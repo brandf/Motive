@@ -1,14 +1,18 @@
-# Python
+# Python bytecode
 __pycache__/
 *.pyc
 *.pyo
-*.pyd
-.Python
-env/
+
+# Virtual environment
 venv/
 
-# Secrets
-.env
+# Build artifacts
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
 
 # Logs
 logs/
+
+# Environment variables
+.env
