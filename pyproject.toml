@@ -1,0 +1,17 @@
+[project]
+name = "motive"
+version = "0.0.1"
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "W", "I"] # Select specific error/warning codes
+
+[tool.setuptools.packages.find]
+include = ["motive*"]
+exclude = ["logs*", "tests*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

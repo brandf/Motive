@@ -1,0 +1,21 @@
+langchain==0.3.27
+langchain-core==0.3.75
+
+# Specific provider integrations for common LLMs
+# Install only those you use, or all for broad compatibility.
+# For a game master, you likely want to enable many for player choice.
+langchain-openai
+langchain-google-genai
+langchain-anthropic
+
+# For loading .env files
+python-dotenv
+
+# For reading the YAML config file
+pyyaml
+
+# For structured configuration (Pydantic - as discussed for future growth)
+pydantic>=2.0.0
+
+# For LLM application observability (tracing, debugging, evaluation)
+langsmith
