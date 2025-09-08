@@ -1,0 +1,61 @@
+id: fantasy
+name: Fantasy Theme
+object_types:
+  torch:
+    id: torch
+    name: Torch
+    description: A simple wooden torch, useful for illumination.
+    tags: ["light_source"]
+    properties:
+      is_lit: false
+  generic_fountain:
+    id: generic_fountain
+    name: Fountain
+    description: A basic fountain.
+    tags: []
+    properties: {}
+  generic_sign:
+    id: generic_sign
+    name: Sign
+    description: A generic sign.
+    tags: []
+    properties: {}
+actions:
+  look:
+    id: look
+    name: look
+    cost: 1
+    description: Look around the current room.
+    parameters: []
+    requirements: []
+    effects: []
+  light_torch:
+    id: light_torch
+    name: light torch
+    cost: 1
+    description: Light a torch you are holding.
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the torch to light.
+    requirements:
+      - type: player_has_object_in_inventory
+        object_name_param: object_name
+      - type: object_property_equals
+        object_name_param: object_name
+        property: is_lit
+        value: false
+    effects:
+      - type: set_object_property
+        object_name_param: object_name
+        property: is_lit
+        value: true
+      - type: generate_event
+        message: "{{player_name}} lights the {{object_name}}."
+        observers: ["room_players", "adjacent_rooms"]
+character_types:
+  hero:
+    id: hero
+    name: Hero
+    backstory: A brave adventurer.
+    motive: Defeat the evil sorcerer.

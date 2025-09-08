@@ -1,8 +1,8 @@
 # Game settings
 game_settings:
   num_rounds: 3
-  theme: "Fantasy"
-  edition: "HearthAndShadow"
+  theme_config_path: "configs/themes/fantasy.yaml"
+  edition_config_path: "configs/editions/hearth_and_shadow.yaml"
   manual: "MOTIVE_MANUAL.md"
 
 # List of AI players

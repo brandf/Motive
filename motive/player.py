@@ -1,7 +1,65 @@
+from typing import List, Dict, Any, Optional
 import logging
 import os
 from motive.llm_factory import create_llm_client
 from langchain_core.messages import AIMessage, HumanMessage
+from motive.game_objects import GameObject # Import GameObject
+
+
+class PlayerCharacter:
+    """Represents the in-game state of a player's character."""
+    def __init__(
+        self,
+        char_id: str,
+        name: str,
+        backstory: str,
+        motive: str,
+        current_room_id: str,
+        inventory: Optional[Dict[str, GameObject]] = None,
+        tags: Optional[List[str]] = None,
+        properties: Optional[Dict[str, Any]] = None,
+        action_points: int = 3 # Default action points
+    ):
+        self.id = char_id
+        self.name = name
+        self.backstory = backstory
+        self.motive = motive
+        self.current_room_id = current_room_id
+        self.inventory = inventory if inventory else {}
+        self.tags = set(tags) if tags else set()
+        self.properties = properties if properties else {}
+        self.action_points = action_points
+
+    def add_item_to_inventory(self, item: GameObject):
+        self.inventory[item.id] = item
+        item.current_location_id = self.id
+
+    def remove_item_from_inventory(self, item_id: str) -> Optional[GameObject]:
+        return self.inventory.pop(item_id, None)
+
+    def has_item_in_inventory(self, item_id: str) -> bool:
+        return item_id in self.inventory
+
+    def get_item_in_inventory(self, item_id: str) -> Optional[GameObject]:
+        return self.inventory.get(item_id)
+
+    def add_tag(self, tag: str):
+        self.tags.add(tag)
+
+    def remove_tag(self, tag: str):
+        self.tags.discard(tag)
+
+    def has_tag(self, tag: str) -> bool:
+        return tag in self.tags
+
+    def set_property(self, key: str, value: Any):
+        self.properties[key] = value
+
+    def get_property(self, key: str, default: Any = None) -> Any:
+        return self.properties.get(key, default)
+
+    def __repr__(self):
+        return f"PlayerCharacter(id='{self.id}', name='{self.name}', room='{self.current_room_id}', ap={self.action_points})"
 
 
 class Player:
@@ -16,6 +74,7 @@ class Player:
         self.chat_history = []
         self.log_dir = log_dir
         self.logger = self._setup_logger()
+        self.character: Optional[PlayerCharacter] = None # Link to PlayerCharacter instance
 
     def _setup_logger(self):
         """Sets up a dedicated logger for this player's chat history."""
