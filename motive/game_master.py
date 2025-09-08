@@ -16,8 +16,24 @@ class GameMaster:
         self.game_id = game_id
         self.theme = game_config.game_settings.theme
         self.edition = game_config.game_settings.edition
+        self.manual_path = game_config.game_settings.manual
         self.log_dir = self._setup_logging()
+        self.manual_content = self._load_manual_content()
         self._initialize_players(game_config.players)
+
+    def _load_manual_content(self) -> str:
+        """Loads the content of the game manual from the specified path."""
+        try:
+            with open(self.manual_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            self.gm_logger.info(f"Loaded game manual from {self.manual_path}")
+            return content
+        except FileNotFoundError:
+            self.gm_logger.error(f"Game manual file not found: {self.manual_path}")
+            return ""
+        except Exception as e:
+            self.gm_logger.error(f"Error loading game manual from {self.manual_path}: {e}")
+            return ""
 
     def _setup_logging(self):
         """Sets up the logging directory and configures the GM logger."""
@@ -97,21 +113,39 @@ class GameMaster:
         """Sends the initial game rules to all players."""
         self.game_logger.info("Sending initial game rules to all players...")
         print("\nSending initial game rules to all players...") # Keep for console output
-        system_prompt = "You are a player in a text-based adventure game. Respond with your actions."
-        rules_message = "Welcome to the game! Here are the rules: [Placeholder for game rules]. You are in a dark room. What do you do?"
+        # Include the full manual content in the system prompt for the LLM
+        system_prompt = f"You are a player in a text-based adventure game. Below is the game manual. Read it carefully to understand the rules, your role, and how to interact with the game world.\n\n" \
+                        f"--- GAME MANUAL START ---\n{self.manual_content}\n--- GAME MANUAL END ---\n\n" \
+                        f"Now, based on the manual and your character, respond with your actions."
 
         for player in self.players:
+            # Hardcoded character/motive and initial observations for the first round
+            character_assignment = f"You are {player.name}, a Brave Knight.\nYour motive is to find the Dragon's Hoard and escape the dungeon."
+            initial_observations = "You are in a dimly lit antechamber. There is a rusty iron door to the north and a flickering torch on the wall."
+            sample_actions = "Available actions (examples): 'look', 'move <direction>', 'help' (0 AP)."
+            
+            # Construct the first HumanMessage with character, motive, and observations
+            first_human_message_content = (
+                f"{character_assignment}\n\n"
+                f"Observations: {initial_observations}\n\n"
+                f"{sample_actions}\n\n"
+                f"What do you do?"
+            )
+
             system_msg = SystemMessage(content=system_prompt)
-            human_msg = HumanMessage(content=rules_message)
+            human_msg = HumanMessage(content=first_human_message_content)
 
             messages_for_llm = [system_msg, human_msg]
 
             player.add_message(system_msg)
             player.add_message(human_msg)
-            player.logger.info(f"SYSTEM: {system_prompt}")
-            player.logger.info(f"GM: {rules_message}")
-            self.game_logger.info(f"GM to {player.name} (SYSTEM): {system_prompt}")
-            self.game_logger.info(f"GM to {player.name}: {rules_message}")
+            # Log a placeholder for the manual in GM and game logs
+            self.gm_logger.info(f"SYSTEM (with manual: {self.manual_path}): {system_prompt[:50]}...")
+            self.game_logger.info(f"GM to {player.name} (SYSTEM, with manual: {self.manual_path}): {system_prompt[:50]}...")
+
+            player.logger.info(f"SYSTEM: {system_prompt}") # Player's log gets full manual
+            player.logger.info(f"GM: {first_human_message_content}") # Player's log gets full first message
+            self.game_logger.info(f"GM to {player.name}: {first_human_message_content}")
 
             start_time = time.time()
             response = await player.get_response_and_update_history(messages_for_llm)

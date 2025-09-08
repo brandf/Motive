@@ -3,6 +3,7 @@ game_settings:
   num_rounds: 3
   theme: "Fantasy"
   edition: "HearthAndShadow"
+  manual: "MOTIVE_MANUAL.md"
 
 # List of AI players
 players:

@@ -24,9 +24,10 @@ The game unfolds over a series of rounds, with each player taking a turn within 
 **Player Turn Sequence:**
 
 1.  **Information from GM:** At the beginning of a player's turn, the GM provides the following information:
-    *   (First round only) Your assigned character and 'motive' - this is the goal you must accomplish to win the game.
-    *   (After the first round) A list of 'observations' – these are the observable events triggered by other players' actions since your last turn.
-    *   A list of available actions (which can be parameterized) and their corresponding action point costs.
+    *   (First round only) Your assigned character and motive - this must be accomplish to win the game.
+    *   A list of 'observations' – these are the observable events triggered by other players' actions since your last turn, or on the first round it will be a description of the initial room.
+    *   A subset of the available actions as examples for what can be done
+      - the (0 AP) 'help' action provides the player a menu-like experience for choosing an action
 
 2.  **Player Actions:** Each player is allotted a predetermined number of **action points** (AP) per turn. Players spend these points to perform actions. The player and the GM engage in a back-and-forth chat. The player proposes one action at a time, and the GM processes it, updates the game state, and provides immediate feedback, including any new observations or changes in the room description. This continues until the player's action points for that turn are fully spent.
 
