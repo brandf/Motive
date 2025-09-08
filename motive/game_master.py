@@ -14,18 +14,20 @@ from motive.config import (
     PlayerConfig,
     ThemeConfig,
     EditionConfig,
-    ObjectTypeConfig,
-    ActionConfig,
+    ObjectTypeConfig, # Re-added for direct usage
+    ActionConfig, # Re-added for direct usage
     ActionRequirementConfig,
     ActionEffectConfig,
     RoomConfig,
     ExitConfig,
     ObjectInstanceConfig,
-    CharacterConfig
+    CharacterConfig # Re-added for direct usage
 )
 from motive.game_objects import GameObject # Import GameObject
 from motive.game_rooms import Room # Import Room
 from motive.action_parser import parse_player_response # Import the new action parser
+from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError # Import custom exceptions
+from motive.game_initializer import GameInitializer # Import GameInitializer
 
 
 class GameMaster:
@@ -42,29 +44,22 @@ class GameMaster:
 
         self.log_dir = self._setup_logging() # Setup logging first
 
-        # Load Theme and Edition configurations
-        theme_cfg = self._load_yaml_config(game_config.game_settings.theme_config_path, ThemeConfig)
-        edition_cfg = self._load_yaml_config(game_config.game_settings.edition_config_path, EditionConfig)
+        # Initialize the GameInitializer
+        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger)
 
-        if not theme_cfg:
-            self.game_logger.error(f"Failed to load theme configuration from {game_config.game_settings.theme_config_path}. Exiting.")
-            return # Or raise an exception
-        if not edition_cfg:
-            self.game_logger.error(f"Failed to load edition configuration from {game_config.game_settings.edition_config_path}. Exiting.")
-            return # Or raise an exception
-
-        # Update actual theme and edition IDs from loaded configs
-        self.theme = theme_cfg.id
-        self.edition = edition_cfg.id
+        # Load Theme and Edition configurations and set theme/edition for logging
+        self.game_initializer._load_configurations()
+        self.theme = self.game_initializer.theme_cfg.id
+        self.edition = self.game_initializer.edition_cfg.id
 
         self.manual_content = self._load_manual_content()
 
         # Store loaded configs in game_config for broader access
-        game_config.theme_config = theme_cfg
-        game_config.edition_config = edition_cfg
+        game_config.theme_config = self.game_initializer.theme_cfg
+        game_config.edition_config = self.game_initializer.edition_cfg
         self.game_config = game_config # Store the full game config
 
-        # Initialize game state collections
+        # Initialize game state collections - these will be populated by GameInitializer
         self.rooms: Dict[str, Room] = {}
         self.game_objects: Dict[str, GameObject] = {}
         self.player_characters: Dict[str, PlayerCharacter] = {}
@@ -75,7 +70,29 @@ class GameMaster:
         self.game_character_types: Dict[str, CharacterConfig] = {}
 
         self._initialize_players(game_config.players)
-        self._setup_game_world(theme_cfg, edition_cfg)
+        
+        # Now, use the initializer to set up the game world
+        self.game_initializer.initialize_game_world(self.players)
+        # Copy the initialized state from the initializer to GameMaster
+        self.rooms = self.game_initializer.rooms
+        self.game_objects = self.game_initializer.game_objects
+        self.player_characters = self.game_initializer.player_characters
+        self.game_object_types = self.game_initializer.game_object_types
+        self.game_actions = self.game_initializer.game_actions
+        self.game_character_types = self.game_initializer.game_character_types
+
+        # Link PlayerCharacter instances to the actual Player objects
+        # This section is no longer needed as GameInitializer already links PlayerCharacter to Player
+        # for player in self.players:
+        #     found_char = None
+        #     for char_id, char_instance in self.player_characters.items():
+        #         if char_instance.name == player.name:
+        #             found_char = char_instance
+        #             break
+        #     if found_char:
+        #         player.character = found_char
+        #     else:
+        #         self.game_logger.warning(f"Could not find PlayerCharacter for player {player.name}. Character not assigned.")
 
     def _load_manual_content(self) -> str:
         """Loads the content of the game manual from the specified path."""
@@ -101,16 +118,16 @@ class GameMaster:
             return validated_config
         except FileNotFoundError:
             self.game_logger.error(f"Configuration file not found: {file_path}")
-            return None
+            raise ConfigNotFoundError(f"Configuration file not found: {file_path}")
         except yaml.YAMLError as e:
             self.game_logger.error(f"Error parsing YAML file {file_path}: {e}")
-            return None
+            raise ConfigParseError(f"Error parsing YAML file {file_path}: {e}")
         except ValidationError as e:
             self.game_logger.error(f"Validation error in {file_path} for {config_model.__name__}: {e}")
-            return None
+            raise ConfigValidationError(f"Validation error in {file_path} for {config_model.__name__}: {e}")
         except Exception as e:
             self.game_logger.error(f"An unexpected error occurred while loading {file_path}: {e}")
-            return None
+            raise e # Re-raise unexpected exceptions
 
     def _setup_logging(self):
         """Sets up the logging directory and configures the GM logger."""
@@ -191,7 +208,9 @@ class GameMaster:
                 continue
 
             # Character Assignment and Motive
-            character_assignment = f"You are {player_char.name}, a {self.game_character_types[player_char.id.replace('_instance','')].name}.\nYour motive is: {player_char.motive}"
+            # Use .split('_instance')[0] to get the base character type ID
+            char_type_id = player_char.id.split('_instance')[0]
+            character_assignment = f"You are {player_char.name}, a {self.game_character_types[char_type_id].name}.\nYour motive is: {player_char.motive}"
 
             # Room Description and Objects
             current_room = self.rooms.get(player_char.current_room_id)
@@ -296,8 +315,13 @@ class GameMaster:
                 if not direction:
                     return False, f"Missing parameter '{req.direction_param}' for exit_exists requirement."
                 
-                exit_data = current_room.exits.get(direction.lower())
-                if not exit_data or exit_data.get('is_hidden', False):
+                found_exit = None
+                for exit_id, exit_data in current_room.exits.items():
+                    if exit_data['name'].lower() == direction.lower() and not exit_data.get('is_hidden', False):
+                        found_exit = exit_data
+                        break
+
+                if not found_exit:
                     return False, f"No visible exit in the '{direction}' direction."
             # Add other requirement types here
             else:
@@ -306,14 +330,15 @@ class GameMaster:
         
         return True, ""
 
-    def _execute_effects(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> str:
+    def _execute_effects(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> List[str]:
         """Applies the effects of an action to the game state and generates feedback/events."""
         feedback_messages: List[str] = []
         events_generated: List[Dict[str, Any]] = []
 
         current_room = self.rooms.get(player_char.current_room_id)
         if not current_room:
-            return f"Error: Character is in an unknown room: {player_char.current_room_id}."
+            feedback_messages.append(f"Error: Character is in an unknown room: {player_char.current_room_id}.")
+            return feedback_messages
 
         for effect in action_config.effects:
             if effect.type == "add_tag":
@@ -383,22 +408,37 @@ class GameMaster:
 
             elif effect.type == "generate_event":
                 # Events will be processed for observability later
-                event_message = effect.message.format(**params, player_name=player_char.name) # Add player_name to params for formatting
+                if action_config.id == "help":
+                    # Dynamically generate help message
+                    help_message_parts = ["Available actions:"]
+                    for action_id, action_cfg in self.game_actions.items():
+                        help_message_parts.append(f"- {action_cfg.name} ({action_cfg.cost} AP): {action_cfg.description}")
+                    event_message = "\n".join(help_message_parts)
+                else:
+                    event_message = effect.message.format(**params, player_name=player_char.name) # Add player_name to params for formatting
                 events_generated.append({"message": event_message, "observers": effect.observers, "source_room": player_char.current_room_id})
                 feedback_messages.append(event_message) # Player sees their own immediate events
 
             elif effect.type == "move_player":
                 direction = params.get(effect.direction_param)
                 if direction:
-                    exit_data = current_room.exits.get(direction.lower())
+                    exit_data = current_room.exits.get(direction.lower()) # Use .get() for safety
                     if exit_data and not exit_data.get('is_hidden', False):
                         destination_room_id = exit_data['destination_room_id']
-                        player_char.current_room_id = destination_room_id
-                        feedback_messages.append(f"You move to the '{self.rooms[destination_room_id].name}'.")
+                        # Remove player from current room and add to destination room
+                        player_char_to_move = current_room.remove_player(player_char.id)
+                        if player_char_to_move:
+                            self.rooms[destination_room_id].add_player(player_char_to_move)
+                            feedback_messages.append(f"You move to the '{self.rooms[destination_room_id].name}'.")
+                        else:
+                            self.game_logger.warning(f"Player character '{player_char.name}' not found in room '{current_room.name}' for move_player effect.")
+                            feedback_messages.append(f"An error occurred while trying to move you.")
                     else:
+                        feedback_messages.append(f"Cannot move '{player_char.name}' in direction '{direction}'. Exit not found or hidden.")
                         self.game_logger.warning(f"Cannot move '{player_char.name}' in direction '{direction}'. Exit not found or hidden.")
                 else:
                     self.game_logger.warning(f"Missing direction parameter for move_player effect for {player_char.name}.")
+                    feedback_messages.append(f"Missing direction for move action.")
 
             # Add other effect types here (e.g., deal_damage, tele_port)
             else:
@@ -406,7 +446,7 @@ class GameMaster:
 
         # TODO: Process events_generated for observability and distribute to relevant players
 
-        return ". ".join(feedback_messages)
+        return feedback_messages
 
     async def _execute_player_turn(self, player: Player, round_num: int):
         """Executes a single player's turn, allowing multiple actions until AP are spent or turn ends."""
@@ -475,48 +515,61 @@ class GameMaster:
 
             if not parsed_actions:
                 # Penalty for not providing any valid actions
-                feedback = "You did not provide any valid actions. Your turn ends prematurely as a penalty."
+                feedback_parts = [
+                    "You did not provide any valid actions.",
+                    "Your turn ends prematurely as a penalty."
+                ]
+                combined_feedback = "\n".join(feedback_parts)
                 player_char.action_points = 0 # End turn as penalty
                 turn_in_progress = False
                 self.game_logger.info(f"{player.name} failed to provide valid actions. Turn ended.")
 
-                feedback_message = HumanMessage(content=feedback)
+                feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM (Feedback): {feedback}")
-                self.game_logger.info(f"GM to {player.name} (Feedback): {feedback}")
+                player.logger.info(f"GM (Feedback): {combined_feedback}")
+                self.game_logger.info(f"GM to {player.name} (Feedback): {combined_feedback}")
                 continue # Continue to the while loop condition to end the turn
 
             else:
                 all_actions_in_response_valid = True # Tracks if all actions in this specific response were valid and processed
-                response_feedback_messages = [] # Collect feedback for this response
+                response_feedback_messages: List[str] = [] # Collect feedback for this response
 
                 for action_config, params in parsed_actions:
-                    action_feedback = ""
+                    action_specific_feedback: List[str] = []
                     if player_char.action_points <= 0:
-                        action_feedback = "You have run out of Action Points for this turn. Cannot perform further actions."
+                        action_specific_feedback.append("You have run out of Action Points for this turn. Cannot perform further actions.")
                         all_actions_in_response_valid = False # No more actions can be processed
                         break # Exit inner loop for actions
 
                     if action_config.cost > player_char.action_points:
-                        action_feedback = f"Action '{action_config.name}' costs {action_config.cost} AP, but you only have {player_char.action_points} AP. Skipping this action."
-                        self.game_logger.info(action_feedback)
+                        action_specific_feedback.append(f"Action '{action_config.name}' costs {action_config.cost} AP, but you only have {player_char.action_points} AP. Skipping this action.")
+                        self.game_logger.info(action_specific_feedback[-1])
                         all_actions_in_response_valid = False
                     else:
                         requirements_met, req_message = self._check_requirements(player_char, action_config, params)
                         if requirements_met:
                             player_char.action_points -= action_config.cost
-                            action_feedback = self._execute_effects(player_char, action_config, params)
+                            action_effect_feedback = self._execute_effects(player_char, action_config, params)
+                            action_specific_feedback.extend(action_effect_feedback)
                             self.game_logger.info(f"Action '{action_config.name}' executed. Remaining AP: {player_char.action_points}")
                             self.game_logger.info(f"Action '{action_config.name}' executed by {player_char.name}. Remaining AP: {player_char.action_points}")
                         else:
-                            action_feedback = f"Cannot perform '{action_config.name}': {req_message}. Skipping this action."
-                            self.game_logger.info(action_feedback)
+                            action_specific_feedback.append(f"Cannot perform '{action_config.name}': {req_message}. Skipping this action.")
+                            self.game_logger.info(action_specific_feedback[-1])
                             all_actions_in_response_valid = False
 
-                    response_feedback_messages.append(action_feedback)
+                    if action_specific_feedback:
+                        response_feedback_messages.append(f"- **{action_config.name.capitalize()} Action:**")
+                        response_feedback_messages.extend([f"  - {msg}" for msg in action_specific_feedback])
 
                 # After processing all actions in the response
-                combined_feedback = ". ".join(response_feedback_messages)
+                if response_feedback_messages:
+                    combined_feedback = "\n".join([
+                        "**Your Actions for this turn:**",
+                        "\n".join(response_feedback_messages)
+                    ])
+                else:
+                    combined_feedback = "No specific feedback for actions performed this turn."
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
@@ -525,16 +578,20 @@ class GameMaster:
 
                 if not all_actions_in_response_valid:
                     # If any action in the response was invalid or couldn't be performed, end the turn as a penalty.
-                    feedback = "One or more actions in your response were invalid or could not be performed. Your turn ends prematurely as a penalty."
+                    feedback_parts = [
+                        "One or more actions in your response were invalid or could not be performed.",
+                        "Your turn ends prematurely as a penalty."
+                    ]
+                    penalty_feedback = "\n".join(feedback_parts)
                     player_char.action_points = 0 # End turn as penalty
                     turn_in_progress = False
                     self.game_logger.info(f"{player.name} had invalid/unexecutable actions in response. Turn ended.")
 
                     # Send final penalty feedback
-                    feedback_message = HumanMessage(content=feedback)
+                    feedback_message = HumanMessage(content=penalty_feedback)
                     player.add_message(feedback_message)
-                    player.logger.info(f"GM (Feedback): {feedback}")
-                    self.game_logger.info(f"GM to {player.name} (Feedback): {feedback}")
+                    player.logger.info(f"GM (Feedback): {penalty_feedback}")
+                    self.game_logger.info(f"GM to {player.name} (Feedback): {penalty_feedback}")
                     
                 elif player_char.action_points <= 0:
                     # If all actions were valid but AP ran out, turn ends naturally.
@@ -555,108 +612,6 @@ class GameMaster:
 
     def _setup_game_world(self, theme_cfg: ThemeConfig, edition_cfg: EditionConfig):
         """Sets up the initial game world by merging configs and instantiating objects."""
-        self.game_logger.info("Setting up game world...")
-
-        # 1. Merge Object Types
-        self.game_object_types.update(theme_cfg.object_types)
-        self.game_object_types.update(edition_cfg.objects) # Edition objects can override or add to theme object types
-        self.game_logger.info(f"Merged {len(self.game_object_types)} object types.")
-
-        # 2. Merge Actions
-        self.game_actions.update(theme_cfg.actions)
-        # self.game_actions.update(edition_cfg.actions) # Edition actions can override or add
-        self.game_logger.info(f"Merged {len(self.game_actions)} actions.")
-
-        # 3. Merge Character Types
-        self.game_character_types.update(theme_cfg.character_types)
-        self.game_character_types.update(edition_cfg.characters) # Edition characters can override or add
-        self.game_logger.info(f"Merged {len(self.game_character_types)} character types.")
-
-        # 4. Instantiate Rooms
-        for room_id, room_cfg in edition_cfg.rooms.items():
-            room = Room(
-                room_id=room_cfg.id,
-                name=room_cfg.name,
-                description=room_cfg.description,
-                exits={exit_id: exit_cfg.model_dump() for exit_id, exit_cfg in room_cfg.exits.items()},
-                tags=room_cfg.tags,
-                properties=room_cfg.properties
-            )
-            self.rooms[room_id] = room
-            self.game_logger.info(f"  - Created room: {room.name} ({room.id})")
-
-            # Place objects defined within the room config
-            for obj_id, obj_instance_cfg in room_cfg.objects.items():
-                obj_type = self.game_object_types.get(obj_instance_cfg.object_type_id)
-                if obj_type:
-                    # Merge object instance config with object type config
-                    final_tags = set(obj_type.tags).union(obj_instance_cfg.tags)
-                    final_properties = {**obj_type.properties, **obj_instance_cfg.properties}
-
-                    game_obj = GameObject(
-                        obj_id=obj_instance_cfg.id,
-                        name=obj_instance_cfg.name or obj_type.name,
-                        description=obj_instance_cfg.description or obj_type.description,
-                        current_location_id=room.id,
-                        tags=list(final_tags),
-                        properties=final_properties
-                    )
-                    room.add_object(game_obj)
-                    self.game_objects[game_obj.id] = game_obj
-                    self.game_logger.info(f"    - Placed object {game_obj.name} ({game_obj.id}) in {room.name}")
-                else:
-                    self.game_logger.warning(f"Object type '{obj_instance_cfg.object_type_id}' not found for object '{obj_instance_cfg.id}' in room '{room.id}'. Skipping.")
-
-        # 5. Instantiate Global Objects (from edition_cfg.objects not explicitly placed in rooms)
-        for obj_id, obj_instance_cfg in edition_cfg.objects.items():
-            # Only create if not already placed in a room above
-            if obj_id not in self.game_objects:
-                obj_type = self.game_object_types.get(obj_instance_cfg.object_type_id)
-                if obj_type:
-                    final_tags = set(obj_type.tags).union(obj_instance_cfg.tags)
-                    final_properties = {**obj_type.properties, **obj_instance_cfg.properties}
-
-                    game_obj = GameObject(
-                        obj_id=obj_instance_cfg.id,
-                        name=obj_instance_cfg.name or obj_type.name,
-                        description=obj_instance_cfg.description or obj_type.description,
-                        current_location_id="world_spawn", # A default location if not specified
-                        tags=list(final_tags),
-                        properties=final_properties
-                    )
-                    self.game_objects[game_obj.id] = game_obj
-                    self.game_logger.info(f"  - Created global object: {game_obj.name} ({game_obj.id}) at {game_obj.current_location_id}")
-                else:
-                    self.game_logger.warning(f"Object type '{obj_instance_cfg.object_type_id}' not found for global object '{obj_instance_cfg.id}'. Skipping.")
-
-        # 6. Instantiate Player Characters and link to Players
-        available_character_ids = list(edition_cfg.characters.keys())
-        if not available_character_ids:
-            self.game_logger.error("No character types defined in edition configuration. Cannot assign characters to players.")
-            return
-        
-        # Assign characters to players in a round-robin fashion for now
-        for i, player in enumerate(self.players):
-            char_id_to_assign = available_character_ids[i % len(available_character_ids)]
-            char_cfg = edition_cfg.characters[char_id_to_assign]
-            
-            # Find a suitable starting room (e.g., the first room defined in the edition)
-            start_room_id = next(iter(edition_cfg.rooms.keys()), None)
-            if not start_room_id:
-                self.game_logger.error(f"No rooms defined in edition configuration. Cannot assign starting room for {player.name}.")
-                return
-
-            player_char = PlayerCharacter(
-                char_id=char_cfg.id + "_instance", # Make character instance ID unique
-                name=char_cfg.name,
-                backstory=char_cfg.backstory,
-                motive=char_cfg.motive,
-                current_room_id=start_room_id,
-                action_points=3 # Default AP per turn for now
-            )
-            player.character = player_char # Link player to character
-            self.player_characters[player_char.id] = player_char
-            self.game_logger.info(f"  - Assigned {player_char.name} ({player_char.id}) to player {player.name} in room {start_room_id}.")
-
-        self.game_logger.info("Game world setup complete.")
+        # This method is now handled by GameInitializer. This empty method can be removed after full refactor.
+        pass
 

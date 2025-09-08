@@ -60,7 +60,14 @@ actions:
     description: Get help about available commands.
     parameters: []
     requirements: []
-    effects: []
+    effects:
+      - type: generate_event
+        message: |
+          Available actions:
+          {% for action in available_actions %}
+          - {{ action.name }} ({{ action.cost }} AP): {{ action.description }}
+          {% endfor %}
+        observers: ["player"]
   move:
     id: move
     name: move

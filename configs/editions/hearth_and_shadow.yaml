@@ -9,7 +9,7 @@ rooms:
     exits:
       west_gate: {id: west_gate, name: West Gate, destination_room_id: old_forest_path}
     objects:
-      fountain: {id: fountain, name: Fountain, object_type_id: fountain, current_room_id: town_square, description: A stone fountain with clear water.}
+      fountain: {id: fountain, name: Fountain, object_type_id: generic_fountain, current_room_id: town_square, description: A stone fountain with clear water.}
     tags: []
     properties: {}
   old_forest_path:
@@ -19,23 +19,8 @@ rooms:
     exits:
       east_gate: {id: east_gate, name: East Gate, destination_room_id: town_square}
     objects:
-      sign: {id: sign, name: Wooden Sign, object_type_id: sign, current_room_id: old_forest_path, description: A weathered wooden sign pointing deeper into the forest.}
+      sign: {id: sign, name: Wooden Sign, object_type_id: generic_sign, current_room_id: old_forest_path, description: A weathered wooden sign pointing deeper into the forest.}
     tags: ["dark"]
-    properties: {}
-objects:
-  fountain:
-    id: fountain
-    name: Fountain
-    object_type_id: generic_fountain # Assuming a generic fountain type in theme
-    description: A beautiful stone fountain with clear, sparkling water.
-    tags: []
-    properties: {}
-  sign:
-    id: sign
-    name: Wooden Sign
-    object_type_id: generic_sign # Assuming a generic sign type in theme
-    description: A weathered wooden sign, difficult to read in the dim light.
-    tags: []
     properties: {}
 characters:
   elara:

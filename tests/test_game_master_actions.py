@@ -14,6 +14,7 @@ from motive.game_objects import GameObject
 from motive.game_rooms import Room
 from langchain_core.messages import AIMessage
 from unittest.mock import AsyncMock
+from pydantic import BaseModel
 
 @pytest.fixture
 def mock_game_master():
@@ -24,7 +25,7 @@ def mock_game_master():
         patch('os.path.join', return_value='mock/log/path'), # Mock os.path.join
         patch('motive.player.create_llm_client', return_value=MagicMock()), # Mock create_llm_client
         patch('motive.player.Player') as mock_player_class, # Mock the Player class
-        patch('motive.game_master.GameMaster._load_yaml_config') as mock_load_yaml_config,
+        patch('motive.game_initializer.GameInitializer._load_yaml_config') as mock_load_yaml_config,
         patch('motive.game_master.GameMaster._load_manual_content') as mock_load_manual_content,
         patch('sys.stdout') as mock_stdout # Mock sys.stdout to prevent console output during tests
     ):
@@ -122,9 +123,9 @@ def mock_game_master():
                     exits={"south": ExitConfig(id="south_exit", name="South", destination_room_id="start_room")}
                 )
             },
-            objects={
-                "global_key": ObjectInstanceConfig(id="global_key", name="key", object_type_id="torch", current_room_id="start_room", tags=["key_tag"])
-            },
+            # objects={
+            #     "global_key": ObjectInstanceConfig(id="global_key", name="key", object_type_id="torch", current_room_id="start_room", tags=["key_tag"])
+            # },
             characters={
                 "rogue": CharacterConfig(id="rogue", name="Rogue", backstory="A sneaky type.", motive="Find treasure.")
             }
@@ -137,16 +138,20 @@ def mock_game_master():
         mock_game_config.game_settings.edition_config_path = "mock/edition.yaml"
         mock_game_config.game_settings.manual = "mock/manual.md"
         mock_game_config.players = [
-            PlayerConfig(name="TestPlayer", provider="mock", model="mock-model"),
+            PlayerConfig(name="Hero", provider="mock", model="mock-model"), # Changed player name to match character
         ]
         mock_game_config.theme_config = dummy_theme_config
         mock_game_config.edition_config = dummy_edition_config
 
         # Configure the mocked _load_yaml_config and _load_manual_content
-        mock_load_yaml_config.side_effect = [
-            dummy_theme_config,
-            dummy_edition_config
-        ]
+        def mock_load_yaml_config_side_effect(file_path: str, config_model: BaseModel):
+            if config_model == ThemeConfig:
+                return dummy_theme_config
+            elif config_model == EditionConfig:
+                return dummy_edition_config
+            raise ValueError(f"Unexpected config_model: {config_model.__name__}")
+
+        mock_load_yaml_config.side_effect = mock_load_yaml_config_side_effect
         mock_load_manual_content.return_value = "Mock manual content."
 
         # Instantiate a real GameMaster, which will call the mocked loaders
@@ -157,7 +162,7 @@ def mock_game_master():
         # The mock_player_class.side_effect now handles returning the mock player instance.
         # We just need to get the instance that was created.
         mock_player_instance = gm.players[0] # GameMaster._initialize_players adds the player
-        mock_player_instance.character = gm.player_characters["rogue_instance"] # Link to the real character
+        mock_player_instance.character = gm.players[0].character # Link to the character assigned by GameInitializer
         mock_player_instance.add_message = MagicMock() # Mock add_message for isolation
         mock_player_instance.get_response_and_update_history = AsyncMock(return_value=AIMessage(content="end turn")) # Default AI response
 
@@ -304,4 +309,4 @@ def test_execute_effects_generate_event(mock_game_master):
     params = {"object_name": "event_torch"}
 
     feedback = gm._execute_effects(player_char, action_config, params)
-    assert "Rogue lights the event_torch." in feedback
+    assert "Hero lights the event_torch." in feedback # Now asserts correctly against the list
