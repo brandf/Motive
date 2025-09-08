@@ -1,6 +1,6 @@
 # Motive Game Manual
 
-This document will contain detailed information about the game mechanics, rules, environments, characters, and objects within the Motive platform. It will serve as a comprehensive guide for understanding how to play, balance, and interact with the game world, especially when designing system prompts for LLM players.
+This document provides a comprehensive guide to the world of Motive, detailing the game mechanics, rules, environments, characters, and objects. It is designed to help players understand how to interact with the game world and achieve their objectives.
 
 ## Table of Contents
 
@@ -10,13 +10,12 @@ This document will contain detailed information about the game mechanics, rules,
 *   Game Environments: Rooms, Exits, and Objects
 *   Player Actions: Categories and Parameters
 *   Communication and Social Engineering
-*   Future Development: Environment Generation and Training Data
 
 ## Game Overview
 
 Motive is a turn-based, round-based game designed for both human and AI players, with a strong emphasis on AI-driven simulations. The core of the game revolves around players interacting with a dynamic environment and each other through a chat interface, mediated by a "Game Master" program. Players are assigned unique characters with secret "motives," which act as their personal win conditions. The ultimate goal is for players to achieve their motive by the end of the final round.
 
-A central tenet of Motive is "observability." Player actions not only change the game state but also generate events that may or may not be observed by other players, leading to strategic social engineering and information asymmetry. The game is envisioned as a platform for generating extensive gameplay data, particularly from LLM-driven players, which can be used for advanced AI training, benchmarking, and research into planning and reasoning.
+A central tenet of Motive is "observability." Player actions not only change the game state but also generate events that may or may not be observed by other players, leading to strategic social engineering and information asymmetry.
 
 ## Game Mechanics: Turns, Actions, and Observability
 
@@ -78,24 +77,3 @@ Communication between players is a vital component of Motive, routed entirely th
 *   **"shout <phrase>":** All players in the same room and potentially players in adjacent rooms might observe this, depending on game rules and environment specifics.
 
 This system allows LLM players to engage in complex social interactions, form alliances, spread misinformation, and strategize based on what they believe other players know or don't know. The ability to control who sees and hears what fosters a rich environment for emergent gameplay and offers significant potential for analyzing LLM reasoning and planning capabilities.
-
-## Future Development: Environment Generation and Training Data
-
-The Motive platform is designed with future expansion and AI research in mind. Key areas for future development include sophisticated environment generation and leveraging gameplay data for machine learning.
-
-**Environment Generation Phases:**
-
-1.  **Initial Static Environment:** Begin with a single, pre-designed environment (e.g., 20 rooms) potentially created with LLM assistance.
-2.  **Randomized Layouts:** Introduce a randomizer to vary room layouts and initial object placements across different games.
-3.  **Full Random Environment Generation:** Develop a robust system capable of generating large-scale, themed environments (e.g., fantasy dungeons, sci-fi spaceports) dynamically.
-
-**Training Data and AI Research:**
-
-Each game played by LLM agents will generate valuable training data from the perspective of every player. This data can be utilized for various AI research purposes:
-
-*   **Fine-tuning LLMs:** Recordings of LLM gameplay can be used for reinforcement learning and long-context training to improve player AI.
-*   **LLM Leaderboards/Benchmarks:** The platform can serve as a benchmark for evaluating different LLMs' ability to play the game effectively.
-*   **Predictive Modeling:** Experiments could involve training LLMs to predict the gameplay actions of other players, enhancing their planning and reasoning abilities.
-*   **Gameplay Analysis:** Analyzing player-specific training data to understand winning and losing strategies, e.g., identifying crucial actions like finding a key to escape a dungeon or how information shared (or withheld) influenced outcomes.
-
-Beyond environments, variations in characters and objects will also be explored, with LLMs assisting in generating diverse backstories, motives, and interactable items, including puzzles, traps, and locks.

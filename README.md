@@ -90,3 +90,24 @@ We welcome contributions to Motive! If you're interested in improving the platfo
 ## Game Manual
 
 For details on how the game works and its mechanics, please refer to the [MOTIVE_MANUAL.md](MOTIVE_MANUAL.md).
+
+## Future Development: Environment Generation and Training Data
+
+The Motive platform is designed with future expansion and AI research in mind. Key areas for future development include sophisticated environment generation and leveraging gameplay data for machine learning.
+
+**Environment Generation Phases:**
+
+1.  **Initial Static Environment:** Begin with a single, pre-designed environment (e.g., 20 rooms) potentially created with LLM assistance.
+2.  **Randomized Layouts:** Introduce a randomizer to vary room layouts and initial object placements across different games.
+3.  **Full Random Environment Generation:** Develop a robust system capable of generating large-scale, themed environments (e.g., fantasy dungeons, sci-fi spaceports) dynamically.
+
+**Training Data and AI Research:**
+
+Each game played by LLM agents will generate valuable training data from the perspective of every player. This data can be utilized for various AI research purposes:
+
+*   **Fine-tuning LLMs:** Recordings of LLM gameplay can be used for reinforcement learning and long-context training to improve player AI.
+*   **LLM Leaderboards/Benchmarks:** The platform can serve as a benchmark for evaluating different LLMs' ability to play the game effectively.
+*   **Predictive Modeling:** Experiments could involve training LLMs to predict the gameplay actions of other players, enhancing their planning and reasoning abilities.
+*   **Gameplay Analysis:** Analyzing player-specific training data to understand winning and losing strategies, e.g., identifying crucial actions like finding a key to escape a dungeon or how information shared (or withheld) influenced outcomes.
+
+Beyond environments, variations in characters and objects will also be explored, with LLMs assisting in generating diverse backstories, motives, and interactable items, including puzzles, traps, and locks.
