@@ -28,6 +28,8 @@ from motive.game_rooms import Room # Import Room
 from motive.action_parser import parse_player_response # Import the new action parser
 from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError # Import custom exceptions
 from motive.game_initializer import GameInitializer # Import GameInitializer
+from datetime import datetime # Added for datetime logging
+import uuid # Added for UUID logging
 
 
 class GameMaster:
@@ -38,19 +40,33 @@ class GameMaster:
         self.game_id = game_id
         self.manual_path = game_config.game_settings.manual
 
-        # Initialize theme and edition with temporary placeholders for logging setup
-        self.theme = "initial_theme" 
-        self.edition = "initial_edition"
+        # Initialize theme and edition with temporary placeholders
+        # These will be updated after configurations are loaded
+        self.theme: str = ""
+        self.edition: str = ""
 
-        self.log_dir = self._setup_logging() # Setup logging first
+        # Initialize a basic logger that logs to stdout before full setup
+        self.game_logger = logging.getLogger("GameNarrative")
+        if not self.game_logger.handlers:
+            handler = logging.StreamHandler(sys.stdout)
+            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+            handler.setFormatter(formatter)
+            self.game_logger.addHandler(handler)
+            self.game_logger.setLevel(logging.INFO)
+        self.game_logger.info("GameMaster initialized with basic logging.")
 
-        # Initialize the GameInitializer
+        # Initialize GameInitializer with the basic logger
         self.game_initializer = GameInitializer(game_config, game_id, self.game_logger)
 
-        # Load Theme and Edition configurations and set theme/edition for logging
+        # Load Theme and Edition configurations
         self.game_initializer._load_configurations()
         self.theme = self.game_initializer.theme_cfg.id
         self.edition = self.game_initializer.edition_cfg.id
+
+        # Now that theme and edition are known, set up the full logging
+        self.log_dir = self._setup_logging()
+        # Update the game initializer with the fully configured logger
+        self.game_initializer.game_logger = self.game_logger
 
         self.manual_content = self._load_manual_content()
 
@@ -111,16 +127,19 @@ class GameMaster:
     def _setup_logging(self):
         """Sets up the logging directory and configures the GM logger."""
         base_log_dir = "logs"
-        game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, self.game_id)
+        # Create a unique, sortable directory name for this game run
+        timestamp = datetime.now().strftime("%Y-%m-%d_%Hhr_%Mmin_%Ssec")
+        unique_game_folder = f"({timestamp}) {self.game_id}"
+        
+        game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, unique_game_folder)
         os.makedirs(game_log_dir, exist_ok=True)
 
-        # Configure Game logger for the combined game narrative and stdout
-        self.game_logger = logging.getLogger("GameNarrative")
-        self.game_logger.setLevel(logging.INFO) # Revert to INFO
+        # Remove all existing handlers from the logger before reconfiguring
+        for handler in list(self.game_logger.handlers):
+            self.game_logger.removeHandler(handler)
 
-        if self.game_logger.handlers:
-            for handler in self.game_logger.handlers:
-                self.game_logger.removeHandler(handler)
+        # Set the level for the game logger (now that it's the main logger)
+        self.game_logger.setLevel(logging.INFO)
 
         # File handler for game.log
         game_narrative_file = os.path.join(game_log_dir, "game.log")
