@@ -24,13 +24,11 @@ The game unfolds over a series of rounds, with each player taking a turn within 
 **Player Turn Sequence:**
 
 1.  **Information from GM:** At the beginning of a player's turn, the GM provides the following information:
-    *   A description of their current room.
-    *   A description of any other visible players or notable objects within the room.
-    *   A list of visible exits from the current room.
-    *   (After the first round) A list of 'observations' – these are all events triggered by other players' actions since this player's last turn that were observable by the current player.
+    *   (First round only) Your assigned character and 'motive' - this is the goal you must accomplish to win the game.
+    *   (After the first round) A list of 'observations' – these are the observable events triggered by other players' actions since your last turn.
     *   A list of available actions (which can be parameterized) and their corresponding action point costs.
 
-2.  **Player Actions:** Each player is allotted a predetermined number of **action points** per turn. Players spend these points to perform actions. The player and the GM engage in a back-and-forth chat. The player proposes one action at a time, and the GM processes it, updates the game state, and provides immediate feedback, including any new observations or changes in the room description. This continues until the player's action points for that turn are fully spent.
+2.  **Player Actions:** Each player is allotted a predetermined number of **action points** (AP) per turn. Players spend these points to perform actions. The player and the GM engage in a back-and-forth chat. The player proposes one action at a time, and the GM processes it, updates the game state, and provides immediate feedback, including any new observations or changes in the room description. This continues until the player's action points for that turn are fully spent.
 
 3.  **Turn End:** Once a player has spent all their action points, their turn concludes, and the GM proceeds to the next player in the turn order.
 

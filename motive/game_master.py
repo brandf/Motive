@@ -1,6 +1,8 @@
 import random
 import time
 import asyncio
+import os
+import logging
 from motive.player import Player
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from motive.config import GameConfig, PlayerConfig # New import for Pydantic config
@@ -8,39 +10,93 @@ from motive.config import GameConfig, PlayerConfig # New import for Pydantic con
 
 class GameMaster:
     # Accept a pre-validated GameConfig object directly
-    def __init__(self, game_config: GameConfig):
+    def __init__(self, game_config: GameConfig, game_id: str):
         self.players = []
         self.num_rounds = game_config.game_settings.num_rounds
+        self.game_id = game_id
+        self.theme = game_config.game_settings.theme
+        self.edition = game_config.game_settings.edition
+        self.log_dir = self._setup_logging()
         self._initialize_players(game_config.players)
+
+    def _setup_logging(self):
+        """Sets up the logging directory and configures the GM logger."""
+        base_log_dir = "logs"
+        game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, self.game_id)
+        os.makedirs(game_log_dir, exist_ok=True)
+
+        # Configure GM logger
+        self.gm_logger = logging.getLogger("GameMasterInternal")
+        self.gm_logger.setLevel(logging.INFO)
+        
+        # Remove any existing handlers to prevent duplicate logs
+        if self.gm_logger.handlers:
+            for handler in self.gm_logger.handlers:
+                self.gm_logger.removeHandler(handler)
+
+        gm_log_file = os.path.join(game_log_dir, "gm_log.log")
+        gm_file_handler = logging.FileHandler(gm_log_file)
+        gm_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        gm_file_handler.setFormatter(gm_formatter)
+        self.gm_logger.addHandler(gm_file_handler)
+        self.gm_logger.info(f"GameMaster internal logging to {gm_log_file}")
+        
+        # Configure Game logger for the combined game narrative
+        self.game_logger = logging.getLogger("GameNarrative")
+        self.game_logger.setLevel(logging.INFO)
+
+        if self.game_logger.handlers:
+            for handler in self.game_logger.handlers:
+                self.game_logger.removeHandler(handler)
+
+        game_narrative_file = os.path.join(game_log_dir, "game.log")
+        game_file_handler = logging.FileHandler(game_narrative_file)
+        game_formatter = logging.Formatter('%(asctime)s - %(message)s') # Simpler format for narrative
+        game_file_handler.setFormatter(game_formatter)
+        self.game_logger.addHandler(game_file_handler)
+        self.gm_logger.info(f"Game narrative logging to {game_narrative_file}")
+        
+        return game_log_dir
 
     def _initialize_players(self, player_configs: list[PlayerConfig]):
         """Initializes players based on the provided list of PlayerConfig objects."""
-        print("Initializing players from configuration...")
+        self.gm_logger.info("Initializing players from configuration...")
         for p_config in player_configs:
             player = Player(
                 name=p_config.name,
                 provider=p_config.provider,
                 model=p_config.model,
+                log_dir=self.log_dir  # Pass the log directory to the player
             )
             self.players.append(player)
-            print(f"  - Initialized player: {player.name} using {p_config.provider}/{p_config.model}")
+            self.gm_logger.info(f"  - Initialized player: {player.name} using {p_config.provider}/{p_config.model}")
 
     async def run_game(self):
         """Main game loop."""
-        print("\n==================== GAME STARTING ====================")
+        self.game_logger.info("==================== GAME STARTING ====================")
+        self.gm_logger.info("==================== GAME STARTING ====================") # Internal GM log
+        print("\n==================== GAME STARTING ====================") # Keep for console output
+
         await self._send_initial_messages()
 
         for round_num in range(1, self.num_rounds + 1):
-            print(f"\n--- Starting Round {round_num} of {self.num_rounds} ---")
+            self.game_logger.info(f"--- Starting Round {round_num} of {self.num_rounds} ---")
+            self.gm_logger.info(f"--- Starting Round {round_num} of {self.num_rounds} ---") # Internal GM log
+            print(f"\n--- Starting Round {round_num} of {self.num_rounds} ---") # Keep for console output
             for player in self.players:
                 await self._execute_player_turn(player, round_num)
-            print(f"--- Round {round_num} Complete ---")
+            self.game_logger.info(f"--- Round {round_num} Complete ---")
+            self.gm_logger.info(f"--- Round {round_num} Complete ---") # Internal GM log
+            print(f"--- Round {round_num} Complete ---") # Keep for console output
 
-        print("\n===================== GAME OVER =====================")
+        self.game_logger.info("===================== GAME OVER ======================")
+        self.gm_logger.info("===================== GAME OVER ======================") # Internal GM log
+        print("\n===================== GAME OVER ======================") # Keep for console output
 
     async def _send_initial_messages(self):
         """Sends the initial game rules to all players."""
-        print("\nSending initial game rules to all players...")
+        self.game_logger.info("Sending initial game rules to all players...")
+        print("\nSending initial game rules to all players...") # Keep for console output
         system_prompt = "You are a player in a text-based adventure game. Respond with your actions."
         rules_message = "Welcome to the game! Here are the rules: [Placeholder for game rules]. You are in a dark room. What do you do?"
 
@@ -54,6 +110,8 @@ class GameMaster:
             player.add_message(human_msg)
             player.logger.info(f"SYSTEM: {system_prompt}")
             player.logger.info(f"GM: {rules_message}")
+            self.game_logger.info(f"GM to {player.name} (SYSTEM): {system_prompt}")
+            self.game_logger.info(f"GM to {player.name}: {rules_message}")
 
             start_time = time.time()
             response = await player.get_response_and_update_history(messages_for_llm)
@@ -61,16 +119,18 @@ class GameMaster:
             response_len = len(response.content)
 
             print(f"    '{player.name}' initial response in {duration:.2f}s ({response_len} chars).")
-
+            self.game_logger.info(f"{player.name}: {response.content}")
             player.logger.info(f"{player.name}: {response.content}")
 
 
     async def _execute_player_turn(self, player: Player, round_num: int):
         """Executes a single player's turn, which may involve multiple messages."""
-        print(f"\n>>> It is {player.name}'s turn. (Round {round_num})")
+        self.game_logger.info(f">>> It is {player.name}'s turn. (Round {round_num})")
+        print(f"\n>>> It is {player.name}'s turn. (Round {round_num})") # Keep for console output
         
         num_interactions = random.randint(1, 3)
-        print(f"({player.name} will have {num_interactions} interaction(s) this turn)")
+        self.game_logger.info(f"({player.name} will have {num_interactions} interaction(s) this turn)")
+        print(f"({player.name} will have {num_interactions} interaction(s) this turn)") # Keep for console output
 
         for i in range(num_interactions):
             gm_message_content = (
@@ -82,6 +142,7 @@ class GameMaster:
             gm_message = HumanMessage(content=gm_message_content)
             player.add_message(gm_message)
             player.logger.info(f"GM: {gm_message_content}")
+            self.game_logger.info(f"GM to {player.name}: {gm_message_content}")
 
             start_time = time.time()
             response = await player.get_response_and_update_history(player.chat_history)
@@ -90,6 +151,6 @@ class GameMaster:
             response_len = len(response.content)
 
             print(f"    '{player.name}' responded in {duration:.2f}s ({response_len} chars).")
-
+            self.game_logger.info(f"{player.name}: {response.content}")
             player.logger.info(f"{player.name}: {response.content}")
 

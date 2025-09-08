@@ -1,4 +1,5 @@
 import logging
+import os # Import os for mocking os.makedirs
 from unittest.mock import MagicMock, AsyncMock
 from motive.player import Player
 from langchain_core.messages import AIMessage, HumanMessage
@@ -15,9 +16,14 @@ def test_player_initialization(monkeypatch):
     """
     Tests that a Player instance is correctly initialized.
     """
+    # Mock os.makedirs to prevent directory creation during tests
+    monkeypatch.setattr(os, "makedirs", MagicMock())
+    # Mock logging.FileHandler to prevent actual file writing
+    monkeypatch.setattr(logging, "FileHandler", MagicMock())
+    
     _mock_create_llm_client(monkeypatch, AIMessage(content="irrelevant"))
 
-    test_player = Player(name="TestPlayer", provider="mock", model="mock-model")
+    test_player = Player(name="TestPlayer", provider="mock", model="mock-model", log_dir="mock_log_dir")
 
     assert test_player.name == "TestPlayer"
     assert test_player.chat_history == []
@@ -31,10 +37,15 @@ async def test_player_processes_message_and_updates_history(monkeypatch):
     Tests that the player's LLM client is invoked with the correct chat history
     and that the chat history is updated with both the user message and the AI's response.
     """
+    # Mock os.makedirs to prevent directory creation during tests
+    monkeypatch.setattr(os, "makedirs", MagicMock())
+    # Mock logging.FileHandler to prevent actual file writing
+    monkeypatch.setattr(logging, "FileHandler", MagicMock())
+    
     ai_response_content = "I check for traps."
     mock_llm = _mock_create_llm_client(monkeypatch, AIMessage(content=ai_response_content))
 
-    test_player = Player(name="TestPlayer", provider="mock", model="mock-model")
+    test_player = Player(name="TestPlayer", provider="mock", model="mock-model", log_dir="mock_log_dir")
     user_message = "What do you do next?"
     test_player.add_message(HumanMessage(content=user_message))
 
@@ -53,6 +64,9 @@ def test_player_logs_messages(monkeypatch):
     """
     Tests that the player correctly logs messages to its dedicated log file.
     """
+    # Mock os.makedirs to prevent directory creation during tests
+    monkeypatch.setattr(os, "makedirs", MagicMock())
+
     # Mock the logger's handler to capture log records
     mock_file_handler = MagicMock()
     mock_logger = MagicMock(spec=logging.Logger)
@@ -81,7 +95,7 @@ def test_player_logs_messages(monkeypatch):
 
 
     _mock_create_llm_client(monkeypatch, AIMessage(content="irrelevant"))
-    test_player = Player(name="TestPlayer", provider="mock", model="mock-model")
+    test_player = Player(name="TestPlayer", provider="mock", model="mock-model", log_dir="mock_log_dir")
 
     test_player.logger.info("Test message 1")
     test_player.logger.info("Test message 2")

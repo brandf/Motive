@@ -1,6 +1,8 @@
 # Game settings
 game_settings:
   num_rounds: 3
+  theme: "Fantasy"
+  edition: "HearthAndShadow"
 
 # List of AI players
 players:

@@ -10,6 +10,8 @@ class PlayerConfig(BaseModel):
 class GameSettings(BaseModel):
     """General game settings."""
     num_rounds: int = Field(..., gt=0, description="Number of rounds the game will run.")
+    theme: str = Field("Fantasy", description="The theme of the game environment and characters.")
+    edition: str = Field("HearthAndShadow", description="The specific edition or story of the game.")
 
 class GameConfig(BaseModel):
     """Overall game configuration."""

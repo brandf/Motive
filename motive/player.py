@@ -1,4 +1,5 @@
 import logging
+import os
 from motive.llm_factory import create_llm_client
 from langchain_core.messages import AIMessage, HumanMessage
 
@@ -9,10 +10,11 @@ class Player:
     chat history, and logging.
     """
 
-    def __init__(self, name: str, provider: str, model: str):
+    def __init__(self, name: str, provider: str, model: str, log_dir: str):
         self.name = name
         self.llm_client = create_llm_client(provider, model)
         self.chat_history = []
+        self.log_dir = log_dir
         self.logger = self._setup_logger()
 
     def _setup_logger(self):
@@ -24,7 +26,8 @@ class Player:
         logger.propagate = False
 
         # Create a file handler
-        handler = logging.FileHandler(f"logs/{self.name}_chat.log", mode="w")
+        player_log_file = os.path.join(self.log_dir, f"{self.name}_chat.log")
+        handler = logging.FileHandler(player_log_file, mode="w")
         formatter = logging.Formatter("%(asctime)s - %(message)s")
         handler.setFormatter(formatter)
 

@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from motive.game_master import GameMaster
 from motive.llm_factory import PROVIDER_API_KEYS
 from motive.config import GameConfig # New import for Pydantic config
+import uuid # Import for generating unique game IDs
 
 
 async def main():
@@ -63,9 +64,13 @@ async def main():
         return
     # --- End Dynamic API Key Validation ---
 
+    # Generate a unique game ID
+    game_id = str(uuid.uuid4())
+    print(f"\nStarting game session: {game_id}")
+
     try:
         # Pass the validated GameConfig object directly
-        gm = GameMaster(game_config=game_config) 
+        gm = GameMaster(game_config=game_config, game_id=game_id) 
         await gm.run_game()
     except Exception as e:
         print(f"An unexpected error occurred during game execution: {e}")
