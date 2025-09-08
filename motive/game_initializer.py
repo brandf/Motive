@@ -22,10 +22,11 @@ from motive.player import Player, PlayerCharacter # Import Player and PlayerChar
 from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError
 
 class GameInitializer:
-    def __init__(self, game_config: GameConfig, game_id: str, game_logger: logging.Logger):
+    def __init__(self, game_config: GameConfig, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20):
         self.game_config = game_config # This is the overall GameConfig loaded from config.yaml
         self.game_id = game_id
         self.game_logger = game_logger
+        self.initial_ap_per_turn = initial_ap_per_turn # Store initial AP per turn
 
         self.rooms: Dict[str, Room] = {}
         self.game_objects: Dict[str, GameObject] = {}
@@ -218,7 +219,7 @@ class GameInitializer:
                 backstory=char_cfg.backstory,
                 motive=char_cfg.motive,
                 current_room_id=start_room_id,
-                action_points=3 # Default AP per turn for now. Will be updated for GM-6.
+                action_points=self.initial_ap_per_turn # Use configurable initial AP
             )
             player.character = player_char # Link player to character
             self.player_characters[player_char.id] = player_char

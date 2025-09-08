@@ -2,8 +2,8 @@ actions:
   look:
     id: look
     name: look
-    cost: 1
-    description: Look around the current room or at a specific object.
+    cost: 10
+    description: Look around.
     parameters:
       - name: target
         type: string
@@ -17,8 +17,8 @@ actions:
   help:
     id: help
     name: help
-    cost: 1
-    description: Get help about available commands.
+    cost: 10
+    description: Get help.
     parameters: []
     requirements: []
     effects:
@@ -29,7 +29,7 @@ actions:
   move:
     id: move
     name: move
-    cost: 1
+    cost: 10
     description: Move in a specified direction.
     parameters:
       - name: direction

@@ -29,6 +29,10 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
     # Use action_config.name for slicing, as it's the actual string that matched within the input
     param_string = action_line[len(action_config.name):].strip()
     
+    # Special handling for 'look at' syntax
+    if action_config.name.lower() == "look" and param_string.lower().startswith("at "):
+        param_string = param_string[len("at "):].strip()
+
     params: Dict[str, Any] = {}
     if action_config.parameters:
         if len(action_config.parameters) == 1 and action_config.parameters[0].type == "string":

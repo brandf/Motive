@@ -24,7 +24,7 @@ actions:
   pickup:
     id: pickup
     name: pickup
-    cost: 1
+    cost: 10
     description: Pick up an object.
     parameters:
       - name: object_name
@@ -41,7 +41,7 @@ actions:
   light_torch:
     id: light_torch
     name: light torch
-    cost: 1
+    cost: 10
     description: Light a torch you are holding.
     parameters:
       - name: object_name

@@ -59,9 +59,9 @@ def mock_game_master():
         # Create dummy core config for basic initialization
         dummy_core_config = CoreConfig(
             actions={
-                "look": ActionConfig(id="look", name="look", cost=1, description="Look around.", parameters=[ParameterConfig(name="target", type="string", description="The name of the object or character to look at.")], requirements=[], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="look_at_target", observers=["player"])]),
-                "help": ActionConfig(id="help", name="help", cost=1, description="Get help.", parameters=[], requirements=[], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="generate_help_message", observers=["player"])]),
-                "move": ActionConfig(id="move", name="move", cost=1, description="Move in a specified direction.", parameters=[ParameterConfig(name="direction", type="string", description="The direction to move (e.g., north, south, east, west).")], requirements=[ActionRequirementConfig(type="exit_exists", direction_param="direction")], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="handle_move_action", observers=["player"])])
+                "look": ActionConfig(id="look", name="look", cost=10, description="Look around.", parameters=[ParameterConfig(name="target", type="string", description="The name of the object or character to look at.")], requirements=[], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="look_at_target", observers=["player"])]),
+                "help": ActionConfig(id="help", name="help", cost=10, description="Get help.", parameters=[], requirements=[], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="generate_help_message", observers=["player"])]),
+                "move": ActionConfig(id="move", name="move", cost=10, description="Move in a specified direction.", parameters=[ParameterConfig(name="direction", type="string", description="The direction to move (e.g., north, south, east, west).")], requirements=[ActionRequirementConfig(type="exit_exists", direction_param="direction")], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="handle_move_action", observers=["player"])])
             }
         )
 
@@ -78,7 +78,7 @@ def mock_game_master():
                 "pickup": ActionConfig(
                     id="pickup",
                     name="pickup",
-                    cost=1,
+                    cost=10,
                     description="Pick up an object.",
                     parameters=[ParameterConfig(name="object_name", type="string", description="The name of the object to pick up.")],
                     requirements=[
@@ -91,7 +91,7 @@ def mock_game_master():
                 "light_torch": ActionConfig(
                     id="light_torch",
                     name="light torch",
-                    cost=1,
+                    cost=10,
                     description="Light a torch you are holding.",
                     parameters=[ParameterConfig(name="object_name", type="string", description="The name of the torch to light.")],
                     requirements=[
@@ -143,6 +143,7 @@ def mock_game_master():
         mock_game_config.game_settings.theme_config_path = "mock/theme.yaml"
         mock_game_config.game_settings.edition_config_path = "mock/edition.yaml"
         mock_game_config.game_settings.manual = "mock/manual.md"
+        mock_game_config.game_settings.initial_ap_per_turn = 20 # Set initial AP for tests
         mock_game_config.players = [
             PlayerConfig(name="Hero", provider="mock", model="mock-model"),
         ]
@@ -340,10 +341,10 @@ def test_execute_effects_help_action(mock_game_master):
     feedback = gm._execute_effects(player_char, action_config, params)
     expected_feedback = [
         "Available actions:",
-        "- look (1 AP): Look around.",
-        "- help (1 AP): Get help.",
-        "- move (1 AP): Move in a specified direction.",
-        "- pickup (1 AP): Pick up an object.",
-        "- light torch (1 AP): Light a torch you are holding."
+        "- look (10 AP): Look around.",
+        "- help (10 AP): Get help.",
+        "- move (10 AP): Move in a specified direction.",
+        "- pickup (10 AP): Pick up an object.",
+        "- light torch (10 AP): Light a torch you are holding."
     ]
     assert all(item in feedback[0] for item in expected_feedback)

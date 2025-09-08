@@ -13,6 +13,16 @@ class ParameterConfig(BaseModel):
     type: str = Field(..., description="Data type of the parameter (e.g., 'string', 'integer').")
     description: str
 
+class Event(BaseModel):
+    """Represents a discrete event occurring in the game world."""
+    message: str = Field(..., description="Human-readable description of the event.")
+    event_type: str = Field(..., description="Categorization of the event (e.g., 'movement', 'interaction', 'status_change').")
+    source_room_id: str = Field(..., description="The ID of the room where the event occurred.")
+    timestamp: str = Field(..., description="ISO formatted timestamp when the event occurred.")
+    related_object_id: Optional[str] = None
+    related_player_id: Optional[str] = None
+    observers: List[Literal["player", "room_players", "adjacent_rooms", "all_players", "game_master"]] = Field(..., description="Scopes of observers who should receive this event.")
+
 class ActionRequirementConfig(BaseModel):
     """Base model for action requirements."""
     type: str = Field(..., description="Type of requirement (e.g., 'player_has_tag', 'object_in_room').")
@@ -125,6 +135,7 @@ class GameSettings(BaseModel):
     theme_config_path: str = Field(..., description="Path to the theme YAML configuration file.")
     edition_config_path: str = Field(..., description="Path to the edition YAML configuration file.")
     manual: str = Field("MOTIVE_MANUAL.md", description="Path to the game manual markdown file.")
+    initial_ap_per_turn: int = Field(20, description="Initial action points per player per turn. Defaults to 20 for testing.")
 
 class GameConfig(BaseModel):
     """Overall game configuration."""

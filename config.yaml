@@ -5,6 +5,7 @@ game_settings:
   theme_config_path: "configs/themes/fantasy/fantasy.yaml"
   edition_config_path: "configs/themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
   manual: "MOTIVE_MANUAL.md"
+  initial_ap_per_turn: 20 # Set initial AP per turn for testing
 
 # List of AI players
 players:

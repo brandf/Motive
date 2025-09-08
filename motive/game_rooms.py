@@ -56,6 +56,10 @@ class Room:
         """Gets a PlayerCharacter in this room by ID."""
         return self.players.get(player_char_id)
 
+    def get_all_player_characters_in_room(self) -> List[PlayerCharacter]:
+        """Returns a list of all PlayerCharacter instances currently in this room."""
+        return list(self.players.values())
+
     def add_tag(self, tag: str):
         self.tags.add(tag)
 

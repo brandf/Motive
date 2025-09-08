@@ -113,12 +113,13 @@ def test_edition_config_valid():
     assert "start_room" in config.rooms
 
 def test_game_settings_valid():
-    settings = GameSettings(num_rounds=5, core_config_path="core.yaml", theme_config_path="theme.yaml", edition_config_path="edition.yaml", manual="manual.md")
+    settings = GameSettings(num_rounds=5, core_config_path="core.yaml", theme_config_path="theme.yaml", edition_config_path="edition.yaml", manual="manual.md", initial_ap_per_turn=20)
     assert settings.num_rounds == 5
+    assert settings.initial_ap_per_turn == 20
 
 def test_game_config_valid():
     game_config = GameConfig(
-        game_settings=GameSettings(num_rounds=5, core_config_path="core.yaml", theme_config_path="theme.yaml", edition_config_path="edition.yaml", manual="manual.md"),
+        game_settings=GameSettings(num_rounds=5, core_config_path="core.yaml", theme_config_path="theme.yaml", edition_config_path="edition.yaml", manual="manual.md", initial_ap_per_turn=20),
         players=[PlayerConfig(name="Player1", provider="mock", model="mock-model")]
     )
     assert game_config.players[0].name == "Player1"
@@ -194,6 +195,7 @@ game_settings:
   theme_config_path: "configs/themes/fantasy.yaml"
   edition_config_path: "configs/editions/hearth_and_shadow.yaml"
   manual: "MOTIVE_MANUAL.md"
+  initial_ap_per_turn: 20
 players:
   - name: "Arion"
     provider: "google"
@@ -202,6 +204,7 @@ players:
     config_data = yaml.safe_load(yaml_content)
     game_config = GameConfig(**config_data)
     assert game_config.game_settings.num_rounds == 3
+    assert game_config.game_settings.initial_ap_per_turn == 20
     assert game_config.players[0].name == "Arion"
 
 def test_load_game_config_invalid_num_rounds():

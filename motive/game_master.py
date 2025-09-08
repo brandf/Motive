@@ -21,7 +21,8 @@ from motive.config import (
     RoomConfig,
     ExitConfig,
     ObjectInstanceConfig,
-    CharacterConfig # Re-added for direct usage
+    CharacterConfig, # Re-added for direct usage
+    Event # Added for event handling
 )
 from motive.game_objects import GameObject # Import GameObject
 from motive.game_rooms import Room # Import Room
@@ -40,6 +41,8 @@ class GameMaster:
         self.game_id = game_id
         self.manual_path = game_config.game_settings.manual
 
+        self.game_config = game_config # Assign game_config earlier
+
         # Initialize theme and edition with temporary placeholders
         # These will be updated after configurations are loaded
         self.theme: str = ""
@@ -47,16 +50,16 @@ class GameMaster:
 
         # Initialize a basic logger that logs to stdout before full setup
         self.game_logger = logging.getLogger("GameNarrative")
+        self.game_logger.propagate = False # Prevent propagation to root logger to avoid duplicate output
         if not self.game_logger.handlers:
             handler = logging.StreamHandler(sys.stdout)
             formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
             handler.setFormatter(formatter)
             self.game_logger.addHandler(handler)
             self.game_logger.setLevel(logging.INFO)
-        self.game_logger.info("GameMaster initialized with basic logging.")
 
         # Initialize GameInitializer with the basic logger
-        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger)
+        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger, self.game_config.game_settings.initial_ap_per_turn)
 
         # Load Theme and Edition configurations
         self.game_initializer._load_configurations()
@@ -73,17 +76,23 @@ class GameMaster:
         # Store loaded configs in game_config for broader access
         game_config.theme_config = self.game_initializer.theme_cfg
         game_config.edition_config = self.game_initializer.edition_cfg
-        self.game_config = game_config # Store the full game config
+        # self.game_config = game_config # Store the full game config # Moved to earlier
 
         # Initialize game state collections - these will be populated by GameInitializer
         self.rooms: Dict[str, Room] = {}
         self.game_objects: Dict[str, GameObject] = {}
         self.player_characters: Dict[str, PlayerCharacter] = {}
 
+        self.player_first_interaction_done: Dict[str, bool] = {} # Track if a player has had their first interaction
+
         # These will store the merged configurations
         self.game_object_types: Dict[str, ObjectTypeConfig] = {}
         self.game_actions: Dict[str, ActionConfig] = {}
         self.game_character_types: Dict[str, CharacterConfig] = {}
+
+        # Event management
+        self.event_queue: List[Event] = [] # All events generated during a turn
+        self.player_observations: Dict[str, List[Event]] = {} # Events specific to each player
 
         self._initialize_players(game_config.players)
         
@@ -96,6 +105,16 @@ class GameMaster:
         self.game_object_types = self.game_initializer.game_object_types
         self.game_actions = self.game_initializer.game_actions
         self.game_character_types = self.game_initializer.game_character_types
+
+        # Pass initial AP to GameInitializer for character instantiation
+        self.game_initializer.initial_ap_per_turn = self.game_config.game_settings.initial_ap_per_turn
+
+        # Initialize player_observations for all players
+        for player in self.players:
+            if player.character:
+                self.player_observations[player.character.id] = []
+            else:
+                self.game_logger.warning(f"Player {player.name} has no character, cannot initialize observation queue.")
 
         # Link PlayerCharacter instances to the actual Player objects
         # This section is no longer needed as GameInitializer already links PlayerCharacter to Player
@@ -170,100 +189,26 @@ class GameMaster:
             )
             self.players.append(player)
             self.game_logger.info(f"  - Initialized player: {player.name} using {p_config.provider}/{p_config.model}")
+            self.player_first_interaction_done[player.name] = False # Initialize for tracking
 
     async def run_game(self):
         """Main game loop."""
         self.game_logger.info("==================== GAME STARTING ====================")
         print("\n==================== GAME STARTING ====================") # Keep for console output
 
-        await self._send_initial_messages()
+        # Removed: await self._send_initial_messages()
 
         for round_num in range(1, self.num_rounds + 1):
             self.game_logger.info(f"--- Starting Round {round_num} of {self.num_rounds} ---")
             print(f"\n--- Starting Round {round_num} of {self.num_rounds} ---") # Keep for console output
             for player in self.players:
+                player.character.action_points = self.game_config.game_settings.initial_ap_per_turn # Reset AP from config
                 await self._execute_player_turn(player, round_num)
             self.game_logger.info(f"--- Round {round_num} Complete ---")
             print(f"--- Round {round_num} Complete ---") # Keep for console output
 
         self.game_logger.info("===================== GAME OVER ======================")
         print("\n===================== GAME OVER ======================") # Keep for console output
-
-    async def _send_initial_messages(self):
-        """Sends the initial game rules and character/world info to all players."""
-        self.game_logger.info("Sending initial game rules and world state to all players...")
-        print("\nSending initial game rules and world state to all players...") # Keep for console output
-        
-        # Include the full manual content in the system prompt for the LLM
-        system_prompt = f"You are a player in a text-based adventure game. Below is the game manual. Read it carefully to understand the rules, your role, and how to interact with the game world.\n\n" \
-                        f"--- GAME MANUAL START ---\n{self.manual_content}\n--- GAME MANUAL END ---\n\n" \
-                        f"Now, based on the manual and your character, respond with your actions."
-
-        for player in self.players:
-            player_char = player.character
-            if not player_char:
-                self.game_logger.error(f"Player {player.name} has no assigned character. Skipping initial message.")
-                continue
-
-            # Character Assignment and Motive
-            # Use .split('_instance')[0] to get the base character type ID
-            char_type_id = player_char.id.split('_instance')[0]
-            character_assignment = f"You are {player_char.name}, a {self.game_character_types[char_type_id].name}.\nYour motive is: {player_char.motive}"
-
-            # Room Description and Objects
-            current_room = self.rooms.get(player_char.current_room_id)
-            if not current_room:
-                self.game_logger.error(f"Character {player_char.name} is in an unknown room: {player_char.current_room_id}. Skipping initial message.")
-                continue
-
-            room_description_parts = [current_room.description]
-            if current_room.objects:
-                object_names = [obj.name for obj in current_room.objects.values()]
-                room_description_parts.append(f"You also see: {', '.join(object_names)}.")
-            
-            # Visible exits
-            if current_room.exits:
-                exit_names = [exit_data['name'] for exit_data in current_room.exits.values() if not exit_data.get('is_hidden', False)]
-                if exit_names:
-                    room_description_parts.append(f"Exits: {', '.join(exit_names)}.")
-
-            initial_observations = " ".join(room_description_parts)
-
-            # Available Actions (simplified for now)
-            available_action_names = [action.name for action in self.game_actions.values()]
-            sample_actions = f"Available actions: {', '.join(available_action_names)}. (Costs {player_char.action_points} AP per turn.)"
-            
-            # Construct the first HumanMessage with character, motive, and observations
-            first_human_message_content = (
-                f"{character_assignment}\n\n"
-                f"Observations: {initial_observations}\n\n"
-                f"{sample_actions}\n\n"
-                f"What do you do?"
-            )
-
-            system_msg = SystemMessage(content=system_prompt)
-            human_msg = HumanMessage(content=first_human_message_content)
-
-            messages_for_llm = [system_msg, human_msg]
-
-            player.add_message(system_msg)
-            player.add_message(human_msg)
-            # Log a placeholder for the manual in GM and game logs
-            self.game_logger.info(f"SYSTEM (with manual: {self.manual_path}): {system_prompt[:50]}...")
-            self.game_logger.info(f"GM to {player.name} (SYSTEM, with manual: {self.manual_path}): {system_prompt[:50]}...")
-
-            player.logger.info(f"SYSTEM: {system_prompt}") # Player's log gets full manual
-            player.logger.info(f"GM: {first_human_message_content}") # Player's log gets full first message
-            self.game_logger.info(f"GM to {player.name}: {first_human_message_content}")
-
-            start_time = time.time()
-            response = await player.get_response_and_update_history(messages_for_llm)
-            duration = time.time() - start_time
-            response_len = len(response.content)
-
-            print(f"    '{player.name}' initial response in {duration:.2f}s ({response_len} chars).")
-            self.game_logger.info(f"{player.name}: {response.content}")
-            player.logger.info(f"{player.name}: {response.content}")
 
     def _check_requirements(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
         """Checks if all requirements for an action are met."""
@@ -335,7 +280,7 @@ class GameMaster:
     def _execute_effects(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> List[str]:
         """Applies the effects of an action to the game state and generates feedback/events."""
         feedback_messages: List[str] = []
-        events_generated: List[Dict[str, Any]] = []
+        events_generated: List[Event] = [] # Changed to list of Event objects
 
         current_room = self.rooms.get(player_char.current_room_id)
         if not current_room:
@@ -390,7 +335,14 @@ class GameMaster:
             elif effect.type == "generate_event":
                 if effect.message and effect.observers:
                     event_message = effect.message.format(**params, player_name=player_char.name) # Add player_name to params for formatting
-                    events_generated.append({"message": event_message, "observers": effect.observers, "source_room": player_char.current_room_id})
+                    events_generated.append(Event(
+                        message=event_message,
+                        event_type="action_event", # A generic type for now
+                        source_room_id=player_char.current_room_id,
+                        timestamp=datetime.now().isoformat(),
+                        related_player_id=player_char.id,
+                        observers=effect.observers
+                    ))
                     feedback_messages.append(event_message) # Player sees their own immediate events
 
             elif effect.type == "code_binding":
@@ -399,11 +351,14 @@ class GameMaster:
                         module = __import__(effect.function_module, fromlist=[effect.function_name])
                         hook_function = getattr(module, effect.function_name)
                         
-                        hook_feedback = hook_function(self, player_char, params)
+                        hook_events_and_feedback = hook_function(self, player_char, params) # Expecting a tuple: (List[Event], List[str])
+                        hook_events = hook_events_and_feedback[0]
+                        hook_feedback = hook_events_and_feedback[1]
+                        
                         feedback_messages.extend(hook_feedback)
-                        events_generated.append({"message": "\n".join(hook_feedback), "observers": effect.observers, "source_room": player_char.current_room_id})
+                        events_generated.extend(hook_events) # Extend with actual Event objects
 
-                    except (ImportError, AttributeError) as e:
+                    except (ImportError, AttributeError, IndexError) as e: # Added IndexError for tuple unpacking
                         error_message = f"Error calling code binding for action '{action_config.name}': {e}"
                         self.game_logger.error(error_message)
                         feedback_messages.append(f"An error occurred while trying to process your action: {e}")
@@ -418,9 +373,48 @@ class GameMaster:
             else:
                 self.game_logger.warning(f"Unsupported effect type: {effect.type}")
 
-        # TODO: Process events_generated for observability and distribute to relevant players
-
+        # After processing all effects, add generated events to the main event queue
+        self.event_queue.extend(events_generated)
         return feedback_messages
+
+    def _distribute_events(self):
+        """Distributes generated events to relevant players based on observer scopes."""
+        for event in self.event_queue:
+            # Ensure current_room exists for event distribution logic
+            event_room = self.rooms.get(event.source_room_id)
+            if not event_room:
+                self.game_logger.warning(f"Event originated from unknown room ID: {event.source_room_id}. Cannot distribute to room-based observers.")
+                continue # Skip room-based distribution for this event
+
+            # Iterate through all players to determine who observes the event
+            for player in self.players:
+                player_char = player.character
+                if not player_char:
+                    continue
+                
+                observes = False
+                # Determine if the player should observe this event based on scopes
+                if "all_players" in event.observers:
+                    observes = True
+                elif "player" in event.observers and event.related_player_id == player_char.id:
+                    observes = True
+                elif "room_players" in event.observers and player_char.current_room_id == event.source_room_id:
+                    observes = True
+                elif "adjacent_rooms" in event.observers:
+                    # Check if player's current room is adjacent to event_room
+                    for exit_data in event_room.exits.values():
+                        if exit_data['destination_room_id'] == player_char.current_room_id:
+                            observes = True
+                            break
+                # Add more observer types here as needed (e.g., target_player, target_object_owner)
+
+                if observes and player_char.id in self.player_observations:
+                    self.player_observations[player_char.id].append(event)
+                    self.game_logger.debug(f"Distributed event '{event.message}' to {player.name}.")
+                    # Log to game.log when an event is actually observed by a player
+                    self.game_logger.info(f"OBSERVED - Player {player.name} in {player_char.current_room_id} observed event from {event.source_room_id}: '{event.message}' (Type: {event.event_type})")
+        
+        self.event_queue.clear() # Clear the queue after distributing all events
 
     async def _execute_player_turn(self, player: Player, round_num: int):
         """Executes a single player's turn, allowing multiple actions until AP are spent or turn ends."""
@@ -439,7 +433,20 @@ class GameMaster:
                 self.game_logger.error(f"Character {player_char.name} is in an unknown room: {player_char.current_room_id}. Ending turn.")
                 break
 
-            # Dynamically generate current observations and action prompt for each iteration
+            # Distribute any events generated from previous actions/turns to all players before current player acts.
+            self._distribute_events()
+
+            # Gather observations for the current player
+            player_observations = self.player_observations.get(player_char.id, [])
+            observation_messages: List[str] = []
+            if player_observations:
+                observation_messages.append("**New Observations:**")
+                for event in player_observations:
+                    observation_messages.append(f"- {event.message}")
+                # Clear observations for this player after presenting them
+                self.player_observations[player_char.id] = []
+
+            # Dynamically generate current room description and action prompt
             room_description_parts = [current_room.description]
             if current_room.objects:
                 object_names = [obj.name for obj in current_room.objects.values()]
@@ -448,25 +455,69 @@ class GameMaster:
                 exit_names = [exit_data['name'] for exit_data in current_room.exits.values() if not exit_data.get('is_hidden', False)]
                 if exit_names:
                     room_description_parts.append(f"Exits: {', '.join(exit_names)}.")
-            current_observations = " ".join(room_description_parts)
+            current_room_description = " ".join(room_description_parts)
 
             available_action_names = [action.name for action in self.game_actions.values()]
             action_prompt = f"Available actions: {', '.join(available_action_names)}. (You have {player_char.action_points} AP remaining.)"
 
-            gm_message_content = (
-                f"Current situation: {current_observations}\n\n"
-                f"{action_prompt}\n\n"
-                f"What do you do? (You can also type 'end turn' to finish.)"
-            )
-            
-            gm_message = HumanMessage(content=gm_message_content)
-            player.add_message(gm_message)
-            player.logger.info(f"GM: {gm_message_content}")
-            self.game_logger.info(f"GM to {player.name}: {gm_message_content}")
+            # Handle the very first interaction differently
+            if not self.player_first_interaction_done.get(player_char.id, False):
+                # Include the full manual content in the system prompt for the LLM
+                system_prompt = f"You are a player in a text-based adventure game. Below is the game manual. Read it carefully to understand the rules, your role, and how to interact with the game world.\n\n" \
+                                f"--- GAME MANUAL START ---\n{self.manual_content}\n--- GAME MANUAL END ---\n\n" \
+                                f"Now, based on the manual and your character, respond with your actions."
 
-            start_time = time.time()
-            response = await player.get_response_and_update_history(player.chat_history)
-            duration = time.time() - start_time
+                # Character Assignment and Motive
+                char_type_id = player_char.id.split('_instance')[0]
+                character_assignment = f"You are {player_char.name}, a {self.game_character_types[char_type_id].name}.\nYour motive is: {player_char.motive}"
+
+                # Construct the first HumanMessage with character, motive, and observations
+                first_human_message_content = (
+                    f"{character_assignment}\n\n"
+                    f"Observations: {current_room_description}\n\n"
+                    f"{action_prompt.replace('You have', 'You start with').replace('remaining', 'per turn')}\n\n"
+                    f"What do you do?"
+                )
+
+                system_msg = SystemMessage(content=system_prompt)
+                human_msg = HumanMessage(content=first_human_message_content)
+
+                player.add_message(system_msg)
+                player.add_message(human_msg)
+                self.game_logger.info(f"SYSTEM (with manual: {self.manual_path}): {system_prompt[:50]}...")
+                self.game_logger.info(f"GM to {player.name} (SYSTEM, with manual: {self.manual_path}): {system_prompt[:50]}...")
+                player.logger.info(f"SYSTEM: {system_prompt}")
+                player.logger.info(f"GM: {first_human_message_content}")
+                self.game_logger.info(f"GM to {player.name}: {first_human_message_content}")
+
+                start_time = time.time()
+                response = await player.get_response_and_update_history(player.chat_history)
+                duration = time.time() - start_time
+                self.player_first_interaction_done[player_char.id] = True # Mark as done
+            else:
+                # Construct the GM message content for subsequent interactions, including observations
+                gm_message_content_parts = [
+                    f"Current situation: {current_room_description}"
+                ]
+                if observation_messages:
+                    gm_message_content_parts.append("\n".join(observation_messages))
+                
+                gm_message_content_parts.extend([
+                    f"", # Add an empty string for a newline for better formatting
+                    f"{action_prompt}",
+                    f"What do you do? (You can also type 'end turn' to finish.)"
+                ])
+                gm_message_content = "\n\n".join(gm_message_content_parts)
+                
+                gm_message = HumanMessage(content=gm_message_content)
+                player.add_message(gm_message)
+                player.logger.info(f"GM: {gm_message_content}")
+                self.game_logger.info(f"GM to {player.name}: {gm_message_content}")
+
+                start_time = time.time()
+                response = await player.get_response_and_update_history(player.chat_history)
+                duration = time.time() - start_time
+            
             response_len = len(response.content)
 
             player_input = response.content.strip().lower()
@@ -581,8 +632,8 @@ class GameMaster:
                     
                 # If all actions were valid and AP remain, the loop continues automatically to re-prompt.
 
-            self.game_logger.info(f"<<< {player.name}'s turn ended. Remaining AP: {player_char.action_points}")
-            print(f"<<< {player.name}'s turn ended. Remaining AP: {player_char.action_points}")
+        self.game_logger.info(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
+        print(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
 
     def _setup_game_world(self, theme_cfg: ThemeConfig, edition_cfg: EditionConfig):
         """Sets up the initial game world by merging configs and instantiating objects."""
