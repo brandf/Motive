@@ -1,5 +1,7 @@
 # Motive
 
+![Motive Logo](assets/images/Motive.png)
+
 Motive is a novel platform designed for the exploration and benchmarking of Large Language Models (LLMs) through interactive, turn-based games. It provides a unique environment where AI (or human) players can engage in complex scenarios, fostering the generation of valuable training data and facilitating research into advanced AI capabilities like long-context reasoning, planning, and social engineering.
 
 ## Purpose of Motive
