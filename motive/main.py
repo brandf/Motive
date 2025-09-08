@@ -3,7 +3,7 @@ import asyncio
 import yaml
 from dotenv import load_dotenv
 from motive.game_master import GameMaster
-from llm_factory import PROVIDER_API_KEYS
+from motive.llm_factory import PROVIDER_API_KEYS
 from motive.config import GameConfig # New import for Pydantic config
 
 
