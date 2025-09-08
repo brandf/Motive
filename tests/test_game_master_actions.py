@@ -12,6 +12,8 @@ from motive.config import (
 from motive.player import Player, PlayerCharacter
 from motive.game_objects import GameObject
 from motive.game_rooms import Room
+from langchain_core.messages import AIMessage
+from unittest.mock import AsyncMock
 
 @pytest.fixture
 def mock_game_master():
@@ -20,13 +22,38 @@ def mock_game_master():
         patch('os.makedirs'),
         patch('logging.FileHandler') as mock_file_handler_class,
         patch('os.path.join', return_value='mock/log/path'), # Mock os.path.join
-        patch('motive.llm_factory.create_llm_client', return_value=MagicMock()), # Mock create_llm_client
-        patch('motive.player.Player') as mock_player_class # Mock the Player class
+        patch('motive.player.create_llm_client', return_value=MagicMock()), # Mock create_llm_client
+        patch('motive.player.Player') as mock_player_class, # Mock the Player class
+        patch('motive.game_master.GameMaster._load_yaml_config') as mock_load_yaml_config,
+        patch('motive.game_master.GameMaster._load_manual_content') as mock_load_manual_content,
+        patch('sys.stdout') as mock_stdout # Mock sys.stdout to prevent console output during tests
     ):
         # Configure the mock file handler to return an integer level
         mock_file_handler_instance = MagicMock()
         mock_file_handler_instance.level = logging.INFO # Set an integer level
         mock_file_handler_class.return_value = mock_file_handler_instance
+
+        # Configure mock_stdout for assertions if needed
+        mock_stdout.write.return_value = None
+
+        # Define a mock Player class that accepts log_dir and has a mocked logger
+        class MockPlayer:
+            def __init__(self, name: str, provider: str, model: str, log_dir: str):
+                self.name = name
+                self.llm_client = MagicMock() # Mock the LLM client
+                self.chat_history = []
+                self.log_dir = log_dir
+                self.logger = MagicMock(spec=logging.Logger)
+                self.logger.info = MagicMock()
+                self.character = None
+
+            def add_message(self, message):
+                self.chat_history.append(message)
+
+            async def get_response_and_update_history(self, messages_for_llm: list) -> AIMessage:
+                return AIMessage(content="end turn") # Default AI response
+        
+        mock_player_class.side_effect = MockPlayer # Assign the mock class as a side effect
 
         # Create dummy theme and edition configs for basic initialization
         dummy_theme_config = ThemeConfig(
@@ -51,7 +78,7 @@ def mock_game_master():
                     ],
                     effects=[
                         ActionEffectConfig(type="set_object_property", object_name_param="object_name", property="is_lit", value=True),
-                        ActionEffectConfig(type="generate_event", message="{{player_name}} lights the {{object_name}}.", observers=["room_players"])
+                        ActionEffectConfig(type="generate_event", message="{player_name} lights the {object_name}.", observers=["room_players"])
                     ]
                 ),
                 "pickup": ActionConfig(
@@ -115,127 +142,29 @@ def mock_game_master():
         mock_game_config.theme_config = dummy_theme_config
         mock_game_config.edition_config = dummy_edition_config
 
-        # Create a mock GameMaster instance without calling its __init__
-        mock_gm = MagicMock(spec=GameMaster)
-        mock_gm.game_id = "test_game_id"
-        mock_gm.theme = dummy_theme_config.id
-        mock_gm.edition = dummy_edition_config.id
-        mock_gm.manual_path = mock_game_config.game_settings.manual
-        mock_gm.log_dir = "mock_log_dir"
+        # Configure the mocked _load_yaml_config and _load_manual_content
+        mock_load_yaml_config.side_effect = [
+            dummy_theme_config,
+            dummy_edition_config
+        ]
+        mock_load_manual_content.return_value = "Mock manual content."
 
-        # Manually set up mock loggers
-        mock_gm.gm_logger = MagicMock(spec=logging.Logger)
-        mock_gm.game_logger = MagicMock(spec=logging.Logger)
+        # Instantiate a real GameMaster, which will call the mocked loaders
+        gm = GameMaster(game_config=mock_game_config, game_id="test_game_id")
+        gm.game_logger.setLevel(logging.DEBUG) # Set logging level to DEBUG for tests
 
-        # Explicitly initialize game state attributes on the mock
-        mock_gm.rooms = {}
-        mock_gm.game_objects = {}
-        mock_gm.player_characters = {}
-        mock_gm.game_object_types = {}
-        mock_gm.game_actions = {}
-        mock_gm.game_character_types = {}
+        # Mock the player instance created by GameMaster._initialize_players
+        # The mock_player_class.side_effect now handles returning the mock player instance.
+        # We just need to get the instance that was created.
+        mock_player_instance = gm.players[0] # GameMaster._initialize_players adds the player
+        mock_player_instance.character = gm.player_characters["rogue_instance"] # Link to the real character
+        mock_player_instance.add_message = MagicMock() # Mock add_message for isolation
+        mock_player_instance.get_response_and_update_history = AsyncMock(return_value=AIMessage(content="end turn")) # Default AI response
 
-        # Manually populate game state attributes as if _setup_game_world was run
-        mock_gm.rooms = {
-            room_id: Room(
-                room_id=cfg.id,
-                name=cfg.name,
-                description=cfg.description,
-                exits={e_id: e_cfg.model_dump() for e_id, e_cfg in cfg.exits.items()},
-                objects={},
-                tags=cfg.tags,
-                properties=cfg.properties
-            )
-            for room_id, cfg in dummy_edition_config.rooms.items()
-        }
+        # Replace the real player list with our mocked player
+        gm.players = [mock_player_instance]
 
-        # Add objects from room configs to mock_gm.game_objects and mock_gm.rooms
-        for room_id, room_cfg in dummy_edition_config.rooms.items():
-            room = mock_gm.rooms[room_id]
-            for obj_id, obj_instance_cfg in room_cfg.objects.items():
-                obj_type = dummy_theme_config.object_types.get(obj_instance_cfg.object_type_id)
-                if obj_type:
-                    game_obj = GameObject(
-                        obj_id=obj_instance_cfg.id,
-                        name=obj_instance_cfg.name or obj_type.name,
-                        description=obj_instance_cfg.description or obj_type.description,
-                        current_location_id=room.id,
-                        tags=list(set(obj_type.tags).union(obj_instance_cfg.tags)),
-                        properties={**obj_type.properties, **obj_instance_cfg.properties}
-                    )
-                    room.add_object(game_obj)
-                    mock_gm.game_objects[game_obj.id] = game_obj
-
-        # Add global objects from edition config (not in rooms)
-        for obj_id, obj_instance_cfg in dummy_edition_config.objects.items():
-            if obj_id not in mock_gm.game_objects:
-                obj_type = dummy_theme_config.object_types.get(obj_instance_cfg.object_type_id)
-                if obj_type:
-                    game_obj = GameObject(
-                        obj_id=obj_instance_cfg.id,
-                        name=obj_instance_cfg.name or obj_type.name,
-                        description=obj_instance_cfg.description or obj_type.description,
-                        current_location_id="world_spawn",
-                        tags=list(set(obj_type.tags).union(obj_instance_cfg.tags)),
-                        properties={**obj_type.properties, **obj_instance_cfg.properties}
-                    )
-                    mock_gm.game_objects[game_obj.id] = game_obj
-
-        mock_gm.game_object_types = dummy_theme_config.object_types.copy()
-        # mock_gm.game_object_types.update(dummy_edition_config.objects) # This is incorrect, edition_config.objects are instances not types
-
-
-        mock_gm.game_actions = {action_id: action for action_id, action in dummy_theme_config.actions.items()}
-        # mock_gm.game_actions.update({action_id: action for action_id, action in dummy_edition_config.actions.items()}) # Edition actions can override or add
-
-        mock_gm.game_actions["look"] = ActionConfig(id="look", name="look", cost=1, description="Look around.", parameters=[], requirements=[], effects=[])
-        mock_gm.game_character_types = dummy_theme_config.character_types.copy()
-
-        # Mock player and player_character
-        test_player_character = PlayerCharacter(
-            char_id="TestPlayer_instance",
-            name="Test Player",
-            backstory="A test player.",
-            motive="Test motive.",
-            current_room_id="start_room"
-        )
-        test_player_character.action_points = 3 # Manually set action points after instantiation
-        mock_gm.player_characters["TestPlayer_instance"] = test_player_character
-
-        mock_player = mock_player_class.return_value # Get the mocked player instance
-        mock_player.name = "TestPlayer"
-        mock_player.character = test_player_character
-        mock_gm.players = [mock_player]
-
-        yield mock_gm
-
-# --- Test _parse_player_action --- #
-
-def test_parse_player_action_valid(mock_game_master):
-    gm = mock_game_master
-    mock_action_config = MagicMock(spec=ActionConfig)
-    mock_action_config.name = "light_torch"
-    gm._parse_player_action.return_value = (mock_action_config, {"object_name": "my_torch"})
-    action_config, params = gm._parse_player_action("light_torch my_torch")
-    assert action_config.name == "light_torch"
-    assert params["object_name"] == "my_torch"
-
-def test_parse_player_action_invalid_action_name(mock_game_master):
-    gm = mock_game_master
-    # Set return value for this specific test
-    gm._parse_player_action.return_value = None
-    result = gm._parse_player_action("unknown_action some_param")
-    assert result is None
-
-def test_parse_player_action_no_params(mock_game_master):
-    gm = mock_game_master
-    gm.game_actions["look"] = ActionConfig(id="look", name="look", cost=1, description="Look around.", parameters=[], requirements=[], effects=[])
-    mock_action_config = MagicMock(spec=ActionConfig)
-    mock_action_config.name = "look"
-    gm._parse_player_action.return_value = (mock_action_config, {})
-    action_config, params = gm._parse_player_action("look")
-    assert action_config.name == "look"
-    assert params == {}
+        yield gm
 
 # --- Test _check_requirements --- #
 
@@ -252,8 +181,6 @@ def test_check_requirements_player_has_object_in_inventory_success(mock_game_mas
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "my_torch"}
 
-    # Set return value for this specific test
-    gm._check_requirements.return_value = (True, "")
     success, message = gm._check_requirements(player_char, action_config, params)
     assert success is True
     assert message == ""
@@ -261,15 +188,14 @@ def test_check_requirements_player_has_object_in_inventory_success(mock_game_mas
 def test_check_requirements_player_has_object_in_inventory_fail(mock_game_master):
     gm = mock_game_master
     player = gm.players[0]
+    player_char = player.character
 
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "non_existent_torch"}
 
-    # Set return value for this specific test
-    gm._check_requirements.return_value = (False, "Player does not have 'non_existent_torch' in inventory.")
-    success, message = gm._check_requirements(player.character, action_config, params)
+    success, message = gm._check_requirements(player_char, action_config, params)
     assert success is False
-    assert "Player does not have" in message
+    assert "Player does not have 'non_existent_torch' in inventory." in message
 
 def test_check_requirements_object_property_equals_success(mock_game_master):
     gm = mock_game_master
@@ -284,8 +210,6 @@ def test_check_requirements_object_property_equals_success(mock_game_master):
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "my_torch"}
 
-    # Set return value for this specific test
-    gm._check_requirements.return_value = (True, "")
     success, message = gm._check_requirements(player_char, action_config, params)
     assert success is True
     assert message == ""
@@ -303,37 +227,33 @@ def test_check_requirements_object_property_equals_fail(mock_game_master):
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "my_lit_torch"}
 
-    # Set return value for this specific test
-    gm._check_requirements.return_value = (False, "Object 'my_lit_torch' property 'is_lit' is not 'False'.")
     success, message = gm._check_requirements(player_char, action_config, params)
     assert success is False
-    assert "is not 'False'" in message
+    assert "Object 'my_lit_torch' property 'is_lit' is not 'False'." in message
 
 def test_check_requirements_object_in_room_success(mock_game_master):
     gm = mock_game_master
     player = gm.players[0]
+    player_char = player.character
 
     action_config = gm.game_actions["pickup"]
     params = {"object_name": "room_torch"}
 
-    # Set return value for this specific test
-    gm._check_requirements.return_value = (True, "")
-    success, message = gm._check_requirements(player.character, action_config, params)
+    success, message = gm._check_requirements(player_char, action_config, params)
     assert success is True
     assert message == ""
 
 def test_check_requirements_object_in_room_fail(mock_game_master):
     gm = mock_game_master
     player = gm.players[0]
+    player_char = player.character
 
     action_config = gm.game_actions["pickup"]
     params = {"object_name": "non_existent_object"}
 
-    # Set return value for this specific test
-    gm._check_requirements.return_value = (False, "Object 'non_existent_object' not in room.")
-    success, message = gm._check_requirements(player.character, action_config, params)
+    success, message = gm._check_requirements(player_char, action_config, params)
     assert success is False
-    assert "not in room" in message
+    assert "Object 'non_existent_object' not in room." in message
 
 # --- Test _execute_effects --- #
 
@@ -349,10 +269,9 @@ def test_execute_effects_set_object_property(mock_game_master):
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "my_torch_effect"}
 
-    # Set return value for this specific test
-    gm._execute_effects.return_value = "The my_torch_effect's is_lit is now 'True'."
     feedback = gm._execute_effects(player_char, action_config, params)
-    assert "is now 'True'" in feedback
+    assert "The my_torch_effect's is_lit is now 'True'." in feedback
+    assert player_char.get_item_in_inventory("my_torch_effect").get_property("is_lit") is True
 
 def test_execute_effects_move_object_to_inventory(mock_game_master):
     gm = mock_game_master
@@ -367,10 +286,10 @@ def test_execute_effects_move_object_to_inventory(mock_game_master):
     action_config = gm.game_actions["pickup"]
     params = {"object_name": "room_torch"}
 
-    # Set return value for this specific test
-    gm._execute_effects.return_value = "You pick up the room_torch."
     feedback = gm._execute_effects(player_char, action_config, params)
-    assert "pick up the room_torch" in feedback
+    assert "You pick up the room_torch." in feedback
+    assert player_char.has_item_in_inventory("room_torch")
+    assert initial_room.get_object("room_torch") is None
 
 def test_execute_effects_generate_event(mock_game_master):
     gm = mock_game_master
@@ -384,7 +303,5 @@ def test_execute_effects_generate_event(mock_game_master):
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "event_torch"}
 
-    # Set return value for this specific test
-    gm._execute_effects.return_value = "Test Player lights the event_torch."
     feedback = gm._execute_effects(player_char, action_config, params)
-    assert "lights the event_torch" in feedback
+    assert "Rogue lights the event_torch." in feedback

@@ -53,6 +53,29 @@ actions:
       - type: generate_event
         message: "{{player_name}} lights the {{object_name}}."
         observers: ["room_players", "adjacent_rooms"]
+  help:
+    id: help
+    name: help
+    cost: 1
+    description: Get help about available commands.
+    parameters: []
+    requirements: []
+    effects: []
+  move:
+    id: move
+    name: move
+    cost: 1
+    description: Move in a specified direction.
+    parameters:
+      - name: direction
+        type: string
+        description: The direction to move (e.g., north, south, east, west).
+    requirements:
+      - type: exit_exists # Placeholder for new requirement type
+        direction_param: direction # Parameter for the direction
+    effects:
+      - type: move_player # Placeholder for new effect type
+        direction_param: direction # Parameter for the direction
 character_types:
   hero:
     id: hero

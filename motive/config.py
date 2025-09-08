@@ -22,6 +22,7 @@ class ActionRequirementConfig(BaseModel):
     property: Optional[str] = None # For object_property_equals
     value: Optional[Any] = None # For object_property_equals
     target_player_param: Optional[str] = None # For player_in_room, player_has_tag
+    direction_param: Optional[str] = None # For exit_exists
 
 class ActionEffectConfig(BaseModel):
     """Base model for action effects."""
@@ -39,6 +40,7 @@ class ActionEffectConfig(BaseModel):
     function_module: Optional[str] = None # For call_custom_logic
     function_name: Optional[str] = None # For call_custom_logic
     args: Optional[Dict[str, Any]] = None # For call_custom_logic
+    direction_param: Optional[str] = None # For move_player
 
 class ActionConfig(BaseModel):
     """Configuration for a single action."""

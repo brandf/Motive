@@ -61,7 +61,6 @@ class PlayerCharacter:
     def __repr__(self):
         return f"PlayerCharacter(id='{self.id}', name='{self.name}', room='{self.current_room_id}', ap={self.action_points})"
 
-
 class Player:
     """
     Represents a single AI player, managing their LLM client,

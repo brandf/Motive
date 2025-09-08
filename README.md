@@ -77,6 +77,31 @@ To start the game:
 python -m motive.main
 ```
 
+## Player Action Syntax
+
+Players communicate with the Game Master (GM) through natural language messages. Within these messages, specific actions are indicated by lines starting with a `>` character. This allows for both freeform communication and structured command input.
+
+### Rules for Actions:
+
+*   **Action Prefix:** Any line within a player's response that begins with `>` (after trimming leading whitespace) will be interpreted as an action. For example: `> look`.
+*   **Single Line Actions:** Each action must be contained on a single line. Multi-line actions are not supported.
+*   **Quoted Parameters:** If an action requires a parameter with multiple words (e.g., a phrase for a 'say' action), the parameter should be enclosed in single or double quotes. For example: `> say "Hello there!"` or `> whisper 'secret message' to John`.
+*   **Multiple Actions:** A single player response can contain multiple action lines. These actions will be executed sequentially by the GM.
+*   **Invalid Actions/No Actions Penalty:** If a player's response contains no lines prefixed with `>` or if any parsed action is invalid (e.g., unknown action name, incorrect parameters), the player's turn will immediately end, as if they had spent all their action points. This is a penalty for not following the action syntax rules.
+
+### Examples:
+
+```
+Hello GM, I'd like to do a couple of things.
+> look
+> pick up rusty sword
+I think I'll try to find a way out after that.
+```
+
+```
+> say "Is anyone else here?"
+```
+
 ## Running Tests
 
 To run the unit tests for the project:

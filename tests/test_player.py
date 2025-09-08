@@ -30,6 +30,7 @@ def test_player_initialization(monkeypatch):
     assert isinstance(test_player.llm_client, MagicMock)
     assert isinstance(test_player.logger, logging.Logger)
     assert test_player.logger.name == "TestPlayer"
+    assert test_player.character is None
 
 
 async def test_player_processes_message_and_updates_history(monkeypatch):
