@@ -1,6 +1,6 @@
 import logging
 import yaml
-from typing import Dict, List
+from typing import Dict, List, Optional
 from pydantic import BaseModel, ValidationError
 
 from motive.config import (
@@ -14,6 +14,7 @@ from motive.config import (
     ExitConfig,
     ObjectInstanceConfig,
     # CharacterInstanceConfig # Removed this as it does not exist
+    CoreConfig, # Added CoreConfig
 )
 from motive.game_objects import GameObject # Import GameObject
 from motive.game_rooms import Room
@@ -22,19 +23,23 @@ from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValid
 
 class GameInitializer:
     def __init__(self, game_config: GameConfig, game_id: str, game_logger: logging.Logger):
-        self.game_config = game_config
+        self.game_config = game_config # This is the overall GameConfig loaded from config.yaml
         self.game_id = game_id
         self.game_logger = game_logger
 
         self.rooms: Dict[str, Room] = {}
         self.game_objects: Dict[str, GameObject] = {}
         self.player_characters: Dict[str, PlayerCharacter] = {}
+
+        # These will store the merged configurations
         self.game_object_types: Dict[str, ObjectTypeConfig] = {}
         self.game_actions: Dict[str, ActionConfig] = {}
         self.game_character_types: Dict[str, CharacterConfig] = {}
 
-        self.theme_cfg: ThemeConfig = None
-        self.edition_cfg: EditionConfig = None
+        # Store loaded configs for later merging
+        self.core_cfg: Optional[CoreConfig] = None
+        self.theme_cfg: Optional[ThemeConfig] = None
+        self.edition_cfg: Optional[EditionConfig] = None
 
     def initialize_game_world(self, players: List[Player]):
         self._load_configurations()
@@ -43,19 +48,76 @@ class GameInitializer:
         self._instantiate_player_characters(players)
 
     def _load_configurations(self):
+        """Loads theme and edition configurations and merges them."""
         self.game_logger.info("Loading game configurations...")
+
+        # Load CoreConfig first
+        try:
+            self.core_cfg = self._load_yaml_config(self.game_config.game_settings.core_config_path, CoreConfig)
+        except (ConfigNotFoundError, ConfigParseError, ConfigValidationError) as e:
+            self.game_logger.critical(f"Critical configuration error for core config: {e}")
+            raise # Re-raise to stop game initialization
+
+        # Load ThemeConfig
         try:
             self.theme_cfg = self._load_yaml_config(self.game_config.game_settings.theme_config_path, ThemeConfig)
+        except (ConfigNotFoundError, ConfigParseError, ConfigValidationError) as e:
+            self.game_logger.critical(f"Critical configuration error for theme config: {e}")
+            raise # Re-raise to stop game initialization
+
+        # Load EditionConfig
+        try:
             self.edition_cfg = self._load_yaml_config(self.game_config.game_settings.edition_config_path, EditionConfig)
         except (ConfigNotFoundError, ConfigParseError, ConfigValidationError) as e:
-            self.game_logger.critical(f"Critical configuration error during game initialization: {e}")
+            self.game_logger.critical(f"Critical configuration error for edition config: {e}")
             raise # Re-raise to stop game initialization
+
+        self.game_logger.info("Merging theme and edition configurations...")
+
+        # Start with core actions if present
+        if self.core_cfg and self.core_cfg.actions:
+            self.game_actions.update(self.core_cfg.actions)
+            self.game_logger.info(f"Merged {len(self.core_cfg.actions)} core actions.")
+
+        # 1. Merge Object Types (Theme takes precedence, Edition can add)
+        if self.theme_cfg:
+            self.game_object_types.update(self.theme_cfg.object_types)
+
+        if self.edition_cfg and self.edition_cfg.objects:
+            # The edition defines ObjectInstanceConfig, not ObjectTypeConfig. 
+            # This means the edition provides *instances* of objects, not new *types*.
+            # The merging logic here needs to be revised if the edition is meant to define new object types.
+            # For now, we will assume edition objects are instances and handled during world instantiation.
+            pass # Object instances are handled in _instantiate_rooms_and_objects
+
+        # 2. Merge Actions (Theme actions override core, Edition actions override theme)
+        if self.theme_cfg and self.theme_cfg.actions:
+            self.game_actions.update(self.theme_cfg.actions)
+            self.game_logger.info(f"Merged {len(self.theme_cfg.actions)} theme actions.")
+
+        # Edition can override/add actions
+        # This block is incorrect as EditionConfig does not have an 'actions' attribute.
+        # if self.edition_cfg and self.edition_cfg.actions: # Assuming edition can define actions now
+        #     self.game_actions.update(self.edition_cfg.actions)
+        #     self.game_logger.info(f"Merged {len(self.edition_cfg.actions)} edition actions.")
+
+        # 3. Merge Character Types (Theme takes precedence, Edition can add)
+        if self.theme_cfg and self.theme_cfg.character_types:
+            self.game_character_types.update(self.theme_cfg.character_types)
+
+        if self.edition_cfg and self.edition_cfg.characters:
+            self.game_character_types.update(self.edition_cfg.characters)
+
+        self.game_logger.info(f"Merged {len(self.game_object_types)} object types.")
+        self.game_logger.info(f"Merged {len(self.game_actions)} actions.")
+        self.game_logger.info(f"Merged {len(self.game_character_types)} character types.")
 
     def _load_yaml_config(self, file_path: str, config_model: BaseModel) -> BaseModel:
         """Loads and validates a YAML configuration file against a Pydantic model."""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 raw_config = yaml.safe_load(f)
+            
             validated_config = config_model(**raw_config)
             self.game_logger.info(f"Successfully loaded and validated {file_path} as {config_model.__name__}")
             return validated_config

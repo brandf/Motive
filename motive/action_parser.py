@@ -7,28 +7,37 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
     found_action_name = None
     longest_match_len = 0
 
-    for act_name in available_actions.keys():
-        if action_line.lower().startswith(act_name.lower()):
-            if len(act_name) > longest_match_len:
-                longest_match_len = len(act_name)
-                found_action_name = act_name
+    # Normalize action_line for matching by making it lowercase and stripping all whitespace
+    normalized_action_line = action_line.lower().strip()
+
+    for act_name_key, action_cfg in available_actions.items():
+        # Use action_cfg.name for matching against the player input
+        normalized_act_name = action_cfg.name.lower().strip()
+        if normalized_action_line.startswith(normalized_act_name):
+            if len(normalized_act_name) > longest_match_len:
+                longest_match_len = len(normalized_act_name)
+                found_action_name = act_name_key # Store the original key from available_actions
     
     if not found_action_name:
         return None
 
-    action_name = found_action_name
-    param_string = action_line[len(action_name):].strip()
-
-    action_config = available_actions.get(action_name)
+    action_config = available_actions.get(found_action_name)
     if not action_config:
         return None # Should not happen if found_action_name is from available_actions
 
+    # Extract parameter string from the original action_line based on the length of the *matched action name*
+    # Use action_config.name for slicing, as it's the actual string that matched within the input
+    param_string = action_line[len(action_config.name):].strip()
+    
     params: Dict[str, Any] = {}
     if action_config.parameters:
         if len(action_config.parameters) == 1 and action_config.parameters[0].type == "string":
             param_name = action_config.parameters[0].name
+            # If param_string is empty, treat as if parameter was not provided
+            if not param_string:
+                params[param_name] = None
             # Handle quoted parameters for multi-word arguments
-            if (param_string.startswith('\'') and param_string.endswith('\'')) or \
+            elif (param_string.startswith('\'') and param_string.endswith('\'')) or \
                (param_string.startswith("\"") and param_string.endswith("\"")):
                 params[param_name] = param_string[1:-1]
             else:

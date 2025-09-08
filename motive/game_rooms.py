@@ -31,7 +31,17 @@ class Room:
         return self.objects.pop(obj_id, None)
 
     def get_object(self, obj_id: str) -> Optional[GameObject]:
-        return self.objects.get(obj_id)
+        """Gets a GameObject in this room by its ID or name (case-insensitive)."""
+        # Try to find by ID first
+        obj = self.objects.get(obj_id)
+        if obj:
+            return obj
+
+        # If not found by ID, try to find by name (case-insensitive)
+        for game_obj in self.objects.values():
+            if game_obj.name.lower() == obj_id.lower(): # obj_id is now used for name as well
+                return game_obj
+        return None
 
     def add_player(self, player_char: PlayerCharacter):
         """Adds a PlayerCharacter to this room."""

@@ -7,7 +7,7 @@ from motive.game_master import GameMaster
 from motive.config import (
     GameConfig, PlayerConfig, ThemeConfig, EditionConfig, ObjectTypeConfig, 
     ActionConfig, CharacterConfig, RoomConfig, ExitConfig, ObjectInstanceConfig, 
-    ActionRequirementConfig, ActionEffectConfig, ParameterConfig, GameSettings
+    ActionRequirementConfig, ActionEffectConfig, ParameterConfig, GameSettings, CoreConfig
 ) # Added GameSettings and other config models
 from motive.player import Player, PlayerCharacter
 from motive.game_objects import GameObject
@@ -56,6 +56,15 @@ def mock_game_master():
         
         mock_player_class.side_effect = MockPlayer # Assign the mock class as a side effect
 
+        # Create dummy core config for basic initialization
+        dummy_core_config = CoreConfig(
+            actions={
+                "look": ActionConfig(id="look", name="look", cost=1, description="Look around.", parameters=[ParameterConfig(name="target", type="string", description="The name of the object or character to look at.")], requirements=[], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="look_at_target", observers=["player"])]),
+                "help": ActionConfig(id="help", name="help", cost=1, description="Get help.", parameters=[], requirements=[], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="generate_help_message", observers=["player"])]),
+                "move": ActionConfig(id="move", name="move", cost=1, description="Move in a specified direction.", parameters=[ParameterConfig(name="direction", type="string", description="The direction to move (e.g., north, south, east, west).")], requirements=[ActionRequirementConfig(type="exit_exists", direction_param="direction")], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="handle_move_action", observers=["player"])])
+            }
+        )
+
         # Create dummy theme and edition configs for basic initialization
         dummy_theme_config = ThemeConfig(
             id="test_theme",
@@ -66,7 +75,19 @@ def mock_game_master():
                 "generic_sign": ObjectTypeConfig(id="generic_sign", name="Sign", description="A generic sign.", tags=[], properties={})
             },
             actions={
-                "look": ActionConfig(id="look", name="look", cost=1, description="Look around.", parameters=[], requirements=[], effects=[]),
+                "pickup": ActionConfig(
+                    id="pickup",
+                    name="pickup",
+                    cost=1,
+                    description="Pick up an object.",
+                    parameters=[ParameterConfig(name="object_name", type="string", description="The name of the object to pick up.")],
+                    requirements=[
+                        ActionRequirementConfig(type="object_in_room", object_name_param="object_name")
+                    ],
+                    effects=[
+                        ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="handle_pickup_action", observers=["player"])
+                    ]
+                ),
                 "light_torch": ActionConfig(
                     id="light_torch",
                     name="light torch",
@@ -78,21 +99,8 @@ def mock_game_master():
                         ActionRequirementConfig(type="object_property_equals", object_name_param="object_name", property="is_lit", value=False)
                     ],
                     effects=[
-                        ActionEffectConfig(type="set_object_property", object_name_param="object_name", property="is_lit", value=True),
+                        ActionEffectConfig(type="set_property", target_type="object", target_id_param="object_name", property="is_lit", value=True),
                         ActionEffectConfig(type="generate_event", message="{player_name} lights the {object_name}.", observers=["room_players"])
-                    ]
-                ),
-                "pickup": ActionConfig(
-                    id="pickup",
-                    name="pickup",
-                    cost=1,
-                    description="Pick up an object.",
-                    parameters=[ParameterConfig(name="object_name", type="string", description="The name of the object to pick up.")],
-                    requirements=[
-                        ActionRequirementConfig(type="object_in_room", object_name_param="object_name")
-                    ],
-                    effects=[
-                        ActionEffectConfig(type="move_object", object_name_param="object_name", destination_type="player_inventory")
                     ]
                 )
             },
@@ -123,29 +131,29 @@ def mock_game_master():
                     exits={"south": ExitConfig(id="south_exit", name="South", destination_room_id="start_room")}
                 )
             },
-            # objects={
-            #     "global_key": ObjectInstanceConfig(id="global_key", name="key", object_type_id="torch", current_room_id="start_room", tags=["key_tag"])
-            # },
             characters={
-                "rogue": CharacterConfig(id="rogue", name="Rogue", backstory="A sneaky type.", motive="Find treasure.")
+                "hero": CharacterConfig(id="hero", name="Hero", backstory="A brave adventurer.", motive="Defeat evil.")
             }
         )
 
         mock_game_config = MagicMock(spec=GameConfig)
         mock_game_config.game_settings = MagicMock(spec=GameSettings)
         mock_game_config.game_settings.num_rounds = 1
+        mock_game_config.game_settings.core_config_path = "mock/core.yaml"
         mock_game_config.game_settings.theme_config_path = "mock/theme.yaml"
         mock_game_config.game_settings.edition_config_path = "mock/edition.yaml"
         mock_game_config.game_settings.manual = "mock/manual.md"
         mock_game_config.players = [
-            PlayerConfig(name="Hero", provider="mock", model="mock-model"), # Changed player name to match character
+            PlayerConfig(name="Hero", provider="mock", model="mock-model"),
         ]
         mock_game_config.theme_config = dummy_theme_config
         mock_game_config.edition_config = dummy_edition_config
 
         # Configure the mocked _load_yaml_config and _load_manual_content
         def mock_load_yaml_config_side_effect(file_path: str, config_model: BaseModel):
-            if config_model == ThemeConfig:
+            if config_model == CoreConfig:
+                return dummy_core_config
+            elif config_model == ThemeConfig:
                 return dummy_theme_config
             elif config_model == EditionConfig:
                 return dummy_edition_config
@@ -159,17 +167,26 @@ def mock_game_master():
         gm.game_logger.setLevel(logging.DEBUG) # Set logging level to DEBUG for tests
 
         # Mock the player instance created by GameMaster._initialize_players
-        # The mock_player_class.side_effect now handles returning the mock player instance.
-        # We just need to get the instance that was created.
-        mock_player_instance = gm.players[0] # GameMaster._initialize_players adds the player
-        mock_player_instance.character = gm.players[0].character # Link to the character assigned by GameInitializer
+        mock_player_instance = gm.players[0]
+        mock_player_instance.character = gm.player_characters["hero_instance_0"] # Link to the character assigned by GameInitializer
         mock_player_instance.add_message = MagicMock() # Mock add_message for isolation
         mock_player_instance.get_response_and_update_history = AsyncMock(return_value=AIMessage(content="end turn")) # Default AI response
 
         # Replace the real player list with our mocked player
         gm.players = [mock_player_instance]
 
-        yield gm
+        # Create a mock torch object for the player's inventory
+        mock_torch = GameObject(
+            obj_id="player_torch",
+            name="torch",
+            description="A simple wooden torch.",
+            current_location_id="hero_instance_0", # Set location to player character's ID
+            properties={'is_lit': False}
+        )
+        # Manually add the torch to the player character's inventory for the test
+        gm.player_characters["hero_instance_0"].add_item_to_inventory(mock_torch)
+
+        yield gm # Provide the configured GameMaster to the tests
 
 # --- Test _check_requirements --- #
 
@@ -186,7 +203,7 @@ def test_check_requirements_player_has_object_in_inventory_success(mock_game_mas
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "my_torch"}
 
-    success, message = gm._check_requirements(player_char, action_config, params)
+    success, message, _ = gm._check_requirements(player_char, action_config, params)
     assert success is True
     assert message == ""
 
@@ -198,7 +215,7 @@ def test_check_requirements_player_has_object_in_inventory_fail(mock_game_master
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "non_existent_torch"}
 
-    success, message = gm._check_requirements(player_char, action_config, params)
+    success, message, _ = gm._check_requirements(player_char, action_config, params)
     assert success is False
     assert "Player does not have 'non_existent_torch' in inventory." in message
 
@@ -215,7 +232,7 @@ def test_check_requirements_object_property_equals_success(mock_game_master):
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "my_torch"}
 
-    success, message = gm._check_requirements(player_char, action_config, params)
+    success, message, _ = gm._check_requirements(player_char, action_config, params)
     assert success is True
     assert message == ""
 
@@ -232,7 +249,7 @@ def test_check_requirements_object_property_equals_fail(mock_game_master):
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "my_lit_torch"}
 
-    success, message = gm._check_requirements(player_char, action_config, params)
+    success, message, _ = gm._check_requirements(player_char, action_config, params)
     assert success is False
     assert "Object 'my_lit_torch' property 'is_lit' is not 'False'." in message
 
@@ -244,7 +261,7 @@ def test_check_requirements_object_in_room_success(mock_game_master):
     action_config = gm.game_actions["pickup"]
     params = {"object_name": "room_torch"}
 
-    success, message = gm._check_requirements(player_char, action_config, params)
+    success, message, _ = gm._check_requirements(player_char, action_config, params)
     assert success is True
     assert message == ""
 
@@ -256,7 +273,7 @@ def test_check_requirements_object_in_room_fail(mock_game_master):
     action_config = gm.game_actions["pickup"]
     params = {"object_name": "non_existent_object"}
 
-    success, message = gm._check_requirements(player_char, action_config, params)
+    success, message, _ = gm._check_requirements(player_char, action_config, params)
     assert success is False
     assert "Object 'non_existent_object' not in room." in message
 
@@ -275,7 +292,7 @@ def test_execute_effects_set_object_property(mock_game_master):
     params = {"object_name": "my_torch_effect"}
 
     feedback = gm._execute_effects(player_char, action_config, params)
-    assert "The my_torch_effect's is_lit is now 'True'." in feedback
+    assert "The object 'my_torch_effect's 'is_lit' is now 'True'." in feedback
     assert player_char.get_item_in_inventory("my_torch_effect").get_property("is_lit") is True
 
 def test_execute_effects_move_object_to_inventory(mock_game_master):
@@ -285,7 +302,8 @@ def test_execute_effects_move_object_to_inventory(mock_game_master):
     initial_room = gm.rooms.get(player_char.current_room_id)
 
     # Ensure the room_torch is in the initial room
-    assert initial_room.get_object("room_torch") is not None
+    room_torch_obj = initial_room.get_object("room_torch")
+    assert room_torch_obj is not None
     assert not player_char.has_item_in_inventory("room_torch")
 
     action_config = gm.game_actions["pickup"]
@@ -309,4 +327,23 @@ def test_execute_effects_generate_event(mock_game_master):
     params = {"object_name": "event_torch"}
 
     feedback = gm._execute_effects(player_char, action_config, params)
-    assert "Hero lights the event_torch." in feedback # Now asserts correctly against the list
+    assert "Hero lights the event_torch." in feedback
+
+def test_execute_effects_help_action(mock_game_master):
+    gm = mock_game_master
+    player = gm.players[0]
+    player_char = player.character
+
+    action_config = gm.game_actions["help"]
+    params = {}
+
+    feedback = gm._execute_effects(player_char, action_config, params)
+    expected_feedback = [
+        "Available actions:",
+        "- look (1 AP): Look around.",
+        "- help (1 AP): Get help.",
+        "- move (1 AP): Move in a specified direction.",
+        "- pickup (1 AP): Pick up an object.",
+        "- light torch (1 AP): Light a torch you are holding."
+    ]
+    assert all(item in feedback[0] for item in expected_feedback)

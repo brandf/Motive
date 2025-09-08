@@ -1,12 +1,16 @@
-import os
 import asyncio
+import logging
+import os
+import sys
 import yaml
 from dotenv import load_dotenv
 from motive.game_master import GameMaster
 from motive.llm_factory import PROVIDER_API_KEYS
-from motive.config import GameConfig # New import for Pydantic config
+from motive.config import GameConfig # Only need GameConfig now
 import uuid # Import for generating unique game IDs
 
+# Setup basic logging to console
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 async def main():
     """
@@ -23,61 +27,37 @@ async def main():
         print("LangSmith tracing is disabled. Set LANGCHAIN_TRACING_V2='true' in .env to enable.")
     # --- End LangSmith Configuration ---
 
+    game_id = os.getenv("MOTIVE_GAME_ID", str(uuid.uuid4()))
 
-    # --- Load & Validate Game Configuration with Pydantic ---
-    print("\nLoading and validating game configuration...")
-    game_config: GameConfig
+    # Load the main config.yaml file
     try:
-        with open("config.yaml", "r") as f:
-            raw_config = yaml.safe_load(f)
-        game_config = GameConfig(**raw_config) # Validate with Pydantic
-        print("Game configuration loaded and validated successfully.")
+        with open("config.yaml", "r", encoding="utf-8") as f:
+            main_config_data = yaml.safe_load(f)
+        game_config = GameConfig(**main_config_data)
     except FileNotFoundError:
-        print("Error: config.yaml not found. Please ensure the file exists.")
-        return
+        logging.critical("Main configuration file 'config.yaml' not found.")
+        sys.exit(1)
     except yaml.YAMLError as e:
-        print(f"Error parsing config.yaml: {e}")
-        return
-    except Exception as e: # Catch Pydantic validation errors
-        print(f"Error validating config.yaml with Pydantic: {e}")
-        return
-    # --- End Pydantic Config Loading ---
+        logging.critical(f"Error parsing main configuration file 'config.yaml': {e}")
+        sys.exit(1)
+    except Exception as e:
+        logging.critical(f"An unexpected error occurred while loading main configuration: {e}")
+        sys.exit(1)
 
-
-    # --- Dynamic API Key Validation ---
-    used_providers = {player.provider for player in game_config.players} # Use Pydantic object
-    
-    missing_keys = []
-    for provider in used_providers:
-        env_var_name = PROVIDER_API_KEYS.get(provider)
-        if env_var_name and not os.getenv(env_var_name):
-            missing_keys.append(env_var_name)
-        elif not env_var_name:
-            print(f"Warning: No API key environment variable defined in llm_factory.py for provider '{provider}'. "
-                  "Assuming it does not require an explicit environment variable or will be handled internally by LangChain.")
-
-    if missing_keys:
-        print("\nError: The following API keys are missing from your .env file or environment variables:")
-        for key in missing_keys:
-            print(f" - {key}")
-        print("Please ensure they are set for the providers specified in config.yaml.")
-        return
-    # --- End Dynamic API Key Validation ---
-
-    # Generate a unique game ID
-    game_id = str(uuid.uuid4())
-    print(f"\nStarting game session: {game_id}")
-
+    # The GameMaster now handles loading individual config files via GameInitializer
     try:
-        # Pass the validated GameConfig object directly
-        gm = GameMaster(game_config=game_config, game_id=game_id) 
+        gm = GameMaster(game_config=game_config, game_id=game_id)
         await gm.run_game()
     except Exception as e:
-        print(f"An unexpected error occurred during game execution: {e}")
+        logging.critical(f"An unexpected error occurred during game execution: {e}")
         import traceback
         traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
+    # Ensure LANGCHAIN_API_KEY is set if LangSmith tracing is enabled
+    if os.getenv("LANGCHAIN_TRACING_V2") == "true" and not os.getenv("LANGCHAIN_API_KEY"):
+        logging.warning("LangSmith tracing is enabled. Ensure LANGCHAIN_API_KEY is set in .env.")
     asyncio.run(main())
 

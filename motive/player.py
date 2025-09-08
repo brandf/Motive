@@ -35,13 +35,32 @@ class PlayerCharacter:
         item.current_location_id = self.id
 
     def remove_item_from_inventory(self, item_id: str) -> Optional[GameObject]:
-        return self.inventory.pop(item_id, None)
+        # Try to remove by ID first
+        if item_id in self.inventory:
+            return self.inventory.pop(item_id)
+        
+        # If not found by ID, try to find by name (case-insensitive) and remove
+        for game_obj_id, game_obj in list(self.inventory.items()): # Use list() to allow modification during iteration
+            if game_obj.name.lower() == item_id.lower():
+                return self.inventory.pop(game_obj_id)
+        return None
 
-    def has_item_in_inventory(self, item_id: str) -> bool:
-        return item_id in self.inventory
+    def has_item_in_inventory(self, item_name_or_id: str) -> bool:
+        """Checks if an item is in the inventory by its ID or name (case-insensitive)."""
+        return self.get_item_in_inventory(item_name_or_id) is not None
 
-    def get_item_in_inventory(self, item_id: str) -> Optional[GameObject]:
-        return self.inventory.get(item_id)
+    def get_item_in_inventory(self, item_name_or_id: str) -> Optional[GameObject]:
+        """Gets a GameObject from inventory by its ID or name (case-insensitive)."""
+        # Try to find by ID first
+        item = self.inventory.get(item_name_or_id)
+        if item:
+            return item
+        
+        # If not found by ID, try to find by name (case-insensitive)
+        for game_obj in self.inventory.values():
+            if game_obj.name.lower() == item_name_or_id.lower():
+                return game_obj
+        return None
 
     def add_tag(self, tag: str):
         self.tags.add(tag)

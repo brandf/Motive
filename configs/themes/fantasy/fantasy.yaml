@@ -21,14 +21,23 @@ object_types:
     tags: []
     properties: {}
 actions:
-  look:
-    id: look
-    name: look
+  pickup:
+    id: pickup
+    name: pickup
     cost: 1
-    description: Look around the current room.
-    parameters: []
-    requirements: []
-    effects: []
+    description: Pick up an object.
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to pick up.
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_module: motive.hooks.core_hooks
+        function_name: handle_pickup_action
+        observers: ["player"]
   light_torch:
     id: light_torch
     name: light torch
@@ -46,43 +55,14 @@ actions:
         property: is_lit
         value: false
     effects:
-      - type: set_object_property
-        object_name_param: object_name
+      - type: set_property
+        target_type: object
+        target_id_param: object_name
         property: is_lit
         value: true
       - type: generate_event
         message: "{{player_name}} lights the {{object_name}}."
-        observers: ["room_players", "adjacent_rooms"]
-  help:
-    id: help
-    name: help
-    cost: 1
-    description: Get help about available commands.
-    parameters: []
-    requirements: []
-    effects:
-      - type: generate_event
-        message: |
-          Available actions:
-          {% for action in available_actions %}
-          - {{ action.name }} ({{ action.cost }} AP): {{ action.description }}
-          {% endfor %}
-        observers: ["player"]
-  move:
-    id: move
-    name: move
-    cost: 1
-    description: Move in a specified direction.
-    parameters:
-      - name: direction
-        type: string
-        description: The direction to move (e.g., north, south, east, west).
-    requirements:
-      - type: exit_exists # Placeholder for new requirement type
-        direction_param: direction # Parameter for the direction
-    effects:
-      - type: move_player # Placeholder for new effect type
-        direction_param: direction # Parameter for the direction
+        observers: ["room_players"]
 character_types:
   hero:
     id: hero

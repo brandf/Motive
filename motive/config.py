@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, conint
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Literal
 
 class PlayerConfig(BaseModel):
     """Configuration for a single AI player."""
@@ -26,27 +26,29 @@ class ActionRequirementConfig(BaseModel):
 
 class ActionEffectConfig(BaseModel):
     """Base model for action effects."""
-    type: str = Field(..., description="Type of effect (e.g., 'add_tag', 'move_object', 'generate_event').")
-    # Generic fields that can be used by various effect types
-    target: Optional[str] = None # e.g., 'player', 'room', 'object'
-    tag: Optional[str] = None # For add_tag, remove_tag
-    object_name_param: Optional[str] = None # For move_object, set_object_property
-    destination_type: Optional[str] = None # For move_object (e.g., 'player_inventory', 'room')
-    destination_id: Optional[str] = None # For move_object (e.g., a specific room ID)
-    property: Optional[str] = None # For set_object_property
-    value: Optional[Any] = None # For set_object_property
-    message: Optional[str] = None # For generate_event
-    observers: Optional[List[str]] = None # For generate_event (e.g., ['room_players', 'adjacent_rooms'])
-    function_module: Optional[str] = None # For call_custom_logic
-    function_name: Optional[str] = None # For call_custom_logic
-    args: Optional[Dict[str, Any]] = None # For call_custom_logic
-    direction_param: Optional[str] = None # For move_player
+    type: str = Field(..., description="Type of effect (e.g., 'add_tag', 'remove_tag', 'set_property', 'generate_event', 'code_binding').")
+    
+    # Fields for declarative effects (add_tag, remove_tag, set_property)
+    target_type: Optional[Literal["player", "room", "object"]] = None
+    target_id_param: Optional[str] = None # Name of the action parameter that holds the target ID
+    target_id: Optional[str] = None # Direct ID of the target (if not from a parameter)
+    tag: Optional[str] = None
+    property: Optional[str] = None
+    value: Any = None
+
+    # Fields for generate_event effect
+    message: Optional[str] = None
+    observers: Optional[List[Literal["player", "room_players", "adjacent_rooms", "all_players", "game_master"]]] = None
+
+    # Fields for code_binding effect
+    function_module: Optional[str] = None
+    function_name: Optional[str] = None
 
 class ActionConfig(BaseModel):
     """Configuration for a single action."""
     id: str = Field(..., description="Unique identifier for the action.")
     name: str = Field(..., description="The command name for the action (e.g., 'look', 'pickup').")
-    cost: conint(gt=0) = Field(..., description="Action points consumed by this action.")
+    cost: int = Field(..., description="Action points consumed by this action.")
     description: str
     parameters: List[ParameterConfig] = []
     requirements: List[ActionRequirementConfig] = []
@@ -103,6 +105,10 @@ class ThemeConfig(BaseModel):
     actions: Dict[str, ActionConfig] = {}
     character_types: Dict[str, CharacterConfig] = {}
 
+class CoreConfig(BaseModel):
+    """Configuration for core game elements (e.g., universal actions)."""
+    actions: Dict[str, ActionConfig] = {}
+
 class EditionConfig(BaseModel):
     """Configuration for a specific game edition (e.g., 'HearthAndShadow')."""
     id: str = Field(..., description="Unique identifier for the edition.")
@@ -115,6 +121,7 @@ class EditionConfig(BaseModel):
 class GameSettings(BaseModel):
     """General game settings."""
     num_rounds: int = Field(..., gt=0, description="Number of rounds the game will run.")
+    core_config_path: str = Field(..., description="Path to the core YAML configuration file.")
     theme_config_path: str = Field(..., description="Path to the theme YAML configuration file.")
     edition_config_path: str = Field(..., description="Path to the edition YAML configuration file.")
     manual: str = Field("MOTIVE_MANUAL.md", description="Path to the game manual markdown file.")
@@ -123,6 +130,7 @@ class GameConfig(BaseModel):
     """Overall game configuration."""
     game_settings: GameSettings
     players: List[PlayerConfig] = Field(..., min_length=1, description="List of AI players participating in the game.")
+    core_config: Optional[CoreConfig] = None # New: CoreConfig
     theme_config: Optional[ThemeConfig] = None
     edition_config: Optional[EditionConfig] = None
 

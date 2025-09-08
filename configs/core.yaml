@@ -1,0 +1,45 @@
+actions:
+  look:
+    id: look
+    name: look
+    cost: 1
+    description: Look around the current room or at a specific object.
+    parameters:
+      - name: target
+        type: string
+        description: The name of the object or character to look at.
+    requirements: []
+    effects:
+      - type: code_binding
+        function_module: motive.hooks.core_hooks
+        function_name: look_at_target
+        observers: ["player"]
+  help:
+    id: help
+    name: help
+    cost: 1
+    description: Get help about available commands.
+    parameters: []
+    requirements: []
+    effects:
+      - type: code_binding
+        function_module: motive.hooks.core_hooks
+        function_name: generate_help_message
+        observers: ["player"]
+  move:
+    id: move
+    name: move
+    cost: 1
+    description: Move in a specified direction.
+    parameters:
+      - name: direction
+        type: string
+        description: The direction to move (e.g., north, south, east, west).
+    requirements:
+      - type: exit_exists
+        direction_param: direction
+    effects:
+      - type: code_binding
+        function_module: motive.hooks.core_hooks
+        function_name: handle_move_action
+        observers: ["player"]

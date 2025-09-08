@@ -108,27 +108,6 @@ class GameMaster:
             self.game_logger.error(f"Error loading game manual from {self.manual_path}: {e}")
             return ""
 
-    def _load_yaml_config(self, file_path: str, config_model: BaseModel) -> Optional[BaseModel]:
-        """Loads and validates a YAML configuration file against a Pydantic model."""
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                raw_config = yaml.safe_load(f)
-            validated_config = config_model(**raw_config)
-            self.game_logger.info(f"Successfully loaded and validated {file_path} as {config_model.__name__}")
-            return validated_config
-        except FileNotFoundError:
-            self.game_logger.error(f"Configuration file not found: {file_path}")
-            raise ConfigNotFoundError(f"Configuration file not found: {file_path}")
-        except yaml.YAMLError as e:
-            self.game_logger.error(f"Error parsing YAML file {file_path}: {e}")
-            raise ConfigParseError(f"Error parsing YAML file {file_path}: {e}")
-        except ValidationError as e:
-            self.game_logger.error(f"Validation error in {file_path} for {config_model.__name__}: {e}")
-            raise ConfigValidationError(f"Validation error in {file_path} for {config_model.__name__}: {e}")
-        except Exception as e:
-            self.game_logger.error(f"An unexpected error occurred while loading {file_path}: {e}")
-            raise e # Re-raise unexpected exceptions
-
     def _setup_logging(self):
         """Sets up the logging directory and configures the GM logger."""
         base_log_dir = "logs"
@@ -137,7 +116,7 @@ class GameMaster:
 
         # Configure Game logger for the combined game narrative and stdout
         self.game_logger = logging.getLogger("GameNarrative")
-        self.game_logger.setLevel(logging.INFO)
+        self.game_logger.setLevel(logging.INFO) # Revert to INFO
 
         if self.game_logger.handlers:
             for handler in self.game_logger.handlers:
@@ -267,20 +246,22 @@ class GameMaster:
             self.game_logger.info(f"{player.name}: {response.content}")
             player.logger.info(f"{player.name}: {response.content}")
 
-    def _check_requirements(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[bool, str]:
+    def _check_requirements(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
         """Checks if all requirements for an action are met."""
         current_room = self.rooms.get(player_char.current_room_id)
         if not current_room:
-            return False, f"Character is in an unknown room: {player_char.current_room_id}."
+            return False, f"Character is in an unknown room: {player_char.current_room_id}.", None
+
+        found_exit_data: Optional[Dict[str, Any]] = None # To store exit data if found
 
         for req in action_config.requirements:
             if req.type == "player_has_tag":
                 if not player_char.has_tag(req.tag):
-                    return False, f"Player does not have tag '{req.tag}'."
+                    return False, f"Player does not have tag '{req.tag}'.", None
             elif req.type == "object_in_room":
                 object_name = params.get(req.object_name_param)
                 if not object_name:
-                    return False, f"Missing parameter '{req.object_name_param}' for object_in_room requirement."
+                    return False, f"Missing parameter '{req.object_name_param}' for object_in_room requirement.", None
                 
                 obj_found = False
                 for obj in current_room.objects.values():
@@ -288,11 +269,11 @@ class GameMaster:
                         obj_found = True
                         break
                 if not obj_found:
-                    return False, f"Object '{object_name}' not in room."
+                    return False, f"Object '{object_name}' not in room.", None
             elif req.type == "object_property_equals":
                 object_name = params.get(req.object_name_param)
                 if not object_name:
-                    return False, f"Missing parameter '{req.object_name_param}' for object_property_equals requirement."
+                    return False, f"Missing parameter '{req.object_name_param}' for object_property_equals requirement.", None
                 
                 obj_found = player_char.get_item_in_inventory(object_name) # Check inventory first
                 if not obj_found:
@@ -300,20 +281,21 @@ class GameMaster:
                     obj_found = current_room.get_object(object_name)
 
                 if not obj_found:
-                    return False, f"Object '{object_name}' not found for property check."
+                    return False, f"Object '{object_name}' not found for property check.", None
                 
                 if obj_found.get_property(req.property) != req.value:
-                    return False, f"Object '{object_name}' property '{req.property}' is not '{req.value}'."
+                    return False, f"Object '{object_name}' property '{req.property}' is not '{req.value}'.", None
             elif req.type == "player_has_object_in_inventory":
                 object_name = params.get(req.object_name_param)
-                if not object_name:
-                    return False, f"Missing parameter '{req.object_name_param}' for player_has_object_in_inventory requirement."
+                if object_name is None:
+                    return False, f"Missing parameter '{req.object_name_param}' for player_has_object_in_inventory requirement.", None
+                
                 if not player_char.has_item_in_inventory(object_name):
-                    return False, f"Player does not have '{object_name}' in inventory."
+                    return False, f"Player does not have '{object_name}' in inventory.", None
             elif req.type == "exit_exists":
                 direction = params.get(req.direction_param)
                 if not direction:
-                    return False, f"Missing parameter '{req.direction_param}' for exit_exists requirement."
+                    return False, f"Missing parameter '{req.direction_param}' for exit_exists requirement.", None
                 
                 found_exit = None
                 for exit_id, exit_data in current_room.exits.items():
@@ -322,13 +304,14 @@ class GameMaster:
                         break
 
                 if not found_exit:
-                    return False, f"No visible exit in the '{direction}' direction."
+                    return False, f"No visible exit in the '{direction}' direction.", None
+                found_exit_data = found_exit # Store for returning
             # Add other requirement types here
             else:
                 self.game_logger.warning(f"Unsupported requirement type: {req.type}")
-                return False, f"Unsupported requirement type: {req.type}"
+                return False, f"Unsupported requirement type: {req.type}", None
         
-        return True, ""
+        return True, "", found_exit_data
 
     def _execute_effects(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> List[str]:
         """Applies the effects of an action to the game state and generates feedback/events."""
@@ -341,106 +324,78 @@ class GameMaster:
             return feedback_messages
 
         for effect in action_config.effects:
-            if effect.type == "add_tag":
-                target_obj = None
-                if effect.target == "player":
-                    player_char.add_tag(effect.tag)
-                    feedback_messages.append(f"You gain the tag: '{effect.tag}'.")
-                elif effect.target == "object" and effect.object_name_param:
-                    object_name = params.get(effect.object_name_param)
-                    target_obj = player_char.get_item_in_inventory(object_name) or current_room.get_object(object_name)
-                    if target_obj:
-                        target_obj.add_tag(effect.tag)
-                        feedback_messages.append(f"The {target_obj.name} gains the tag: '{effect.tag}'.")
-                # Add other targets (room, other players) later
-                
-            elif effect.type == "remove_tag":
-                target_obj = None
-                if effect.target == "player":
-                    player_char.remove_tag(effect.tag)
-                    feedback_messages.append(f"You lose the tag: '{effect.tag}'.")
-                elif effect.target == "object" and effect.object_name_param:
-                    object_name = params.get(effect.object_name_param)
-                    target_obj = player_char.get_item_in_inventory(object_name) or current_room.get_object(object_name)
-                    if target_obj:
-                        target_obj.remove_tag(effect.tag)
-                        feedback_messages.append(f"The {target_obj.name} loses the tag: '{effect.tag}'.")
-            
-            elif effect.type == "set_object_property":
-                object_name = params.get(effect.object_name_param)
-                if object_name and effect.property is not None and effect.value is not None:
-                    target_obj = player_char.get_item_in_inventory(object_name) or current_room.get_object(object_name)
-                    if target_obj:
-                        target_obj.set_property(effect.property, effect.value)
-                        feedback_messages.append(f"The {target_obj.name}'s {effect.property} is now '{effect.value}'.")
-                    else:
-                        self.game_logger.warning(f"Object '{object_name}' not found for property setting.")
+            target_instance = None
+            target_id_from_param = params.get(effect.target_id_param) if effect.target_id_param else None
+            target_id = effect.target_id or target_id_from_param
 
-            elif effect.type == "move_object":
-                object_name = params.get(effect.object_name_param)
-                if object_name:
-                    obj_to_move = None
-                    if player_char.has_item_in_inventory(object_name):
-                        obj_to_move = player_char.remove_item_from_inventory(object_name)
-                    else: # Assume it's in the current room
-                        obj_to_move = current_room.remove_object(object_name)
-                    
-                    if obj_to_move:
-                        if effect.destination_type == "player_inventory":
-                            player_char.add_item_to_inventory(obj_to_move)
-                            feedback_messages.append(f"You pick up the {obj_to_move.name}.")
-                        elif effect.destination_type == "room" and effect.destination_id:
-                            destination_room = self.rooms.get(effect.destination_id)
-                            if destination_room:
-                                destination_room.add_object(obj_to_move)
-                                feedback_messages.append(f"You move the {obj_to_move.name} to {destination_room.name}.")
-                            else:
-                                self.game_logger.warning(f"Destination room '{effect.destination_id}' not found for move_object effect.")
-                                # If destination not found, put it back where it came from
-                                if obj_to_move.current_location_id == player_char.id:
-                                    player_char.add_item_to_inventory(obj_to_move)
-                                else:
-                                    current_room.add_object(obj_to_move)
-                        else:
-                            self.game_logger.warning(f"Unsupported destination type '{effect.destination_type}' or missing destination_id for move_object effect.")
-                    else:
-                        self.game_logger.warning(f"Object '{object_name}' not found for move_object effect.")
+            if effect.target_type == "player":
+                # For player target, the instance is always the current player_char
+                target_instance = player_char
+            elif effect.target_type == "room":
+                if target_id:
+                    target_instance = self.rooms.get(target_id)
+                elif player_char.current_room_id: # Default to current room if target_id not specified
+                    target_instance = self.rooms.get(player_char.current_room_id)
+            elif effect.target_type == "object":
+                if target_id:
+                    # Check player inventory first
+                    target_instance = player_char.get_item_in_inventory(target_id)
+                    if not target_instance:
+                        # Then check current room
+                        current_room = self.rooms.get(player_char.current_room_id)
+                        if current_room:
+                            target_instance = current_room.get_object(target_id)
+            
+            # Execute effects based on type
+            if effect.type == "add_tag":
+                if target_instance and effect.tag:
+                    target_instance.add_tag(effect.tag)
+                    feedback_messages.append(f"The {effect.target_type} '{target_instance.name}' gains the tag: '{effect.tag}'.")
+                else:
+                    self.game_logger.warning(f"add_tag effect missing target or tag for action '{action_config.name}'.")
+
+            elif effect.type == "remove_tag":
+                if target_instance and effect.tag:
+                    target_instance.remove_tag(effect.tag)
+                    feedback_messages.append(f"The {effect.target_type} '{target_instance.name}' loses the tag: '{effect.tag}'.")
+                else:
+                    self.game_logger.warning(f"remove_tag effect missing target or tag for action '{action_config.name}'.")
+
+            elif effect.type == "set_property":
+                if target_instance and effect.property and effect.value is not None:
+                    target_instance.set_property(effect.property, effect.value)
+                    feedback_messages.append(f"The {effect.target_type} '{target_instance.name}'s '{effect.property}' is now '{effect.value}'.")
+                else:
+                    self.game_logger.warning(f"set_property effect missing target, property, or value for action '{action_config.name}'.")
 
             elif effect.type == "generate_event":
-                # Events will be processed for observability later
-                if action_config.id == "help":
-                    # Dynamically generate help message
-                    help_message_parts = ["Available actions:"]
-                    for action_id, action_cfg in self.game_actions.items():
-                        help_message_parts.append(f"- {action_cfg.name} ({action_cfg.cost} AP): {action_cfg.description}")
-                    event_message = "\n".join(help_message_parts)
-                else:
+                if effect.message and effect.observers:
                     event_message = effect.message.format(**params, player_name=player_char.name) # Add player_name to params for formatting
-                events_generated.append({"message": event_message, "observers": effect.observers, "source_room": player_char.current_room_id})
-                feedback_messages.append(event_message) # Player sees their own immediate events
+                    events_generated.append({"message": event_message, "observers": effect.observers, "source_room": player_char.current_room_id})
+                    feedback_messages.append(event_message) # Player sees their own immediate events
 
-            elif effect.type == "move_player":
-                direction = params.get(effect.direction_param)
-                if direction:
-                    exit_data = current_room.exits.get(direction.lower()) # Use .get() for safety
-                    if exit_data and not exit_data.get('is_hidden', False):
-                        destination_room_id = exit_data['destination_room_id']
-                        # Remove player from current room and add to destination room
-                        player_char_to_move = current_room.remove_player(player_char.id)
-                        if player_char_to_move:
-                            self.rooms[destination_room_id].add_player(player_char_to_move)
-                            feedback_messages.append(f"You move to the '{self.rooms[destination_room_id].name}'.")
-                        else:
-                            self.game_logger.warning(f"Player character '{player_char.name}' not found in room '{current_room.name}' for move_player effect.")
-                            feedback_messages.append(f"An error occurred while trying to move you.")
-                    else:
-                        feedback_messages.append(f"Cannot move '{player_char.name}' in direction '{direction}'. Exit not found or hidden.")
-                        self.game_logger.warning(f"Cannot move '{player_char.name}' in direction '{direction}'. Exit not found or hidden.")
+            elif effect.type == "code_binding":
+                if effect.function_module and effect.function_name:
+                    try:
+                        module = __import__(effect.function_module, fromlist=[effect.function_name])
+                        hook_function = getattr(module, effect.function_name)
+                        
+                        hook_feedback = hook_function(self, player_char, params)
+                        feedback_messages.extend(hook_feedback)
+                        events_generated.append({"message": "\n".join(hook_feedback), "observers": effect.observers, "source_room": player_char.current_room_id})
+
+                    except (ImportError, AttributeError) as e:
+                        error_message = f"Error calling code binding for action '{action_config.name}': {e}"
+                        self.game_logger.error(error_message)
+                        feedback_messages.append(f"An error occurred while trying to process your action: {e}")
+                    except Exception as e:
+                        error_message = f"An unexpected error occurred in code binding for action '{action_config.name}': {e}"
+                        self.game_logger.error(error_message)
+                        feedback_messages.append(f"An unexpected error occurred: {e}")
                 else:
-                    self.game_logger.warning(f"Missing direction parameter for move_player effect for {player_char.name}.")
-                    feedback_messages.append(f"Missing direction for move action.")
+                    self.game_logger.warning(f"code_binding effect for '{action_config.name}' missing function_module or function_name.")
+                    feedback_messages.append(f"An error occurred due to missing code binding configuration.")
 
-            # Add other effect types here (e.g., deal_damage, tele_port)
             else:
                 self.game_logger.warning(f"Unsupported effect type: {effect.type}")
 
@@ -546,7 +501,7 @@ class GameMaster:
                         self.game_logger.info(action_specific_feedback[-1])
                         all_actions_in_response_valid = False
                     else:
-                        requirements_met, req_message = self._check_requirements(player_char, action_config, params)
+                        requirements_met, req_message, exit_data = self._check_requirements(player_char, action_config, params)
                         if requirements_met:
                             player_char.action_points -= action_config.cost
                             action_effect_feedback = self._execute_effects(player_char, action_config, params)

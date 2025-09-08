@@ -33,9 +33,9 @@ def test_action_requirement_config_valid():
     assert config.tag == "has_key"
 
 def test_action_effect_config_valid():
-    config = ActionEffectConfig(type="add_tag", target="player", tag="has_torch_effect")
+    config = ActionEffectConfig(type="add_tag", target_type="player", tag="has_torch_effect")
     assert config.type == "add_tag"
-    assert config.target == "player"
+    assert config.target_type == "player"
 
 def test_action_config_valid():
     config = ActionConfig(
@@ -50,9 +50,16 @@ def test_action_config_valid():
     assert config.id == "look"
     assert len(config.parameters) == 1
 
-def test_action_config_invalid_cost():
-    with pytest.raises(ValueError):
-        ActionConfig(id="invalid", name="invalid", cost=0, description="Invalid cost.")
+def test_action_config_minimum_cost():
+    # Now that conint(gt=0) is removed, 0 is a valid cost
+    action_data = {
+        "id": "test_action",
+        "name": "test action",
+        "cost": 0, # Should now be valid
+        "description": "A test action."
+    }
+    action = ActionConfig(**action_data)
+    assert action.cost == 0
 
 def test_object_type_config_valid():
     config = ObjectTypeConfig(id="torch", name="Torch", description="A light source.", tags=["light"], properties={"is_lit": False})
@@ -106,12 +113,12 @@ def test_edition_config_valid():
     assert "start_room" in config.rooms
 
 def test_game_settings_valid():
-    settings = GameSettings(num_rounds=5, theme_config_path="theme.yaml", edition_config_path="edition.yaml", manual="manual.md")
+    settings = GameSettings(num_rounds=5, core_config_path="core.yaml", theme_config_path="theme.yaml", edition_config_path="edition.yaml", manual="manual.md")
     assert settings.num_rounds == 5
 
 def test_game_config_valid():
     game_config = GameConfig(
-        game_settings=GameSettings(num_rounds=5, theme_config_path="theme.yaml", edition_config_path="edition.yaml", manual="manual.md"),
+        game_settings=GameSettings(num_rounds=5, core_config_path="core.yaml", theme_config_path="theme.yaml", edition_config_path="edition.yaml", manual="manual.md"),
         players=[PlayerConfig(name="Player1", provider="mock", model="mock-model")]
     )
     assert game_config.players[0].name == "Player1"
@@ -183,6 +190,7 @@ def test_load_game_config_from_yaml():
     yaml_content = """
 game_settings:
   num_rounds: 3
+  core_config_path: "configs/core.yaml"
   theme_config_path: "configs/themes/fantasy.yaml"
   edition_config_path: "configs/editions/hearth_and_shadow.yaml"
   manual: "MOTIVE_MANUAL.md"
