@@ -14,10 +14,6 @@ def generate_help_message(game_master: Any, player_char: PlayerCharacter, params
     for action_id, action_cfg in game_master.game_actions.items():
         help_message_parts.append(f"- {action_cfg.name} ({action_cfg.cost} AP): {action_cfg.description}")
     
-    # Add action prompt to consolidate the message
-    help_message_parts.append("")
-    help_message_parts.append("Example actions: look, move, say, pickup, pass, help (for more available actions).")
-    
     full_help_message = "\n".join(help_message_parts)
     feedback_messages.append(full_help_message)
 
@@ -91,15 +87,14 @@ def look_at_target(game_master: Any, player_char: PlayerCharacter, params: Dict[
         else:
             feedback_messages.append(f"You don't see any '{target_name}' here or in your inventory.")
             event_message = f"Player {player_char.name} tried to look at non-existent object '{target_name}'."
-
-    events_generated.append(Event(
-        message=event_message,
-        event_type="player_action",
-        source_room_id=player_char.current_room_id,
-        timestamp=datetime.now().isoformat(),
-        related_player_id=player_char.id,
-        observers=["player", "game_master"]
-    ))
+            events_generated.append(Event(
+                message=event_message,
+                event_type="player_action_failed",
+                source_room_id=player_char.current_room_id,
+                timestamp=datetime.now().isoformat(),
+                related_player_id=player_char.id,
+                observers=["player", "game_master"]
+            ))
     
     return events_generated, feedback_messages
 

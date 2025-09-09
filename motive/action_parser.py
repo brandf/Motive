@@ -77,6 +77,38 @@ def parse_player_response(player_response: str, available_actions: Dict[str, Act
                 if parsed_action:
                     parsed_actions.append(parsed_action)
                 else:
-                    invalid_actions.append(action_line)
+                    # Add suggestion for similar actions
+                    suggestion = _suggest_similar_action(action_line, available_actions)
+                    if suggestion:
+                        invalid_actions.append(f"{action_line} (did you mean '{suggestion}'?)")
+                    else:
+                        invalid_actions.append(action_line)
 
     return parsed_actions, invalid_actions
+
+def _suggest_similar_action(action_line: str, available_actions: Dict[str, ActionConfig]) -> Optional[str]:
+    """Suggests a similar action if the input doesn't match any known actions."""
+    action_line_lower = action_line.lower().strip()
+    
+    # Get all available action names
+    available_names = [action_cfg.name for action_cfg in available_actions.values()]
+    
+    # Check for common typos or partial matches
+    for name in available_names:
+        name_lower = name.lower()
+        
+        # Check if the action line is a prefix of a known action
+        if name_lower.startswith(action_line_lower) and len(action_line_lower) >= 2:
+            return name
+            
+        # Check if a known action is a prefix of the action line
+        if action_line_lower.startswith(name_lower) and len(name_lower) >= 2:
+            return name
+            
+        # Check for simple character differences (typos)
+        if len(action_line_lower) == len(name_lower):
+            differences = sum(1 for a, b in zip(action_line_lower, name_lower) if a != b)
+            if differences <= 1:  # Allow 1 character difference
+                return name
+    
+    return None

@@ -224,6 +224,49 @@ class GameMaster:
 
         self.game_logger.info("===================== GAME OVER ======================")
         print("\n===================== GAME OVER ======================") # Keep for console output
+        
+        # Check win conditions and provide game summary
+        self._check_win_conditions_and_summarize()
+
+    def _check_win_conditions_and_summarize(self):
+        """Checks if any players achieved their motives and provides a game summary."""
+        winners = []
+        losers = []
+        
+        for player in self.players:
+            if player.character.action_points == -1:  # Player quit
+                losers.append(f"{player.name} (quit)")
+                continue
+                
+            # For now, we'll implement a simple win condition check
+            # In a real game, this would check if the player's motive was achieved
+            # based on game state, objects collected, actions taken, etc.
+            
+            # Placeholder: Check if player has any items in inventory as a simple win condition
+            if player.character.inventory:
+                winners.append(f"{player.name} (achieved motive: {player.character.motive})")
+            else:
+                losers.append(f"{player.name} (failed to achieve motive: {player.character.motive})")
+        
+        # Log and display results
+        if winners:
+            winner_text = f"WINNERS: {', '.join(winners)}"
+            self.game_logger.info(winner_text)
+            print(f"\n{winner_text}")
+        else:
+            no_winners_text = "No players achieved their motives."
+            self.game_logger.info(no_winners_text)
+            print(f"\n{no_winners_text}")
+        
+        if losers:
+            loser_text = f"LOSERS: {', '.join(losers)}"
+            self.game_logger.info(loser_text)
+            print(f"{loser_text}")
+        
+        # Game summary
+        summary_text = f"\nGame Summary:\n- Total players: {len(self.players)}\n- Winners: {len(winners)}\n- Losers: {len(losers)}"
+        self.game_logger.info(summary_text)
+        print(summary_text)
 
     def _check_requirements(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
         """Checks if all requirements for an action are met."""
@@ -482,7 +525,9 @@ class GameMaster:
 
                 # Character Assignment and Motive
                 char_type_id = player_char.id.split('_instance')[0]
-                character_assignment = f"You are {player_char.name}, a {self.game_character_types[char_type_id].name}.\nYour motive is: {player_char.motive}"
+                char_type_name = self.game_character_types[char_type_id].name
+                article = "an" if char_type_name.lower().startswith(('a', 'e', 'i', 'o', 'u')) else "a"
+                character_assignment = f"You are {player_char.name}, {article} {char_type_name}.\nYour motive is: {player_char.motive}"
 
                 # Gather observations for the first interaction too
                 player_observations = self.player_observations.get(player_char.id, [])
@@ -593,10 +638,19 @@ class GameMaster:
                 continue # Continue to the while loop condition to end the turn
             elif invalid_actions:
                 # Penalty for providing invalid actions
+                # Get valid action names for better feedback
+                valid_action_names = [action.name for action, _ in parsed_actions] if parsed_actions else []
+                core_actions = ["look", "move", "say", "pickup", "pass", "help"]
+                
                 feedback_parts = [
                     f"You provided invalid actions: {', '.join(invalid_actions)}",
                     "Your turn ends prematurely as a penalty."
                 ]
+                
+                if valid_action_names:
+                    feedback_parts.append(f"Valid actions in your response: {', '.join(valid_action_names)}")
+                else:
+                    feedback_parts.append(f"Available actions include: {', '.join(core_actions)}. Use 'help' for a complete list.")
                 combined_feedback = "\n".join(feedback_parts)
                 player_char.action_points = 0 # End turn as penalty
                 
@@ -755,6 +809,21 @@ class GameMaster:
         elif "> continue" in response.content or "continue" in player_input:
             self.game_logger.info(f"Player {player.name} chose to continue.")
             player.logger.info(f"Player {player.name} chose to continue.")
+            
+            # Check for any other actions in the response and warn about them
+            other_actions = []
+            for line in response.content.strip().splitlines():
+                trimmed_line = line.strip()
+                if trimmed_line.startswith(">") and not trimmed_line.startswith("> continue") and not trimmed_line.startswith("> quit"):
+                    other_actions.append(trimmed_line)
+            
+            if other_actions:
+                warning_msg = f"Note: You submitted other actions ({', '.join(other_actions)}) during turn end confirmation. These were ignored. Actions can only be performed during your active turn."
+                warning_message = HumanMessage(content=warning_msg)
+                player.add_message(warning_message)
+                player.logger.info(f"GM sent chat to {player.name} (Warning):\n{warning_msg}")
+                self.game_logger.info(f"GM sent chat to {player.name} (Warning):\n{warning_msg}")
+            
             return True  # Player continues
         else:
             # Default to continue if unclear response

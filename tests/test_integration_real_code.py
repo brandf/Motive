@@ -57,9 +57,8 @@ class TestRealCodeIntegration:
         events, feedback = look_at_target(game_master, player_char, {})
         
         # Verify it generates events for room_players scope
-        assert len(events) == 2  # One for the room look, one for the general event
-        room_look_event = next((e for e in events if e.observers == ["room_players"]), None)
-        assert room_look_event is not None
+        assert len(events) == 1  # One event for the room look (duplicate removed)
+        room_look_event = events[0]
         assert "looks around the room" in room_look_event.message
         assert room_look_event.observers == ["room_players"]
     
@@ -96,9 +95,9 @@ class TestRealCodeIntegration:
         assert events[0].message == "TestPlayer requests help."
         assert events[0].observers == ["room_players"]
         
-        # Verify it includes action prompt in feedback
+        # Verify it includes action prompt in feedback (example actions removed to avoid duplication)
         assert "Available actions:" in feedback[0]
-        assert "Example actions:" in feedback[0]
+        assert "Example actions:" not in feedback[0]  # Removed to avoid duplication
     
     def test_pickup_action_generates_events_real_code(self):
         """Test that the real handle_pickup_action function generates events."""

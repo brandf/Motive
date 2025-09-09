@@ -43,7 +43,7 @@ class GameInitializer:
         self.edition_cfg: Optional[EditionConfig] = None
 
     def initialize_game_world(self, players: List[Player]):
-        self._load_configurations()
+        # Configurations are already loaded in GameMaster constructor
         self._merge_configurations()
         self._instantiate_rooms_and_objects()
         self._instantiate_player_characters(players)
