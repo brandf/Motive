@@ -6,13 +6,7 @@ game_settings:
   edition_config_path: "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
   manual: "../MOTIVE_MANUAL.md"
   initial_ap_per_turn: 20 # Set initial AP per turn for testing
-hints:
-  # Test AP exhaustion feedback
-  - hint_id: "test_ap_exhaustion_feedback"
-    hint_action: "> pickup torch\n> pickup sword\n> pickup armor\n> look\n> move west\n> say hello\n> help"
-    when:
-      round: 1
-      players: ["Arion"]
+# hints: [] # No hints configured - clean state for production
 
 # List of AI players
 players:
