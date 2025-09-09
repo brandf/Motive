@@ -580,7 +580,6 @@ class GameMaster:
                 
                 # Log detailed information about what went wrong
                 self.game_logger.error(f"{player.name} provided invalid actions. Turn ended.")
-                self.game_logger.error(f"Player response was: {response.content}")
                 self.game_logger.error(f"Invalid actions were: {invalid_actions}")
                 if parsed_actions:
                     self.game_logger.error(f"Valid actions were: {[(action.name, params) for action, params in parsed_actions]}")
@@ -654,7 +653,6 @@ class GameMaster:
                     
                     # Log detailed information about what went wrong
                     self.game_logger.error(f"{player.name} had invalid/unexecutable actions in response. Turn ended.")
-                    self.game_logger.error(f"Player response was: {response.content}")
                     self.game_logger.error(f"Parsed actions were: {[(action.name, params) for action, params in parsed_actions]}")
                     
                     # Send final penalty feedback
