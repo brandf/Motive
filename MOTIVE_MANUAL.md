@@ -31,7 +31,7 @@ The game unfolds over a series of rounds, with each player taking a turn within 
 
 2.  **Player Actions:** Each player is allotted a predetermined number of **action points** (AP) per turn. Players spend these points to perform actions. The player and the GM engage in a back-and-forth chat. The player proposes one action at a time, and the GM processes it, updates the game state, and provides immediate feedback, including any new observations or changes in the room description. This continues until the player's action points for that turn are fully spent.
 
-3.  **Turn End:** Once a player has spent all their action points, their turn concludes, and the GM proceeds to the next player in the turn order.
+3.  **Turn End:** Once a player has spent all their action points, their turn concludes. The player must confirm they want to continue to the next turn or quit the game. Actions submitted during turn end confirmation are ignored with a warning.
 
 **Observability:**
 
@@ -65,7 +65,7 @@ Players communicate with the Game Master (GM) through natural language messages.
 *   **Single Line Actions:** Each action must be contained on a single line. Multi-line actions are not supported.
 *   **Quoted Parameters:** If an action requires a parameter with multiple words (e.g., a phrase for a 'say' action), the parameter should be enclosed in single or double quotes. For example: `> say "Hello there!"` or `> whisper 'secret message' to John`.
 *   **Multiple Actions:** A single player response can contain multiple action lines. These actions will be executed sequentially by the GM.
-*   **Invalid Actions/No Actions Penalty:** If a player's response contains no lines prefixed with `>` or if any parsed action is invalid (e.g., unknown action name, incorrect parameters), the player's turn will immediately end, as if they had spent all their action points. This is a penalty for not following the action syntax rules.
+*   **Invalid Actions/No Actions Penalty:** If a player's response contains no lines prefixed with `>` or if any parsed action is invalid (e.g., unknown action name, incorrect parameters), the player's turn will immediately end, as if they had spent all their action points. This is a penalty for not following the action syntax rules. The GM will provide helpful feedback about valid actions and suggestions for similar actions when possible.
 
 ### Action Categories
 
@@ -86,5 +86,12 @@ Communication between players is a vital component of Motive, routed entirely th
 *   **"whisper <player> <phrase>":** Only the specified target player observes this communication.
 *   **"say <phrase>":** All players currently in the same room as the speaker observe this communication.
 *   **"shout <phrase>":** All players in the same room and potentially players in adjacent rooms might observe this, depending on game rules and environment specifics.
+
+**Examples of Movement Observability:**
+
+*   **Movement between rooms:** When a player moves from one room to another, other players in both the source and destination rooms observe the movement with specific direction information.
+    *   Players in the source room see: "[Player] left the room via [Direction]."
+    *   Players in the destination room see: "[Player] entered the room from [Direction]."
+*   **Strategic importance:** This direction-specific information is crucial when multiple exits exist, allowing players to track each other's movements and make informed tactical decisions.
 
 This system allows LLM players to engage in complex social interactions, form alliances, spread misinformation, and strategize based on what they believe other players know or don't know. The ability to control who sees and hears what fosters a rich environment for emergent gameplay and offers significant potential for analyzing LLM reasoning and planning capabilities.

@@ -32,6 +32,10 @@
 
 - **Tests should prove real fixes**: Add integration tests that fail before a fix and pass after. Keep them close to real user scenarios (e.g., those seen in `game.log`).
 
+- **Don't use inline Python for testing**: When testing functionality, create proper test files instead of running inline Python code. Inline testing is fragile, not durable, and doesn't integrate with the test suite. Always write tests that can be run with `pytest`.
+
+- **Check import paths when writing tests**: When creating new test files, verify the correct import paths by checking where classes are actually defined (e.g., `Room` is in `motive.game_rooms`, not `motive.game_objects`).
+
 
 
 
