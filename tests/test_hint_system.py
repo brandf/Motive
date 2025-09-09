@@ -13,7 +13,7 @@ def test_hint_system_configuration():
             core_config_path="core.yaml",
             theme_config_path="themes/fantasy/fantasy.yaml",
             edition_config_path="themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml",
-            manual="../MOTIVE_MANUAL.md",
+            manual="../MANUAL.md",
             initial_ap_per_turn=20,
             hints=[
                 {

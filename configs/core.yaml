@@ -130,43 +130,42 @@ actions:
     effects:
       - type: code_binding
         function_name: handle_shout_action
-pickup:
-  id: pickup
-  name: pickup
-  cost: 10
-  description: Pick up an object from the current room.
-  category: inventory
-  parameters:
-    - name: object_name
-      type: string
-      description: The name of the object to pick up.
-      required: true
-  requirements:
-    - type: object_in_room
-      object_name_param: object_name
-    - type: object_possession_allowed
-      object_name_param: object_name
-  effects:
-    - type: code_binding
-      function_name: handle_pickup_action
-      observers: ["player", "room_players", "adjacent_rooms"]
-
-drop:
-  id: drop
-  name: drop
-  cost: 10
-  description: Drop an object from your inventory into the current room.
-  category: inventory
-  parameters:
-    - name: object_name
-      type: string
-      description: The name of the object to drop.
-      required: true
-  requirements:
-    - type: object_in_inventory
-      object_name_param: object_name
-  effects:
-    - type: code_binding
-      function_name: handle_drop_action
-      observers: ["player", "room_players", "adjacent_rooms"]
+  pickup:
+    id: pickup
+    name: pickup
+    cost: 10
+    description: Pick up an object from the current room.
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to pick up.
+        required: true
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+      - type: object_possession_allowed
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: handle_pickup_action
+        observers: ["player", "room_players", "adjacent_rooms"]
+  drop:
+    id: drop
+    name: drop
+    cost: 10
+    description: Drop an object from your inventory into the current room.
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to drop.
+        required: true
+    requirements:
+      - type: object_in_inventory
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: handle_drop_action
+        observers: ["player", "room_players", "adjacent_rooms"]
 

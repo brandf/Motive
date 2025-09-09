@@ -14,7 +14,7 @@ def test_manual_path_resolution():
             core_config_path="core.yaml",
             theme_config_path="themes/fantasy/fantasy.yaml",
             edition_config_path="themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml",
-            manual="../MOTIVE_MANUAL.md",  # This is what's in game.yaml
+            manual="../MANUAL.md",  # This is what's in game.yaml
             initial_ap_per_turn=20
         ),
         players=[
@@ -27,7 +27,7 @@ def test_manual_path_resolution():
     manual_path = os.path.join(configs_dir, game_config.game_settings.manual)
     
     # Verify the path is resolved correctly
-    expected_manual_path = os.path.join(configs_dir, "../MOTIVE_MANUAL.md")
+    expected_manual_path = os.path.join(configs_dir, "../MANUAL.md")
     assert manual_path == expected_manual_path
     
     # Verify the manual file exists at the resolved path

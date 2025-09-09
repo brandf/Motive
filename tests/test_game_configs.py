@@ -194,7 +194,7 @@ game_settings:
   core_config_path: "configs/core.yaml"
   theme_config_path: "configs/themes/fantasy.yaml"
   edition_config_path: "configs/editions/hearth_and_shadow.yaml"
-  manual: "MOTIVE_MANUAL.md"
+  manual: "MANUAL.md"
   initial_ap_per_turn: 20
 players:
   - name: "Arion"
@@ -213,7 +213,7 @@ game_settings:
   num_rounds: 0
   theme_config_path: "configs/themes/fantasy.yaml"
   edition_config_path: "configs/editions/hearth_and_shadow.yaml"
-  manual: "MOTIVE_MANUAL.md"
+  manual: "MANUAL.md"
 players:
   - name: "Arion"
     provider: "google"

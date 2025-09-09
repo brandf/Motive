@@ -4,15 +4,9 @@ game_settings:
   core_config_path: "core.yaml"
   theme_config_path: "themes/fantasy/fantasy.yaml"
   edition_config_path: "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
-  manual: "../MOTIVE_MANUAL.md"
+  manual: "../MANUAL.md"
   initial_ap_per_turn: 20 # Set initial AP per turn for testing
-hints:
-  # Test look inventory functionality
-  - hint_id: "test_look_inventory"
-    hint_action: "> pickup Tiny Gem\n> look inventory\n> pickup Large Sword\n> look inventory"
-    when:
-      round: 1
-      players: ["Arion"]
+# hints: [] # No hints configured - clean state for production
 
 # List of AI players
 players:

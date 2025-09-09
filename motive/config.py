@@ -140,7 +140,7 @@ class GameSettings(BaseModel):
     core_config_path: str = Field(..., description="Path to the core YAML configuration file.")
     theme_config_path: str = Field(..., description="Path to the theme YAML configuration file.")
     edition_config_path: str = Field(..., description="Path to the edition YAML configuration file.")
-    manual: str = Field("MOTIVE_MANUAL.md", description="Path to the game manual markdown file.")
+    manual: str = Field("MANUAL.md", description="Path to the game manual markdown file.")
     initial_ap_per_turn: int = Field(20, description="Initial action points per player per turn. Defaults to 20 for testing.")
     hints: Optional[List[Dict[str, Any]]] = Field(None, description="Optional hints to guide LLM players toward specific actions for validation.")
 

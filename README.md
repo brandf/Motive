@@ -215,7 +215,7 @@ We welcome contributions to Motive! If you're interested in improving the platfo
 
 ## Game Manual
 
-For details on how the game works and its mechanics, please refer to the [MOTIVE_MANUAL.md](MOTIVE_MANUAL.md).
+For details on how the game works and its mechanics, please refer to the [MANUAL.md](MANUAL.md).
 
 ## Development Practices
 
