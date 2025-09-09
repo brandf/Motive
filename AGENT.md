@@ -77,6 +77,50 @@ When issues are found in `motive.main` that should have been caught by tests:
 2. **Test-First Fix**: Write failing test first, confirm it fails, fix root cause, verify test passes
 3. **Validation**: Achieve high confidence, use hints for reproduction, document the lesson
 
+## Git Commit Workflow
+
+### Pre-Commit Assessment Checklist
+Before committing changes, verify all items are complete:
+
+#### **Code Quality & Testing**
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] No linter errors: `pytest tests/ --tb=short` (check for any failures)
+- [ ] Real-world validation passed: `motive.main` completed successfully
+- [ ] No temporary debug code or print statements left in production code
+
+#### **Configuration & Documentation**
+- [ ] Configuration files updated correctly (e.g., `configs/core.yaml`, `configs/game.yaml`)
+- [ ] Temporary hint configurations removed from `configs/game.yaml` (if added for testing)
+- [ ] Documentation updated: `AGENT.md`, `VIBECODER.md`, `README.md` as needed
+- [ ] New lessons learned added to appropriate documentation files
+
+#### **Code Organization**
+- [ ] New test files created for new functionality
+- [ ] Test files follow naming convention: `test_*.py`
+- [ ] No temporary test files left behind
+- [ ] Code follows project patterns and conventions
+
+#### **Commit Message Standards**
+- **Format**: `feat/fix/docs/test: brief description`
+- **Types**: `feat` (new features), `fix` (bug fixes), `docs` (documentation), `test` (tests), `refactor` (code changes)
+- **Description**: Clear, concise description of what changed
+- **Examples**:
+  - `feat: implement whisper and shout communication actions`
+  - `fix: correct help action AP cost to match manual (1 AP)`
+  - `docs: add git commit workflow to AGENT.md`
+
+### Commit Process
+1. **Run assessment**: Execute the pre-commit checklist
+2. **Generate commit message**: Based on changes made
+3. **Stage changes**: `git add .` (or specific files)
+4. **Commit**: `git commit -m "generated message"`
+5. **Push**: `git push origin main` (with user approval)
+
+### Confidence Levels for Commits
+- **9-10/10**: All tests pass, `motive.main` successful, documentation updated, no temporary code
+- **7-8/10**: Most tests pass, minor issues that don't affect core functionality
+- **<7/10**: Do not commit - fix issues first
+
 ## Getting Started
 
 ### Prerequisites
@@ -122,6 +166,7 @@ Current core actions include: `move`, `say`, `look`, `help`, `whisper`, `shout`,
 - **Test requirement type implementations**: When adding new requirement types (like `player_in_room`), create integration tests that verify the requirement checking logic works correctly with real player and room data. Test both success and failure cases.
 - **Verify Pydantic field names**: When working with configuration, always check the actual field names in the Pydantic model definitions rather than assuming names (e.g., `target_player_param` not `player_name_param`).
 - **Don't ask permission for high-confidence operations**: When confidence is 8+ and rationale is provided, just run the operation (like `motive.main`). The user will reject if they don't want it run.
+- **Don't ask permission for high-confidence git commits**: When commit assessment is 9-10/10, just proceed with staging, committing, and pushing. The user will reject if they don't want it.
 
 ### Configuration Security
 - **Prefer structured over freeform configuration**: Use structured objects/dictionaries instead of freeform strings that require evaluation
