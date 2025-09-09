@@ -34,3 +34,15 @@
 
 
 
+
+## Cost-aware runs and confidence policy
+
+- **Default to tests over paid runs**: Running `python -m motive.main` triggers paid LLM calls. Prefer unit/integration tests which stub external LLMs.
+- **Confidence scale (1–10) before paid runs**:
+  - 9–10: Broad integration coverage of real code paths, deterministic seeds, recent green runs, and stable configs; no pending FIXME/TODOs in the touched area.
+  - 7–8: Integration tests cover the new logic end-to-end with stubs, logs verified, and realistic fixtures; minor unknowns remain (config, I/O, timing).
+  - 5–6: Unit tests pass but integration coverage is partial; notable unknowns or recent refactors.
+  - ≤4: Significant unknowns, heavy mocking, or flakiness; do not run paid flows.
+- **Gate to run `motive.main`**: Only after (a) tests are green, (b) observation/event logs look correct on fixtures, and (c) configs (`config.yaml`, theme YAMLs, API keys) are validated.
+- **Cheap smoke first**: If feasible, do a quick dry run with stubbed LLMs or a “sandbox” config (lowest-cost models, single round, minimal players) before a full-cost session.
+- **Logging hygiene**: Ensure UTF-8 logs and concise event/observation blocks are enabled to make any post-run debugging cheaper.
