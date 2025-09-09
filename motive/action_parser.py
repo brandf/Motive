@@ -56,12 +56,16 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                 pass
     return action_config, params
 
-def parse_player_response(player_response: str, available_actions: Dict[str, ActionConfig]) -> List[Tuple[ActionConfig, Dict[str, Any]]]:
+def parse_player_response(player_response: str, available_actions: Dict[str, ActionConfig]) -> Tuple[List[Tuple[ActionConfig, Dict[str, Any]]], List[str]]:
     """Extracts and parses actions from a player's response.
 
     Looks for lines starting with '>' as indicators of actions.
+    
+    Returns:
+        Tuple of (parsed_actions, invalid_actions)
     """
     parsed_actions: List[Tuple[ActionConfig, Dict[str, Any]]] = []
+    invalid_actions: List[str] = []
     lines = player_response.strip().splitlines()
 
     for line in lines:
@@ -72,6 +76,7 @@ def parse_player_response(player_response: str, available_actions: Dict[str, Act
                 parsed_action = _parse_single_action_line(action_line, available_actions)
                 if parsed_action:
                     parsed_actions.append(parsed_action)
-                # else: TODO: Handle invalid single action line more gracefully (e.g., log, add to feedback)
+                else:
+                    invalid_actions.append(action_line)
 
-    return parsed_actions
+    return parsed_actions, invalid_actions

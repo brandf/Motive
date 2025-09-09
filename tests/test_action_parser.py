@@ -73,19 +73,20 @@ def test_parse_single_action_line_empty_string(sample_actions):
 
 def test_parse_player_response_no_actions():
     response = "Hello GM, I have no actions."
-    parsed_actions = parse_player_response(response, {})
+    parsed_actions, invalid_actions = parse_player_response(response, {})
     assert parsed_actions == []
+    assert invalid_actions == []
 
 def test_parse_player_response_single_action(sample_actions):
     response = "I will look around.\n> look\nThen I'll wait."
-    parsed_actions = parse_player_response(response, sample_actions)
+    parsed_actions, invalid_actions = parse_player_response(response, sample_actions)
     assert len(parsed_actions) == 1
     assert parsed_actions[0][0].id == "look"
     assert parsed_actions[0][1] == {}
 
 def test_parse_player_response_multiple_actions(sample_actions):
     response = "First, I'll pick up the sword.\n> pickup sword\nThen I'll say something.\n> say 'Greetings!'\nFinally, I will wait."
-    parsed_actions = parse_player_response(response, sample_actions)
+    parsed_actions, invalid_actions = parse_player_response(response, sample_actions)
     assert len(parsed_actions) == 2
     assert parsed_actions[0][0].id == "pickup"
     assert parsed_actions[0][1] == {"object_name": "sword"}
@@ -94,7 +95,7 @@ def test_parse_player_response_multiple_actions(sample_actions):
 
 def test_parse_player_response_action_with_leading_whitespace(sample_actions):
     response = "  > look"
-    parsed_actions = parse_player_response(response, sample_actions)
+    parsed_actions, invalid_actions = parse_player_response(response, sample_actions)
     assert len(parsed_actions) == 1
     assert parsed_actions[0][0].id == "look"
 
@@ -109,7 +110,7 @@ def test_parse_player_response_mixed_content_and_actions(sample_actions):
     )
 
     # The 'light torch' action is already part of sample_actions fixture
-    parsed_actions = parse_player_response(response, sample_actions)
+    parsed_actions, invalid_actions = parse_player_response(response, sample_actions)
     assert len(parsed_actions) == 2
     assert parsed_actions[0][0].id == "pickup"
     assert parsed_actions[0][1] == {"object_name": "torch"}
@@ -122,6 +123,6 @@ def test_parse_player_response_invalid_action_included(sample_actions):
         "> walk north\n" # This action is not in sample_actions
         "> look"
     )
-    parsed_actions = parse_player_response(response, sample_actions)
+    parsed_actions, invalid_actions = parse_player_response(response, sample_actions)
     assert len(parsed_actions) == 1 # Only 'look' should be parsed successfully
     assert parsed_actions[0][0].id == "look"

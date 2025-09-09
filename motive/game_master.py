@@ -201,9 +201,24 @@ class GameMaster:
         for round_num in range(1, self.num_rounds + 1):
             self.game_logger.info(f"--- Starting Round {round_num} of {self.num_rounds} ---")
             print(f"\n--- Starting Round {round_num} of {self.num_rounds} ---") # Keep for console output
-            for player in self.players:
+            
+            # Filter out players who have quit
+            active_players = [player for player in self.players if player.character.action_points != -1]
+            
+            if not active_players:
+                self.game_logger.info("No active players remaining. Game ending early.")
+                print("No active players remaining. Game ending early.")
+                break
+                
+            for player in active_players:
                 player.character.action_points = self.game_config.game_settings.initial_ap_per_turn # Reset AP from config
                 await self._execute_player_turn(player, round_num)
+                
+                # Check if player quit during their turn
+                if player.character.action_points == -1:
+                    self.game_logger.info(f"Player {player.name} has quit the game.")
+                    print(f"Player {player.name} has quit the game.")
+                    
             self.game_logger.info(f"--- Round {round_num} Complete ---")
             print(f"--- Round {round_num} Complete ---") # Keep for console output
 
@@ -534,23 +549,51 @@ class GameMaster:
                 continue # Continue to the while loop condition to end the turn
 
             # Parse all actions from the player's response
-            parsed_actions = parse_player_response(response.content, self.game_actions)
+            parsed_actions, invalid_actions = parse_player_response(response.content, self.game_actions)
 
-            if not parsed_actions:
-                # Penalty for not providing any valid actions
+            if not parsed_actions and not invalid_actions:
+                # Penalty for not providing any actions at all
                 feedback_parts = [
-                    "You did not provide any valid actions.",
+                    "You did not provide any actions.",
                     "Your turn ends prematurely as a penalty."
                 ]
                 combined_feedback = "\n".join(feedback_parts)
                 player_char.action_points = 0 # End turn as penalty
-                turn_in_progress = False
-                self.game_logger.info(f"{player.name} failed to provide valid actions. Turn ended.")
+                self.game_logger.info(f"{player.name} failed to provide any actions. Turn ended.")
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
                 player.logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
                 self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
+                
+                # Wait for player to confirm turn end
+                await self._handle_turn_end_confirmation(player, player_char)
+                turn_in_progress = False
+                continue # Continue to the while loop condition to end the turn
+            elif invalid_actions:
+                # Penalty for providing invalid actions
+                feedback_parts = [
+                    f"You provided invalid actions: {', '.join(invalid_actions)}",
+                    "Your turn ends prematurely as a penalty."
+                ]
+                combined_feedback = "\n".join(feedback_parts)
+                player_char.action_points = 0 # End turn as penalty
+                
+                # Log detailed information about what went wrong
+                self.game_logger.error(f"{player.name} provided invalid actions. Turn ended.")
+                self.game_logger.error(f"Player response was: {response.content}")
+                self.game_logger.error(f"Invalid actions were: {invalid_actions}")
+                if parsed_actions:
+                    self.game_logger.error(f"Valid actions were: {[(action.name, params) for action, params in parsed_actions]}")
+
+                feedback_message = HumanMessage(content=combined_feedback)
+                player.add_message(feedback_message)
+                player.logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
+                self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
+                
+                # Wait for player to confirm turn end
+                await self._handle_turn_end_confirmation(player, player_char)
+                turn_in_progress = False
                 continue # Continue to the while loop condition to end the turn
 
             else:
@@ -606,19 +649,25 @@ class GameMaster:
                     ]
                     penalty_feedback = "\n".join(feedback_parts)
                     player_char.action_points = 0 # End turn as penalty
-                    turn_in_progress = False
-                    self.game_logger.info(f"{player.name} had invalid/unexecutable actions in response. Turn ended.")
-
+                    
+                    # Log detailed information about what went wrong
+                    self.game_logger.error(f"{player.name} had invalid/unexecutable actions in response. Turn ended.")
+                    self.game_logger.error(f"Player response was: {response.content}")
+                    self.game_logger.error(f"Parsed actions were: {[(action.name, params) for action, params in parsed_actions]}")
+                    
                     # Send final penalty feedback
                     feedback_message = HumanMessage(content=penalty_feedback)
                     player.add_message(feedback_message)
                     player.logger.info(f"GM sent chat to {player.name} (Feedback): {penalty_feedback}")
                     self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {penalty_feedback}")
                     
+                    # Wait for player to confirm turn end
+                    await self._handle_turn_end_confirmation(player, player_char)
+                    turn_in_progress = False
+                    
                 elif player_char.action_points <= 0:
                     # If all actions were valid but AP ran out, turn ends naturally.
                     feedback = "You have used all your Action Points for this turn. Your turn has ended."
-                    turn_in_progress = False
                     self.game_logger.info(f"{player.name} used all AP. Turn ended.")
 
                     # Send final AP exhaustion feedback
@@ -627,10 +676,61 @@ class GameMaster:
                     player.logger.info(f"GM sent chat to {player.name} (Feedback): {feedback}")
                     self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {feedback}")
                     
+                    # Wait for player to confirm turn end
+                    await self._handle_turn_end_confirmation(player, player_char)
+                    turn_in_progress = False
+                    
                 # If all actions were valid and AP remain, the loop continues automatically to re-prompt.
 
         self.game_logger.info(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
         print(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
+
+    async def _handle_turn_end_confirmation(self, player: Player, player_char: PlayerCharacter):
+        """Handles the turn end confirmation process with the player."""
+        self.game_logger.info(f"=== TURN END CONFIRMATION START for {player.name} ===")
+        
+        # Send turn end confirmation message
+        confirmation_message = (
+            "Your turn has ended. Please confirm how you'd like to proceed:\n"
+            "> continue - Continue to the next turn\n"
+            "> quit - Leave the game (this will count as a loss for your motive)\n\n"
+            "What would you like to do?"
+        )
+        
+        confirmation_msg = HumanMessage(content=confirmation_message)
+        player.add_message(confirmation_msg)
+        player.logger.info(f"GM sent chat to {player.name} (Turn End Confirmation): {confirmation_message}")
+        self.game_logger.info(f"GM sent chat to {player.name} (Turn End Confirmation): {confirmation_message}")
+        
+        # Get player's response
+        start_time = time.time()
+        response = await player.get_response_and_update_history(player.chat_history)
+        duration = time.time() - start_time
+        response_len = len(response.content)
+        
+        player_input = response.content.strip().lower()
+        self.game_logger.info(f"GM received chat from {player.name} (Turn End Response): {player_input}")
+        player.logger.info(f"GM received chat from {player.name} (Turn End Response): {player_input}")
+        print(f"    '{player.name}' responded in {duration:.2f}s ({response_len} chars): {player_input}")
+        
+        # Parse the response for turn end actions
+        if "> quit" in response.content or "quit" in player_input:
+            self.game_logger.info(f"Player {player.name} chose to quit the game.")
+            player.logger.info(f"Player {player.name} chose to quit the game.")
+            # Mark player as quit (we'll handle this in the main game loop)
+            player_char.action_points = -1  # Special marker for quit
+            return False  # Player quit
+        elif "> continue" in response.content or "continue" in player_input:
+            self.game_logger.info(f"Player {player.name} chose to continue.")
+            player.logger.info(f"Player {player.name} chose to continue.")
+            return True  # Player continues
+        else:
+            # Default to continue if unclear response
+            self.game_logger.info(f"Player {player.name} gave unclear response, defaulting to continue.")
+            player.logger.info(f"Player {player.name} gave unclear response, defaulting to continue.")
+            return True  # Player continues
+        
+        self.game_logger.info(f"=== TURN END CONFIRMATION COMPLETE for {player.name} ===")
 
     def _setup_game_world(self, theme_cfg: ThemeConfig, edition_cfg: EditionConfig):
         """Sets up the initial game world by merging configs and instantiating objects."""
