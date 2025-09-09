@@ -202,6 +202,10 @@ I think I'll try to find a way out after that.
 To run the unit tests for the project:
 
 ```bash
+# First, ensure the project is installed in editable mode
+pip install -e .
+
+# Then run the tests
 pytest
 ```
 
