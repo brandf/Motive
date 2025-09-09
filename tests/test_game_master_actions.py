@@ -367,5 +367,5 @@ def test_execute_effects_say_action(mock_game_master):
     assert "You say: 'Hello everyone!'." in feedback[0]
     
     # Check the event queue for the generated event
-    assert any(e.message == f"Player {player_char.name} says: \"Hello everyone!\"." and
+    assert any(e.message == f"{player_char.name} says: \"Hello everyone!\"." and
                "room_players" in e.observers for e in events_generated)

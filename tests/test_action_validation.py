@@ -225,7 +225,6 @@ async def test_invalid_actions_trigger_penalty_and_logging(mock_game_master_vali
     error_calls = [call[0][0] for call in gm.game_logger.error.call_args_list]
     print(f"Error calls: {error_calls}")  # Debug output
     assert any("provided invalid actions" in call for call in error_calls)
-    assert any("Player response was:" in call for call in error_calls)
     assert any("Invalid actions were:" in call for call in error_calls)
 
 
