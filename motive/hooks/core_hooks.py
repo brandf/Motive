@@ -93,6 +93,39 @@ def look_at_target(game_master: Any, player_char: PlayerCharacter, action_config
             feedback_messages.append("You are in an unknown location.")
             event_message = f"Player {player_char.name} looked around an unknown location."
     else:
+        # Special case: look at inventory
+        if target_name.lower() == "inventory":
+            if not player_char.inventory:
+                feedback_messages.append("Your inventory is empty.")
+                event_message = f"{player_char.name} looks at their empty inventory."
+            else:
+                # Build inventory display
+                inventory_items = []
+                for item in player_char.inventory.values():
+                    item_description = f"- {item.name}: {item.description}"
+                    
+                    # Add properties if they exist
+                    if item.properties:
+                        properties_text = ", ".join([f"{key}: {value}" for key, value in item.properties.items()])
+                        item_description += f" (Properties: {properties_text})"
+                    
+                    inventory_items.append(item_description)
+                
+                # Create the inventory display
+                inventory_text = "You are carrying:\n" + "\n".join(inventory_items)
+                feedback_messages.append(inventory_text)
+                event_message = f"{player_char.name} looks at their inventory."
+            
+            events_generated.append(Event(
+                message=event_message,
+                event_type="player_action",
+                source_room_id=player_char.current_room_id,
+                timestamp=datetime.now().isoformat(),
+                related_player_id=player_char.id,
+                observers=["player"]  # Inventory is private, only the player sees it
+            ))
+            return events_generated, feedback_messages
+        
         # Target specified, try to find it in the room or inventory
         target_object = player_char.get_item_in_inventory(target_name)
         if not target_object:
@@ -688,3 +721,4 @@ def handle_drop_action(game_master: Any, player_char: PlayerCharacter, action_co
     feedback_messages.append(f"You drop the {target_object.name}.")
     
     return events, feedback_messages
+

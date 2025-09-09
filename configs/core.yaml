@@ -169,3 +169,4 @@ drop:
     - type: code_binding
       function_name: handle_drop_action
       observers: ["player", "room_players", "adjacent_rooms"]
+
