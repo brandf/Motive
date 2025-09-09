@@ -160,7 +160,20 @@ def handle_move_action(game_master: Any, player_char: PlayerCharacter, params: D
     current_room.remove_player(player_char.id)
     destination_room.add_player(player_char)
 
+    # Generate destination room description (like a free look action)
+    destination_description_parts = [destination_room.description]
+    if destination_room.objects:
+        object_names = [obj.name for obj in destination_room.objects.values()]
+        destination_description_parts.append(f"You also see: {', '.join(object_names)}.")
+    if destination_room.exits:
+        exit_names = [exit_data['name'] for exit_data in destination_room.exits.values() if not exit_data.get('is_hidden', False)]
+        if exit_names:
+            destination_description_parts.append(f"Exits: {', '.join(exit_names)}.")
+    destination_description = " ".join(destination_description_parts)
+
     feedback_messages.append(f"You move to the '{destination_room.name}'.")
+    feedback_messages.append(f"Destination: {destination_description}")
+    
     events_generated.append(Event(
         message=f"Player {player_char.name} moved from {current_room.name} to {destination_room.name}.",
         event_type="player_movement",

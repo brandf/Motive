@@ -510,9 +510,7 @@ class GameMaster:
                 self.player_first_interaction_done[player_char.id] = True # Mark as done
             else:
                 # Construct the GM message content for subsequent interactions, including observations
-                gm_message_content_parts = [
-                    f"Current situation: {current_room_description}"
-                ]
+                gm_message_content_parts = []
                 if observation_messages:
                     gm_message_content_parts.append("\n".join(observation_messages))
                 
