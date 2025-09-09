@@ -10,6 +10,13 @@ rooms:
       west_gate: {id: west_gate, name: West Gate, destination_room_id: old_forest_path}
     objects:
       fountain: {id: fountain, name: Fountain, object_type_id: generic_fountain, current_room_id: town_square, description: A stone fountain with clear water.}
+      town_statue: {id: town_statue, name: Town Statue, object_type_id: town_statue, current_room_id: town_square, description: A large statue of the town's founder, too heavy to move.}
+      tiny_gem: {id: tiny_gem, name: Tiny Gem, object_type_id: tiny_gem, current_room_id: town_square, description: A small, precious gem that sparkles in the light.}
+      large_sword: {id: large_sword, name: Large Sword, object_type_id: large_sword, current_room_id: town_square, description: A massive two-handed sword that requires great strength to wield.}
+      warrior_armor: {id: warrior_armor, name: Warrior's Armor, object_type_id: warrior_armor, current_room_id: town_square, description: Heavy plate armor that only warriors can wear.}
+      legendary_sword: {id: legendary_sword, name: Legendary Sword, object_type_id: legendary_sword, current_room_id: town_square, description: A sword of immense power that only high-level heroes can wield.}
+      paladin_sword: {id: paladin_sword, name: Paladin's Sword, object_type_id: paladin_sword, current_room_id: town_square, description: A holy sword that requires both warrior class and high level.}
+      elven_artifact: {id: elven_artifact, name: Elven Artifact, object_type_id: elven_artifact, current_room_id: town_square, description: An ancient elven artifact that only elves of good alignment can use.}
     tags: []
     properties: {}
   old_forest_path:
@@ -20,6 +27,11 @@ rooms:
       east_gate: {id: east_gate, name: East Gate, destination_room_id: town_square}
     objects:
       sign: {id: sign, name: Wooden Sign, object_type_id: generic_sign, current_room_id: old_forest_path, description: A weathered wooden sign pointing deeper into the forest.}
+      ancient_altar: {id: ancient_altar, name: Ancient Altar, object_type_id: ancient_altar, current_room_id: old_forest_path, description: A sacred altar that has been in this place for centuries.}
+      mage_staff: {id: mage_staff, name: Mage's Staff, object_type_id: mage_staff, current_room_id: old_forest_path, description: A magical staff that only mages can channel power through.}
+      rogue_dagger: {id: rogue_dagger, name: Rogue's Dagger, object_type_id: rogue_dagger, current_room_id: old_forest_path, description: A finely crafted dagger that only rogues can wield effectively.}
+      huge_boulder: {id: huge_boulder, name: Huge Boulder, object_type_id: huge_boulder, current_room_id: old_forest_path, description: An enormous boulder that only the strongest can move.}
+      dragon_scale: {id: dragon_scale, name: Dragon Scale, object_type_id: dragon_scale, current_room_id: old_forest_path, description: A scale from an ancient dragon, only usable by those with dragon blood.}
     tags: ["dark"]
     properties: {}
 characters:

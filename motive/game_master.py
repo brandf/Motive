@@ -310,6 +310,32 @@ class GameMaster:
                         break
                 if not obj_found:
                     return False, f"Object '{object_name}' not in inventory.", None
+            elif req.type == "object_possession_allowed":
+                object_name = params.get(req.object_name_param)
+                if not object_name:
+                    return False, f"Missing parameter '{req.object_name_param}' for object_possession_allowed requirement.", None
+                
+                # Find the object in the room
+                target_object = None
+                for obj in current_room.objects.values():
+                    if obj.name.lower() == object_name.lower():
+                        target_object = obj
+                        break
+                
+                if not target_object:
+                    return False, f"Object '{object_name}' not found for pickup check.", None
+                
+                # Check if object has pickup constraints
+                if "immovable" in target_object.tags:
+                    return False, f"Cannot pick up '{object_name}' - it is immovable.", None
+                
+                # Add other pickup constraints here (e.g., too_heavy, magically_bound, etc.)
+                if "too_heavy" in target_object.tags:
+                    return False, f"Cannot pick up '{object_name}' - it is too heavy.", None
+                
+                if "magically_bound" in target_object.tags:
+                    return False, f"Cannot pick up '{object_name}' - it is magically bound to this location.", None
+                
             elif req.type == "object_property_equals":
                 object_name = params.get(req.object_name_param)
                 if not object_name:

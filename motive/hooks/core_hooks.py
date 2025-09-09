@@ -235,67 +235,6 @@ def handle_move_action(game_master: Any, player_char: PlayerCharacter, action_co
     
     return events_generated, feedback_messages
  
-def handle_pickup_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
-    """Handles a player picking up an object from the current room."""
-    feedback_messages: List[str] = []
-    events_generated: List[Event] = []
-    object_name = params.get("object_name")
-
-    if not object_name:
-        feedback_messages.append("Pickup action requires an object name.")
-        events_generated.append(Event(
-            message=f"Player {player_char.name} attempted to pick up an object without specifying its name.",
-            event_type="player_action_failed",
-            source_room_id=player_char.current_room_id,
-            timestamp=datetime.now().isoformat(),
-            related_player_id=player_char.id,
-            observers=["player", "game_master"]
-        ))
-        return events_generated, feedback_messages
-
-    current_room = game_master.rooms.get(player_char.current_room_id)
-    if not current_room:
-        feedback_messages.append(f"Error: Player is in an unknown room (ID: {player_char.current_room_id}).")
-        events_generated.append(Event(
-            message=f"Player {player_char.name} is in an unknown room ({player_char.current_room_id}) and cannot pick up.",
-            event_type="system_error",
-            source_room_id="unknown",
-            timestamp=datetime.now().isoformat(),
-            related_player_id=player_char.id,
-            observers=["game_master"]
-        ))
-        return events_generated, feedback_messages
-
-    obj_to_pickup = current_room.get_object(object_name)
-    if not obj_to_pickup:
-        feedback_messages.append(f"You don't see any '{object_name}' here to pick up.")
-        events_generated.append(Event(
-            message=f"Player {player_char.name} attempted to pick up non-existent object '{object_name}'.",
-            event_type="player_action_failed",
-            source_room_id=player_char.current_room_id,
-            timestamp=datetime.now().isoformat(),
-            related_player_id=player_char.id,
-            related_object_id=object_name,
-            observers=["player", "game_master"]
-        ))
-        return events_generated, feedback_messages
-
-    # Remove from room and add to player inventory
-    current_room.remove_object(obj_to_pickup.id)
-    player_char.add_item_to_inventory(obj_to_pickup)
-
-    feedback_messages.append(f"You pick up the {obj_to_pickup.name}.")
-    events_generated.append(Event(
-        message=f"{player_char.name} picked up the {obj_to_pickup.name}.",
-        event_type="object_pickup",
-        source_room_id=current_room.id,
-        timestamp=datetime.now().isoformat(),
-        related_player_id=player_char.id,
-        related_object_id=obj_to_pickup.id,
-        observers=["room_players"]  # Only other players in the room see the pickup
-    ))
-    
-    return events_generated, feedback_messages
 
 def handle_say_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles a player saying something to other players in the room."""
@@ -584,6 +523,16 @@ def handle_pickup_action(game_master: Any, player_char: PlayerCharacter, action_
     
     if not target_object:
         return [], [f"Error: '{object_name}' not found in the room."]
+    
+    # Check inventory constraints using centralized system
+    from motive.inventory_constraints import validate_inventory_transfer
+    
+    can_transfer, error_msg, error_event = validate_inventory_transfer(
+        target_object, None, player_char, "pickup"
+    )
+    
+    if not can_transfer:
+        return [error_event], [error_msg]
     
     # Move object from room to player inventory
     current_room.remove_object(target_object.id)

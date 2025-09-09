@@ -184,7 +184,8 @@ Current core actions include: `move`, `say`, `look`, `help`, `whisper`, `shout`,
 - **Use hints strategically for validation**: Add temporary hints to `configs/game.yaml` before running `motive.main` to ensure LLM players test the specific functionality being validated. Clean up hints before committing to maintain a clean production state.
 - **Tests should not depend on specific game.yaml content**: Tests that depend on specific configurations in `game.yaml` are fragile and will break whenever the configuration changes. Design tests to be independent of configuration content or use test-specific configurations.
 - **Don't ask permission for high-confidence operations**: When confidence is 8+ and rationale is provided, just run the operation (like `motive.main`). The user will reject if they don't want it run.
-- **Don't ask permission for high-confidence git commits**: When commit assessment is 9-10/10, just proceed with staging, committing, and pushing. The user will reject if they don't want it.
+- **CRITICAL: Always validate in motive.main before committing**: Never start the commit workflow (git add/commit/push) without first validating changes in `motive.main`. Tests can pass but real-world integration may still fail.
+- **Don't ask permission for high-confidence git commits**: When commit assessment is 9-10/10 AND after successful `motive.main` validation, just proceed with staging, committing, and pushing. The user will reject if they don't want it.
 - **Don't ask permission for hint cleanup and commits**: After successful `motive.main` validation, automatically clean up temporary hints and commit changes. The user will reject if they don't want it.
 - **Use platform-appropriate commands**: Always test/verify what platform we're on and use appropriate bash and/or PowerShell commands. On Windows, use PowerShell syntax (`;` instead of `&&` for command chaining).
 - **Batch git operations**: Use `&&` to chain git commands (e.g., `git add . && git commit -m "message" && git push`) to reduce approval requests.
@@ -220,6 +221,7 @@ When issues are found in `motive.main` that should have been caught by tests, fo
 
 ### 4. **Validation and Prevention**
 - **Achieve high confidence**: Get to 9-10 confidence level before running `motive.main`
+- **CRITICAL: Always validate in motive.main before committing**: Never start the commit workflow (git add/commit/push) without first validating changes in `motive.main`. Tests can pass but real-world integration may still fail.
 - **Use hints for reproduction**: After fixing, use the hint system to try reproducing the original issue in `motive.main`
 - **Document the lesson**: Add the specific test pattern to `AGENT.md` to prevent similar issues
 
