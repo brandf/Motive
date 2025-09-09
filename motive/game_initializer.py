@@ -116,18 +116,23 @@ class GameInitializer:
     def _load_yaml_config(self, file_path: str, config_model: BaseModel) -> BaseModel:
         """Loads and validates a YAML configuration file against a Pydantic model."""
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            # Resolve path relative to the configs directory (where game.yaml is located)
+            import os
+            configs_dir = os.path.dirname(os.path.abspath("configs/game.yaml"))
+            resolved_path = os.path.join(configs_dir, file_path)
+            
+            with open(resolved_path, "r", encoding="utf-8") as f:
                 raw_config = yaml.safe_load(f)
             
             validated_config = config_model(**raw_config)
-            self.game_logger.info(f"Successfully loaded and validated {file_path} as {config_model.__name__}")
+            self.game_logger.info(f"Successfully loaded and validated {resolved_path} as {config_model.__name__}")
             return validated_config
         except FileNotFoundError:
-            self.game_logger.error(f"Configuration file not found: {file_path}")
-            raise ConfigNotFoundError(f"Configuration file not found: {file_path}")
+            self.game_logger.error(f"Configuration file not found: {resolved_path}")
+            raise ConfigNotFoundError(f"Configuration file not found: {resolved_path}")
         except yaml.YAMLError as e:
-            self.game_logger.error(f"Error parsing YAML file {file_path}: {e}")
-            raise ConfigParseError(f"Error parsing YAML file {file_path}: {e}")
+            self.game_logger.error(f"Error parsing YAML file {resolved_path}: {e}")
+            raise ConfigParseError(f"Error parsing YAML file {resolved_path}: {e}")
         except ValidationError as e:
             self.game_logger.error(f"Validation error in {file_path} for {config_model.__name__}: {e}")
             raise ConfigValidationError(f"Validation error in {file_path} for {config_model.__name__}: {e}")

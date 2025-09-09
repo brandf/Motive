@@ -342,16 +342,16 @@ def test_execute_effects_help_action(mock_game_master):
     params = {}
 
     _, feedback = gm._execute_effects(player_char, action_config, params)
-    expected_feedback = [
-        "Available actions:",
-        "- look (10 AP): Look around.",
-        "- help (10 AP): Get help.",
-        "- move (10 AP): Move in a specified direction.",
-        "- pickup (10 AP): Pick up an object.",
-        "- light torch (10 AP): Light a torch you are holding."
-    ]
-    # The feedback is a single string containing all parts, so we check if each item is within the string.
-    assert all(item in feedback[0] for item in expected_feedback)
+    help_text = feedback[0]
+    
+    # Check that the new categorized help format is used
+    assert "Available actions by category:" in help_text
+    assert "Use 'help <category>' to see actions in a specific category" in help_text
+    
+    # Check that specific actions are still shown (may be in different categories now)
+    assert "look (10 AP): Look around." in help_text
+    assert "help (10 AP): Get help." in help_text
+    assert "move (10 AP): Move in a specified direction." in help_text
 
 def test_execute_effects_say_action(mock_game_master):
     gm = mock_game_master

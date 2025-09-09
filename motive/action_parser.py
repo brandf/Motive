@@ -47,9 +47,32 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
             else:
                 params[param_name] = param_string
         else:
-            # For more complex parameter types (e.g., multiple params, integers), this would need expansion.
-            # For now, if there are multiple parameters or non-string types, just assign the raw string to a 'target' if it exists.
-            if "target" in [p.name for p in action_config.parameters]:
+            # Handle multiple parameters - try to parse them intelligently
+            if len(action_config.parameters) == 2 and all(p.type == "string" for p in action_config.parameters):
+                # Special case for two string parameters (like whisper: player + phrase)
+                # Look for quoted phrase at the end
+                import re
+                # Pattern to match: word(s) followed by quoted string
+                match = re.match(r'^(\S+)\s+(.+)$', param_string)
+                if match:
+                    first_param = match.group(1)
+                    rest = match.group(2).strip()
+                    
+                    # Check if rest is a quoted string
+                    if ((rest.startswith('\'') and rest.endswith('\'')) or 
+                        (rest.startswith('"') and rest.endswith('"'))):
+                        quoted_content = rest[1:-1]
+                        # Assign to parameters in order
+                        params[action_config.parameters[0].name] = first_param
+                        params[action_config.parameters[1].name] = quoted_content
+                    else:
+                        # Fallback: assign first word to first param, rest to second
+                        params[action_config.parameters[0].name] = first_param
+                        params[action_config.parameters[1].name] = rest
+                else:
+                    # Fallback: assign raw string to first parameter
+                    params[action_config.parameters[0].name] = param_string
+            elif "target" in [p.name for p in action_config.parameters]:
                 params["target"] = param_string
             elif action_config.parameters:
                 # This case means we couldn't parse all expected parameters for a defined action.

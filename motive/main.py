@@ -29,16 +29,16 @@ async def main():
 
     game_id = os.getenv("MOTIVE_GAME_ID", str(uuid.uuid4()))
 
-    # Load the main config.yaml file
+    # Load the main configs/game.yaml file
     try:
-        with open("config.yaml", "r", encoding="utf-8") as f:
+        with open("configs/game.yaml", "r", encoding="utf-8") as f:
             main_config_data = yaml.safe_load(f)
         game_config = GameConfig(**main_config_data)
     except FileNotFoundError:
-        logging.critical("Main configuration file 'config.yaml' not found.")
+        logging.critical("Main configuration file 'configs/game.yaml' not found.")
         sys.exit(1)
     except yaml.YAMLError as e:
-        logging.critical(f"Error parsing main configuration file 'config.yaml': {e}")
+        logging.critical(f"Error parsing main configuration file 'configs/game.yaml': {e}")
         sys.exit(1)
     except Exception as e:
         logging.critical(f"An unexpected error occurred while loading main configuration: {e}")

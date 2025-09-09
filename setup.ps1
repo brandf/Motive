@@ -10,7 +10,7 @@
     5. Installs development dependencies from 'requirements-dev.txt'.
     6. Creates a 'logs/' directory if it doesn't exist.
     7. Copies 'env.example' to '.env' if '.env' does not exist, and reminds the user to fill in API keys.
-    8. Verifies the presence of 'config.yaml'.
+    8. Verifies the presence of 'configs/game.yaml'.
 .NOTES
     Author: T3 Chat (Modified by user request)
     Version: 1.0
@@ -23,7 +23,7 @@
 # --- Configuration ---
 $VenvName = "venv"
 $PythonExe = "py" # Use py launcher for Windows
-$ConfigFileName = "config.yaml"
+$ConfigFileName = "configs\game.yaml"
 $EnvExampleName = "env.example.txt"
 $DotEnvName = ".env"
 $LogsDir = "logs"
@@ -163,7 +163,7 @@ if (-not (Test-Path -Path $DotEnvName -PathType Leaf)) {
     Write-Color Yellow "'$DotEnvName' already exists. Please ensure your API keys are set."
 }
 
-# Check if config.yaml exists
+# Check if configs/game.yaml exists
 if (-not (Test-Path -Path $ConfigFileName -PathType Leaf)) {
     Write-Color Red "Error: '$ConfigFileName' not found. Please ensure it is in the project root."
     exit 1

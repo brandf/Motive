@@ -63,7 +63,8 @@ def test_parse_single_action_line_invalid_action_name(sample_actions):
 def test_parse_single_action_line_multiple_params_unsupported_for_now(sample_actions):
     action_config, params = _parse_single_action_line("use potion on goblin", sample_actions)
     assert action_config.id == "use"
-    assert params == {"target": "potion on goblin"}
+    # With the improved parser, this should now correctly parse both parameters
+    assert params == {"item_name": "potion", "target": "on goblin"}
 
 def test_parse_single_action_line_empty_string(sample_actions):
     result = _parse_single_action_line("", sample_actions)

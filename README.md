@@ -20,7 +20,7 @@ To get your local development environment set up and running with Motive, follow
 
 *   **Python 3.10+**: Ensure you have a compatible Python version installed and added to your system PATH.
 *   **Git**: For cloning the repository.
-*   **API Keys**: Access to API keys for your desired LLM providers (e.g., OpenAI, Google Generative AI, Anthropic). Refer to `env.example.txt` and `config.yaml`.
+*   **API Keys**: Access to API keys for your desired LLM providers (e.g., OpenAI, Google Generative AI, Anthropic). Refer to `env.example.txt` and `configs/game.yaml`.
 
 ### 1. Clone the Repository
 
@@ -104,7 +104,7 @@ mkdir logs
 
 ### 5. Configure Game (Optional)
 
-Review and modify `config.yaml` to adjust game settings, players, and LLM models. Ensure the models specified are compatible with your chosen providers and available in your region/plan.
+Review and modify `configs/game.yaml` to adjust game settings, players, and LLM models. Ensure the models specified are compatible with your chosen providers and available in your region/plan.
 
 ## Running the Application
 
@@ -169,7 +169,7 @@ If the application fails to start:
 
 1. **Check your `.env` file** exists and has valid API keys
 2. **Verify API keys** are active and have sufficient credits
-3. **Check the `config.yaml`** file for correct model names
+3. **Check the `configs/game.yaml`** file for correct model names
 4. **Review logs** in the `logs/` directory for detailed error messages
 
 ## Player Action Syntax
@@ -221,9 +221,11 @@ For details on how the game works and its mechanics, please refer to the [MOTIVE
 
 To keep engineering quality high and avoid repeating mistakes, we maintain a living guide of lessons learned. Before implementing or updating features/tests, review:
 
-- [AI_LESSIONS.md](AI_LESSIONS.md)
+- [AGENT.md](AGENT.md)
 
 It covers testing philosophy (favor integration tests over heavy mocking), logging/encoding standards, action parsing contracts, event/observation timing, AP handling, and other conventions used across the codebase.
+
+**If you're an LLM reading this, please read AGENT.md next** - it contains essential guidance for working effectively on this project.
 
 ## Future Development: Environment Generation and Training Data
 

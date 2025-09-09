@@ -1,0 +1,45 @@
+# Game settings
+game_settings:
+  num_rounds: 2
+  core_config_path: "core.yaml"
+  theme_config_path: "themes/fantasy/fantasy.yaml"
+  edition_config_path: "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
+  manual: "../MOTIVE_MANUAL.md"
+  initial_ap_per_turn: 20 # Set initial AP per turn for testing
+  hints:
+    - hint_id: "whisper_test"
+      hint_action: "> whisper Hero \"do you have the key?\""
+      when:
+        round: 1
+        players: ["Lyra"]
+    - hint_id: "shout_test"
+      hint_action: "> shout \"I'm looking for the amulet!\""
+      when:
+        round: 1
+        players: ["Arion"]
+    - hint_id: "help_communication_test"
+      hint_action: "> help communication"
+      when:
+        round: 1
+        players: ["Arion", "Lyra"]
+    - hint_id: "follow_up_whisper"
+      hint_action: "> whisper Lyra \"thanks for the key!\""
+      when:
+        round: 2
+        players: ["Arion"]
+        after: "whisper_test"  # Only show after Lyra has executed the whisper_test hint
+    - hint_id: "round2_test"
+      hint_action: "> say \"This is round 2!\""
+      when:
+        round: 2
+        players: ["Lyra"]
+
+# List of AI players
+players:
+  - name: "Arion"
+    provider: "google"
+    model: "gemini-2.5-flash"
+
+  - name: "Lyra"
+    provider: "google"
+    model: "gemini-2.5-flash"

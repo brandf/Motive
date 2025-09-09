@@ -4,7 +4,7 @@
 VENV_NAME="venv"
 PYTHON_BIN="python3" # Use python3 for most Linux/macOS systems. On Windows, it might be 'python'.
                      # The script will try both.
-CONFIG_FILE="config.yaml"
+CONFIG_FILE="configs/game.yaml"
 ENV_EXAMPLE="env.example"
 DOT_ENV=".env"
 LOGS_DIR="logs"
@@ -136,7 +136,7 @@ else
     echo_color yellow "'$DOT_ENV' already exists. Please ensure your API keys are set."
 fi
 
-# Check if config.yaml exists
+# Check if configs/game.yaml exists
 if [ ! -f "$CONFIG_FILE" ]; then
     echo_color red "Error: '$CONFIG_FILE' not found. Please ensure it is in the project root."
     exit 1

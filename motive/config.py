@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, conint
-from typing import List, Dict, Any, Optional, Literal
+from typing import List, Dict, Any, Optional, Literal, Union
 
 class PlayerConfig(BaseModel):
     """Configuration for a single AI player."""
@@ -51,15 +51,21 @@ class ActionEffectConfig(BaseModel):
     observers: Optional[List[Literal["player", "room_players", "adjacent_rooms", "all_players", "game_master"]]] = None
 
     # Fields for code_binding effect
-    function_module: Optional[str] = None
     function_name: Optional[str] = None
+
+class CostConfig(BaseModel):
+    """Configuration for action cost - can be static or dynamic."""
+    type: str = Field(..., description="Type of cost calculation ('static' or 'code_binding').")
+    value: Optional[int] = Field(None, description="Static cost value (for type='static').")
+    function_name: Optional[str] = Field(None, description="Function name for dynamic cost calculation (for type='code_binding').")
 
 class ActionConfig(BaseModel):
     """Configuration for a single action."""
     id: str = Field(..., description="Unique identifier for the action.")
     name: str = Field(..., description="The command name for the action (e.g., 'look', 'pickup').")
-    cost: int = Field(..., description="Action points consumed by this action.")
+    cost: Union[int, CostConfig] = Field(..., description="Action points consumed by this action (int for static, CostConfig for dynamic).")
     description: str
+    category: Optional[str] = Field(None, description="Category for grouping actions (e.g., 'movement', 'communication', 'inventory').")
     parameters: List[ParameterConfig] = []
     requirements: List[ActionRequirementConfig] = []
     effects: List[ActionEffectConfig] = []
@@ -136,6 +142,7 @@ class GameSettings(BaseModel):
     edition_config_path: str = Field(..., description="Path to the edition YAML configuration file.")
     manual: str = Field("MOTIVE_MANUAL.md", description="Path to the game manual markdown file.")
     initial_ap_per_turn: int = Field(20, description="Initial action points per player per turn. Defaults to 20 for testing.")
+    hints: Optional[List[Dict[str, Any]]] = Field(None, description="Optional hints to guide LLM players toward specific actions for validation.")
 
 class GameConfig(BaseModel):
     """Overall game configuration."""

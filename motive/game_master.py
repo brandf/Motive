@@ -39,7 +39,10 @@ class GameMaster:
         self.players = []
         self.num_rounds = game_config.game_settings.num_rounds
         self.game_id = game_id
-        self.manual_path = game_config.game_settings.manual
+        # Resolve manual path relative to the configs directory (where game.yaml is located)
+        import os
+        configs_dir = os.path.dirname(os.path.abspath("configs/game.yaml"))
+        self.manual_path = os.path.join(configs_dir, game_config.game_settings.manual)
 
         self.game_config = game_config # Assign game_config earlier
 
@@ -47,6 +50,9 @@ class GameMaster:
         # These will be updated after configurations are loaded
         self.theme: str = ""
         self.edition: str = ""
+        
+        # Track which hints have been executed (hint_id -> set of player_names)
+        self.executed_hints: Dict[str, set] = {}
 
         # Initialize a basic logger that logs to stdout before full setup
         self.game_logger = logging.getLogger("GameNarrative")
@@ -328,6 +334,24 @@ class GameMaster:
                 if not found_exit:
                     return False, f"No visible exit in the '{direction}' direction.", None
                 found_exit_data = found_exit # Store for returning
+            elif req.type == "player_in_room":
+                player_name = params.get(req.target_player_param)
+                if not player_name:
+                    return False, f"Missing parameter '{req.target_player_param}' for player_in_room requirement.", None
+                
+                # Check if the target player is in the same room
+                target_player = None
+                for player in self.players:
+                    if hasattr(player, 'character') and player.character:
+                        if player.character.name.lower() == player_name.lower():
+                            target_player = player.character
+                            break
+                
+                if not target_player:
+                    return False, f"Player '{player_name}' not found.", None
+                
+                if target_player.current_room_id != player_char.current_room_id:
+                    return False, f"Player '{player_name}' is not in the same room.", None
             # Add other requirement types here
             else:
                 self.game_logger.warning(f"Unsupported requirement type: {req.type}")
@@ -404,10 +428,12 @@ class GameMaster:
                     feedback_messages.append(event_message) # Player sees their own immediate events
 
             elif effect.type == "code_binding":
-                if effect.function_module and effect.function_name:
+                if effect.function_name:
                     try:
-                        module = __import__(effect.function_module, fromlist=[effect.function_name])
-                        hook_function = getattr(module, effect.function_name)
+                        # Use convention-based import: assume core_hooks for now
+                        # TODO: Make this more flexible for different hook modules
+                        import motive.hooks.core_hooks as core_hooks
+                        hook_function = getattr(core_hooks, effect.function_name)
                         
                         hook_events_and_feedback = hook_function(self, player_char, params) # Expecting a tuple: (List[Event], List[str])
                         hook_events = hook_events_and_feedback[0]
@@ -416,7 +442,7 @@ class GameMaster:
                         feedback_messages.extend(hook_feedback)
                         events_generated.extend(hook_events) # Extend with actual Event objects
 
-                    except (ImportError, AttributeError, IndexError) as e: # Added IndexError for tuple unpacking
+                    except (ImportError, AttributeError, KeyError, IndexError) as e: # Added KeyError for globals lookup
                         error_message = f"Error calling code binding for action '{action_config.name}': {e}"
                         self.game_logger.error(error_message)
                         feedback_messages.append(f"An error occurred while trying to process your action: {e}")
@@ -425,7 +451,7 @@ class GameMaster:
                         self.game_logger.error(error_message)
                         feedback_messages.append(f"An unexpected error occurred: {e}")
                 else:
-                    self.game_logger.warning(f"code_binding effect for '{action_config.name}' missing function_module or function_name.")
+                    self.game_logger.warning(f"code_binding effect for '{action_config.name}' missing function_name.")
                     feedback_messages.append(f"An error occurred due to missing code binding configuration.")
 
             else:
@@ -433,6 +459,34 @@ class GameMaster:
 
         # After processing all effects, add generated events to the main event queue
         return events_generated, feedback_messages
+
+    def _calculate_action_cost(self, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> int:
+        """Calculate the actual cost for an action, using cost calculation function if available."""
+        # Handle new cost configuration format
+        if hasattr(action_config, 'cost') and isinstance(action_config.cost, dict):
+            cost_config = action_config.cost
+            if cost_config.get('type') == 'code_binding':
+                function_name = cost_config.get('function_name')
+                if function_name == "calculate_help_cost":
+                    from motive.hooks.core_hooks import calculate_help_cost
+                    return calculate_help_cost(self, player_char, action_config, params)
+                # Add more cost calculation functions here as needed
+            elif cost_config.get('type') == 'static':
+                return cost_config.get('value', 0)
+        
+        # Handle CostConfig object (from Pydantic model)
+        if hasattr(action_config, 'cost') and hasattr(action_config.cost, 'type'):
+            if action_config.cost.type == 'code_binding':
+                function_name = action_config.cost.function_name
+                if function_name == "calculate_help_cost":
+                    from motive.hooks.core_hooks import calculate_help_cost
+                    return calculate_help_cost(self, player_char, action_config, params)
+                # Add more cost calculation functions here as needed
+            elif action_config.cost.type == 'static':
+                return action_config.cost.value or 0
+        
+        # Default to static cost from config (backward compatibility for int)
+        return action_config.cost
 
     def _distribute_events(self):
         """Distributes generated events to relevant players based on observer scopes."""
@@ -514,13 +568,15 @@ class GameMaster:
                     room_description_parts.append(f"Exits: {', '.join(exit_names)}.")
             current_room_description = " ".join(room_description_parts)
 
-            action_prompt = self._get_action_display(player_char, is_first_turn=False)
+            action_prompt = self._get_action_display(player_char, is_first_turn=False, round_num=round_num)
 
             # Handle the very first interaction differently
             if not self.player_first_interaction_done.get(player_char.id, False):
                 # Include the full manual content in the system prompt for the LLM
                 system_prompt = f"You are a player in a text-based adventure game. Below is the game manual. Read it carefully to understand the rules, your role, and how to interact with the game world.\n\n" \
                                 f"--- GAME MANUAL START ---\n{self.manual_content}\n--- GAME MANUAL END ---\n\n" \
+                                f"IMPORTANT: All actions must be on their own line and start with '>' (e.g., '> look', '> move west', '> say hello'). " \
+                                f"Without the '>' prefix, your actions will be ignored and you'll receive a penalty.\n\n" \
                                 f"Now, based on the manual and your character, respond with your actions."
 
                 # Character Assignment and Motive
@@ -538,7 +594,7 @@ class GameMaster:
                         observation_messages.append(f"• {event.message}")
 
                 # Construct the first HumanMessage with character, motive, and initial room description
-                first_action_prompt = self._get_action_display(player_char, is_first_turn=True)
+                first_action_prompt = self._get_action_display(player_char, is_first_turn=True, round_num=round_num)
                 first_human_message_parts = [
                     character_assignment,
                     f"Initial location: {current_room_description}"
@@ -621,6 +677,8 @@ class GameMaster:
                 # Penalty for not providing any actions at all
                 feedback_parts = [
                     "You did not provide any actions.",
+                    "",
+                    "Remember: Actions must be on their own line and start with '>' (e.g., '> look', '> move west').",
                     "Your turn ends prematurely as a penalty."
                 ]
                 combined_feedback = "\n".join(feedback_parts)
@@ -682,14 +740,17 @@ class GameMaster:
                         # Don't set all_actions_in_response_valid = False for AP exhaustion - this is normal gameplay
                         break # Exit inner loop for actions
 
-                    if action_config.cost > player_char.action_points:
-                        action_specific_feedback.append(f"Action '{action_config.name}' costs {action_config.cost} AP, but you only have {player_char.action_points} AP. Skipping this action.")
+                    # Calculate actual cost using cost calculation function if available
+                    actual_cost = self._calculate_action_cost(player_char, action_config, params)
+                    
+                    if actual_cost > player_char.action_points:
+                        action_specific_feedback.append(f"Action '{action_config.name}' costs {actual_cost} AP, but you only have {player_char.action_points} AP. Skipping this action.")
                         self.game_logger.info(action_specific_feedback[-1])
                         # Don't set all_actions_in_response_valid = False for AP exhaustion - this is normal gameplay
                     else:
                         requirements_met, req_message, exit_data = self._check_requirements(player_char, action_config, params)
                         if requirements_met:
-                            player_char.action_points -= action_config.cost
+                            player_char.action_points -= actual_cost
                             action_events, action_specific_feedback_list = self._execute_effects(player_char, action_config, params)
                             action_specific_feedback.extend(action_specific_feedback_list)
                             
@@ -703,7 +764,10 @@ class GameMaster:
                             # Distribute events immediately after action execution
                             self._distribute_events()
                             
-                            self.game_logger.info(f"Action '{action_config.name}' executed by {player_char.name} (cost: {action_config.cost} AP). Remaining AP: {player_char.action_points}")
+                            # Mark hint as executed if this action matches a hint
+                            self._mark_hint_executed(player.name, action_config.name, params)
+                            
+                            self.game_logger.info(f"Action '{action_config.name}' executed by {player_char.name} (cost: {actual_cost} AP). Remaining AP: {player_char.action_points}")
                         else:
                             action_specific_feedback.append(f"Cannot perform '{action_config.name}': {req_message}. Skipping this action.")
                             self.game_logger.info(action_specific_feedback[-1])
@@ -711,9 +775,9 @@ class GameMaster:
 
                     if action_specific_feedback:
                         # Calculate AP info for this action
-                        ap_before = player_char.action_points + action_config.cost
+                        ap_before = player_char.action_points + actual_cost
                         ap_after = player_char.action_points
-                        response_feedback_messages.append(f"- **{action_config.name.capitalize()} Action:** (Cost: {action_config.cost} AP, Remaining: {ap_after} AP)")
+                        response_feedback_messages.append(f"- **{action_config.name.capitalize()} Action:** (Cost: {actual_cost} AP, Remaining: {ap_after} AP)")
                         response_feedback_messages.extend([f"  - {msg}" for msg in action_specific_feedback])
 
                 # After processing all actions in the response
@@ -779,7 +843,7 @@ class GameMaster:
         # Send turn end confirmation message
         confirmation_message = (
             "Your turn has ended. Please confirm how you'd like to proceed:\n\n"
-            "Example actions: continue, quit (will count as failure to complete motive)\n\n"
+            "Example actions: > continue, > quit (will count as failure to complete motive)\n\n"
             "What would you like to do?"
         )
         
@@ -799,14 +863,14 @@ class GameMaster:
         player.logger.info(f"GM received chat from {player.name} (Turn End Response):\n{player_input}")
         print(f"    '{player.name}' responded in {duration:.2f}s ({response_len} chars): {player_input}")
         
-        # Parse the response for turn end actions
-        if "> quit" in response.content or "quit" in player_input:
+        # Parse the response for turn end actions (only accept actions with > prefix)
+        if "> quit" in response.content:
             self.game_logger.info(f"Player {player.name} chose to quit the game.")
             player.logger.info(f"Player {player.name} chose to quit the game.")
             # Mark player as quit (we'll handle this in the main game loop)
             player_char.action_points = -1  # Special marker for quit
             return False  # Player quit
-        elif "> continue" in response.content or "continue" in player_input:
+        elif "> continue" in response.content:
             self.game_logger.info(f"Player {player.name} chose to continue.")
             player.logger.info(f"Player {player.name} chose to continue.")
             
@@ -833,13 +897,133 @@ class GameMaster:
         
         self.game_logger.info(f"=== TURN END CONFIRMATION COMPLETE for {player.name} ===")
 
-    def _get_action_display(self, player_char: PlayerCharacter, is_first_turn: bool = False) -> str:
+    def _get_applicable_hints(self, player_name: str, round_num: int) -> List[str]:
+        """Get hints that apply to the current player and round."""
+        if not hasattr(self.game_config.game_settings, 'hints') or not self.game_config.game_settings.hints:
+            return []
+        
+        applicable_hints = []
+        for hint in self.game_config.game_settings.hints:
+            # Check if hint has already been executed by this player
+            hint_id = hint.get("hint_id", "")
+            if hint_id and hint_id in self.executed_hints and player_name in self.executed_hints[hint_id]:
+                continue  # Skip this hint as it's already been executed by this player
+            
+            # Check if hint applies to this player and round using structured when clause
+            when_condition = hint.get("when", {})
+            if not self._evaluate_when_condition(when_condition, player_name, round_num):
+                continue
+            
+            hint_action = hint.get("hint_action", "")
+            if hint_action:
+                applicable_hints.append(hint_action)
+        
+        return applicable_hints
+
+    def _evaluate_when_condition(self, when_condition: Dict[str, Any], player_name: str, round_num: int) -> bool:
+        """Evaluate a structured when condition to determine if a hint should be shown."""
+        if not when_condition:
+            return True  # No condition means always show
+        
+        # Check round condition
+        if "round" in when_condition:
+            required_round = when_condition["round"]
+            if isinstance(required_round, int):
+                if round_num < required_round:
+                    return False
+            elif isinstance(required_round, dict):
+                # Support range conditions like {"min": 1, "max": 3}
+                if "min" in required_round and round_num < required_round["min"]:
+                    return False
+                if "max" in required_round and round_num > required_round["max"]:
+                    return False
+        
+        # Check player condition
+        if "players" in when_condition:
+            target_players = when_condition["players"]
+            if isinstance(target_players, list):
+                if player_name not in target_players:
+                    return False
+            elif isinstance(target_players, str):
+                if player_name != target_players:
+                    return False
+        
+        # Check after condition (hint should only show after another hint was executed)
+        if "after" in when_condition:
+            after_hint_id = when_condition["after"]
+            if after_hint_id not in self.executed_hints:
+                return False  # Required hint hasn't been executed by anyone yet
+            # Note: We don't check if the current player executed the prerequisite hint
+            # The hint just needs to be executed by someone
+        
+        # Check room condition (for future expansion)
+        if "room" in when_condition:
+            # This could be expanded to check if player is in specific room
+            pass
+        
+        # Check action condition (for future expansion)
+        if "after_action" in when_condition:
+            # This could be expanded to show hints after specific actions
+            pass
+        
+        return True
+
+    def _mark_hint_executed(self, player_name: str, action_name: str, params: Dict[str, Any]):
+        """Mark a hint as executed if the action matches a hint."""
+        if not hasattr(self.game_config.game_settings, 'hints') or not self.game_config.game_settings.hints:
+            return
+        
+        for hint in self.game_config.game_settings.hints:
+            hint_id = hint.get("hint_id", "")
+            if not hint_id:
+                continue
+                
+            # Check if this player should have this hint using the when condition
+            when_condition = hint.get("when", {})
+            if not self._evaluate_when_condition(when_condition, player_name, 1):  # Use round 1 for evaluation
+                continue
+            
+            # Check if the action matches the hint
+            hint_action = hint.get("hint_action", "")
+            if not hint_action.startswith(">"):
+                continue
+                
+            # Extract action from hint (e.g., "> whisper Hero" -> "whisper")
+            hint_action_parts = hint_action[1:].strip().split()
+            if not hint_action_parts:
+                continue
+                
+            hint_action_name = hint_action_parts[0]
+            
+            # Check if the executed action matches the hint action
+            if action_name == hint_action_name:
+                # Mark this hint as executed by this player
+                if hint_id not in self.executed_hints:
+                    self.executed_hints[hint_id] = set()
+                self.executed_hints[hint_id].add(player_name)
+                self.game_logger.info(f"Marked hint '{hint_id}' as executed by {player_name}")
+
+    def _get_action_display(self, player_char: PlayerCharacter, is_first_turn: bool = False, round_num: int = 1) -> str:
         """Get standardized action display text."""
         # Only show core actions from core.yaml
         core_actions = ["look", "move", "say", "pickup", "pass"]
         
         # Create action display without AP info (AP will be shown separately)
-        return f"Example actions: {', '.join(core_actions)}, help (for more available actions)."
+        action_display = f"Example actions: {', '.join(core_actions)}, help (for more available actions)."
+        
+        # Add applicable hints
+        player_name = None
+        for player in self.players:
+            if player.character and player.character.id == player_char.id:
+                player_name = player.name
+                break
+        
+        if player_name:
+            hints = self._get_applicable_hints(player_name, round_num)
+            if hints:
+                action_display += "\n\nHint(s), try these actions please, we're testing game mechanics:\n" + "\n".join(hints)
+        
+        return action_display
 
     def _setup_game_world(self, theme_cfg: ThemeConfig, edition_cfg: EditionConfig):
         """Sets up the initial game world by merging configs and instantiating objects."""

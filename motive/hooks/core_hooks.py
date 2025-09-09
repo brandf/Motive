@@ -6,19 +6,51 @@ from motive.config import Event
 from datetime import datetime
 
 def generate_help_message(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
-    """Generates a help message with available actions and their costs/descriptions."""
+    """Generates a help message with available actions, optionally filtered by category."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
-
-    help_message_parts = ["Available actions:"]
+    
+    category_filter = params.get("category")
+    
+    # Group actions by category
+    actions_by_category = {}
     for action_id, action_cfg in game_master.game_actions.items():
-        help_message_parts.append(f"- {action_cfg.name} ({action_cfg.cost} AP): {action_cfg.description}")
+        category = action_cfg.category or "other"
+        if category not in actions_by_category:
+            actions_by_category[category] = []
+        actions_by_category[category].append(action_cfg)
+    
+    if category_filter:
+        # Filter to specific category
+        category_filter_lower = category_filter.lower()
+        matching_categories = [cat for cat in actions_by_category.keys() if cat.lower() == category_filter_lower]
+        
+        if matching_categories:
+            category = matching_categories[0]
+            help_message_parts = [f"Actions in '{category}' category:"]
+            for action_cfg in actions_by_category[category]:
+                help_message_parts.append(f"- {action_cfg.name} ({action_cfg.cost} AP): {action_cfg.description}")
+        else:
+            # Category not found, show available categories
+            available_categories = sorted(actions_by_category.keys())
+            help_message_parts = [f"Category '{category_filter}' not found."]
+            help_message_parts.append(f"Available categories: {', '.join(available_categories)}")
+            help_message_parts.append("Use 'help' without a category to see all actions.")
+    else:
+        # Show all actions grouped by category
+        help_message_parts = ["Available actions by category:"]
+        for category in sorted(actions_by_category.keys()):
+            help_message_parts.append(f"\n{category.upper()}:")
+            for action_cfg in actions_by_category[category]:
+                help_message_parts.append(f"  - {action_cfg.name} ({action_cfg.cost} AP): {action_cfg.description}")
+        
+        help_message_parts.append(f"\nUse 'help <category>' to see actions in a specific category (costs 5 AP).")
     
     full_help_message = "\n".join(help_message_parts)
     feedback_messages.append(full_help_message)
 
     events_generated.append(Event(
-        message=f"{player_char.name} requests help.",
+        message=f"{player_char.name} requests help{f' for {category_filter}' if category_filter else ''}.",
         event_type="player_action",
         source_room_id=player_char.current_room_id,
         timestamp=datetime.now().isoformat(),
@@ -380,3 +412,154 @@ def handle_read_action(game_master: Any, player_char: PlayerCharacter, params: D
     ))
     
     return events_generated, feedback_messages
+
+def handle_whisper_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handles a player whispering privately to a specific player in the same room."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    target_player_name = params.get("player")
+    phrase = params.get("phrase")
+
+    if not target_player_name or not phrase:
+        feedback_messages.append("Whisper action requires both a player name and a phrase.")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to whisper without proper parameters.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    if not current_room:
+        feedback_messages.append(f"Error: Player is in an unknown room (ID: {player_char.current_room_id}).")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} is in an unknown room ({player_char.current_room_id}) and cannot whisper.",
+            event_type="system_error",
+            source_room_id="unknown",
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["game_master"]
+        ))
+        return events_generated, feedback_messages
+
+    # Find the target player in the current room
+    target_player = None
+    for player_id in current_room.player_ids:
+        if player_id in game_master.players:
+            player = game_master.players[player_id]
+            if player.name.lower() == target_player_name.lower():
+                target_player = player
+                break
+
+    if not target_player:
+        feedback_messages.append(f"You don't see any player named '{target_player_name}' in this room.")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to whisper to non-existent player '{target_player_name}'.",
+            event_type="player_action_failed",
+            source_room_id=current_room.id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+
+    # Don't whisper to yourself
+    if target_player.id == player_char.id:
+        feedback_messages.append("You can't whisper to yourself.")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to whisper to themselves.",
+            event_type="player_action_failed",
+            source_room_id=current_room.id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+
+    feedback_messages.append(f"You whisper to {target_player.name}: \"{phrase}\"")
+    
+    # Generate separate events for the speaker and target player
+    # Event for the speaker
+    events_generated.append(Event(
+        message=f"You whisper to {target_player.name}: \"{phrase}\"",
+        event_type="player_communication",
+        source_room_id=current_room.id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        observers=["player"]  # Only the speaker sees this event
+    ))
+    
+    # Event for the target player
+    events_generated.append(Event(
+        message=f"{player_char.name} whispers to you: \"{phrase}\"",
+        event_type="player_communication",
+        source_room_id=current_room.id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=target_player.id,
+        observers=["player"]  # Only the target player sees this event
+    ))
+    
+    return events_generated, feedback_messages
+
+def handle_shout_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handles a player shouting loudly, potentially heard in adjacent rooms."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    phrase = params.get("phrase")
+
+    if not phrase:
+        feedback_messages.append("Shout action requires a phrase to shout.")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to shout without specifying a phrase.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    if not current_room:
+        feedback_messages.append(f"Error: Player is in an unknown room (ID: {player_char.current_room_id}).")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} is in an unknown room ({player_char.current_room_id}) and cannot shout.",
+            event_type="system_error",
+            source_room_id="unknown",
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["game_master"]
+        ))
+        return events_generated, feedback_messages
+
+    feedback_messages.append(f"You shout: \"{phrase}\"")
+    
+    # Generate event for current room and adjacent rooms
+    events_generated.append(Event(
+        message=f"{player_char.name} shouts: \"{phrase}\"",
+        event_type="player_communication",
+        source_room_id=current_room.id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        observers=["player", "room_players", "adjacent_rooms"]  # Heard in current room and adjacent rooms
+    ))
+    
+    return events_generated, feedback_messages
+
+def calculate_help_cost(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> int:
+    """Calculate the actual cost for the help action based on parameters."""
+    # Extract the base cost value from CostConfig
+    if hasattr(action_config.cost, 'value'):
+        base_cost = action_config.cost.value
+    else:
+        base_cost = action_config.cost  # Fallback for integer costs
+    
+    # If a category is specified and not empty/whitespace, reduce cost by half
+    category = params.get("category")
+    if category and category.strip():
+        return base_cost // 2  # Half cost for category-specific help
+    
+    return base_cost  # Full cost for general help

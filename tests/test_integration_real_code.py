@@ -96,7 +96,7 @@ class TestRealCodeIntegration:
         assert events[0].observers == ["room_players"]
         
         # Verify it includes action prompt in feedback (example actions removed to avoid duplication)
-        assert "Available actions:" in feedback[0]
+        assert "Available actions by category:" in feedback[0]
         assert "Example actions:" not in feedback[0]  # Removed to avoid duplication
     
     def test_pickup_action_generates_events_real_code(self):

@@ -4,6 +4,7 @@ actions:
     name: look
     cost: 10
     description: Look around.
+    category: observation
     parameters:
       - name: target
         type: string
@@ -11,19 +12,24 @@ actions:
     requirements: []
     effects:
       - type: code_binding
-        function_module: motive.hooks.core_hooks
         function_name: look_at_target
         observers: ["player"]
   help:
     id: help
     name: help
-    cost: 10
-    description: Get help.
-    parameters: []
+    cost:
+      type: code_binding
+      function_name: calculate_help_cost
+      value: 1  # Base cost for help action (matches manual)
+    description: Get help with available actions.
+    category: system
+    parameters:
+      - name: category
+        type: string
+        description: Optional category to filter actions (e.g., 'movement', 'communication').
     requirements: []
     effects:
       - type: code_binding
-        function_module: motive.hooks.core_hooks
         function_name: generate_help_message
         observers: ["player"]
   move:
@@ -31,6 +37,7 @@ actions:
     name: move
     cost: 10
     description: Move in a specified direction.
+    category: movement
     parameters:
       - name: direction
         type: string
@@ -40,7 +47,6 @@ actions:
         direction_param: direction
     effects:
       - type: code_binding
-        function_module: motive.hooks.core_hooks
         function_name: handle_move_action
         observers: ["player"]
   say:
@@ -48,6 +54,7 @@ actions:
     name: say
     cost: 10
     description: Say something to other players in the room.
+    category: communication
     parameters:
       - name: phrase
         type: string
@@ -55,7 +62,6 @@ actions:
     requirements: []
     effects:
       - type: code_binding
-        function_module: motive.hooks.core_hooks
         function_name: handle_say_action
         observers: ["player", "room_players"]
   pass:
@@ -63,11 +69,11 @@ actions:
     name: pass
     cost: 0
     description: End your turn without taking any action.
+    category: system
     parameters: []
     requirements: []
     effects:
       - type: code_binding
-        function_module: motive.hooks.core_hooks
         function_name: handle_pass_action
         observers: ["player"]
   read:
@@ -75,6 +81,7 @@ actions:
     name: read
     cost: 5
     description: Read text from an object (like signs, books, etc.).
+    category: interaction
     parameters:
       - name: object_name
         type: string
@@ -85,6 +92,42 @@ actions:
         object_name_param: object_name
     effects:
       - type: code_binding
-        function_module: motive.hooks.core_hooks
         function_name: handle_read_action
         observers: ["player", "room_players"]
+  whisper:
+    id: whisper
+    name: whisper
+    cost: 10
+    description: Whisper privately to a specific player in the same room.
+    category: communication
+    parameters:
+      - name: player
+        type: string
+        description: The name of the player to whisper to.
+        required: true
+      - name: phrase
+        type: string
+        description: The phrase to whisper.
+        required: true
+    requirements:
+      - type: player_in_room
+        target_player_param: player
+    effects:
+      - type: code_binding
+        function_name: handle_whisper_action
+  shout:
+    id: shout
+    name: shout
+    cost: 10
+    description: Shout loudly, potentially heard in adjacent rooms.
+    category: communication
+    parameters:
+      - name: phrase
+        type: string
+        description: The phrase to shout.
+        required: true
+    requirements: []
+    effects:
+      - type: code_binding
+        function_name: handle_shout_action
+        observers: ["player", "room_players", "adjacent_rooms"]
