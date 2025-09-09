@@ -183,7 +183,7 @@ def handle_move_action(game_master: Any, player_char: PlayerCharacter, params: D
     
     # Generate exit event for players in the source room
     events_generated.append(Event(
-        message=f"{player_char.name} left the room.",
+        message=f"{player_char.name} left the room via {direction}.",
         event_type="player_exit",
         source_room_id=current_room.id,
         timestamp=datetime.now().isoformat(),
@@ -193,7 +193,7 @@ def handle_move_action(game_master: Any, player_char: PlayerCharacter, params: D
     
     # Generate enter event for players in the destination room
     events_generated.append(Event(
-        message=f"{player_char.name} entered the room.",
+        message=f"{player_char.name} entered the room from {direction}.",
         event_type="player_enter",
         source_room_id=destination_room.id,
         timestamp=datetime.now().isoformat(),
