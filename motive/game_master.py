@@ -393,6 +393,9 @@ class GameMaster:
 
     def _distribute_events(self):
         """Distributes generated events to relevant players based on observer scopes."""
+        if not self.event_queue:
+            return  # No events to distribute
+            
         for event in self.event_queue:
             # Ensure current_room exists for event distribution logic
             event_room = self.rooms.get(event.source_room_id)
@@ -423,10 +426,10 @@ class GameMaster:
                 # Add more observer types here as needed (e.g., target_player, target_object_owner)
 
                 if observes and player_char.id in self.player_observations:
-                    self.player_observations[player_char.id].append(event)
-                    self.game_logger.debug(f"Distributed event '{event.message}' to {player.name}.")
-                    # Log to game.log when an event is actually observed by a player
-                    self.game_logger.info(f"OBSERVED - Player {player.name} in {player_char.current_room_id} observed event from {event.source_room_id}: '{event.message}' (Type: {event.event_type})")
+                    # Don't let players observe their own events - they already get feedback
+                    if event.related_player_id != player_char.id:
+                        self.player_observations[player_char.id].append(event)
+                        self.game_logger.info(f"OBSERVED - Player {player.name} in {player_char.current_room_id} observed event from {event.source_room_id}: '{event.message}' (Type: {event.event_type})")
         
         self.event_queue.clear() # Clear the queue after distributing all events
 
@@ -447,16 +450,15 @@ class GameMaster:
                 self.game_logger.error(f"Character {player_char.name} is in an unknown room: {player_char.current_room_id}. Ending turn.")
                 break
 
-            # Distribute any events generated from previous actions/turns to all players before current player acts.
-            self._distribute_events()
+            # Events are now distributed immediately after each action execution
 
             # Gather observations for the current player
             player_observations = self.player_observations.get(player_char.id, [])
             observation_messages: List[str] = []
             if player_observations:
-                observation_messages.append("**New Observations:**")
+                observation_messages.append("**Recent Events:**")
                 for event in player_observations:
-                    observation_messages.append(f"- {event.message}")
+                    observation_messages.append(f"• {event.message}")
                 # Clear observations for this player after presenting them
                 self.player_observations[player_char.id] = []
 
@@ -484,15 +486,33 @@ class GameMaster:
                 char_type_id = player_char.id.split('_instance')[0]
                 character_assignment = f"You are {player_char.name}, a {self.game_character_types[char_type_id].name}.\nYour motive is: {player_char.motive}"
 
-                # Construct the first HumanMessage with character, motive, and observations
+                # Gather observations for the first interaction too
+                player_observations = self.player_observations.get(player_char.id, [])
+                observation_messages: List[str] = []
+                if player_observations:
+                    observation_messages.append("**Recent Events:**")
+                    for event in player_observations:
+                        observation_messages.append(f"• {event.message}")
+                    # Clear observations for this player after presenting them
+                    self.player_observations[player_char.id] = []
+
+                # Construct the first HumanMessage with character, motive, and initial room description
                 first_action_prompt = self._get_action_display(player_char, is_first_turn=True)
-                first_human_message_content = (
-                    f"{character_assignment}\n\n"
-                    f"Observations: {current_room_description}\n\n"
-                    f"{first_action_prompt}\n\n"
-                    f"Action Points: {player_char.action_points} AP\n\n"
+                first_human_message_parts = [
+                    character_assignment,
+                    f"Initial location: {current_room_description}"
+                ]
+                
+                if observation_messages:
+                    first_human_message_parts.append("\n".join(observation_messages))
+                
+                first_human_message_parts.extend([
+                    f"{first_action_prompt}",
+                    f"Action Points: {player_char.action_points} AP",
                     f"What do you do?"
-                )
+                ])
+                
+                first_human_message_content = "\n\n".join(first_human_message_parts)
 
                 system_msg = SystemMessage(content=system_prompt)
                 human_msg = HumanMessage(content=first_human_message_content)
@@ -602,19 +622,26 @@ class GameMaster:
                     action_specific_feedback: List[str] = []
                     if player_char.action_points <= 0:
                         action_specific_feedback.append("You have run out of Action Points for this turn. Cannot perform further actions.")
-                        all_actions_in_response_valid = False # No more actions can be processed
+                        # Don't set all_actions_in_response_valid = False for AP exhaustion - this is normal gameplay
                         break # Exit inner loop for actions
 
                     if action_config.cost > player_char.action_points:
                         action_specific_feedback.append(f"Action '{action_config.name}' costs {action_config.cost} AP, but you only have {player_char.action_points} AP. Skipping this action.")
                         self.game_logger.info(action_specific_feedback[-1])
-                        all_actions_in_response_valid = False
+                        # Don't set all_actions_in_response_valid = False for AP exhaustion - this is normal gameplay
                     else:
                         requirements_met, req_message, exit_data = self._check_requirements(player_char, action_config, params)
                         if requirements_met:
                             player_char.action_points -= action_config.cost
-                            action_effect_feedback, action_specific_feedback_list = self._execute_effects(player_char, action_config, params)
+                            action_events, action_specific_feedback_list = self._execute_effects(player_char, action_config, params)
                             action_specific_feedback.extend(action_specific_feedback_list)
+                            
+                            # Add generated events to the main event queue
+                            self.event_queue.extend(action_events)
+                            
+                            # Distribute events immediately after action execution
+                            self._distribute_events()
+                            
                             self.game_logger.info(f"Action '{action_config.name}' executed by {player_char.name} (cost: {action_config.cost} AP). Remaining AP: {player_char.action_points}")
                         else:
                             action_specific_feedback.append(f"Cannot perform '{action_config.name}': {req_message}. Skipping this action.")
@@ -654,6 +681,7 @@ class GameMaster:
                     # Log detailed information about what went wrong
                     self.game_logger.error(f"{player.name} had invalid/unexecutable actions in response. Turn ended.")
                     self.game_logger.error(f"Parsed actions were: {[(action.name, params) for action, params in parsed_actions]}")
+                    self.game_logger.error(f"Action feedback that caused failure: {response_feedback_messages}")
                     
                     # Send final penalty feedback
                     feedback_message = HumanMessage(content=penalty_feedback)

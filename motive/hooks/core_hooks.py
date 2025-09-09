@@ -174,22 +174,24 @@ def handle_move_action(game_master: Any, player_char: PlayerCharacter, params: D
     feedback_messages.append(f"You move to the '{destination_room.name}'.")
     feedback_messages.append(f"Destination: {destination_description}")
     
+    # Generate exit event for players in the source room
     events_generated.append(Event(
-        message=f"Player {player_char.name} moved from {current_room.name} to {destination_room.name}.",
-        event_type="player_movement",
-        source_room_id=current_room.id, # Event originated in the room they left
+        message=f"{player_char.name} left the room.",
+        event_type="player_exit",
+        source_room_id=current_room.id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["player", "room_players", "adjacent_rooms", "game_master"]
+        observers=["room_players"]  # Only players in the source room see the exit
     ))
-    # An additional event for the destination room's players, so they see the player arrive
+    
+    # Generate enter event for players in the destination room
     events_generated.append(Event(
-        message=f"Player {player_char.name} has entered the room.",
-        event_type="player_arrival",
-        source_room_id=destination_room.id, # Event is now in the new room
+        message=f"{player_char.name} entered the room.",
+        event_type="player_enter",
+        source_room_id=destination_room.id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["room_players"]
+        observers=["room_players"]  # Only players in the destination room see the enter
     ))
     
     return events_generated, feedback_messages
@@ -245,13 +247,13 @@ def handle_pickup_action(game_master: Any, player_char: PlayerCharacter, params:
 
     feedback_messages.append(f"You pick up the {obj_to_pickup.name}.")
     events_generated.append(Event(
-        message=f"Player {player_char.name} picked up {obj_to_pickup.name} from {current_room.name}.",
+        message=f"{player_char.name} picked up the {obj_to_pickup.name}.",
         event_type="object_pickup",
         source_room_id=current_room.id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
         related_object_id=obj_to_pickup.id,
-        observers=["player", "room_players", "game_master"]
+        observers=["room_players"]  # Only other players in the room see the pickup
     ))
     
     return events_generated, feedback_messages
@@ -276,12 +278,12 @@ def handle_say_action(game_master: Any, player_char: PlayerCharacter, params: Di
 
     feedback_messages.append(f"You say: \'{phrase}\'.")
     events_generated.append(Event(
-        message=f"Player {player_char.name} says: \"{phrase}\".",
+        message=f"{player_char.name} says: \"{phrase}\".",
         event_type="player_communication",
         source_room_id=player_char.current_room_id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["player", "room_players", "game_master"]
+        observers=["room_players"]  # Only other players in the room hear the speech
     ))
     
     return events_generated, feedback_messages
