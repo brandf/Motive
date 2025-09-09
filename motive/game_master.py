@@ -736,7 +736,7 @@ class GameMaster:
                 # Penalty for providing invalid actions
                 # Get valid action names for better feedback
                 valid_action_names = [action.name for action, _ in parsed_actions] if parsed_actions else []
-                core_actions = ["look", "move", "say", "pickup", "pass", "help"]
+                example_actions = self._get_example_actions()
                 
                 feedback_parts = [
                     f"You provided invalid actions: {', '.join(invalid_actions)}",
@@ -746,7 +746,7 @@ class GameMaster:
                 if valid_action_names:
                     feedback_parts.append(f"Valid actions in your response: {', '.join(valid_action_names)}")
                 else:
-                    feedback_parts.append(f"Available actions include: {', '.join(core_actions)}. Use 'help' for a complete list.")
+                    feedback_parts.append(f"Available actions include: {', '.join(example_actions)}. Use 'help' for a complete list.")
                 combined_feedback = "\n".join(feedback_parts)
                 player_char.action_points = 0 # End turn as penalty
                 
@@ -1052,13 +1052,61 @@ class GameMaster:
                 self.executed_hints[hint_id].add(player_name)
                 self.game_logger.info(f"Marked hint '{hint_id}' as executed by {player_name}")
 
+    def _get_example_actions(self) -> List[str]:
+        """Generate example actions dynamically from available actions."""
+        if not self.game_actions:
+            return ["look", "help"]  # Fallback if no actions loaded
+        
+        # Define priority categories for example actions
+        priority_categories = ["observation", "movement", "communication", "inventory", "interaction"]
+        
+        # Collect actions by category
+        actions_by_category = {}
+        for action_id, action_cfg in self.game_actions.items():
+            category = action_cfg.category or "other"
+            if category not in actions_by_category:
+                actions_by_category[category] = []
+            actions_by_category[category].append(action_cfg.name)
+        
+        # Build example actions list prioritizing core categories
+        example_actions = []
+        
+        # Add actions from priority categories first
+        for category in priority_categories:
+            if category in actions_by_category:
+                # Take the first action from each priority category
+                example_actions.append(actions_by_category[category][0])
+        
+        # Add help action if available
+        if "help" in self.game_actions:
+            example_actions.append("help")
+        
+        # Ensure we have at least a few actions
+        if len(example_actions) < 3:
+            # Add more actions from any category
+            for category, actions in actions_by_category.items():
+                if category not in priority_categories:
+                    example_actions.extend(actions[:2])  # Add up to 2 from each category
+                    if len(example_actions) >= 5:  # Limit to reasonable number
+                        break
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_actions = []
+        for action in example_actions:
+            if action not in seen:
+                seen.add(action)
+                unique_actions.append(action)
+        
+        return unique_actions[:5]  # Limit to 5 example actions
+
     def _get_action_display(self, player_char: PlayerCharacter, is_first_turn: bool = False, round_num: int = 1) -> str:
         """Get standardized action display text."""
-        # Only show core actions from core.yaml
-        core_actions = ["look", "move", "say", "pickup", "pass"]
+        # Generate example actions dynamically
+        example_actions = self._get_example_actions()
         
         # Create action display without AP info (AP will be shown separately)
-        action_display = f"Example actions: {', '.join(core_actions)}, help (for more available actions)."
+        action_display = f"Example actions: {', '.join(example_actions)}, help (for more available actions)."
         
         # Add applicable hints
         player_name = None
