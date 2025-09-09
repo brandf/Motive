@@ -40,7 +40,10 @@ def test_move_action_includes_direction_in_events():
     game_master.rooms = {"room1": room1, "room2": room2}
     
     # Test move action
-    events, feedback = handle_move_action(game_master, player_char, {"direction": "North Exit"})
+    class MockActionConfig:
+        pass
+    action_config = MockActionConfig()
+    events, feedback = handle_move_action(game_master, player_char, action_config, {"direction": "North Exit"})
     
     # Verify we get 2 events (exit and enter)
     assert len(events) == 2
@@ -89,13 +92,18 @@ def test_move_action_with_multiple_exits():
         "east_room": Room("east_room", "East Room", "East room", {}, {})
     }
     
+    # Create mock action config
+    class MockActionConfig:
+        pass
+    action_config = MockActionConfig()
+    
     # Test moving north
-    events, _ = handle_move_action(game_master, player_char, {"direction": "North Exit"})
+    events, _ = handle_move_action(game_master, player_char, action_config, {"direction": "North Exit"})
     assert "left the room via North Exit" in events[0].message
     assert "entered the room from North Exit" in events[1].message
     
     # Test moving south
     player_char.current_room_id = "multi_exit_room"  # Reset position
-    events, _ = handle_move_action(game_master, player_char, {"direction": "South Exit"})
+    events, _ = handle_move_action(game_master, player_char, action_config, {"direction": "South Exit"})
     assert "left the room via South Exit" in events[0].message
     assert "entered the room from South Exit" in events[1].message

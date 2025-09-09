@@ -54,7 +54,10 @@ class TestRealCodeIntegration:
         game_master.rooms = {"test_room": room}
         
         # Call the REAL look_at_target function
-        events, feedback = look_at_target(game_master, player_char, {})
+        class MockActionConfig:
+            pass
+        action_config = MockActionConfig()
+        events, feedback = look_at_target(game_master, player_char, action_config, {})
         
         # Verify it generates events for room_players scope
         assert len(events) == 1  # One event for the room look (duplicate removed)
@@ -88,7 +91,10 @@ class TestRealCodeIntegration:
         }
         
         # Call the REAL generate_help_message function
-        events, feedback = generate_help_message(game_master, player_char, {})
+        class MockActionConfig:
+            pass
+        action_config = MockActionConfig()
+        events, feedback = generate_help_message(game_master, player_char, action_config, {})
         
         # Verify it generates events for room_players scope
         assert len(events) == 1
@@ -132,13 +138,22 @@ class TestRealCodeIntegration:
         game_master.rooms = {"test_room": room}
         
         # Call the REAL handle_pickup_action function
-        events, feedback = handle_pickup_action(game_master, player_char, {"object_name": "test item"})
+        class MockActionConfig:
+            pass
+        action_config = MockActionConfig()
+        events, feedback = handle_pickup_action(game_master, player_char, action_config, {"object_name": "test item"})
         
-        # Verify it generates events for room_players scope
-        assert len(events) == 1
-        assert events[0].message == "TestPlayer picked up the test item."
-        assert events[0].observers == ["room_players"]
-        assert events[0].event_type == "object_pickup"
+        # Verify it generates events for multiple scopes
+        assert len(events) == 3
+        # Check that we have events for player, room_players, and adjacent_rooms
+        observers = [event.observers[0] for event in events]
+        assert "player" in observers
+        assert "room_players" in observers  
+        assert "adjacent_rooms" in observers
+        # Check that we have the right event types
+        event_types = [event.event_type for event in events]
+        assert "item_pickup" in event_types
+        assert "player_action" in event_types
     
     def test_read_action_works_real_code(self):
         """Test that the real handle_read_action function works."""
@@ -173,7 +188,10 @@ class TestRealCodeIntegration:
         game_master.rooms = {"test_room": room}
         
         # Call the REAL handle_read_action function
-        events, feedback = handle_read_action(game_master, player_char, {"object_name": "wooden sign"})
+        class MockActionConfig:
+            pass
+        action_config = MockActionConfig()
+        events, feedback = handle_read_action(game_master, player_char, action_config, {"object_name": "wooden sign"})
         
         # Verify it works correctly
         assert len(events) == 1
@@ -213,8 +231,13 @@ class TestRealCodeIntegration:
         game_master = MagicMock()
         game_master.rooms = {"test_room": room}
         
+        # Create mock action config
+        class MockActionConfig:
+            pass
+        action_config = MockActionConfig()
+        
         # Call the REAL handle_read_action function
-        events, feedback = handle_read_action(game_master, player_char, {"object_name": "rock"})
+        events, feedback = handle_read_action(game_master, player_char, action_config, {"object_name": "rock"})
         
         # Verify it handles the no-text case
         assert len(events) == 1

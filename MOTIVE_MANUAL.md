@@ -77,6 +77,49 @@ Actions are broadly categorized as:
 
 Performing an action results in changes to the game state (e.g., an object moves from a room to an inventory) and the generation of events. These events are then processed by the GM to determine which players observe them.
 
+### Planned Core Actions
+
+The following core actions are planned for future implementation to enhance gameplay depth and object interaction:
+
+#### **Throw Action**
+- **Syntax:** `> throw <inventory object> <exit>`
+- **Description:** Removes an object from the player's inventory and places it in an adjacent room via the specified exit, rather than the current room like 'drop'
+- **Strategic Use:** Allows players to place objects in specific locations without being present, enabling tactical positioning and indirect object manipulation
+
+#### **Use Action (Generic Object Manipulation)**
+- **Syntax:** `> use <inventory object>`
+- **Description:** A generic way to manipulate object states in an object-specific manner defined declaratively in YAML configuration
+- **Examples:** 
+  - `> use torch` could light the torch by adding a 'burning' tag to the object
+  - `> use torch` could also extinguish the torch if it's already burning (conditional behavior)
+- **Benefits:** Reduces the need for specific actions like 'light torch' or 'extinguish torch' by using conditional logic based on object state
+
+#### **Look Object Action (Enhanced Object Interaction)**
+- **Syntax:** `> look <object>`
+- **Description:** Operates generically in an object-specific way, similar to the 'use' action proposal
+- **Features:**
+  - Object descriptions can be state-dependent (e.g., "The torch flickers with flame" vs "The torch is cold and unlit")
+  - Descriptions can be based on tags on the room the object is in using conditional declarations
+  - Enables rich, contextual object descriptions that change based on game state
+
+#### **Declarative Object Behavior System**
+- **Concept:** Objects will define their behavior declaratively in YAML using conditional logic (reusing the 'when' system from hints)
+- **Benefits:** 
+  - Fewer, more generic actions instead of specific actions for each object type
+  - Flexible object behavior that can adapt to game state
+  - Maintainable configuration-driven object interactions
+- **Example Configuration:**
+  ```yaml
+  torch:
+    use_conditions:
+      - when: {object_tags: ["unlit"]}
+        action: "light_torch"
+        effects: [add_tag: "burning", remove_tag: "unlit"]
+      - when: {object_tags: ["burning"]}
+        action: "extinguish_torch" 
+        effects: [add_tag: "unlit", remove_tag: "burning"]
+  ```
+
 ## Communication and Social Engineering
 
 Communication between players is a vital component of Motive, routed entirely through the Game Master (GM). The GM does not interpret the content of player communications but plays a crucial role in determining their observability. This controlled dissemination of information is central to the game's social engineering aspect.

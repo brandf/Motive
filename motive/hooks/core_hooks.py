@@ -5,7 +5,7 @@ from motive.player import PlayerCharacter
 from motive.config import Event
 from datetime import datetime
 
-def generate_help_message(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def generate_help_message(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Generates a help message with available actions, optionally filtered by category."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -60,7 +60,7 @@ def generate_help_message(game_master: Any, player_char: PlayerCharacter, params
 
     return events_generated, feedback_messages
 
-def look_at_target(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def look_at_target(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Provides a detailed description of the current room or a specified object/character."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -130,7 +130,7 @@ def look_at_target(game_master: Any, player_char: PlayerCharacter, params: Dict[
     
     return events_generated, feedback_messages
 
-def handle_move_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_move_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles the player character movement between rooms."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -297,7 +297,7 @@ def handle_pickup_action(game_master: Any, player_char: PlayerCharacter, params:
     
     return events_generated, feedback_messages
 
-def handle_say_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_say_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles a player saying something to other players in the room."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -327,7 +327,7 @@ def handle_say_action(game_master: Any, player_char: PlayerCharacter, params: Di
     
     return events_generated, feedback_messages
 
-def handle_pass_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_pass_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles the player passing their turn."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -347,7 +347,7 @@ def handle_pass_action(game_master: Any, player_char: PlayerCharacter, params: D
     
     return events_generated, feedback_messages
 
-def handle_read_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_read_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles a player reading text from an object."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -413,7 +413,7 @@ def handle_read_action(game_master: Any, player_char: PlayerCharacter, params: D
     
     return events_generated, feedback_messages
 
-def handle_whisper_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_whisper_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles a player whispering privately to a specific player in the same room."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -504,7 +504,7 @@ def handle_whisper_action(game_master: Any, player_char: PlayerCharacter, params
     
     return events_generated, feedback_messages
 
-def handle_shout_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_shout_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles a player shouting loudly, potentially heard in adjacent rooms."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -563,3 +563,76 @@ def calculate_help_cost(game_master: Any, player_char: PlayerCharacter, action_c
         return base_cost // 2  # Half cost for category-specific help
     
     return base_cost  # Full cost for general help
+
+def handle_pickup_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handle the pickup action - move an object from room to player inventory."""
+    object_name = params.get("object_name")
+    if not object_name:
+        return [], ["Error: No object specified to pick up."]
+    
+    # Get the current room
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    if not current_room:
+        return [], [f"Error: Character is in an unknown room: {player_char.current_room_id}."]
+    
+    # Find the object in the room
+    target_object = None
+    for obj_id, obj in current_room.objects.items():
+        if obj.name.lower() == object_name.lower():
+            target_object = obj
+            break
+    
+    if not target_object:
+        return [], [f"Error: '{object_name}' not found in the room."]
+    
+    # Move object from room to player inventory
+    current_room.remove_object(target_object.id)
+    player_char.add_item_to_inventory(target_object)
+    
+    # Generate events
+    events = []
+    feedback_messages = []
+    
+    # Generate timestamp
+    from datetime import datetime
+    timestamp = datetime.now().isoformat()
+    
+    # Event for the player who picked up the item
+    pickup_event = Event(
+        message=f"You pick up the {target_object.name}.",
+        event_type="item_pickup",
+        source_room_id=player_char.current_room_id,
+        timestamp=timestamp,
+        related_object_id=target_object.id,
+        related_player_id=player_char.id,
+        observers=["player"]
+    )
+    events.append(pickup_event)
+    
+    # Event for other players in the room
+    room_pickup_event = Event(
+        message=f"{player_char.name} picks up the {target_object.name}.",
+        event_type="player_action",
+        source_room_id=player_char.current_room_id,
+        timestamp=timestamp,
+        related_object_id=target_object.id,
+        related_player_id=player_char.id,
+        observers=["room_players"]
+    )
+    events.append(room_pickup_event)
+    
+    # Event for adjacent rooms (optional - they might hear the pickup)
+    adjacent_pickup_event = Event(
+        message=f"{player_char.name} picks up something.",
+        event_type="player_action",
+        source_room_id=player_char.current_room_id,
+        timestamp=timestamp,
+        related_object_id=target_object.id,
+        related_player_id=player_char.id,
+        observers=["adjacent_rooms"]
+    )
+    events.append(adjacent_pickup_event)
+    
+    feedback_messages.append(f"You pick up the {target_object.name}.")
+    
+    return events, feedback_messages

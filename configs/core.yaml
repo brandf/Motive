@@ -130,4 +130,21 @@ actions:
     effects:
       - type: code_binding
         function_name: handle_shout_action
+  pickup:
+    id: pickup
+    name: pickup
+    cost: 10
+    description: Pick up an object from the current room.
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to pick up.
+        required: true
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: handle_pickup_action
         observers: ["player", "room_players", "adjacent_rooms"]

@@ -435,7 +435,7 @@ class GameMaster:
                         import motive.hooks.core_hooks as core_hooks
                         hook_function = getattr(core_hooks, effect.function_name)
                         
-                        hook_events_and_feedback = hook_function(self, player_char, params) # Expecting a tuple: (List[Event], List[str])
+                        hook_events_and_feedback = hook_function(self, player_char, action_config, params) # Expecting a tuple: (List[Event], List[str])
                         hook_events = hook_events_and_feedback[0]
                         hook_feedback = hook_events_and_feedback[1]
                         

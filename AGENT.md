@@ -90,9 +90,14 @@ Before committing changes, verify all items are complete:
 
 #### **Configuration & Documentation**
 - [ ] Configuration files updated correctly (e.g., `configs/core.yaml`, `configs/game.yaml`)
-- [ ] Temporary hint configurations removed from `configs/game.yaml` (if added for testing)
+- [ ] **Temporary hint configurations removed from `configs/game.yaml`** (if added for testing)
 - [ ] Documentation updated: `AGENT.md`, `VIBECODER.md`, `README.md` as needed
 - [ ] New lessons learned added to appropriate documentation files
+
+#### **Pre-Validation Checklist (Before `motive.main`)**
+- [ ] **Add temporary hints for validation**: Add appropriate hints to `configs/game.yaml` to guide LLM players to test the specific functionality being validated
+- [ ] **Verify hint syntax**: Ensure hint configurations are valid and won't cause parsing errors
+- [ ] **Target specific actions**: Hints should direct players to execute the exact actions needed to validate the new feature or bug fix
 
 #### **Code Organization**
 - [ ] New test files created for new functionality
@@ -160,14 +165,28 @@ Current core actions include: `move`, `say`, `look`, `help`, `whisper`, `shout`,
 - **Movement observations must include direction**: Exit/enter events should specify which direction players moved
 - **Turn end confirmation handling**: During turn end confirmation, only accept "continue" or "quit" actions
 
+### Test-Driven Development (TDD) Workflow
+- **Write tests first**: When implementing new features or fixing bugs, always write tests first with the expectation that they will fail because the feature hasn't been implemented yet
+- **Red-Green-Refactor cycle**: 
+  1. **Red**: Write failing tests that describe the desired behavior
+  2. **Green**: Implement the feature/bug fix to make tests pass
+  3. **Refactor**: Improve code while keeping tests green
+- **Learn from failures**: If something goes wrong during implementation, always walk away with a lesson to add to `AGENT.md` for how to prevent the mistake in the future
+- **Test coverage before implementation**: Ensure comprehensive test coverage exists before writing production code
+
 ### Testing Specifics
 - **Check import paths when writing tests**: Verify correct import paths by checking where classes are actually defined
 - **Test edge cases in configuration evaluation**: Test missing fields, empty values, and invalid combinations
 - **Test both positive and negative cases**: Include boundary conditions and edge cases
 - **Test requirement type implementations**: When adding new requirement types (like `player_in_room`), create integration tests that verify the requirement checking logic works correctly with real player and room data. Test both success and failure cases.
 - **Verify Pydantic field names**: When working with configuration, always check the actual field names in the Pydantic model definitions rather than assuming names (e.g., `target_player_param` not `player_name_param`).
+- **Inventory security is critical**: Always create comprehensive security tests for inventory management actions (pickup, drop, give, trade). Test for object duplication, unauthorized access, malicious input, and cross-room exploits.
+- **Use hints strategically for validation**: Add temporary hints to `configs/game.yaml` before running `motive.main` to ensure LLM players test the specific functionality being validated. Clean up hints before committing to maintain a clean production state.
+- **Tests should not depend on specific game.yaml content**: Tests that depend on specific configurations in `game.yaml` are fragile and will break whenever the configuration changes. Design tests to be independent of configuration content or use test-specific configurations.
 - **Don't ask permission for high-confidence operations**: When confidence is 8+ and rationale is provided, just run the operation (like `motive.main`). The user will reject if they don't want it run.
 - **Don't ask permission for high-confidence git commits**: When commit assessment is 9-10/10, just proceed with staging, committing, and pushing. The user will reject if they don't want it.
+- **Don't ask permission for hint cleanup and commits**: After successful `motive.main` validation, automatically clean up temporary hints and commit changes. The user will reject if they don't want it.
+- **Use platform-appropriate commands**: Always test/verify what platform we're on and use appropriate bash and/or PowerShell commands. On Windows, use PowerShell syntax (`;` instead of `&&` for command chaining).
 - **Batch git operations**: Use `&&` to chain git commands (e.g., `git add . && git commit -m "message" && git push`) to reduce approval requests.
 
 ### Configuration Security
