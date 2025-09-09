@@ -152,7 +152,9 @@ Before committing changes, verify all items are complete:
 
 **Core actions** are actions that are defined in all themes and editions of Motive. These are fundamental actions available to all players regardless of the game theme or edition. They form the basic interaction layer that all games share.
 
-Current core actions include: `move`, `say`, `look`, `help`, `whisper`, `shout`, `pickup`, `drop`, `inventory`, `read`, `continue`, `quit`.
+Current core actions include: `move`, `say`, `look` (including `look inventory`), `help`, `whisper`, `shout`, `pickup`, `drop`, `read`, `pass`.
+
+**Note**: The `inventory` action has been integrated into the `look` action as `look inventory` to follow the verb + noun design principle.
 
 ## Detailed Implementation Guidelines
 
@@ -196,6 +198,11 @@ Current core actions include: `move`, `say`, `look`, `help`, `whisper`, `shout`,
 - **Design for extensibility**: Include placeholder fields for future expansion even if not immediately implemented
 - **Unify related configuration fields**: Integrate similar concepts into single structured fields
 - **Use declarative over imperative configuration**: Describe what should happen rather than how to do it
+
+### Design Principles
+- **Actions should be verbs, parameters should be nouns**: Follow the pattern of `look inventory`, `pickup sword`, `move north` rather than `inventory`, `pickup sword`, `move north`
+- **Consistent naming conventions**: Use clear, descriptive names that follow established patterns
+- **Extend existing actions over creating new ones**: When possible, extend existing actions (like `look inventory`) rather than creating redundant actions
 
 ## Real-World Issue Resolution Workflow
 

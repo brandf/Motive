@@ -25,7 +25,7 @@ To get your local development environment set up and running with Motive, follow
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Motive.git  # Replace with your actual repo URL
+git clone https://github.com/brandf/Motive.git
 cd Motive
 ```
 
@@ -184,17 +184,27 @@ Players communicate with the Game Master (GM) through natural language messages.
 *   **Multiple Actions:** A single player response can contain multiple action lines. These actions will be executed sequentially by the GM.
 *   **Invalid Actions/No Actions Penalty:** If a player's response contains no lines prefixed with `>` or if any parsed action is invalid (e.g., unknown action name, incorrect parameters), the player's turn will immediately end, as if they had spent all their action points. This is a penalty for not following the action syntax rules.
 
+### Current Available Actions:
+
+*   **Movement**: `look`, `move <direction>`
+*   **Communication**: `say <phrase>`, `whisper <player> <phrase>`, `shout <phrase>`
+*   **Inventory**: `pickup <object>`, `drop <object>`, `look inventory`
+*   **Interaction**: `read <object>`, `help [category]`
+*   **System**: `pass`
+
 ### Examples:
 
 ```
 Hello GM, I'd like to do a couple of things.
 > look
-> pick up rusty sword
+> pickup rusty sword
+> look inventory
 I think I'll try to find a way out after that.
 ```
 
 ```
 > say "Is anyone else here?"
+> whisper Hero "Do you have the key?"
 ```
 
 ## Running Tests
@@ -207,6 +217,10 @@ pip install -e .
 
 # Then run the tests
 pytest
+
+# Run specific test categories
+pytest tests/test_pickup_action.py -v
+pytest tests/test_inventory_constraints.py -v
 ```
 
 ## Contribution
@@ -217,6 +231,21 @@ We welcome contributions to Motive! If you're interested in improving the platfo
 
 For details on how the game works and its mechanics, please refer to the [MANUAL.md](MANUAL.md).
 
+## Configuration Analysis
+
+Use the included configuration analysis tool to explore available actions, objects, and game elements:
+
+```bash
+# Show all available actions
+python utilities/analyze-configs.py -A
+
+# Show all objects in fantasy theme
+python utilities/analyze-configs.py -c configs/themes/fantasy/fantasy.yaml -O
+
+# Show complete configuration summary
+python utilities/analyze-configs.py -a
+```
+
 ## Development Practices
 
 To keep engineering quality high and avoid repeating mistakes, we maintain a living guide of lessons learned. Before implementing or updating features/tests, review:
@@ -226,6 +255,34 @@ To keep engineering quality high and avoid repeating mistakes, we maintain a liv
 It covers testing philosophy (favor integration tests over heavy mocking), logging/encoding standards, action parsing contracts, event/observation timing, AP handling, and other conventions used across the codebase.
 
 **If you're an LLM reading this, please read AGENT.md next** - it contains essential guidance for working effectively on this project.
+
+## Current Features
+
+### Inventory Constraint System
+
+Motive includes a sophisticated inventory constraint system that prevents object duplication and ensures realistic gameplay:
+
+- **Size Requirements**: Objects can require specific player sizes (tiny, small, medium, large, huge)
+- **Class Requirements**: Items can be restricted to specific character classes (warrior, mage, rogue)
+- **Level Requirements**: Powerful items require minimum player levels
+- **Custom Constraints**: Complex constraints defined in object properties
+- **Immovable Objects**: Objects that cannot be moved (fountains, statues)
+
+### Action Point System
+
+Players have limited Action Points (AP) per turn, creating strategic decision-making:
+
+- **Default AP**: 20 AP per turn
+- **Action Costs**: Most actions cost 10 AP, system actions cost less
+- **AP Exhaustion**: Clear feedback when actions are skipped due to insufficient AP
+
+### Observability System
+
+Actions generate events that may or may not be observed by other players:
+
+- **Private Actions**: Some actions (like `look inventory`) are only visible to the acting player
+- **Room-Scoped Actions**: Actions like `say` are visible to all players in the same room
+- **Adjacent Room Actions**: Actions like `pickup` may be visible to players in adjacent rooms
 
 ## Future Development: Environment Generation and Training Data
 

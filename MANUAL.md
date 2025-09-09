@@ -69,56 +69,91 @@ Players communicate with the Game Master (GM) through natural language messages.
 
 ### Action Categories
 
-Actions are broadly categorized as:
+Actions are organized into the following categories:
 
-1.  **Common Actions:** These are general actions available to all players. Examples include: "say" (to speak to everyone in the room), "whisper" (to speak privately to a specific player), "shout" (to speak loudly, potentially heard in adjacent rooms), "pick up" (to add an object from the room to inventory), "drop" (to place an object from inventory into the current room), and "move" (to traverse an exit).
-2.  **Character-Specific Actions:** These actions are unique to certain character types, reflecting their abilities or roles. Examples might include: "steal," "heal," or "arrest."
-3.  **Inventory-Enabled Actions:** These actions require a specific object to be present in the player's inventory to be performed. Examples include: "attack <target> with <weapon>," or "unlock <door> with <key>."
+1.  **Movement**: Actions for navigating the game world (`move`, `look`)
+2.  **Communication**: Actions for player-to-player interaction (`say`, `whisper`, `shout`)
+3.  **Inventory**: Actions for managing carried items (`pickup`, `drop`, `look inventory`)
+4.  **Interaction**: Actions for interacting with objects (`read`)
+5.  **System**: Actions for game management (`help`, `pass`)
 
-Performing an action results in changes to the game state (e.g., an object moves from a room to an inventory) and the generation of events. These events are then processed by the GM to determine which players observe them.
+### Action Design Principles
 
-### Planned Core Actions
+Motive follows a consistent design pattern:
+- **Actions are verbs**: Commands like `look`, `pickup`, `move`
+- **Parameters are nouns**: Targets like `inventory`, `sword`, `north`
+- **Costs are balanced**: Most actions cost 10 AP, with system actions costing less
+- **Requirements are declarative**: Actions specify what conditions must be met
+- **Effects are observable**: Actions generate events that other players may observe
 
-The following core actions are planned for future implementation to enhance gameplay depth and object interaction:
+Performing an action results in changes to the game state and the generation of events. These events are then processed by the GM to determine which players observe them, creating the observability mechanic that drives strategic gameplay.
+
+### Current Core Actions
+
+The following core actions are currently implemented and available to all players:
+
+#### **Movement Actions**
+- **`move`**: Move in a specified direction through room exits
+- **`look`**: Look around the current room or examine specific objects
+  - **Special syntax**: `> look inventory` - View your carried items
+
+#### **Communication Actions**
+- **`say`**: Speak to all players in the same room
+- **`whisper`**: Send a private message to a specific player in the same room
+- **`shout`**: Speak loudly, potentially heard in adjacent rooms
+
+#### **Inventory Actions**
+- **`pickup`**: Pick up an object from the current room (subject to inventory constraints)
+- **`drop`**: Drop an object from your inventory into the current room
+- **`look inventory`**: View your carried items and their properties
+
+#### **Interaction Actions**
+- **`read`**: Read text from objects like signs or books
+- **`help`**: Get help with available actions (costs 1 AP)
+- **`pass`**: End your turn without taking any action (costs 0 AP)
+
+### Inventory Constraint System
+
+Objects in Motive can have various constraints that prevent them from being picked up or transferred:
+
+#### **Constraint Types**
+- **`immovable`**: Object cannot be moved (e.g., fountains, statues)
+- **`too_heavy`**: Object is too heavy for the player to carry
+- **`magically_bound`**: Object is bound to a location by magic
+- **`requires_size`**: Player must be a certain size (tiny, small, medium, large, huge)
+- **`requires_class`**: Player must be a specific class (warrior, mage, rogue, etc.)
+- **`requires_level`**: Player must be a certain level or higher
+- **`custom_constraints`**: Complex constraints defined in object properties
+
+#### **Constraint Examples**
+- A `Legendary Sword` requires level 15+ to wield
+- `Warrior's Armor` can only be worn by warrior-class characters
+- A `Huge Boulder` requires large or huge size to move
+- An `Elven Artifact` has custom constraints requiring elf race and good alignment
+
+### Planned Future Actions
+
+The following actions are planned for future implementation:
 
 #### **Throw Action**
 - **Syntax:** `> throw <inventory object> <exit>`
-- **Description:** Removes an object from the player's inventory and places it in an adjacent room via the specified exit, rather than the current room like 'drop'
-- **Strategic Use:** Allows players to place objects in specific locations without being present, enabling tactical positioning and indirect object manipulation
+- **Description:** Removes an object from the player's inventory and places it in an adjacent room via the specified exit
+- **Strategic Use:** Allows tactical positioning without being present
 
 #### **Use Action (Generic Object Manipulation)**
 - **Syntax:** `> use <inventory object>`
-- **Description:** A generic way to manipulate object states in an object-specific manner defined declaratively in YAML configuration
+- **Description:** Generic object state manipulation defined declaratively in YAML
 - **Examples:** 
-  - `> use torch` could light the torch by adding a 'burning' tag to the object
-  - `> use torch` could also extinguish the torch if it's already burning (conditional behavior)
-- **Benefits:** Reduces the need for specific actions like 'light torch' or 'extinguish torch' by using conditional logic based on object state
+  - `> use torch` could light/extinguish based on current state
+  - `> use key` could unlock doors
 
-#### **Look Object Action (Enhanced Object Interaction)**
+#### **Give/Trade Actions**
+- **Syntax:** `> give <object> to <player>` / `> trade <object> for <object> with <player>`
+- **Description:** Safe item transfer between players with queued observation system
+
+#### **Enhanced Look Action**
 - **Syntax:** `> look <object>`
-- **Description:** Operates generically in an object-specific way, similar to the 'use' action proposal
-- **Features:**
-  - Object descriptions can be state-dependent (e.g., "The torch flickers with flame" vs "The torch is cold and unlit")
-  - Descriptions can be based on tags on the room the object is in using conditional declarations
-  - Enables rich, contextual object descriptions that change based on game state
-
-#### **Declarative Object Behavior System**
-- **Concept:** Objects will define their behavior declaratively in YAML using conditional logic (reusing the 'when' system from hints)
-- **Benefits:** 
-  - Fewer, more generic actions instead of specific actions for each object type
-  - Flexible object behavior that can adapt to game state
-  - Maintainable configuration-driven object interactions
-- **Example Configuration:**
-  ```yaml
-  torch:
-    use_conditions:
-      - when: {object_tags: ["unlit"]}
-        action: "light_torch"
-        effects: [add_tag: "burning", remove_tag: "unlit"]
-      - when: {object_tags: ["burning"]}
-        action: "extinguish_torch" 
-        effects: [add_tag: "unlit", remove_tag: "burning"]
-  ```
+- **Description:** State-dependent object descriptions that change based on object tags and room conditions
 
 ## Communication and Social Engineering
 
