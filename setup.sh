@@ -103,6 +103,14 @@ if [ $? -ne 0 ]; then
 fi
 echo_color green "Development dependencies installed."
 
+echo_color blue "Installing project in editable mode..."
+"$VENV_PIP" install -e .
+if [ $? -ne 0 ]; then
+    echo_color red "Failed to install project in editable mode."
+    exit 1
+fi
+echo_color green "Project installed in editable mode."
+
 
 # --- Configuration and Logs Setup ---
 echo_color blue "\n--- Setting up configuration and logs ---"

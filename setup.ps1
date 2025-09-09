@@ -22,9 +22,9 @@
 
 # --- Configuration ---
 $VenvName = "venv"
-$PythonExe = "python.exe" # Default for Windows
+$PythonExe = "py" # Use py launcher for Windows
 $ConfigFileName = "config.yaml"
-$EnvExampleName = "env.example"
+$EnvExampleName = "env.example.txt"
 $DotEnvName = ".env"
 $LogsDir = "logs"
 $RequirementsFile = "requirements.txt"
@@ -59,7 +59,19 @@ function Check-Command {
 # --- Pre-requisite Checks ---
 Write-Color Blue "--- Checking system prerequisites ---"
 Check-Command $PythonExe
-Check-Command "pip.exe" # Check for pip executable directly
+# Check for pip through Python launcher
+try {
+    & $PythonExe -m pip --version | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Color Red "Error: pip is not available through '$PythonExe -m pip'."
+        Write-Color Red "Please ensure pip is installed with your Python installation."
+        exit 1
+    }
+} catch {
+    Write-Color Red "Error: pip is not available through '$PythonExe -m pip'."
+    Write-Color Red "Please ensure pip is installed with your Python installation."
+    exit 1
+}
 
 # Ensure Python version is suitable
 try {
@@ -93,9 +105,9 @@ if ($LASTEXITCODE -ne 0) {
 Write-Color Green "Virtual environment created."
 
 # Define paths to venv executables
-$VenvPython = Join-Path $VenvName "Scripts" $PythonExe
-$VenvPip = Join-Path $VenvName "Scripts" "pip.exe"
-$VenvActivateScript = Join-Path $VenvName "Scripts" "Activate.ps1"
+$VenvPython = Join-Path (Join-Path $VenvName "Scripts") "python.exe"
+$VenvPip = Join-Path (Join-Path $VenvName "Scripts") "pip.exe"
+$VenvActivateScript = Join-Path (Join-Path $VenvName "Scripts") "Activate.ps1"
 
 # --- Install Dependencies ---
 Write-Color Blue "`n--- Installing dependencies ---"
@@ -118,6 +130,14 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 Write-Color Green "Development dependencies installed."
+
+Write-Color Blue "Installing project in editable mode..."
+& $VenvPip install -e .
+if ($LASTEXITCODE -ne 0) {
+    Write-Color Red "Failed to install project in editable mode."
+    exit 1
+}
+Write-Color Green "Project installed in editable mode."
 
 # --- Configuration and Logs Setup ---
 Write-Color Blue "`n--- Setting up configuration and logs ---"

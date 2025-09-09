@@ -18,7 +18,7 @@ To get your local development environment set up and running with Motive, follow
 
 ### Prerequisites
 
-*   **Python 3.10+**: Ensure you have a compatible Python version installed.
+*   **Python 3.10+**: Ensure you have a compatible Python version installed and added to your system PATH.
 *   **Git**: For cloning the repository.
 *   **API Keys**: Access to API keys for your desired LLM providers (e.g., OpenAI, Google Generative AI, Anthropic). Refer to `env.example.txt` and `config.yaml`.
 
@@ -29,9 +29,39 @@ git clone https://github.com/YOUR_USERNAME/Motive.git  # Replace with your actua
 cd Motive
 ```
 
-### 2. Set up Virtual Environment
+### 2. Quick Setup (Automated)
 
-It's highly recommended to use a virtual environment to manage project dependencies.
+The easiest way to set up the project is using the provided setup scripts:
+
+#### Windows (PowerShell)
+
+**First, install Python if you haven't already:**
+1. Download Python 3.10+ from https://www.python.org/downloads/
+2. **Important**: During installation, check "Add Python to PATH"
+3. Verify installation: `python --version` and `pip --version`
+
+**Then run the setup script:**
+```powershell
+# Fix PowerShell execution policy (run as Administrator if needed)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Run the automated setup script
+./setup.ps1
+```
+
+#### macOS/Linux (Bash)
+
+```bash
+# Make the script executable and run it
+chmod +x setup.sh
+./setup.sh
+```
+
+### 3. Manual Setup (Alternative)
+
+If you prefer to set up manually or the automated scripts don't work:
+
+#### Create Virtual Environment
 
 ```bash
 python -m venv venv
@@ -41,31 +71,38 @@ python -m venv venv
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
-
-Install the required production and development dependencies:
+#### Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
+pip install -e .  # Install project in editable mode
 ```
 
-### 4. Install Project in Editable Mode
-
-This makes your `motive` package discoverable for development and testing:
+#### Set Up Configuration
 
 ```bash
-pip install -e .
+# Copy environment template
+# On Windows:
+copy env.example.txt .env
+# On macOS/Linux:
+cp env.example.txt .env
+
+# Create logs directory
+mkdir logs
 ```
 
-### 5. Configure API Keys
+### 4. Configure API Keys
 
-Create a `.env` file in the project root based on `env.example.txt` and fill in your actual API keys as instructed.
-
+1. Open the `.env` file in a text editor
+2. Replace the placeholder values with your actual API keys:
+   - `OPENAI_API_KEY` - Get from https://platform.openai.com/api-keys
+   - `GOOGLE_API_KEY` - Get from https://console.cloud.google.com/
+   - `ANTHROPIC_API_KEY` - Get from https://console.anthropic.com/
 
 **Note**: Never commit your `.env` file to version control.
 
-### 6. Configure Game (Optional)
+### 5. Configure Game (Optional)
 
 Review and modify `config.yaml` to adjust game settings, players, and LLM models. Ensure the models specified are compatible with your chosen providers and available in your region/plan.
 
@@ -74,8 +111,66 @@ Review and modify `config.yaml` to adjust game settings, players, and LLM models
 To start the game:
 
 ```bash
+# Activate virtual environment (if not already active)
+# On Windows:
+.\venv\Scripts\Activate.ps1
+# On macOS/Linux:
+source venv/bin/activate
+
+# Run the application
 python -m motive.main
 ```
+
+## Troubleshooting
+
+### Common Setup Issues
+
+#### Windows PowerShell Execution Policy Error
+If you get an error like "cannot be loaded because running scripts is disabled on this system":
+
+```powershell
+# Run as Administrator or use this command:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+#### Python Not Found
+If `python` or `pip` commands are not recognized:
+
+1. **Install Python** from https://www.python.org/downloads/
+2. **Check "Add Python to PATH"** during installation
+3. **Restart your terminal** after installation
+4. **Verify installation**:
+   ```bash
+   python --version
+   pip --version
+   ```
+
+#### Virtual Environment Issues
+If you have trouble with the virtual environment:
+
+```bash
+# Remove existing venv and recreate
+rm -rf venv  # On Windows: rmdir /s venv
+python -m venv venv
+
+# Activate and install dependencies
+# On Windows:
+.\venv\Scripts\Activate.ps1
+# On macOS/Linux:
+source venv/bin/activate
+
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pip install -e .
+```
+
+#### API Key Issues
+If the application fails to start:
+
+1. **Check your `.env` file** exists and has valid API keys
+2. **Verify API keys** are active and have sufficient credits
+3. **Check the `config.yaml`** file for correct model names
+4. **Review logs** in the `logs/` directory for detailed error messages
 
 ## Player Action Syntax
 
