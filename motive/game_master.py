@@ -277,7 +277,7 @@ class GameMaster:
         
         return True, "", found_exit_data
 
-    def _execute_effects(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> List[str]:
+    def _execute_effects(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
         """Applies the effects of an action to the game state and generates feedback/events."""
         feedback_messages: List[str] = []
         events_generated: List[Event] = [] # Changed to list of Event objects
@@ -285,7 +285,7 @@ class GameMaster:
         current_room = self.rooms.get(player_char.current_room_id)
         if not current_room:
             feedback_messages.append(f"Error: Character is in an unknown room: {player_char.current_room_id}.")
-            return feedback_messages
+            return [], feedback_messages
 
         for effect in action_config.effects:
             target_instance = None
@@ -374,8 +374,7 @@ class GameMaster:
                 self.game_logger.warning(f"Unsupported effect type: {effect.type}")
 
         # After processing all effects, add generated events to the main event queue
-        self.event_queue.extend(events_generated)
-        return feedback_messages
+        return events_generated, feedback_messages
 
     def _distribute_events(self):
         """Distributes generated events to relevant players based on observer scopes."""
@@ -476,7 +475,7 @@ class GameMaster:
                     f"{character_assignment}\n\n"
                     f"Observations: {current_room_description}\n\n"
                     f"{action_prompt.replace('You have', 'You start with').replace('remaining', 'per turn')}\n\n"
-                    f"What do you do?"
+                    f"What do you do? (You can also type 'end turn' to finish.)"
                 )
 
                 system_msg = SystemMessage(content=system_prompt)
@@ -484,11 +483,10 @@ class GameMaster:
 
                 player.add_message(system_msg)
                 player.add_message(human_msg)
-                self.game_logger.info(f"SYSTEM (with manual: {self.manual_path}): {system_prompt[:50]}...")
-                self.game_logger.info(f"GM to {player.name} (SYSTEM, with manual: {self.manual_path}): {system_prompt[:50]}...")
-                player.logger.info(f"SYSTEM: {system_prompt}")
-                player.logger.info(f"GM: {first_human_message_content}")
-                self.game_logger.info(f"GM to {player.name}: {first_human_message_content}")
+                self.game_logger.info(f"GM sent chat to {player.name} (SYSTEM, with manual: {self.manual_path}): {system_prompt[:50]}...")
+                self.game_logger.info(f"GM sent chat to {player.name}: {first_human_message_content}")
+                player.logger.info(f"GM sent chat to {player.name} (SYSTEM): {system_prompt}")
+                player.logger.info(f"GM sent chat to {player.name}: {first_human_message_content}")
 
                 start_time = time.time()
                 response = await player.get_response_and_update_history(player.chat_history)
@@ -511,8 +509,8 @@ class GameMaster:
                 
                 gm_message = HumanMessage(content=gm_message_content)
                 player.add_message(gm_message)
-                player.logger.info(f"GM: {gm_message_content}")
-                self.game_logger.info(f"GM to {player.name}: {gm_message_content}")
+                player.logger.info(f"GM sent chat to {player.name}: {gm_message_content}")
+                self.game_logger.info(f"GM sent chat to {player.name}: {gm_message_content}")
 
                 start_time = time.time()
                 response = await player.get_response_and_update_history(player.chat_history)
@@ -521,8 +519,8 @@ class GameMaster:
             response_len = len(response.content)
 
             player_input = response.content.strip().lower()
-            self.game_logger.info(f"{player.name}: {player_input}")
-            player.logger.info(f"{player.name}: {player_input}")
+            self.game_logger.info(f"GM received chat from {player.name}: {player_input}")
+            player.logger.info(f"GM received chat from {player.name}: {player_input}")
             print(f"    '{player.name}' responded in {duration:.2f}s ({response_len} chars): {player_input}")
 
             # Check for explicit "end turn" command first
@@ -531,8 +529,8 @@ class GameMaster:
                 turn_in_progress = False
                 feedback_message = HumanMessage(content=feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM (Feedback): {feedback}")
-                self.game_logger.info(f"GM to {player.name} (Feedback): {feedback}")
+                player.logger.info(f"GM sent chat to {player.name} (Feedback): {feedback}")
+                self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {feedback}")
                 continue # Continue to the while loop condition to end the turn
 
             # Parse all actions from the player's response
@@ -551,8 +549,8 @@ class GameMaster:
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM (Feedback): {combined_feedback}")
-                self.game_logger.info(f"GM to {player.name} (Feedback): {combined_feedback}")
+                player.logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
+                self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
                 continue # Continue to the while loop condition to end the turn
 
             else:
@@ -574,10 +572,9 @@ class GameMaster:
                         requirements_met, req_message, exit_data = self._check_requirements(player_char, action_config, params)
                         if requirements_met:
                             player_char.action_points -= action_config.cost
-                            action_effect_feedback = self._execute_effects(player_char, action_config, params)
-                            action_specific_feedback.extend(action_effect_feedback)
-                            self.game_logger.info(f"Action '{action_config.name}' executed. Remaining AP: {player_char.action_points}")
-                            self.game_logger.info(f"Action '{action_config.name}' executed by {player_char.name}. Remaining AP: {player_char.action_points}")
+                            action_effect_feedback, action_specific_feedback_list = self._execute_effects(player_char, action_config, params)
+                            action_specific_feedback.extend(action_specific_feedback_list)
+                            self.game_logger.info(f"Action '{action_config.name}' executed by {player_char.name} (cost: {action_config.cost} AP). Remaining AP: {player_char.action_points}")
                         else:
                             action_specific_feedback.append(f"Cannot perform '{action_config.name}': {req_message}. Skipping this action.")
                             self.game_logger.info(action_specific_feedback[-1])
@@ -598,8 +595,8 @@ class GameMaster:
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM (Feedback): {combined_feedback}")
-                self.game_logger.info(f"GM to {player.name} (Feedback): {combined_feedback}")
+                player.logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
+                self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
 
                 if not all_actions_in_response_valid:
                     # If any action in the response was invalid or couldn't be performed, end the turn as a penalty.
@@ -615,8 +612,8 @@ class GameMaster:
                     # Send final penalty feedback
                     feedback_message = HumanMessage(content=penalty_feedback)
                     player.add_message(feedback_message)
-                    player.logger.info(f"GM (Feedback): {penalty_feedback}")
-                    self.game_logger.info(f"GM to {player.name} (Feedback): {penalty_feedback}")
+                    player.logger.info(f"GM sent chat to {player.name} (Feedback): {penalty_feedback}")
+                    self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {penalty_feedback}")
                     
                 elif player_char.action_points <= 0:
                     # If all actions were valid but AP ran out, turn ends naturally.
@@ -627,8 +624,8 @@ class GameMaster:
                     # Send final AP exhaustion feedback
                     feedback_message = HumanMessage(content=feedback)
                     player.add_message(feedback_message)
-                    player.logger.info(f"GM (Feedback): {feedback}")
-                    self.game_logger.info(f"GM to {player.name} (Feedback): {feedback}")
+                    player.logger.info(f"GM sent chat to {player.name} (Feedback): {feedback}")
+                    self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {feedback}")
                     
                 # If all actions were valid and AP remain, the loop continues automatically to re-prompt.
 

@@ -61,7 +61,8 @@ def mock_game_master():
             actions={
                 "look": ActionConfig(id="look", name="look", cost=10, description="Look around.", parameters=[ParameterConfig(name="target", type="string", description="The name of the object or character to look at.")], requirements=[], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="look_at_target", observers=["player"])]),
                 "help": ActionConfig(id="help", name="help", cost=10, description="Get help.", parameters=[], requirements=[], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="generate_help_message", observers=["player"])]),
-                "move": ActionConfig(id="move", name="move", cost=10, description="Move in a specified direction.", parameters=[ParameterConfig(name="direction", type="string", description="The direction to move (e.g., north, south, east, west).")], requirements=[ActionRequirementConfig(type="exit_exists", direction_param="direction")], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="handle_move_action", observers=["player"])])
+                "move": ActionConfig(id="move", name="move", cost=10, description="Move in a specified direction.", parameters=[ParameterConfig(name="direction", type="string", description="The direction to move (e.g., north, south, east, west).")], requirements=[ActionRequirementConfig(type="exit_exists", direction_param="direction")], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="handle_move_action", observers=["player"])]),
+                "say": ActionConfig(id="say", name="say", cost=10, description="Say something to other players in the room.", parameters=[ParameterConfig(name="phrase", type="string", description="The phrase to say.")], requirements=[], effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="handle_say_action", observers=["player", "room_players"])])
             }
         )
 
@@ -292,7 +293,7 @@ def test_execute_effects_set_object_property(mock_game_master):
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "my_torch_effect"}
 
-    feedback = gm._execute_effects(player_char, action_config, params)
+    _, feedback = gm._execute_effects(player_char, action_config, params)
     assert "The object 'my_torch_effect's 'is_lit' is now 'True'." in feedback
     assert player_char.get_item_in_inventory("my_torch_effect").get_property("is_lit") is True
 
@@ -310,7 +311,7 @@ def test_execute_effects_move_object_to_inventory(mock_game_master):
     action_config = gm.game_actions["pickup"]
     params = {"object_name": "room_torch"}
 
-    feedback = gm._execute_effects(player_char, action_config, params)
+    _, feedback = gm._execute_effects(player_char, action_config, params)
     assert "You pick up the room_torch." in feedback
     assert player_char.has_item_in_inventory("room_torch")
     assert initial_room.get_object("room_torch") is None
@@ -327,8 +328,10 @@ def test_execute_effects_generate_event(mock_game_master):
     action_config = gm.game_actions["light_torch"]
     params = {"object_name": "event_torch"}
 
-    feedback = gm._execute_effects(player_char, action_config, params)
+    events_generated, feedback = gm._execute_effects(player_char, action_config, params)
     assert "Hero lights the event_torch." in feedback
+    # Also check that the event was actually generated and has the correct message
+    assert any(e.message == "Hero lights the event_torch." for e in events_generated)
 
 def test_execute_effects_help_action(mock_game_master):
     gm = mock_game_master
@@ -338,7 +341,7 @@ def test_execute_effects_help_action(mock_game_master):
     action_config = gm.game_actions["help"]
     params = {}
 
-    feedback = gm._execute_effects(player_char, action_config, params)
+    _, feedback = gm._execute_effects(player_char, action_config, params)
     expected_feedback = [
         "Available actions:",
         "- look (10 AP): Look around.",
@@ -347,4 +350,22 @@ def test_execute_effects_help_action(mock_game_master):
         "- pickup (10 AP): Pick up an object.",
         "- light torch (10 AP): Light a torch you are holding."
     ]
+    # The feedback is a single string containing all parts, so we check if each item is within the string.
     assert all(item in feedback[0] for item in expected_feedback)
+
+def test_execute_effects_say_action(mock_game_master):
+    gm = mock_game_master
+    player = gm.players[0]
+    player_char = player.character
+
+    action_config = gm.game_actions["say"]
+    params = {"phrase": "Hello everyone!"}
+
+    # _execute_effects returns a list of feedback messages.
+    events_generated, feedback = gm._execute_effects(player_char, action_config, params)
+
+    assert "You say: 'Hello everyone!'." in feedback[0]
+    
+    # Check the event queue for the generated event
+    assert any(e.message == f"Player {player_char.name} says: \"Hello everyone!\"." and
+               "room_players" in e.observers for e in events_generated)

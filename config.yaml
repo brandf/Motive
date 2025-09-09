@@ -1,6 +1,6 @@
 # Game settings
 game_settings:
-  num_rounds: 3
+  num_rounds: 2
   core_config_path: "configs/core.yaml"
   theme_config_path: "configs/themes/fantasy/fantasy.yaml"
   edition_config_path: "configs/themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
@@ -14,9 +14,5 @@ players:
     model: "gemini-2.5-flash"
 
   - name: "Lyra"
-    provider: "google"
-    model: "gemini-2.5-flash"
-
-  - name: "Kael"
     provider: "google"
     model: "gemini-2.5-flash"

@@ -242,3 +242,33 @@ def handle_pickup_action(game_master: Any, player_char: PlayerCharacter, params:
     ))
     
     return events_generated, feedback_messages
+
+def handle_say_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handles a player saying something to other players in the room."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    phrase = params.get("phrase")
+
+    if not phrase:
+        feedback_messages.append("Say action requires a phrase to say.")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to say nothing.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+
+    feedback_messages.append(f"You say: \'{phrase}\'.")
+    events_generated.append(Event(
+        message=f"Player {player_char.name} says: \"{phrase}\".",
+        event_type="player_communication",
+        source_room_id=player_char.current_room_id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        observers=["player", "room_players", "game_master"]
+    ))
+    
+    return events_generated, feedback_messages

@@ -43,3 +43,18 @@ actions:
         function_module: motive.hooks.core_hooks
         function_name: handle_move_action
         observers: ["player"]
+  say:
+    id: say
+    name: say
+    cost: 10
+    description: Say something to other players in the room.
+    parameters:
+      - name: phrase
+        type: string
+        description: The phrase to say.
+    requirements: []
+    effects:
+      - type: code_binding
+        function_module: motive.hooks.core_hooks
+        function_name: handle_say_action
+        observers: ["player", "room_players"]
