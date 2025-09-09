@@ -636,3 +636,106 @@ def handle_pickup_action(game_master: Any, player_char: PlayerCharacter, action_
     feedback_messages.append(f"You pick up the {target_object.name}.")
     
     return events, feedback_messages
+
+
+def handle_drop_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handle drop action - move object from player inventory to current room."""
+    from datetime import datetime
+    
+    events = []
+    feedback_messages = []
+    
+    # Get object name from parameters
+    object_name = params.get("object_name")
+    if not object_name:
+        # Generate event for failed drop
+        error_event = Event(
+            message=f"{player_char.name} attempts to drop something, but no object was specified.",
+            event_type="player_action",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["room_players"]
+        )
+        events.append(error_event)
+        feedback_messages.append("Cannot perform 'drop': No object name provided.")
+        return events, feedback_messages
+    
+    # Find the object in player's inventory (case insensitive)
+    target_object = None
+    target_object_id = None
+    for obj_id, obj in player_char.inventory.items():
+        if obj.name.lower() == object_name.lower():
+            target_object = obj
+            target_object_id = obj_id
+            break
+    
+    if not target_object:
+        # Generate event for failed drop
+        error_event = Event(
+            message=f"{player_char.name} attempts to drop the {object_name}, but it is not in their inventory.",
+            event_type="player_action",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["room_players"]
+        )
+        events.append(error_event)
+        feedback_messages.append(f"Cannot perform 'drop': Object '{object_name}' not in inventory.")
+        return events, feedback_messages
+    
+    # Get current room
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    if not current_room:
+        feedback_messages.append("Cannot perform 'drop': Invalid room.")
+        return events, feedback_messages
+    
+    # Move object from inventory to room
+    del player_char.inventory[target_object_id]
+    current_room.objects[target_object_id] = target_object
+    
+    # Update object's location
+    target_object.current_location_id = player_char.current_room_id
+    
+    # Generate timestamp
+    timestamp = datetime.now().isoformat()
+    
+    # Event for the player who dropped the item
+    drop_event = Event(
+        message=f"You drop the {target_object.name}.",
+        event_type="item_drop",
+        source_room_id=player_char.current_room_id,
+        timestamp=timestamp,
+        related_object_id=target_object.id,
+        related_player_id=player_char.id,
+        observers=["player"]
+    )
+    events.append(drop_event)
+    
+    # Event for other players in the room
+    room_drop_event = Event(
+        message=f"{player_char.name} drops the {target_object.name}.",
+        event_type="player_action",
+        source_room_id=player_char.current_room_id,
+        timestamp=timestamp,
+        related_object_id=target_object.id,
+        related_player_id=player_char.id,
+        observers=["room_players"]
+    )
+    events.append(room_drop_event)
+    
+    # Event for adjacent rooms (optional - they might hear the drop)
+    adjacent_drop_event = Event(
+        message=f"{player_char.name} drops something.",
+        event_type="player_action",
+        source_room_id=player_char.current_room_id,
+        timestamp=timestamp,
+        related_object_id=target_object.id,
+        related_player_id=player_char.id,
+        observers=["adjacent_rooms"]
+    )
+    events.append(adjacent_drop_event)
+    
+    feedback_messages.append(f"You drop the {target_object.name}.")
+    
+    return events, feedback_messages

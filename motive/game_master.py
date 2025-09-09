@@ -298,6 +298,18 @@ class GameMaster:
                         break
                 if not obj_found:
                     return False, f"Object '{object_name}' not in room.", None
+            elif req.type == "object_in_inventory":
+                object_name = params.get(req.object_name_param)
+                if not object_name:
+                    return False, f"Missing parameter '{req.object_name_param}' for object_in_inventory requirement.", None
+                
+                obj_found = False
+                for obj in player_char.inventory.values():
+                    if obj.name.lower() == object_name.lower():
+                        obj_found = True
+                        break
+                if not obj_found:
+                    return False, f"Object '{object_name}' not in inventory.", None
             elif req.type == "object_property_equals":
                 object_name = params.get(req.object_name_param)
                 if not object_name:

@@ -6,7 +6,23 @@ game_settings:
   edition_config_path: "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
   manual: "../MOTIVE_MANUAL.md"
   initial_ap_per_turn: 20 # Set initial AP per turn for testing
-# hints: [] # No hints configured - clean state for production
+hints:
+  - hint_id: "pickup_for_drop_test"
+    hint_action: "> pickup fountain"
+    when:
+      round: 1
+      players: ["Arion"]
+  - hint_id: "drop_test"
+    hint_action: "> drop fountain"
+    when:
+      round: 1
+      players: ["Arion"]
+      after: "pickup_for_drop_test"
+  - hint_id: "drop_nonexistent_test"
+    hint_action: "> drop nonexistent_item"
+    when:
+      round: 1
+      players: ["Lyra"]
 
 # List of AI players
 players:
