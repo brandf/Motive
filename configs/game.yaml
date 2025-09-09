@@ -7,49 +7,12 @@ game_settings:
   manual: "../MOTIVE_MANUAL.md"
   initial_ap_per_turn: 20 # Set initial AP per turn for testing
 hints:
-  # Test immovable object constraint
-  - hint_id: "test_immovable_constraint"
-    hint_action: "> pickup fountain"
+  # Test AP exhaustion feedback
+  - hint_id: "test_ap_exhaustion_feedback"
+    hint_action: "> pickup torch\n> pickup sword\n> pickup armor\n> look\n> move west\n> say hello\n> help"
     when:
       round: 1
       players: ["Arion"]
-  
-  # Test size constraint (large sword requires large size)
-  - hint_id: "test_size_constraint"
-    hint_action: "> pickup Large Sword"
-    when:
-      round: 1
-      players: ["Lyra"]
-  
-  # Test class constraint (warrior armor requires warrior class)
-  - hint_id: "test_class_constraint"
-    hint_action: "> pickup Warrior's Armor"
-    when:
-      round: 1
-      players: ["Arion"]
-    after: "test_immovable_constraint"
-  
-  # Test level constraint (legendary sword requires level 15)
-  - hint_id: "test_level_constraint"
-    hint_action: "> pickup Legendary Sword"
-    when:
-      round: 1
-      players: ["Lyra"]
-    after: "test_size_constraint"
-  
-  # Test multi-constraint object (paladin sword needs warrior class + level 10)
-  - hint_id: "test_multi_constraint"
-    hint_action: "> pickup Paladin's Sword"
-    when:
-      round: 2
-      players: ["Arion"]
-  
-  # Test custom constraint (elven artifact needs elf race + good alignment)
-  - hint_id: "test_custom_constraint"
-    hint_action: "> pickup Elven Artifact"
-    when:
-      round: 2
-      players: ["Lyra"]
 
 # List of AI players
 players:

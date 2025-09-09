@@ -771,11 +771,16 @@ class GameMaster:
                 response_feedback_messages: List[str] = [] # Collect feedback for this response
                 help_action_performed = False # Track if help action was performed to avoid duplicate action prompts
 
+                # Track actions that couldn't be executed due to AP exhaustion
+                actions_skipped_due_to_ap = []
+                
                 for action_config, params in parsed_actions:
                     action_specific_feedback: List[str] = []
                     if player_char.action_points <= 0:
-                        action_specific_feedback.append("You have run out of Action Points for this turn. Cannot perform further actions.")
-                        # Don't set all_actions_in_response_valid = False for AP exhaustion - this is normal gameplay
+                        # Track remaining actions that couldn't be processed due to AP exhaustion
+                        remaining_actions = parsed_actions[parsed_actions.index((action_config, params)):]
+                        for remaining_action_config, remaining_params in remaining_actions:
+                            actions_skipped_due_to_ap.append(f"{remaining_action_config.name} {remaining_params}")
                         break # Exit inner loop for actions
 
                     # Calculate actual cost using cost calculation function if available
@@ -783,6 +788,7 @@ class GameMaster:
                     
                     if actual_cost > player_char.action_points:
                         action_specific_feedback.append(f"Action '{action_config.name}' costs {actual_cost} AP, but you only have {player_char.action_points} AP. Skipping this action.")
+                        actions_skipped_due_to_ap.append(f"{action_config.name} {params}")
                         self.game_logger.info(action_specific_feedback[-1])
                         # Don't set all_actions_in_response_valid = False for AP exhaustion - this is normal gameplay
                     else:
@@ -826,6 +832,11 @@ class GameMaster:
                     ])
                 else:
                     combined_feedback = "No specific feedback for actions performed this turn."
+                
+                # Add feedback about actions skipped due to AP exhaustion
+                if actions_skipped_due_to_ap:
+                    skipped_actions_text = "\n".join([f"- {action}" for action in actions_skipped_due_to_ap])
+                    combined_feedback += f"\n\n**Actions skipped due to insufficient AP:**\n{skipped_actions_text}"
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
