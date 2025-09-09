@@ -272,3 +272,23 @@ def handle_say_action(game_master: Any, player_char: PlayerCharacter, params: Di
     ))
     
     return events_generated, feedback_messages
+
+def handle_pass_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handles the player passing their turn."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    
+    # Pass action costs 0 AP and ends the turn
+    feedback_messages.append("You pass your turn.")
+    
+    event_message = f"Player {player_char.name} passed their turn."
+    events_generated.append(Event(
+        message=event_message,
+        event_type="player_action",
+        source_room_id=player_char.current_room_id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        observers=["player", "game_master"]
+    ))
+    
+    return events_generated, feedback_messages

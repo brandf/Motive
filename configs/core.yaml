@@ -58,3 +58,15 @@ actions:
         function_module: motive.hooks.core_hooks
         function_name: handle_say_action
         observers: ["player", "room_players"]
+  pass:
+    id: pass
+    name: pass
+    cost: 0
+    description: End your turn without taking any action.
+    parameters: []
+    requirements: []
+    effects:
+      - type: code_binding
+        function_module: motive.hooks.core_hooks
+        function_name: handle_pass_action
+        observers: ["player"]

@@ -219,8 +219,8 @@ class GameMaster:
                     self.game_logger.info(f"Player {player.name} has quit the game.")
                     print(f"Player {player.name} has quit the game.")
                     
-            self.game_logger.info(f"--- Round {round_num} Complete ---")
-            print(f"--- Round {round_num} Complete ---") # Keep for console output
+            self.game_logger.info(f"=== Round {round_num} Complete ===")
+            print(f"=== Round {round_num} Complete ===") # Keep for console output
 
         self.game_logger.info("===================== GAME OVER ======================")
         print("\n===================== GAME OVER ======================") # Keep for console output
@@ -471,8 +471,7 @@ class GameMaster:
                     room_description_parts.append(f"Exits: {', '.join(exit_names)}.")
             current_room_description = " ".join(room_description_parts)
 
-            available_action_names = [action.name for action in self.game_actions.values()]
-            action_prompt = f"Available actions: {', '.join(available_action_names)}. (You have {player_char.action_points} AP remaining.)"
+            action_prompt = self._get_action_display(player_char, is_first_turn=False)
 
             # Handle the very first interaction differently
             if not self.player_first_interaction_done.get(player_char.id, False):
@@ -486,11 +485,13 @@ class GameMaster:
                 character_assignment = f"You are {player_char.name}, a {self.game_character_types[char_type_id].name}.\nYour motive is: {player_char.motive}"
 
                 # Construct the first HumanMessage with character, motive, and observations
+                first_action_prompt = self._get_action_display(player_char, is_first_turn=True)
                 first_human_message_content = (
                     f"{character_assignment}\n\n"
                     f"Observations: {current_room_description}\n\n"
-                    f"{action_prompt.replace('You have', 'You start with').replace('remaining', 'per turn')}\n\n"
-                    f"What do you do? (You can also type 'end turn' to finish.)"
+                    f"{first_action_prompt}\n\n"
+                    f"Action Points: {player_char.action_points} AP\n\n"
+                    f"What do you do?"
                 )
 
                 system_msg = SystemMessage(content=system_prompt)
@@ -498,10 +499,10 @@ class GameMaster:
 
                 player.add_message(system_msg)
                 player.add_message(human_msg)
-                self.game_logger.info(f"GM sent chat to {player.name} (SYSTEM, with manual: {self.manual_path}): {system_prompt[:50]}...")
-                self.game_logger.info(f"GM sent chat to {player.name}: {first_human_message_content}")
-                player.logger.info(f"GM sent chat to {player.name} (SYSTEM): {system_prompt}")
-                player.logger.info(f"GM sent chat to {player.name}: {first_human_message_content}")
+                self.game_logger.info(f"GM sent chat to {player.name} (SYSTEM, with manual: {self.manual_path}):\n{system_prompt[:50]}...")
+                self.game_logger.info(f"GM sent chat to {player.name}:\n{first_human_message_content}")
+                player.logger.info(f"GM sent chat to {player.name} (SYSTEM):\n{system_prompt}")
+                player.logger.info(f"GM sent chat to {player.name}:\n{first_human_message_content}")
 
                 start_time = time.time()
                 response = await player.get_response_and_update_history(player.chat_history)
@@ -516,16 +517,16 @@ class GameMaster:
                     gm_message_content_parts.append("\n".join(observation_messages))
                 
                 gm_message_content_parts.extend([
-                    f"", # Add an empty string for a newline for better formatting
                     f"{action_prompt}",
-                    f"What do you do? (You can also type 'end turn' to finish.)"
+                    f"Action Points: {player_char.action_points} AP",
+                    f"What do you do?"
                 ])
                 gm_message_content = "\n\n".join(gm_message_content_parts)
                 
                 gm_message = HumanMessage(content=gm_message_content)
                 player.add_message(gm_message)
-                player.logger.info(f"GM sent chat to {player.name}: {gm_message_content}")
-                self.game_logger.info(f"GM sent chat to {player.name}: {gm_message_content}")
+                player.logger.info(f"GM sent chat to {player.name}:\n{gm_message_content}")
+                self.game_logger.info(f"GM sent chat to {player.name}:\n{gm_message_content}")
 
                 start_time = time.time()
                 response = await player.get_response_and_update_history(player.chat_history)
@@ -534,8 +535,8 @@ class GameMaster:
             response_len = len(response.content)
 
             player_input = response.content.strip().lower()
-            self.game_logger.info(f"GM received chat from {player.name}: {player_input}")
-            player.logger.info(f"GM received chat from {player.name}: {player_input}")
+            self.game_logger.info(f"GM received chat from {player.name}:\n{player_input}")
+            player.logger.info(f"GM received chat from {player.name}:\n{player_input}")
             print(f"    '{player.name}' responded in {duration:.2f}s ({response_len} chars): {player_input}")
 
             # Check for explicit "end turn" command first
@@ -544,8 +545,8 @@ class GameMaster:
                 turn_in_progress = False
                 feedback_message = HumanMessage(content=feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM sent chat to {player.name} (Feedback): {feedback}")
-                self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {feedback}")
+                player.logger.info(f"GM sent chat to {player.name} (Feedback):\n{feedback}")
+                self.game_logger.info(f"GM sent chat to {player.name} (Feedback):\n{feedback}")
                 continue # Continue to the while loop condition to end the turn
 
             # Parse all actions from the player's response
@@ -563,8 +564,8 @@ class GameMaster:
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
-                self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
+                player.logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
+                self.game_logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
                 
                 # Wait for player to confirm turn end
                 await self._handle_turn_end_confirmation(player, player_char)
@@ -588,8 +589,8 @@ class GameMaster:
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
-                self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
+                player.logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
+                self.game_logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
                 
                 # Wait for player to confirm turn end
                 await self._handle_turn_end_confirmation(player, player_char)
@@ -624,7 +625,10 @@ class GameMaster:
                             all_actions_in_response_valid = False
 
                     if action_specific_feedback:
-                        response_feedback_messages.append(f"- **{action_config.name.capitalize()} Action:**")
+                        # Calculate AP info for this action
+                        ap_before = player_char.action_points + action_config.cost
+                        ap_after = player_char.action_points
+                        response_feedback_messages.append(f"- **{action_config.name.capitalize()} Action:** (Cost: {action_config.cost} AP, Remaining: {ap_after} AP)")
                         response_feedback_messages.extend([f"  - {msg}" for msg in action_specific_feedback])
 
                 # After processing all actions in the response
@@ -638,8 +642,8 @@ class GameMaster:
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
-                self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {combined_feedback}")
+                player.logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
+                self.game_logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
 
                 if not all_actions_in_response_valid:
                     # If any action in the response was invalid or couldn't be performed, end the turn as a penalty.
@@ -658,8 +662,8 @@ class GameMaster:
                     # Send final penalty feedback
                     feedback_message = HumanMessage(content=penalty_feedback)
                     player.add_message(feedback_message)
-                    player.logger.info(f"GM sent chat to {player.name} (Feedback): {penalty_feedback}")
-                    self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {penalty_feedback}")
+                    player.logger.info(f"GM sent chat to {player.name} (Feedback):\n{penalty_feedback}")
+                    self.game_logger.info(f"GM sent chat to {player.name} (Feedback):\n{penalty_feedback}")
                     
                     # Wait for player to confirm turn end
                     await self._handle_turn_end_confirmation(player, player_char)
@@ -670,13 +674,7 @@ class GameMaster:
                     feedback = "You have used all your Action Points for this turn. Your turn has ended."
                     self.game_logger.info(f"{player.name} used all AP. Turn ended.")
 
-                    # Send final AP exhaustion feedback
-                    feedback_message = HumanMessage(content=feedback)
-                    player.add_message(feedback_message)
-                    player.logger.info(f"GM sent chat to {player.name} (Feedback): {feedback}")
-                    self.game_logger.info(f"GM sent chat to {player.name} (Feedback): {feedback}")
-                    
-                    # Wait for player to confirm turn end
+                    # Wait for player to confirm turn end (no separate feedback needed)
                     await self._handle_turn_end_confirmation(player, player_char)
                     turn_in_progress = False
                     
@@ -691,16 +689,15 @@ class GameMaster:
         
         # Send turn end confirmation message
         confirmation_message = (
-            "Your turn has ended. Please confirm how you'd like to proceed:\n"
-            "> continue - Continue to the next turn\n"
-            "> quit - Leave the game (this will count as a loss for your motive)\n\n"
+            "Your turn has ended. Please confirm how you'd like to proceed:\n\n"
+            "Example actions: continue, quit (will count as failure to complete motive)\n\n"
             "What would you like to do?"
         )
         
         confirmation_msg = HumanMessage(content=confirmation_message)
         player.add_message(confirmation_msg)
-        player.logger.info(f"GM sent chat to {player.name} (Turn End Confirmation): {confirmation_message}")
-        self.game_logger.info(f"GM sent chat to {player.name} (Turn End Confirmation): {confirmation_message}")
+        player.logger.info(f"GM sent chat to {player.name} (Turn End Confirmation):\n{confirmation_message}")
+        self.game_logger.info(f"GM sent chat to {player.name} (Turn End Confirmation):\n{confirmation_message}")
         
         # Get player's response
         start_time = time.time()
@@ -709,8 +706,8 @@ class GameMaster:
         response_len = len(response.content)
         
         player_input = response.content.strip().lower()
-        self.game_logger.info(f"GM received chat from {player.name} (Turn End Response): {player_input}")
-        player.logger.info(f"GM received chat from {player.name} (Turn End Response): {player_input}")
+        self.game_logger.info(f"GM received chat from {player.name} (Turn End Response):\n{player_input}")
+        player.logger.info(f"GM received chat from {player.name} (Turn End Response):\n{player_input}")
         print(f"    '{player.name}' responded in {duration:.2f}s ({response_len} chars): {player_input}")
         
         # Parse the response for turn end actions
@@ -731,6 +728,14 @@ class GameMaster:
             return True  # Player continues
         
         self.game_logger.info(f"=== TURN END CONFIRMATION COMPLETE for {player.name} ===")
+
+    def _get_action_display(self, player_char: PlayerCharacter, is_first_turn: bool = False) -> str:
+        """Get standardized action display text."""
+        # Only show core actions from core.yaml
+        core_actions = ["look", "move", "say", "pickup", "pass"]
+        
+        # Create action display without AP info (AP will be shown separately)
+        return f"Example actions: {', '.join(core_actions)}, help (for more available actions)."
 
     def _setup_game_world(self, theme_cfg: ThemeConfig, edition_cfg: EditionConfig):
         """Sets up the initial game world by merging configs and instantiating objects."""
