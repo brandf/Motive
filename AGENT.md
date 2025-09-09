@@ -115,6 +115,7 @@ Before committing changes, verify all items are complete:
 3. **Stage changes**: `git add .` (or specific files)
 4. **Commit**: `git commit -m "generated message"`
 5. **Push**: `git push origin main` (with user approval)
+6. **Verify operations**: Run `git status` and `git log --oneline -3` to confirm success
 
 ### Confidence Levels for Commits
 - **9-10/10**: All tests pass, `motive.main` successful, documentation updated, no temporary code
