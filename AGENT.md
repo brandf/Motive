@@ -167,6 +167,7 @@ Current core actions include: `move`, `say`, `look`, `help`, `whisper`, `shout`,
 - **Verify Pydantic field names**: When working with configuration, always check the actual field names in the Pydantic model definitions rather than assuming names (e.g., `target_player_param` not `player_name_param`).
 - **Don't ask permission for high-confidence operations**: When confidence is 8+ and rationale is provided, just run the operation (like `motive.main`). The user will reject if they don't want it run.
 - **Don't ask permission for high-confidence git commits**: When commit assessment is 9-10/10, just proceed with staging, committing, and pushing. The user will reject if they don't want it.
+- **Batch git operations**: Use `&&` to chain git commands (e.g., `git add . && git commit -m "message" && git push`) to reduce approval requests.
 
 ### Configuration Security
 - **Prefer structured over freeform configuration**: Use structured objects/dictionaries instead of freeform strings that require evaluation
