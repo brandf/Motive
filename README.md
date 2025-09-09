@@ -217,6 +217,14 @@ We welcome contributions to Motive! If you're interested in improving the platfo
 
 For details on how the game works and its mechanics, please refer to the [MOTIVE_MANUAL.md](MOTIVE_MANUAL.md).
 
+## Development Practices
+
+To keep engineering quality high and avoid repeating mistakes, we maintain a living guide of lessons learned. Before implementing or updating features/tests, review:
+
+- [AI_LESSIONS.md](AI_LESSIONS.md)
+
+It covers testing philosophy (favor integration tests over heavy mocking), logging/encoding standards, action parsing contracts, event/observation timing, AP handling, and other conventions used across the codebase.
+
 ## Future Development: Environment Generation and Training Data
 
 The Motive platform is designed with future expansion and AI research in mind. Key areas for future development include sophisticated environment generation and leveraging gameplay data for machine learning.

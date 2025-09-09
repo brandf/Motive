@@ -162,7 +162,7 @@ class GameMaster:
 
         # File handler for game.log
         game_narrative_file = os.path.join(game_log_dir, "game.log")
-        game_file_handler = logging.FileHandler(game_narrative_file)
+        game_file_handler = logging.FileHandler(game_narrative_file, encoding="utf-8")
         game_formatter = logging.Formatter('%(asctime)s - %(message)s') # Simpler format for narrative
         game_file_handler.setFormatter(game_formatter)
         self.game_logger.addHandler(game_file_handler)
@@ -459,8 +459,6 @@ class GameMaster:
                 observation_messages.append("**Recent Events:**")
                 for event in player_observations:
                     observation_messages.append(f"• {event.message}")
-                # Clear observations for this player after presenting them
-                self.player_observations[player_char.id] = []
 
             # Dynamically generate current room description and action prompt
             room_description_parts = [current_room.description]
@@ -493,8 +491,6 @@ class GameMaster:
                     observation_messages.append("**Recent Events:**")
                     for event in player_observations:
                         observation_messages.append(f"• {event.message}")
-                    # Clear observations for this player after presenting them
-                    self.player_observations[player_char.id] = []
 
                 # Construct the first HumanMessage with character, motive, and initial room description
                 first_action_prompt = self._get_action_display(player_char, is_first_turn=True)
@@ -505,6 +501,8 @@ class GameMaster:
                 
                 if observation_messages:
                     first_human_message_parts.append("\n".join(observation_messages))
+                    # Clear observations for this player after presenting them
+                    self.player_observations[player_char.id] = []
                 
                 first_human_message_parts.extend([
                     f"{first_action_prompt}",
@@ -545,6 +543,10 @@ class GameMaster:
                 player.add_message(gm_message)
                 player.logger.info(f"GM sent chat to {player.name}:\n{gm_message_content}")
                 self.game_logger.info(f"GM sent chat to {player.name}:\n{gm_message_content}")
+                
+                # Clear observations for this player after presenting them
+                if observation_messages:
+                    self.player_observations[player_char.id] = []
 
                 start_time = time.time()
                 response = await player.get_response_and_update_history(player.chat_history)
@@ -617,6 +619,7 @@ class GameMaster:
             else:
                 all_actions_in_response_valid = True # Tracks if all actions in this specific response were valid and processed
                 response_feedback_messages: List[str] = [] # Collect feedback for this response
+                help_action_performed = False # Track if help action was performed to avoid duplicate action prompts
 
                 for action_config, params in parsed_actions:
                     action_specific_feedback: List[str] = []
@@ -635,6 +638,10 @@ class GameMaster:
                             player_char.action_points -= action_config.cost
                             action_events, action_specific_feedback_list = self._execute_effects(player_char, action_config, params)
                             action_specific_feedback.extend(action_specific_feedback_list)
+                            
+                            # Track if help action was performed
+                            if action_config.name == "help":
+                                help_action_performed = True
                             
                             # Add generated events to the main event queue
                             self.event_queue.extend(action_events)
@@ -703,6 +710,10 @@ class GameMaster:
                     turn_in_progress = False
                     
                 # If all actions were valid and AP remain, the loop continues automatically to re-prompt.
+                # But if help action was performed, skip the next action prompt to avoid duplication
+                if help_action_performed and player_char.action_points > 0:
+                    # Help action already included the action prompt, so skip the next iteration
+                    continue
 
         self.game_logger.info(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
         print(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")

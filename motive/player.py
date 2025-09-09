@@ -104,7 +104,7 @@ class Player:
 
         # Create a file handler
         player_log_file = os.path.join(self.log_dir, f"{self.name}_chat.log")
-        handler = logging.FileHandler(player_log_file, mode="w")
+        handler = logging.FileHandler(player_log_file, mode="w", encoding="utf-8")
         formatter = logging.Formatter("%(asctime)s - %(message)s")
         handler.setFormatter(formatter)
 

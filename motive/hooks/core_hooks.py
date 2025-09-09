@@ -14,16 +14,20 @@ def generate_help_message(game_master: Any, player_char: PlayerCharacter, params
     for action_id, action_cfg in game_master.game_actions.items():
         help_message_parts.append(f"- {action_cfg.name} ({action_cfg.cost} AP): {action_cfg.description}")
     
+    # Add action prompt to consolidate the message
+    help_message_parts.append("")
+    help_message_parts.append("Example actions: look, move, say, pickup, pass, help (for more available actions).")
+    
     full_help_message = "\n".join(help_message_parts)
     feedback_messages.append(full_help_message)
 
     events_generated.append(Event(
-        message=f"Player {player_char.name} requested help.",
+        message=f"{player_char.name} requests help.",
         event_type="player_action",
         source_room_id=player_char.current_room_id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["player", "game_master"]
+        observers=["room_players"]
     ))
 
     return events_generated, feedback_messages
@@ -48,7 +52,15 @@ def look_at_target(game_master: Any, player_char: PlayerCharacter, params: Dict[
                 if exit_names:
                     room_description_parts.append(f"Exits: {', '.join(exit_names)}.")
             feedback_messages.append(" ".join(room_description_parts))
-            event_message = f"Player {player_char.name} looked around {current_room.name}."
+            event_message = f"{player_char.name} looks around the room."
+            events_generated.append(Event(
+                message=event_message,
+                event_type="player_action",
+                source_room_id=player_char.current_room_id,
+                timestamp=datetime.now().isoformat(),
+                related_player_id=player_char.id,
+                observers=["room_players"]
+            ))
         else:
             feedback_messages.append("You are in an unknown location.")
             event_message = f"Player {player_char.name} looked around an unknown location."
@@ -304,6 +316,72 @@ def handle_pass_action(game_master: Any, player_char: PlayerCharacter, params: D
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
         observers=["player", "game_master"]
+    ))
+    
+    return events_generated, feedback_messages
+
+def handle_read_action(game_master: Any, player_char: PlayerCharacter, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handles a player reading text from an object."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    object_name = params.get("object_name")
+
+    if not object_name:
+        feedback_messages.append("Read action requires an object name.")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to read without specifying an object name.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    if not current_room:
+        feedback_messages.append(f"Error: Player is in an unknown room (ID: {player_char.current_room_id}).")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} is in an unknown room ({player_char.current_room_id}) and cannot read.",
+            event_type="system_error",
+            source_room_id="unknown",
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["game_master"]
+        ))
+        return events_generated, feedback_messages
+
+    obj_to_read = current_room.get_object(object_name)
+    if not obj_to_read:
+        feedback_messages.append(f"You don't see any '{object_name}' here to read.")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to read non-existent object '{object_name}'.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            related_object_id=object_name,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+
+    # Check if the object has readable text
+    if "text" in obj_to_read.properties:
+        text_content = obj_to_read.properties["text"]
+        feedback_messages.append(f"You read the {obj_to_read.name}: \"{text_content}\"")
+        event_message = f"{player_char.name} reads the {obj_to_read.name}."
+    else:
+        feedback_messages.append(f"The {obj_to_read.name} has no readable text.")
+        event_message = f"{player_char.name} attempts to read the {obj_to_read.name}, but it has no text."
+
+    events_generated.append(Event(
+        message=event_message,
+        event_type="player_action",
+        source_room_id=current_room.id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        related_object_id=obj_to_read.id,
+        observers=["room_players"]
     ))
     
     return events_generated, feedback_messages

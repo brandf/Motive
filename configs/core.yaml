@@ -70,3 +70,21 @@ actions:
         function_module: motive.hooks.core_hooks
         function_name: handle_pass_action
         observers: ["player"]
+  read:
+    id: read
+    name: read
+    cost: 5
+    description: Read text from an object (like signs, books, etc.).
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to read from.
+        required: true
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_module: motive.hooks.core_hooks
+        function_name: handle_read_action
+        observers: ["player", "room_players"]
