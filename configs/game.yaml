@@ -5,7 +5,7 @@ includes:
 # Game settings
 game_settings:
   num_rounds: 2
-  manual: "../MANUAL.md"
+  manual: "../docs/MANUAL.md"
   initial_ap_per_turn: 30 # High AP for strategic gameplay
 # hints: [] # No hints configured - clean state for production
 
