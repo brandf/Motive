@@ -1078,7 +1078,9 @@ class GameMaster:
         # Send turn end confirmation message
         confirmation_message = (
             "Your turn has ended. Please confirm how you'd like to proceed:\n\n"
-            "Example actions: > continue, > quit (will count as failure to complete motive)\n\n"
+            "Example actions:\n"
+            "  > continue\n"
+            "  > quit (will count as failure to complete motive)\n\n"
             "What would you like to do?"
         )
         
@@ -1313,7 +1315,10 @@ class GameMaster:
         example_actions = self._get_example_actions()
         
         # Create action display without AP info (AP will be shown separately)
-        action_display = f"Example actions: {', '.join(example_actions)}, help (for more available actions)."
+        action_display = "Example actions:\n"
+        for action in example_actions:
+            action_display += f"  > {action}\n"
+        action_display += "  > help (for more available actions)"
         
         # Add applicable hints
         player_name = None
