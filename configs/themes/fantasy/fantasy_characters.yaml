@@ -1,0 +1,6 @@
+character_types:
+  hero:
+    id: hero
+    name: Hero
+    backstory: A brave adventurer.
+    motive: Defeat the evil sorcerer.

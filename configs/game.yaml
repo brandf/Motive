@@ -11,10 +11,10 @@ game_settings:
 
 # List of AI players
 players:
-  - name: "Arion"
+  - name: "Player_1"
     provider: "google"
     model: "gemini-2.5-flash"
 
-  - name: "Lyra"
+  - name: "Player_2"
     provider: "google"
     model: "gemini-2.5-flash"

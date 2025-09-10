@@ -1,0 +1,43 @@
+actions:
+  pickup:
+    id: pickup
+    name: pickup
+    cost: 10
+    description: Pick up an object.
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to pick up.
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_module: motive.hooks.core_hooks
+        function_name: handle_pickup_action
+        observers: ["player"]
+  light_torch:
+    id: light_torch
+    name: light torch
+    cost: 10
+    description: Light a torch you are holding.
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the torch to light.
+    requirements:
+      - type: player_has_object_in_inventory
+        object_name_param: object_name
+      - type: object_property_equals
+        object_name_param: object_name
+        property: is_lit
+        value: false
+    effects:
+      - type: set_property
+        target_type: object
+        target_id_param: object_name
+        property: is_lit
+        value: true
+      - type: generate_event
+        message: "{{player_name}} lights the {{object_name}}."
+        observers: ["room_players"]

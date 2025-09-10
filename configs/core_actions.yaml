@@ -1,0 +1,163 @@
+actions:
+  look:
+    id: look
+    name: look
+    cost: 10
+    description: Look around.
+    category: observation
+    parameters:
+      - name: target
+        type: string
+        description: The name of the object or character to look at.
+    requirements: []
+    effects:
+      - type: code_binding
+        function_name: look_at_target
+        observers: ["player"]
+  help:
+    id: help
+    name: help
+    cost:
+      type: code_binding
+      function_name: calculate_help_cost
+      value: 1  # Base cost for help action (matches manual)
+    description: Get help with available actions.
+    category: system
+    parameters:
+      - name: category
+        type: string
+        description: Optional category to filter actions (e.g., 'movement', 'communication').
+    requirements: []
+    effects:
+      - type: code_binding
+        function_name: generate_help_message
+        observers: ["player"]
+  move:
+    id: move
+    name: move
+    cost: 10
+    description: Move in a specified direction.
+    category: movement
+    parameters:
+      - name: direction
+        type: string
+        description: The direction to move (e.g., 'north', 'south', 'east', 'west').
+    requirements:
+      - type: exit_exists
+        direction_param: direction
+    effects:
+      - type: code_binding
+        function_name: move_player
+        observers: ["player", "room_players"]
+  say:
+    id: say
+    name: say
+    cost: 10
+    description: Say something to other players in the room.
+    category: communication
+    parameters:
+      - name: phrase
+        type: string
+        description: The message to say to other players.
+    requirements: []
+    effects:
+      - type: generate_event
+        message: "Player {player_name} says: \"{phrase}\""
+        observers: ["room_players"]
+  whisper:
+    id: whisper
+    name: whisper
+    cost: 10
+    description: Whisper privately to a specific player in the same room.
+    category: communication
+    parameters:
+      - name: player
+        type: string
+        description: The name of the player to whisper to.
+      - name: phrase
+        type: string
+        description: The private message to whisper.
+    requirements:
+      - type: player_in_room
+        target_player_param: player
+    effects:
+      - type: generate_event
+        message: "Player {player_name} whispers to {player}: \"{phrase}\""
+        observers: ["player"]
+  shout:
+    id: shout
+    name: shout
+    cost: 10
+    description: Shout loudly, potentially heard in adjacent rooms.
+    category: communication
+    parameters:
+      - name: phrase
+        type: string
+        description: The message to shout.
+    requirements: []
+    effects:
+      - type: generate_event
+        message: "Player {player_name} shouts: \"{phrase}\""
+        observers: ["adjacent_rooms"]
+  pickup:
+    id: pickup
+    name: pickup
+    cost: 10
+    description: Pick up an object from the current room.
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to pick up.
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+      - type: object_possession_allowed
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: pickup_object
+        observers: ["player", "room_players"]
+  drop:
+    id: drop
+    name: drop
+    cost: 10
+    description: Drop an object from your inventory into the current room.
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to drop.
+    requirements:
+      - type: object_in_inventory
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: drop_object
+        observers: ["player", "room_players"]
+  read:
+    id: read
+    name: read
+    cost: 5
+    description: Read text from an object (like signs, books, etc.).
+    category: interaction
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to read.
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: read_object
+        observers: ["player"]
+  pass:
+    id: pass
+    name: pass
+    cost: 0
+    description: End your turn without taking any action.
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
