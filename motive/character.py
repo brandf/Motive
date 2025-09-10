@@ -75,5 +75,9 @@ class Character:
     def get_property(self, key: str, default: Any = None) -> Any:
         return self.properties.get(key, default)
 
+    def get_introduction_message(self) -> str:
+        """Generate a character introduction message for the player."""
+        return f"**Character:**\nYou are {self.name}, {self.backstory}.\n\n**Motive:**\n{self.motive}"
+
     def __repr__(self):
         return f"Character(id='{self.id}', name='{self.name}', room='{self.current_room_id}', ap={self.action_points})"

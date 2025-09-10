@@ -68,7 +68,12 @@ def show_summary(config: Dict[str, Any]) -> None:
     action_count = len(config.get('actions', {}))
     object_count = len(config.get('object_types', {}))
     room_count = len(config.get('rooms', {}))
-    character_count = len(config.get('character_types', {}))
+    
+    # Use characters if available, otherwise fall back to character_types
+    characters = config.get('characters', {})
+    if not characters:
+        characters = config.get('character_types', {})
+    character_count = len(characters)
     
     print(f"Actions: {action_count}")
     print(f"Objects: {object_count}")
@@ -178,7 +183,11 @@ def show_characters(config: Dict[str, Any]) -> None:
     print("Available Characters:")
     print("===================")
     
-    characters = config.get('character_types', {})
+    # Use characters if available, otherwise fall back to character_types
+    characters = config.get('characters', {})
+    if not characters:
+        characters = config.get('character_types', {})
+    
     if not characters:
         print("No characters found in this configuration.")
         return

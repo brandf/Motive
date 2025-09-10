@@ -37,6 +37,7 @@ class GameInitializer:
         self.game_object_types: Dict[str, ObjectTypeConfig] = {}
         self.game_actions: Dict[str, ActionConfig] = {}
         self.game_character_types: Dict[str, CharacterConfig] = {}
+        self.game_characters: Dict[str, CharacterConfig] = {}
 
         # Store loaded configs for later merging
         self.core_cfg: Optional[CoreConfig] = None
@@ -80,6 +81,11 @@ class GameInitializer:
             self.game_character_types.update(raw_config['character_types'])
             self.game_logger.info(f"Loaded {len(raw_config['character_types'])} character types from merged config.")
         
+        # Extract characters from merged config
+        if 'characters' in raw_config and raw_config['characters']:
+            self.game_characters.update(raw_config['characters'])
+            self.game_logger.info(f"Loaded {len(raw_config['characters'])} characters from merged config.")
+        
         # Extract rooms from merged config
         if 'rooms' in raw_config and raw_config['rooms']:
             self.game_rooms = raw_config['rooms']
@@ -89,7 +95,7 @@ class GameInitializer:
             self.game_rooms = {}
             self.game_logger.info("No rooms defined in config.")
         
-        self.game_logger.info(f"Total loaded: {len(self.game_object_types)} object types, {len(self.game_actions)} actions, {len(self.game_character_types)} character types.")
+        self.game_logger.info(f"Total loaded: {len(self.game_object_types)} object types, {len(self.game_actions)} actions, {len(self.game_character_types)} character types, {len(self.game_characters)} characters.")
 
     def _load_yaml_config(self, file_path: str, config_model: BaseModel) -> BaseModel:
         """Loads and validates a YAML configuration file against a Pydantic model."""
@@ -179,10 +185,17 @@ class GameInitializer:
 
     def _instantiate_player_characters(self, players: List[Player]):
         self.game_logger.info("Instantiating player characters and assigning to players...")
-        # Use the merged game_character_types, not directly edition_cfg.characters
-        available_character_type_ids = list(self.game_character_types.keys())
-        if not available_character_type_ids:
-            self.game_logger.error("No character types defined in merged configuration. Cannot assign characters to players.")
+        # Use characters if available, otherwise fall back to character_types
+        available_character_ids = []
+        if hasattr(self, 'game_characters') and self.game_characters:
+            available_character_ids = list(self.game_characters.keys())
+            self.game_logger.info(f"Using {len(available_character_ids)} characters from characters section")
+        elif self.game_character_types:
+            available_character_ids = list(self.game_character_types.keys())
+            self.game_logger.info(f"Using {len(available_character_ids)} characters from character_types section")
+        
+        if not available_character_ids:
+            self.game_logger.error("No characters defined in merged configuration. Cannot assign characters to players.")
             return
         
         # Find a suitable starting room (e.g., the first room defined in the merged config)
@@ -192,8 +205,12 @@ class GameInitializer:
             return
 
         for i, player in enumerate(players):
-            char_type_id_to_assign = available_character_type_ids[i % len(available_character_type_ids)]
-            char_cfg = self.game_character_types[char_type_id_to_assign] # Use merged config                                              
+            char_id_to_assign = available_character_ids[i % len(available_character_ids)]
+            # Use characters if available, otherwise fall back to character_types
+            if hasattr(self, 'game_characters') and self.game_characters:
+                char_cfg = self.game_characters[char_id_to_assign]
+            else:
+                char_cfg = self.game_character_types[char_id_to_assign]                                              
 
             # Handle both Pydantic objects and dictionaries from merged config
             if hasattr(char_cfg, 'id'):

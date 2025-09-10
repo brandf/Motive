@@ -784,15 +784,7 @@ class GameMaster:
                                 f"Now, based on the manual and your character, respond with your actions."
 
                 # Character Assignment and Motive
-                char_type_id = player_char.id.split('_instance')[0]  
-                char_type_cfg = self.game_character_types[char_type_id]
-                # Handle both Pydantic objects and dictionaries from merged config
-                if hasattr(char_type_cfg, 'name'):
-                    char_type_name = char_type_cfg.name
-                else:
-                    char_type_name = char_type_cfg.get('name', char_type_id)
-                article = "an" if char_type_name.lower().startswith(('a', 'e', 'i', 'o', 'u')) else "a"
-                character_assignment = f"**Character:**\nYou are {player_char.name}, {article} {char_type_name}.\n\n**Motive:**\n{player_char.motive}"
+                character_assignment = player_char.get_introduction_message()
 
                 # Gather observations for the first interaction too
                 player_observations = self.player_observations.get(player_char.id, [])
