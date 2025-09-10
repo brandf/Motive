@@ -4,7 +4,7 @@ rooms:
     name: Town Square
     description: A bustling town square with a fountain in the center.
     exits:
-      west_gate: {id: west_gate, name: West Gate, destination_room_id: old_forest_path}
+      west_gate: {id: west_gate, name: West Gate, destination_room_id: old_forest_path, aliases: [west, w, gate]}
     objects:
       fountain: {id: fountain, name: Fountain, object_type_id: generic_fountain, current_room_id: town_square, description: A stone fountain with clear water.}
       town_statue: {id: town_statue, name: Town Statue, object_type_id: town_statue, current_room_id: town_square, description: A large statue of the town's founder, too heavy to move.}
@@ -21,7 +21,7 @@ rooms:
     name: Old Forest Path
     description: A narrow, overgrown path leading into a dark forest.
     exits:
-      east_gate: {id: east_gate, name: East Gate, destination_room_id: town_square}
+      east_gate: {id: east_gate, name: East Gate, destination_room_id: town_square, aliases: [east, e, gate]}
     objects:
       sign: {id: sign, name: Wooden Sign, object_type_id: generic_sign, current_room_id: old_forest_path, description: A weathered wooden sign pointing deeper into the forest.}
       ancient_altar: {id: ancient_altar, name: Ancient Altar, object_type_id: ancient_altar, current_room_id: old_forest_path, description: A sacred altar that has been in this place for centuries.}

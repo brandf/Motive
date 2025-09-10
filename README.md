@@ -108,7 +108,7 @@ Review and modify `configs/game.yaml` to adjust game settings, players, and LLM 
 
 ## Running the Application
 
-To start the game:
+After running the setup script (which installs the project in editable mode), you can start the game:
 
 ```bash
 # Activate virtual environment (if not already active)
@@ -131,6 +131,8 @@ motive-analyze -a                        # Show all information
 motive-analyze --validate                # Validate configuration
 motive-analyze --raw-config              # Show merged config as YAML
 ```
+
+**Note**: The `motive` and `motive-analyze` commands are only available after running the setup script, which installs the project in editable mode (`pip install -e .`). If you get a "command not found" error, make sure you've run the setup script first.
 
 ### CLI Options
 

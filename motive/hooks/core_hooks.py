@@ -105,15 +105,8 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
         # No target specified, describe the current room
         current_room = game_master.rooms.get(player_char.current_room_id)
         if current_room:
-            room_description_parts = [current_room.description]
-            if current_room.objects:
-                object_names = [obj.name for obj in current_room.objects.values()]
-                room_description_parts.append(f"You also see: {', '.join(object_names)}.")
-            if current_room.exits:
-                exit_names = [exit_data['name'] for exit_data in current_room.exits.values() if not exit_data.get('is_hidden', False)]
-                if exit_names:
-                    room_description_parts.append(f"Exits: {', '.join(exit_names)}.")
-            feedback_messages.append(" ".join(room_description_parts))
+            # Use the same formatting method as initial room description
+            feedback_messages.append(current_room.get_formatted_description())
             event_message = f"{player_char.name} looks around the room."
             events_generated.append(Event(
                 message=event_message,
@@ -228,10 +221,20 @@ def handle_move_action(game_master: Any, player_char: Character, action_config: 
         ))
         return events_generated, feedback_messages
 
-    # Find the exit by name (case-insensitive) from the current room's exits
+    # Find the exit by name or alias (case-insensitive) from the current room's exits
     exit_data = None
     for exit_id, exit_info in current_room.exits.items():
-        if exit_info['name'].lower() == direction.lower() and not exit_info.get('is_hidden', False):
+        if exit_info.get('is_hidden', False):
+            continue
+            
+        # Check if direction matches the exit name
+        if exit_info['name'].lower() == direction.lower():
+            exit_data = exit_info
+            break
+            
+        # Check if direction matches any of the exit aliases
+        aliases = exit_info.get('aliases', [])
+        if any(alias.lower() == direction.lower() for alias in aliases):
             exit_data = exit_info
             break
 

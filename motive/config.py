@@ -95,6 +95,7 @@ class ExitConfig(BaseModel):
     destination_room_id: str
     is_hidden: bool = False
     is_locked: bool = False
+    aliases: List[str] = []  # Alternative names for this exit
 
 class RoomConfig(BaseModel):
     """Configuration for a single room in the game world."""

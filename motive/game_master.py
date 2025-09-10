@@ -412,7 +412,17 @@ class GameMaster:
                 
                 found_exit = None
                 for exit_id, exit_data in current_room.exits.items():
-                    if exit_data['name'].lower() == direction.lower() and not exit_data.get('is_hidden', False):
+                    if exit_data.get('is_hidden', False):
+                        continue
+                        
+                    # Check if direction matches the exit name
+                    if exit_data['name'].lower() == direction.lower():
+                        found_exit = exit_data
+                        break
+                        
+                    # Check if direction matches any of the exit aliases
+                    aliases = exit_data.get('aliases', [])
+                    if any(alias.lower() == direction.lower() for alias in aliases):
                         found_exit = exit_data
                         break
 

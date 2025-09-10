@@ -47,7 +47,7 @@ actions:
         direction_param: direction
     effects:
       - type: code_binding
-        function_name: move_player
+        function_name: handle_move_action
         observers: ["player", "room_players"]
   say:
     id: say
@@ -151,7 +151,7 @@ actions:
         object_name_param: object_name
     effects:
       - type: code_binding
-        function_name: read_object
+        function_name: handle_read_action
         observers: ["player"]
   pass:
     id: pass
