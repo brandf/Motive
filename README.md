@@ -49,6 +49,35 @@ Motive is specifically designed for LLM players:
 - **Balanced action costs** that encourage strategic thinking
 - **Rich logging** for training data generation
 
+## Background
+
+Motive draws inspiration from the rich history of text-based adventure games and Multi-User Dungeons (MUDs) that emerged in the 1970s and 1980s. These early interactive fiction games, like *Zork*, *Adventure*, and later MUDs such as *LambdaMOO* and *Achaea*, pioneered many concepts that Motive adapts for modern AI research:
+
+### Historical Foundations
+
+**Text Adventures (1970s-1980s)**: Games like *Colossal Cave Adventure* and *Zork* introduced players to interactive fiction through simple text commands (`go north`, `take sword`, `examine room`). These games emphasized exploration, puzzle-solving, and narrative discovery through pure text interaction.
+
+**MUDs (1980s-1990s)**: Multi-User Dungeons expanded text adventures into persistent online worlds where multiple players could interact simultaneously. Games like *LambdaMOO*, *Achaea*, and *DragonMUD* introduced concepts like:
+- **Social dynamics** between players
+- **Character progression** and roleplay
+- **Complex object interactions** and crafting systems
+- **Player-versus-player** conflict and cooperation
+- **Persistent world state** that evolved over time
+
+### Modern Adaptation for AI Research
+
+Motive takes these proven game design principles and reimagines them for Large Language Model benchmarking:
+
+**From Human Players to AI Agents**: While traditional MUDs were designed for human players typing commands, Motive is optimized for LLM players that can engage in complex natural language interactions and strategic reasoning.
+
+**From Real-Time to Turn-Based**: Classic MUDs operated in real-time, but Motive uses structured turn-based gameplay that allows for careful analysis of AI decision-making processes.
+
+**From Entertainment to Research**: While historical games focused on entertainment, Motive serves as a controlled environment for studying AI capabilities like long-context reasoning, social engineering, and multi-agent coordination.
+
+**From Manual Content to AI-Generated**: Traditional MUDs required extensive manual world-building, while Motive's architecture supports AI-assisted content generation and dynamic world creation.
+
+This historical context helps explain why Motive's design choices—like structured action syntax, observability mechanics, and character-driven narratives—aren't arbitrary, but rather evolved solutions to challenges that game designers have been solving for decades.
+
 ## Current Status
 
 ### ✅ Implemented Features
