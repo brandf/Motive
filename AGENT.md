@@ -151,6 +151,7 @@ Before committing changes, verify all items are complete:
 - **`configs/game.yaml`**: Main game configuration
 - **`tests/`**: Test examples and patterns
 - **`logs/`**: Real game execution logs for reference
+- **`training_data/`**: Curated training datasets for LLM development
 
 ## Core Actions Definition
 
@@ -300,3 +301,78 @@ Issue: "Unsupported requirement type: player_in_room" in whisper action
 ```
 
 This workflow ensures that every real-world issue becomes a learning opportunity that strengthens the test suite and prevents future similar issues.
+
+## Training Data Management
+
+Motive generates valuable training data from LLM gameplay that can be used for future model development and research. The platform includes comprehensive tools for curating, processing, and managing this data.
+
+### Training Data Pipeline
+
+The training data system follows a three-stage pipeline:
+
+1. **Raw Collection** (`training_data/raw/`): Copy good game runs from logs
+2. **Processing** (`training_data/processed/`): Clean and format data for training
+3. **Publishing** (`training_data/published/`): Curate high-quality datasets for version control
+
+### Key Commands
+
+```bash
+# Copy latest game run (auto-detects most recent)
+motive-util training copy
+
+# Copy with custom name
+motive-util training copy -n "excellent_20_round_game"
+
+# Process raw data into training formats
+motive-util training process
+
+# Process with custom name
+motive-util training process -n "processed_excellent"
+
+# Publish processed data to curated folder
+motive-util training publish -n "final_dataset" -f
+
+# List available runs
+motive-util training list
+
+# Show statistics
+motive-util training stats
+```
+
+### Data Structure
+
+- **`complete_game_log.txt`**: Complete Game Master view (PRIMARY training data)
+- **`player_perspectives.txt`**: Combined individual player perspectives (filtered views)
+- **`metadata.json`**: Complete game configuration and run details
+
+### Quality Guidelines
+
+Good training data should have:
+- **Complete conversations**: Full player interactions across all rounds
+- **Diverse strategies**: Different approaches to the same situations
+- **Natural language**: Realistic dialogue and decision-making
+- **Character depth**: Rich roleplay and personality development
+- **Strategic thinking**: Complex decision-making processes
+
+### Git Integration
+
+- **`training_data/raw/`** and **`training_data/processed/`**: Working directories (gitignored)
+- **`training_data/published/`**: Curated datasets (git-tracked)
+- Use `motive-util training publish` to move processed data to version control
+
+### Best Practices
+
+- **Start with auto-naming**: Use detailed log folder names initially
+- **Rename when ready**: Use `-n` flag when you deem a run worthy of a custom name
+- **Multiple published datasets**: Each published run gets its own sub-folder
+- **Force overwrite**: Use `-f` flag when updating published data
+- **Validate before publishing**: Ensure data quality before committing to version control
+
+### For LLM Agents
+
+When working with training data:
+- **Always validate data quality** before publishing
+- **Use descriptive names** for published datasets
+- **Follow the pipeline**: Copy → Process → Publish
+- **Check metadata completeness** for self-contained datasets
+- **Respect git boundaries**: Only publish curated, high-quality data

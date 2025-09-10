@@ -125,14 +125,20 @@ motive --no-validate                     # Run without Pydantic validation (debu
 motive --game-id my-custom-game          # Run with custom game ID (default: auto-generated timestamp)
 
 # Analyze configurations
-motive-analyze                           # Analyze default config
-motive-analyze -c configs/game_new.yaml -I  # Show include information
-motive-analyze -a                        # Show all information
-motive-analyze --validate                # Validate configuration
-motive-analyze --raw-config              # Show merged config as YAML
+motive-util config                       # Analyze default config
+motive-util config -c configs/game_new.yaml -I  # Show include information
+motive-util config -a                    # Show all information
+motive-util config --validate            # Validate configuration
+motive-util config --raw-config          # Show merged config as YAML
+
+# Manage training data
+motive-util training copy logs/fantasy/hearth_and_shadow/2025-09-09_22hr_26min_35sec_651bcb1c
+motive-util training process             # Process all raw runs
+motive-util training list                # List available runs
+motive-util training stats               # Show statistics
 ```
 
-**Note**: The `motive` and `motive-analyze` commands are only available after running the setup script, which installs the project in editable mode (`pip install -e .`). If you get a "command not found" error, make sure you've run the setup script first.
+**Note**: The `motive` and `motive-util` commands are only available after running the setup script, which installs the project in editable mode (`pip install -e .`). If you get a "command not found" error, make sure you've run the setup script first.
 
 ### CLI Options
 
@@ -359,16 +365,16 @@ Use the included configuration analysis tool to explore available actions, objec
 
 ```bash
 # Show all available actions
-motive-analyze -A
+motive-util config -A
 
 # Show all objects in fantasy theme
-motive-analyze -c configs/themes/fantasy/fantasy.yaml -O
+motive-util config -c configs/themes/fantasy/fantasy.yaml -O
 
 # Show complete configuration summary
-motive-analyze -a
+motive-util config -a
 
 # Show include information for hierarchical configs
-motive-analyze -I
+motive-util config -I
 ```
 
 ### Advanced Analysis Features
@@ -378,10 +384,10 @@ Debug configuration merging by viewing the final merged result:
 
 ```bash
 # Output merged config as YAML (useful for debugging)
-motive-analyze --raw-config
+motive-util config --raw-config
 
 # Output merged config as JSON (useful for debugging)
-motive-analyze --raw-config-json
+motive-util config --raw-config-json
 ```
 
 #### Configuration Validation
@@ -389,13 +395,13 @@ Validate configurations through Pydantic models to catch errors early:
 
 ```bash
 # Validate configuration and show detailed errors if any
-motive-analyze --validate
+motive-util config --validate
 
 # Output merged config after validation (best of both worlds)
-motive-analyze --raw-config --validate
+motive-util config --raw-config --validate
 
 # Validate and output as JSON
-motive-analyze --raw-config-json --validate
+motive-util config --raw-config-json --validate
 ```
 
 #### Combined Analysis
@@ -403,13 +409,13 @@ Use multiple options together for comprehensive analysis:
 
 ```bash
 # Show all information with validation
-motive-analyze -a --validate
+motive-util config -a --validate
 
 # Show actions and validate config
-motive-analyze -A --validate
+motive-util config -A --validate
 
 # Debug a specific config with full output
-motive-analyze -c configs/game.yaml --raw-config --validate
+motive-util config -c configs/game.yaml --raw-config --validate
 ```
 
 ### Analysis Tool Options
@@ -426,6 +432,86 @@ motive-analyze -c configs/game.yaml --raw-config --validate
 | `--raw-config-json` | Output merged configuration as JSON |
 | `--validate` | Validate configuration through Pydantic models |
 | `-c, --config` | Specify configuration file (default: configs/game.yaml) |
+
+## Training Data Management
+
+Motive includes comprehensive tools for managing training data from successful game runs. This is particularly useful for creating datasets for LLM training.
+
+### Training Data Structure
+
+```
+training_data/
+├── sample/               # Sample data (included in git)
+├── raw/                  # Curated game runs (gitignored)
+├── processed/            # Cleaned training data (gitignored)
+└── datasets/             # Final training formats (gitignored)
+```
+
+### Training Data Commands
+
+```bash
+# Copy latest game run to training data
+motive-util training copy
+
+# Copy specific game run to training data
+motive-util training copy logs/fantasy/hearth_and_shadow/2025-09-09_22hr_26min_35sec_651bcb1c
+
+# Copy with custom name
+motive-util training copy -n "excellent_20_round_game"
+
+# Process all raw runs into training formats
+motive-util training process
+
+# Process a specific run
+motive-util training process training_data/raw/run_20250910_073000
+
+# List all available training runs
+motive-util training list
+
+# Show training data statistics
+motive-util training stats
+```
+
+### Training Data Quality
+
+Good training data should have:
+- **Complete conversations** - Full player interactions across all rounds
+- **Diverse strategies** - Different approaches to the same situations
+- **Natural language** - Realistic dialogue and decision-making
+- **Character depth** - Rich roleplay and personality development
+- **Strategic thinking** - Complex decision-making processes
+
+The player chat logs are the most valuable for LLM training as they contain natural language interactions without hidden game state information.
+
+### Training Data Structure
+
+```
+training_data/
+├── README.md              # This documentation
+├── sample/               # Sample data (included in git)
+│   ├── game.log          # Complete game log
+│   ├── Player_*_chat.log # All player logs (most valuable!)
+│   └── metadata.json     # Run details
+├── raw/                  # Future good runs (gitignored)
+├── processed/            # Cleaned data (gitignored)
+└── datasets/             # Final training formats (gitignored)
+```
+
+### Training Data Workflow
+
+1. **Run a good game**: `motive -c configs/game.yaml`
+2. **Copy the logs**: `motive-util training copy` (uses latest run automatically)
+3. **Process the data**: `motive-util training process`
+4. **Use for training**: Access processed data in `training_data/processed/`
+
+### Training Data Quality Guidelines
+
+Good training data should have:
+- **Complete conversations** - Full player interactions across all rounds
+- **Diverse strategies** - Different approaches to the same situations  
+- **Natural language** - Realistic dialogue and decision-making
+- **Character depth** - Rich roleplay and personality development
+- **Strategic thinking** - Complex decision-making processes
 
 ### Validation Benefits
 

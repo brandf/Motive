@@ -1,0 +1,431 @@
+2025-09-10 08:19:14,420 - Game narrative logging to logs\fantasy\hearth_and_shadow\2025-09-10_08hr_19min_14sec_7b632126\game.log and stdout.
+2025-09-10 08:19:14,421 - Loaded game manual from C:\Users\brand\Documents\GitHub\Motive\configs\../MANUAL.md
+2025-09-10 08:19:14,421 - Initializing players from configuration...
+2025-09-10 08:19:14,498 -   - Initialized player: Player_1 using google/gemini-2.5-flash
+2025-09-10 08:19:14,508 -   - Initialized player: Player_2 using google/gemini-2.5-flash
+2025-09-10 08:19:14,511 - Loading game configurations...
+2025-09-10 08:19:14,512 - Loaded 11 actions from merged config.
+2025-09-10 08:19:14,512 - Loaded 82 object types from merged config.
+2025-09-10 08:19:14,512 - Loaded 1 character types from merged config.
+2025-09-10 08:19:14,513 - Loaded 11 rooms from merged config.
+2025-09-10 08:19:14,513 - Total loaded: 82 object types, 11 actions, 1 character types.
+2025-09-10 08:19:14,514 - Instantiating rooms and objects...
+2025-09-10 08:19:14,514 -   - Created room: Town Square (town_square)
+2025-09-10 08:19:14,515 -     - Placed object Notice Board (notice_board) in Town Square
+2025-09-10 08:19:14,515 -     - Placed object Broken Fountain (broken_fountain) in Town Square
+2025-09-10 08:19:14,516 -     - Placed object Town Statue (town_statue) in Town Square
+2025-09-10 08:19:14,516 -     - Placed object Cult Symbols (cult_symbols) in Town Square
+2025-09-10 08:19:14,517 -     - Placed object Fresh Evidence (fresh_evidence) in Town Square
+2025-09-10 08:19:14,517 -     - Placed object Eternal Flame (eternal_flame) in Town Square
+2025-09-10 08:19:14,517 -     - Placed object Flame of Hope (flame_of_hope) in Town Square
+2025-09-10 08:19:14,518 -     - Placed object Message Board (message_board) in Town Square
+2025-09-10 08:19:14,519 -     - Placed object Town Crier (town_crier) in Town Square
+2025-09-10 08:19:14,519 -   - Created room: The Rusty Anchor Tavern (tavern)
+2025-09-10 08:19:14,520 -     - Placed object Bar (bar) in The Rusty Anchor Tavern
+2025-09-10 08:19:14,520 -     - Placed object Job Board (tavern_notice_board) in The Rusty Anchor Tavern
+2025-09-10 08:19:14,520 -     - Placed object Hooded Figure (suspicious_character) in The Rusty Anchor Tavern
+2025-09-10 08:19:14,521 -     - Placed object Secret Drop Point (secret_drop_point) in The Rusty Anchor Tavern
+2025-09-10 08:19:14,521 -     - Placed object Pigeon Coop (pigeon_coop) in The Rusty Anchor Tavern
+2025-09-10 08:19:14,521 -   - Created room: Adventurer's Guild Hall (adventurer_guild)
+2025-09-10 08:19:14,521 -     - Placed object Quest Board (quest_board) in Adventurer's Guild Hall
+2025-09-10 08:19:14,522 -     - Placed object Guild Master's Desk (guild_master_desk) in Adventurer's Guild Hall
+2025-09-10 08:19:14,522 -     - Placed object Weapon Rack (weapon_rack) in Adventurer's Guild Hall
+2025-09-10 08:19:14,522 -     - Placed object Lockpicks (lockpicks) in Adventurer's Guild Hall
+2025-09-10 08:19:14,523 -     - Placed object Torch (torch) in Adventurer's Guild Hall
+2025-09-10 08:19:14,523 -     - Placed object Investigation Kit (investigation_kit) in Adventurer's Guild Hall
+2025-09-10 08:19:14,524 -   - Created room: Thieves' Den (thieves_den)
+2025-09-10 08:19:14,524 -     - Placed object Stolen Goods (stolen_goods) in Thieves' Den
+2025-09-10 08:19:14,524 -     - Placed object Secret Documents (secret_documents) in Thieves' Den
+2025-09-10 08:19:14,524 -     - Placed object The Raven's Chair (raven_chair) in Thieves' Den
+2025-09-10 08:19:14,525 -   - Created room: Sacred Heart Church (church)
+2025-09-10 08:19:14,525 - Object type 'altar' not found for object 'altar' in room 'church'. Skipping.
+2025-09-10 08:19:14,527 -     - Placed object Confession Booth (confession_booth) in Sacred Heart Church
+2025-09-10 08:19:14,527 -     - Placed object Crypt Entrance (crypt_entrance) in Sacred Heart Church
+2025-09-10 08:19:14,528 -     - Placed object Cult Member's Confession (cult_members_confession) in Sacred Heart Church
+2025-09-10 08:19:14,528 -     - Placed object Holy Water (holy_water) in Sacred Heart Church
+2025-09-10 08:19:14,529 -     - Placed object Hearth Stone (hearth_stone) in Sacred Heart Church
+2025-09-10 08:19:14,529 -   - Created room: Blackwater Cemetery (cemetery)
+2025-09-10 08:19:14,530 -     - Placed object Mausoleum (mausoleum) in Blackwater Cemetery
+2025-09-10 08:19:14,530 -     - Placed object Fresh Graves (fresh_graves) in Blackwater Cemetery
+2025-09-10 08:19:14,530 -     - Placed object Suspicious Footprints (suspicious_footprints) in Blackwater Cemetery
+2025-09-10 08:19:14,530 -     - Placed object Fresh Footprints (fresh_footprints) in Blackwater Cemetery
+2025-09-10 08:19:14,531 -     - Placed object Disturbed Earth (disturbed_earth) in Blackwater Cemetery
+2025-09-10 08:19:14,531 -   - Created room: Blackwater Bank (bank)
+2025-09-10 08:19:14,532 -     - Placed object Vault (vault) in Blackwater Bank
+2025-09-10 08:19:14,533 -     - Placed object Bank Ledgers (ledgers) in Blackwater Bank
+2025-09-10 08:19:14,533 -     - Placed object Guard Post (guard_post) in Blackwater Bank
+2025-09-10 08:19:14,534 -     - Placed object Mayor's Journal (mayors_journal) in Blackwater Bank
+2025-09-10 08:19:14,534 -     - Placed object Missing Items (missing_items) in Blackwater Bank
+2025-09-10 08:19:14,535 -   - Created room: Market District (market_district)
+2025-09-10 08:19:14,535 -     - Placed object Merchant Stalls (merchant_stalls) in Market District
+2025-09-10 08:19:14,535 -     - Placed object Suspicious Merchants (suspicious_merchants) in Market District
+2025-09-10 08:19:14,536 -     - Placed object Hidden Alleyways (hidden_alleyways) in Market District
+2025-09-10 08:19:14,536 -   - Created room: Underground Tunnels (underground_tunnels)
+2025-09-10 08:19:14,536 -     - Placed object Cult Symbols (cult_symbols) in Underground Tunnels
+2025-09-10 08:19:14,537 -     - Placed object Evidence of Recent Activity (evidence_activity) in Underground Tunnels
+2025-09-10 08:19:14,537 -     - Placed object Secret Doors (secret_doors) in Underground Tunnels
+2025-09-10 08:19:14,537 -   - Created room: Secret Cult Chamber (secret_cult_chamber)
+2025-09-10 08:19:14,538 -     - Placed object Cult Altar (cult_altar) in Secret Cult Chamber
+2025-09-10 08:19:14,538 -     - Placed object Prisoner Cells (prisoner_cells) in Secret Cult Chamber
+2025-09-10 08:19:14,538 -     - Placed object Cult Artifacts (cult_artifacts) in Secret Cult Chamber
+2025-09-10 08:19:14,538 -     - Placed object Cult Ritual Book (cult_ritual_book) in Secret Cult Chamber
+2025-09-10 08:19:14,539 -     - Placed object Suspicious Sounds (suspicious_sounds) in Secret Cult Chamber
+2025-09-10 08:19:14,539 -     - Placed object Shadow Crystal (shadow_crystal) in Secret Cult Chamber
+2025-09-10 08:19:14,539 -     - Placed object Shadow Mirror (shadow_mirror) in Secret Cult Chamber
+2025-09-10 08:19:14,540 -     - Placed object Ritual Preparations (ritual_preparations) in Secret Cult Chamber
+2025-09-10 08:19:14,540 -     - Placed object Burning Candle (burning_candle) in Secret Cult Chamber
+2025-09-10 08:19:14,540 -   - Created room: Old Forest Path (old_forest_path)
+2025-09-10 08:19:14,541 - Object type 'wooden_sign' not found for object 'wooden_sign' in room 'old_forest_path'. Skipping.
+2025-09-10 08:19:14,541 -     - Placed object Ancient Altar (ancient_altar) in Old Forest Path
+2025-09-10 08:19:14,541 -     - Placed object Forest Watchers (forest_watchers) in Old Forest Path
+2025-09-10 08:19:14,542 - Instantiating player characters and assigning to players...
+2025-09-10 08:19:14,542 -   - Assigned Hero (hero_instance_0) to player Player_1 in room town_square.
+2025-09-10 08:19:14,543 -   - Assigned Hero (hero_instance_1) to player Player_2 in room town_square.
+2025-09-10 08:19:14,544 - ==================== GAME STARTING ====================
+2025-09-10 08:19:14,544 - Game settings:
+2025-09-10 08:19:14,545 -   num_rounds: 2
+2025-09-10 08:19:14,545 -   initial_ap_per_turn: 30
+2025-09-10 08:19:14,545 -   manual: ../MANUAL.md
+2025-09-10 08:19:14,545 - --- Starting Round 1 of 2 ---
+2025-09-10 08:19:14,546 - >>> It is Player_1's turn. (Round 1) - AP: 30
+2025-09-10 08:19:14,546 - GM sent chat to Player_1 (SYSTEM, with manual: C:\Users\brand\Documents\GitHub\Motive\configs\../MANUAL.md):
+You are a player in a text-based adventure game. B...
+2025-09-10 08:19:14,546 - GM sent chat to Player_1:
+**Character:**
+You are Hero, a Hero.
+
+**Motive:**
+Defeat the evil sorcerer.
+
+Initial location: The heart of Blackwater, once bustling with merchants and travelers, now feels empty and foreboding. 
+A broken fountain sits in the center, its water murky and still. Notice boards line the walls, 
+covered with posters of missing persons. The cobblestones are cracked and worn, and the air carries 
+an unsettling chill. Shadows seem to move at the edges of your vision, and the few remaining 
+townsfolk hurry past with worried expressions. Yet in the center of the square, a small hearth 
+still burns - a symbol of the town's stubborn hope that refuses to be extinguished by the growing darkness.
+
+
+**Objects in the room:**
+  • Notice Board
+  • Broken Fountain
+  • Town Statue
+  • Cult Symbols
+  • Fresh Evidence
+  • Eternal Flame
+  • Flame of Hope
+  • Message Board
+  • Town Crier
+
+**Exits:**
+  • Rusty Anchor Tavern
+  • Adventurer's Guild Hall
+  • Sacred Heart Church
+  • Blackwater Bank
+  • Market District
+  • Old Forest Path
+
+Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+**Action Points:** 30 AP
+
+What do you do?
+2025-09-10 08:19:18,301 - GM received chat from Player_1:
+> look fresh evidence
+> look cult symbols
+> read notice board
+2025-09-10 08:19:18,308 - OBSERVED - Player Player_2 in town_square observed event from town_square: 'Player Hero looked at Fresh Evidence.' (Type: player_action)
+2025-09-10 08:19:18,308 - Action 'look' executed by Hero (cost: 10 AP). Remaining AP: 20
+2025-09-10 08:19:18,309 - OBSERVED - Player Player_2 in town_square observed event from town_square: 'Player Hero looked at Cult Symbols.' (Type: player_action)
+2025-09-10 08:19:18,310 - Action 'look' executed by Hero (cost: 10 AP). Remaining AP: 10
+2025-09-10 08:19:18,310 - OBSERVED - Player Player_2 in town_square observed event from town_square: 'Hero reads the Notice Board.' (Type: player_action)
+2025-09-10 08:19:18,311 - Action 'read' executed by Hero (cost: 5 AP). Remaining AP: 5
+2025-09-10 08:19:18,311 - GM sent chat to Player_1 (Feedback):
+**Your Actions for this turn:**
+- **Look Action:** (Cost: 10 AP, Remaining: 20 AP)
+  - You look at the Fresh Evidence. Recently disturbed earth and strange markings near the fountain.
+  - It has properties: readable: True, immovable: True, size: medium, text: The earth has been recently disturbed. Strange symbols are carved into the ground, still wet with what appears to be blood. Footprints lead away from the site - someone was here recently..
+- **Look Action:** (Cost: 10 AP, Remaining: 10 AP)
+  - You look at the Cult Symbols. Dark
+  - It has properties: readable: True, immovable: True, size: small, text: The symbols seem to pulse with dark energy. They appear to be some form of ancient writing, but the meaning is unclear. However, they all seem to point toward the same direction - deeper into the underground..
+- **Read Action:** (Cost: 5 AP, Remaining: 5 AP)
+  - You read the Notice Board: "Various town announcements and missing person posters are posted here."
+2025-09-10 08:19:18,312 - GM sent chat to Player_1:
+Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+Action Points: 5 AP
+
+What do you do?
+2025-09-10 08:19:23,656 - GM received chat from Player_1:
+> read message board
+2025-09-10 08:19:23,657 - OBSERVED - Player Player_2 in town_square observed event from town_square: 'Hero attempts to read the Message Board, but it has no text.' (Type: player_action)
+2025-09-10 08:19:23,657 - Action 'read' executed by Hero (cost: 5 AP). Remaining AP: 0
+2025-09-10 08:19:23,658 - GM sent chat to Player_1 (Feedback):
+**Your Actions for this turn:**
+- **Read Action:** (Cost: 5 AP, Remaining: 0 AP)
+  - The Message Board has no readable text.
+2025-09-10 08:19:23,658 - Player_1 used all AP. Turn ended.
+2025-09-10 08:19:23,659 - === TURN END CONFIRMATION START for Player_1 ===
+2025-09-10 08:19:23,660 - GM sent chat to Player_1 (Turn End Confirmation):
+Your turn has ended. Please confirm how you'd like to proceed:
+
+Example actions:
+  > continue
+  > quit (will count as failure to complete motive)
+
+What would you like to do?
+2025-09-10 08:19:24,768 - GM received chat from Player_1 (Turn End Response):
+> continue
+2025-09-10 08:19:24,769 - Player Player_1 chose to continue.
+2025-09-10 08:19:24,770 - End of action processing for Player_1. Remaining AP: 0
+2025-09-10 08:19:24,770 - >>> It is Player_2's turn. (Round 1) - AP: 30
+2025-09-10 08:19:24,771 - GM sent chat to Player_2 (SYSTEM, with manual: C:\Users\brand\Documents\GitHub\Motive\configs\../MANUAL.md):
+You are a player in a text-based adventure game. B...
+2025-09-10 08:19:24,771 - GM sent chat to Player_2:
+**Character:**
+You are Hero, a Hero.
+
+**Motive:**
+Defeat the evil sorcerer.
+
+Initial location: The heart of Blackwater, once bustling with merchants and travelers, now feels empty and foreboding. 
+A broken fountain sits in the center, its water murky and still. Notice boards line the walls, 
+covered with posters of missing persons. The cobblestones are cracked and worn, and the air carries 
+an unsettling chill. Shadows seem to move at the edges of your vision, and the few remaining 
+townsfolk hurry past with worried expressions. Yet in the center of the square, a small hearth 
+still burns - a symbol of the town's stubborn hope that refuses to be extinguished by the growing darkness.
+
+
+**Objects in the room:**
+  • Notice Board
+  • Broken Fountain
+  • Town Statue
+  • Cult Symbols
+  • Fresh Evidence
+  • Eternal Flame
+  • Flame of Hope
+  • Message Board
+  • Town Crier
+
+**Exits:**
+  • Rusty Anchor Tavern
+  • Adventurer's Guild Hall
+  • Sacred Heart Church
+  • Blackwater Bank
+  • Market District
+  • Old Forest Path
+
+**Recent Events:**
+• Player Hero looked at Fresh Evidence.
+• Player Hero looked at Cult Symbols.
+• Hero reads the Notice Board.
+• Hero attempts to read the Message Board, but it has no text.
+
+Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+**Action Points:** 30 AP
+
+What do you do?
+2025-09-10 08:19:30,795 - GM received chat from Player_2:
+> look town crier
+> say "excuse me, do you know anything about the missing persons or the dark magic affecting blackwater?"
+> look eternal flame
+2025-09-10 08:19:30,796 - OBSERVED - Player Player_1 in town_square observed event from town_square: 'Player Hero looked at Town Crier.' (Type: player_action)
+2025-09-10 08:19:30,797 - Action 'look' executed by Hero (cost: 10 AP). Remaining AP: 20
+2025-09-10 08:19:30,804 - OBSERVED - Player Player_1 in town_square observed event from town_square: 'Player Hero says: "Excuse me, do you know anything about the missing persons or the dark magic affecting Blackwater?"' (Type: action_event)
+2025-09-10 08:19:30,812 - Action 'say' executed by Hero (cost: 10 AP). Remaining AP: 10
+2025-09-10 08:19:30,820 - OBSERVED - Player Player_1 in town_square observed event from town_square: 'Player Hero looked at Eternal Flame.' (Type: player_action)
+2025-09-10 08:19:30,824 - Action 'look' executed by Hero (cost: 10 AP). Remaining AP: 0
+2025-09-10 08:19:30,825 - GM sent chat to Player_2 (Feedback):
+**Your Actions for this turn:**
+- **Look Action:** (Cost: 10 AP, Remaining: 20 AP)
+  - You look at the Town Crier. A person who makes public announcements throughout the town.
+  - It has properties: readable: True, immovable: True, size: medium, communication: True, public: True.
+- **Say Action:** (Cost: 10 AP, Remaining: 10 AP)
+  - Player Hero says: "Excuse me, do you know anything about the missing persons or the dark magic affecting Blackwater?"
+- **Look Action:** (Cost: 10 AP, Remaining: 0 AP)
+  - You look at the Eternal Flame. A small
+  - It has properties: immovable: True, size: small, magical: True, hearth_symbol: True.
+2025-09-10 08:19:30,827 - Player_2 used all AP. Turn ended.
+2025-09-10 08:19:30,827 - === TURN END CONFIRMATION START for Player_2 ===
+2025-09-10 08:19:30,828 - GM sent chat to Player_2 (Turn End Confirmation):
+Your turn has ended. Please confirm how you'd like to proceed:
+
+Example actions:
+  > continue
+  > quit (will count as failure to complete motive)
+
+What would you like to do?
+2025-09-10 08:19:31,764 - GM received chat from Player_2 (Turn End Response):
+> continue
+2025-09-10 08:19:31,764 - Player Player_2 chose to continue.
+2025-09-10 08:19:31,765 - End of action processing for Player_2. Remaining AP: 0
+2025-09-10 08:19:31,765 - === Round 1 Complete ===
+2025-09-10 08:19:31,766 - --- Starting Round 2 of 2 ---
+2025-09-10 08:19:31,770 - >>> It is Player_1's turn. (Round 2) - AP: 30
+2025-09-10 08:19:31,775 - GM sent chat to Player_1:
+**Recent Events:**
+• Player Hero looked at Town Crier.
+• Player Hero says: "Excuse me, do you know anything about the missing persons or the dark magic affecting Blackwater?"
+• Player Hero looked at Eternal Flame.
+
+Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+Action Points: 30 AP
+
+What do you do?
+2025-09-10 08:19:39,155 - GM received chat from Player_1:
+> say "excuse me, town crier. i found strange cult symbols and disturbed earth pointing underground. do you know anything about a hidden passage or lair beneath blackwater?"
+> look town statue
+> look flame of hope
+2025-09-10 08:19:39,159 - OBSERVED - Player Player_2 in town_square observed event from town_square: 'Player Hero says: "Excuse me, Town Crier. I found strange cult symbols and disturbed earth pointing underground. Do you know anything about a hidden passage or lair beneath Blackwater?"' (Type: action_event)
+2025-09-10 08:19:39,161 - Action 'say' executed by Hero (cost: 10 AP). Remaining AP: 20
+2025-09-10 08:19:39,161 - OBSERVED - Player Player_2 in town_square observed event from town_square: 'Player Hero looked at Town Statue.' (Type: player_action)
+2025-09-10 08:19:39,162 - Action 'look' executed by Hero (cost: 10 AP). Remaining AP: 10
+2025-09-10 08:19:39,164 - OBSERVED - Player Player_2 in town_square observed event from town_square: 'Player Hero looked at Flame of Hope.' (Type: player_action)
+2025-09-10 08:19:39,165 - Action 'look' executed by Hero (cost: 10 AP). Remaining AP: 0
+2025-09-10 08:19:39,165 - GM sent chat to Player_1 (Feedback):
+**Your Actions for this turn:**
+- **Say Action:** (Cost: 10 AP, Remaining: 20 AP)
+  - Player Hero says: "Excuse me, Town Crier. I found strange cult symbols and disturbed earth pointing underground. Do you know anything about a hidden passage or lair beneath Blackwater?"
+- **Look Action:** (Cost: 10 AP, Remaining: 10 AP)
+  - You look at the Town Statue. A large statue of the town's founder
+- **Look Action:** (Cost: 10 AP, Remaining: 0 AP)
+  - You look at the Flame of Hope. A small
+  - It has properties: immovable: True, size: small, magical: True, hearth_symbol: True, responsive: True.
+2025-09-10 08:19:39,166 - Player_1 used all AP. Turn ended.
+2025-09-10 08:19:39,166 - === TURN END CONFIRMATION START for Player_1 ===
+2025-09-10 08:19:39,166 - GM sent chat to Player_1 (Turn End Confirmation):
+Your turn has ended. Please confirm how you'd like to proceed:
+
+Example actions:
+  > continue
+  > quit (will count as failure to complete motive)
+
+What would you like to do?
+2025-09-10 08:19:39,643 - GM received chat from Player_1 (Turn End Response):
+> continue
+2025-09-10 08:19:39,644 - Player Player_1 chose to continue.
+2025-09-10 08:19:39,644 - End of action processing for Player_1. Remaining AP: 0
+2025-09-10 08:19:39,645 - >>> It is Player_2's turn. (Round 2) - AP: 30
+2025-09-10 08:19:39,645 - GM sent chat to Player_2:
+**Recent Events:**
+• Player Hero says: "Excuse me, Town Crier. I found strange cult symbols and disturbed earth pointing underground. Do you know anything about a hidden passage or lair beneath Blackwater?"
+• Player Hero looked at Town Statue.
+• Player Hero looked at Flame of Hope.
+
+Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+Action Points: 30 AP
+
+What do you do?
+2025-09-10 08:19:50,557 - GM received chat from Player_2:
+> move adventurer's guild hall
+> look
+> read quest board
+2025-09-10 08:19:50,558 - OBSERVED - Player Player_1 in town_square observed event from town_square: 'Hero left the room via Adventurer's Guild Hall.' (Type: player_exit)
+2025-09-10 08:19:50,558 - Action 'move' executed by Hero (cost: 10 AP). Remaining AP: 20
+2025-09-10 08:19:50,559 - Action 'look' executed by Hero (cost: 10 AP). Remaining AP: 10
+2025-09-10 08:19:50,560 - Action 'read' executed by Hero (cost: 5 AP). Remaining AP: 5
+2025-09-10 08:19:50,561 - GM sent chat to Player_2 (Feedback):
+**Your Actions for this turn:**
+- **Move Action:** (Cost: 10 AP, Remaining: 20 AP)
+  - You move to the 'Adventurer's Guild Hall'.
+  - Destination: A grand hall filled with the trappings of adventure and heroism. Weapons and armor line the walls, 
+and maps of distant lands cover large tables. A quest board dominates one wall, covered with 
+various missions and bounties. The guild master, a weathered veteran, sits behind a massive 
+desk, reviewing reports and assigning quests. The air is filled with the excitement of new 
+adventures and the weight of past battles.
+ You also see: Quest Board, Guild Master's Desk, Weapon Rack, Lockpicks, Torch, Investigation Kit. Exits: Town Square, Rusty Anchor Tavern, Market District.
+- **Look Action:** (Cost: 10 AP, Remaining: 10 AP)
+  - A grand hall filled with the trappings of adventure and heroism. Weapons and armor line the walls, 
+and maps of distant lands cover large tables. A quest board dominates one wall, covered with 
+various missions and bounties. The guild master, a weathered veteran, sits behind a massive 
+desk, reviewing reports and assigning quests. The air is filled with the excitement of new 
+adventures and the weight of past battles.
+
+
+**Objects in the room:**
+  • Quest Board
+  • Guild Master's Desk
+  • Weapon Rack
+  • Lockpicks
+  • Torch
+  • Investigation Kit
+
+**Exits:**
+  • Town Square
+  • Rusty Anchor Tavern
+  • Market District
+- **Read Action:** (Cost: 5 AP, Remaining: 5 AP)
+  - You read the Quest Board: "Various quests and bounties are posted here, including some related to recent disappearances."
+2025-09-10 08:19:50,562 - GM sent chat to Player_2:
+Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+Action Points: 5 AP
+
+What do you do?
+2025-09-10 08:19:56,435 - GM received chat from Player_2:
+> read guild master's desk
+2025-09-10 08:19:56,438 - Action 'read' executed by Hero (cost: 5 AP). Remaining AP: 0
+2025-09-10 08:19:56,444 - GM sent chat to Player_2 (Feedback):
+**Your Actions for this turn:**
+- **Read Action:** (Cost: 5 AP, Remaining: 0 AP)
+  - You read the Guild Master's Desk: "The desk contains various reports and maps that might contain valuable information."
+2025-09-10 08:19:56,445 - Player_2 used all AP. Turn ended.
+2025-09-10 08:19:56,445 - === TURN END CONFIRMATION START for Player_2 ===
+2025-09-10 08:19:56,446 - GM sent chat to Player_2 (Turn End Confirmation):
+Your turn has ended. Please confirm how you'd like to proceed:
+
+Example actions:
+  > continue
+  > quit (will count as failure to complete motive)
+
+What would you like to do?
+2025-09-10 08:19:57,846 - GM received chat from Player_2 (Turn End Response):
+> continue
+2025-09-10 08:19:57,847 - Player Player_2 chose to continue.
+2025-09-10 08:19:57,847 - End of action processing for Player_2. Remaining AP: 0
+2025-09-10 08:19:57,847 - === Round 2 Complete ===
+2025-09-10 08:19:57,848 - ===================== GAME OVER ======================
+2025-09-10 08:19:57,848 - No players achieved their motives.
+2025-09-10 08:19:57,848 - LOSERS: Player_1 (failed to achieve motive: Defeat the evil sorcerer.), Player_2 (failed to achieve motive: Defeat the evil sorcerer.)
+2025-09-10 08:19:57,849 - Game Summary:
+- Total players: 2
+- Winners: 0
+- Losers: 2

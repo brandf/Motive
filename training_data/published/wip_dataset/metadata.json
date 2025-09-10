@@ -1,0 +1,36 @@
+{
+  "source_directory": "logs\\fantasy\\hearth_and_shadow\\2025-09-10_08hr_19min_14sec_7b632126",
+  "copied_at": "2025-09-10T09:05:45.442146",
+  "files_copied": [
+    "game.log",
+    "Player_1_chat.log",
+    "Player_2_chat.log"
+  ],
+  "description": "PUBLISHED: Good game run - manually curated",
+  "edition": "hearth_and_shadow",
+  "game_settings": {
+    "num_rounds": 2,
+    "initial_ap_per_turn": 30,
+    "manual": "../MANUAL.md"
+  },
+  "players": [
+    {
+      "name": "Player_1",
+      "provider": "google",
+      "model": "gemini-2.5-flash"
+    },
+    {
+      "name": "Player_2",
+      "provider": "google",
+      "model": "gemini-2.5-flash"
+    }
+  ],
+  "total_rounds": 2,
+  "ap_per_turn": 30,
+  "published_notes": [
+    "This is a curated subset of high-quality training data",
+    "Use this as a reference for expected data quality and format",
+    "Published from: processed_test",
+    "Published at: 2025-09-10T09:11:44.451875"
+  ]
+}

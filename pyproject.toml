@@ -20,7 +20,7 @@ dependencies = [
 
 [project.scripts]
 motive = "motive.cli:main"
-motive-analyze = "motive.analyze:main"
+motive-util = "motive.util:main"
 
 [tool.black]
 line-length = 88

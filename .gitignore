@@ -14,5 +14,9 @@ venv/
 # Logs
 logs/
 
+# Training data working directories
+training_data/raw/
+training_data/processed/
+
 # Environment variables
 .env

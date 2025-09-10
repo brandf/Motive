@@ -232,6 +232,17 @@ class GameMaster:
     async def run_game(self):
         """Main game loop."""
         self.game_logger.info("==================== GAME STARTING ====================")
+        
+        # Log game settings for training data metadata
+        self.game_logger.info("Game settings:")
+        if hasattr(self.game_config, 'game_settings'):
+            self.game_logger.info(f"  num_rounds: {self.game_config.game_settings.num_rounds}")
+            self.game_logger.info(f"  initial_ap_per_turn: {self.game_config.game_settings.initial_ap_per_turn}")
+            self.game_logger.info(f"  manual: {self.game_config.game_settings.manual}")
+        else:
+            self.game_logger.info(f"  num_rounds: {self.game_config['game_settings']['num_rounds']}")
+            self.game_logger.info(f"  initial_ap_per_turn: {self.game_config['game_settings']['initial_ap_per_turn']}")
+            self.game_logger.info(f"  manual: {self.game_config['game_settings']['manual']}")
 
         # Removed: await self._send_initial_messages()
 
