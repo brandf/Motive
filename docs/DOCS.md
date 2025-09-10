@@ -71,6 +71,7 @@ docs/
 - `docs/AGENT.md` - AI agent development guidelines
 - `docs/VIBECODER.md` - Human-LLM collaboration lessons
 - `docs/TODO.md` - Current development priorities
+- `docs/COMPETITIVE_ANALYSIS.md` - Comparison with similar platforms and research environments
 
 ### docs/CONTRIBUTORS.md References
 - `../README.md` - Project overview

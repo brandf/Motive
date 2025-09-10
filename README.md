@@ -181,6 +181,8 @@ The platform includes comprehensive tools for:
 - **Multi-agent systems** research
 - **Human-AI collaboration** studies
 
+For a detailed comparison with similar platforms and research environments, see [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md).
+
 ## Future Vision
 
 ### Environment Generation
@@ -224,6 +226,7 @@ Current development priorities are tracked in [docs/TODO.md](docs/TODO.md).
 - **[docs/VIBECODER.md](docs/VIBECODER.md)** - Human-LLM collaboration lessons
 - **[docs/TODO.md](docs/TODO.md)** - Current development priorities
 - **[docs/DOCS.md](docs/DOCS.md)** - Documentation structure and relationships
+- **[docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md)** - Comparison with similar platforms and research environments
 
 For active development planning, always check [docs/TODO.md](docs/TODO.md) after reading the contributors guide.
 
