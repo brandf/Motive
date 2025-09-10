@@ -12,9 +12,10 @@ from datetime import datetime
 
 from motive.config import Event, GameConfig, PlayerConfig, ThemeConfig, EditionConfig, ActionConfig, CharacterConfig, RoomConfig, ExitConfig, ObjectInstanceConfig, ActionRequirementConfig, ActionEffectConfig, ParameterConfig, GameSettings, CoreConfig
 from motive.game_master import GameMaster
-from motive.player import Player, PlayerCharacter
-from motive.game_objects import GameObject
-from motive.game_rooms import Room
+from motive.player import Player
+from motive.character import Character
+from motive.game_object import GameObject
+from motive.room import Room
 from motive.hooks.core_hooks import look_at_target, generate_help_message, handle_pickup_action, handle_read_action
 
 
@@ -41,7 +42,7 @@ class TestRealCodeIntegration:
         )
         
         # Create a real player character
-        player_char = PlayerCharacter(
+        player_char = Character(
             char_id="test_player",
             name="TestPlayer",
             backstory="A test character",
@@ -68,7 +69,7 @@ class TestRealCodeIntegration:
     def test_help_action_generates_events_real_code(self):
         """Test that the real generate_help_message function generates events."""
         # Create a real player character
-        player_char = PlayerCharacter(
+        player_char = Character(
             char_id="test_player",
             name="TestPlayer",
             backstory="A test character",
@@ -125,7 +126,7 @@ class TestRealCodeIntegration:
         )
         
         # Create a real player character
-        player_char = PlayerCharacter(
+        player_char = Character(
             char_id="test_player",
             name="TestPlayer",
             backstory="A test character",
@@ -175,7 +176,7 @@ class TestRealCodeIntegration:
         )
         
         # Create a real player character
-        player_char = PlayerCharacter(
+        player_char = Character(
             char_id="test_player",
             name="TestPlayer",
             backstory="A test character",
@@ -219,7 +220,7 @@ class TestRealCodeIntegration:
         )
         
         # Create a real player character
-        player_char = PlayerCharacter(
+        player_char = Character(
             char_id="test_player",
             name="TestPlayer",
             backstory="A test character",

@@ -3,9 +3,9 @@
 import pytest
 from unittest.mock import MagicMock
 from motive.hooks.core_hooks import handle_move_action
-from motive.game_objects import GameObject
-from motive.game_rooms import Room
-from motive.player import PlayerCharacter
+from motive.game_object import GameObject
+from motive.room import Room
+from motive.character import Character
 
 
 def test_move_action_includes_direction_in_events():
@@ -27,7 +27,7 @@ def test_move_action_includes_direction_in_events():
     )
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -76,7 +76,7 @@ def test_move_action_with_multiple_exits():
         }
     )
     
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer", 
         backstory="A test character",

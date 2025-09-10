@@ -2,9 +2,9 @@
 
 import pytest
 from motive.hooks.core_hooks import handle_pickup_action
-from motive.game_objects import GameObject
-from motive.game_rooms import Room
-from motive.player import PlayerCharacter
+from motive.game_object import GameObject
+from motive.room import Room
+from motive.character import Character
 
 
 def test_pickup_action_success():
@@ -37,7 +37,7 @@ def test_pickup_action_success():
     test_room.add_object(test_object)
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_char",
         name="TestPlayer",
         backstory="A test character",
@@ -99,7 +99,7 @@ def test_pickup_action_object_not_found():
     )
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_char",
         name="TestPlayer",
         backstory="A test character",
@@ -136,7 +136,7 @@ def test_pickup_action_no_object_name():
             self.game_id = "test_game"
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_char",
         name="TestPlayer",
         backstory="A test character",
@@ -193,7 +193,7 @@ def test_pickup_action_case_insensitive():
     test_room.add_object(test_object)
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_char",
         name="TestPlayer",
         backstory="A test character",

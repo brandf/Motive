@@ -161,8 +161,8 @@ class ConfigLoader:
                 # Recursively merge dictionaries
                 result[key] = self._merge_configs(result[key], value)
             elif key in result and isinstance(result[key], list) and isinstance(value, list):
-                # Merge lists using simple append strategy by default
-                result[key] = self._merge_lists_simple(result[key], value, key)
+                # Simple append strategy - most intuitive for users
+                result[key] = result[key] + value
             elif key in result and isinstance(result[key], dict) and isinstance(value, list):
                 # Handle case where base is dict but override is list (advanced merging)
                 result[key] = self._apply_patch_list(list(result[key].values()), value)
@@ -192,6 +192,7 @@ class ConfigLoader:
         """
         # Simple append strategy - most intuitive for users
         return base_list.copy() + override_list.copy()
+    
     
     def _is_patch_reference(self, value: Any) -> bool:
         """Check if a value is a patch reference."""

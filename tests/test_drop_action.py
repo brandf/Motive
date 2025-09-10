@@ -2,9 +2,9 @@
 
 import pytest
 from motive.hooks.core_hooks import handle_drop_action
-from motive.game_objects import GameObject
-from motive.game_rooms import Room
-from motive.player import PlayerCharacter
+from motive.game_object import GameObject
+from motive.room import Room
+from motive.character import Character
 
 
 def test_drop_action_success():
@@ -33,7 +33,7 @@ def test_drop_action_success():
     )
     
     # Create test player character with object in inventory
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -93,7 +93,7 @@ def test_drop_action_object_not_in_inventory():
     )
     
     # Create test player character with empty inventory
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -159,7 +159,7 @@ def test_drop_action_case_insensitive():
     )
     
     # Create test player character with object in inventory
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -211,7 +211,7 @@ def test_drop_action_no_object_name():
     )
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -280,7 +280,7 @@ def test_drop_action_multiple_objects_same_name():
     )
     
     # Create test player character with both objects in inventory
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",

@@ -2,17 +2,17 @@
 
 import pytest
 from motive.game_master import GameMaster
-from motive.player import PlayerCharacter
-from motive.game_rooms import Room
+from motive.character import Character
+from motive.room import Room
 from motive.config import GameConfig, ActionConfig, ActionRequirementConfig
 import yaml
 
 
 def test_player_in_room_requirement_implementation():
     """Test the actual player_in_room requirement implementation."""
-    from motive.game_rooms import Room
+    from motive.room import Room
     from motive.config import ActionConfig, ActionRequirementConfig
-    from motive.player import PlayerCharacter
+    from motive.character import Character
     
     # Create a mock GameMaster class that only has the _check_requirements method
     class MockGameMaster:
@@ -62,7 +62,7 @@ def test_player_in_room_requirement_implementation():
     )
     
     # Create test player characters
-    player1_char = PlayerCharacter(
+    player1_char = Character(
         char_id="player1",
         name="Player1",
         backstory="Test player 1",
@@ -70,7 +70,7 @@ def test_player_in_room_requirement_implementation():
         current_room_id="test_room"
     )
     
-    player2_char = PlayerCharacter(
+    player2_char = Character(
         char_id="player2", 
         name="Player2",
         backstory="Test player 2",
@@ -127,7 +127,7 @@ def test_player_in_room_requirement_implementation():
     assert "missing parameter" in message.lower()
     
     # Test case 4: Player in different room - should fail
-    player3_char = PlayerCharacter(
+    player3_char = Character(
         char_id="player3",
         name="Player3", 
         backstory="Test player 3",

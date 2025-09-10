@@ -20,7 +20,7 @@ def test_all_action_handlers_have_consistent_signatures():
             self.game_id = "test_game"
             self.game_actions = {}  # Add missing attribute
     
-    class MockPlayerCharacter:
+    class MockCharacter:
         def __init__(self):
             self.id = "test_char"
             self.name = "TestPlayer"
@@ -30,7 +30,7 @@ def test_all_action_handlers_have_consistent_signatures():
         pass
     
     gm = MockGameMaster()
-    player_char = MockPlayerCharacter()
+    player_char = MockCharacter()
     action_config = MockActionConfig()
     params = {}
     

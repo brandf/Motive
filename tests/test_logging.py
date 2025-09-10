@@ -9,8 +9,9 @@ from motive.config import (
     ActionConfig, CharacterConfig, RoomConfig, ExitConfig, ObjectInstanceConfig, 
     ActionRequirementConfig, ActionEffectConfig, ParameterConfig, GameSettings, CoreConfig
 )
-from motive.player import Player, PlayerCharacter
-from motive.game_objects import GameObject
+from motive.player import Player
+from motive.character import Character
+from motive.game_object import GameObject
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel
 
@@ -49,7 +50,7 @@ def mock_game_master_logging():
                 character_type_id = "hero" # Default to 'hero'
                 if name == "Elara": # For Lyra (Elara character)
                     character_type_id = "elara"
-                self.character = PlayerCharacter(
+                self.character = Character(
                     char_id=f"{character_type_id}_instance_0", # Use character_type_id here
                     name=name,
                     backstory="",
@@ -209,12 +210,12 @@ def mock_game_master_logging():
             
             # Re-assign get_response_and_update_history with desired mock behavior
             if player_instance.name == "Arion":
-                player_instance.character = PlayerCharacter(
+                player_instance.character = Character(
                     char_id="hero_instance_0", name="Arion", backstory="", motive="Defeat evil.", current_room_id="start_room", action_points=20
                 )
                 player_instance.get_response_and_update_history = AsyncMock(return_value=AIMessage(content="> help"))
             elif player_instance.name == "Kael":
-                player_instance.character = PlayerCharacter(
+                player_instance.character = Character(
                     char_id="hero_instance_1", name="Kael", backstory="", motive="Defeat evil.", current_room_id="start_room", action_points=20
                 )
                 player_instance.get_response_and_update_history = AsyncMock(return_value=AIMessage(content="> say \"hello!\""))

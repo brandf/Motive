@@ -224,6 +224,8 @@ Current core actions include: `move`, `say`, `look` (including `look inventory`)
 - **Don't ask permission for high-confidence git commits**: When commit assessment is 9-10/10 AND after successful `motive` validation, just proceed with staging, committing, and pushing. The user will reject if they don't want it.
 - **Don't ask permission for high-confidence commits**: After successful `motive` validation with test configs, automatically commit changes. The user will reject if they don't want it.
 - **Use `motive` with defaults for validation**: Simply run `motive` (no arguments needed) to validate changes, as it defaults to `configs/game.yaml` and auto-generates game IDs.
+- **Use test configs for specific validation**: Use `motive -c tests/configs/integration/game_test.yaml` to test with specific configurations, hints, and shorter game rounds. This is especially useful for debugging specific actions or behaviors.
+- **CRITICAL: Understand root cause before making changes**: Don't run off changing things before you understand the root cause of an issue. You're likely to do more harm than good. Always trace back to the source of the problem first - check config files, understand what's being merged, identify the actual issue before implementing fixes.
 - **Use platform-appropriate commands**: Always test/verify what platform we're on and use appropriate bash and/or PowerShell commands. On Windows, use PowerShell syntax (`;` instead of `&&` for command chaining).
 - **Batch git operations**: Use `&&` to chain git commands (e.g., `git add . && git commit -m "message" && git push`) to reduce approval requests.
 

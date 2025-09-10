@@ -2,8 +2,8 @@
 
 import pytest
 from motive.inventory_constraints import check_inventory_constraints, validate_inventory_transfer
-from motive.game_objects import GameObject
-from motive.player import PlayerCharacter
+from motive.game_object import GameObject
+from motive.character import Character
 
 
 def test_immovable_constraint():
@@ -19,7 +19,7 @@ def test_immovable_constraint():
     )
     
     # Create test player
-    player = PlayerCharacter(
+    player = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -51,7 +51,7 @@ def test_size_constraint():
     )
     
     # Create small player
-    small_player = PlayerCharacter(
+    small_player = Character(
         char_id="small_player",
         name="SmallPlayer",
         backstory="A small character",
@@ -61,7 +61,7 @@ def test_size_constraint():
     )
     
     # Create large player
-    large_player = PlayerCharacter(
+    large_player = Character(
         char_id="large_player",
         name="LargePlayer",
         backstory="A large character",
@@ -102,7 +102,7 @@ def test_class_constraint():
     )
     
     # Create mage player
-    mage_player = PlayerCharacter(
+    mage_player = Character(
         char_id="mage_player",
         name="MagePlayer",
         backstory="A mage character",
@@ -112,7 +112,7 @@ def test_class_constraint():
     )
     
     # Create warrior player
-    warrior_player = PlayerCharacter(
+    warrior_player = Character(
         char_id="warrior_player",
         name="WarriorPlayer",
         backstory="A warrior character",
@@ -153,7 +153,7 @@ def test_level_constraint():
     )
     
     # Create low-level player
-    low_level_player = PlayerCharacter(
+    low_level_player = Character(
         char_id="low_player",
         name="LowPlayer",
         backstory="A low-level character",
@@ -163,7 +163,7 @@ def test_level_constraint():
     )
     
     # Create high-level player
-    high_level_player = PlayerCharacter(
+    high_level_player = Character(
         char_id="high_player",
         name="HighPlayer",
         backstory="A high-level character",
@@ -209,7 +209,7 @@ def test_custom_constraints():
     )
     
     # Create player meeting requirements
-    good_elf_player = PlayerCharacter(
+    good_elf_player = Character(
         char_id="good_elf",
         name="GoodElf",
         backstory="A good elf character",
@@ -219,7 +219,7 @@ def test_custom_constraints():
     )
     
     # Create player not meeting requirements
-    evil_human_player = PlayerCharacter(
+    evil_human_player = Character(
         char_id="evil_human",
         name="EvilHuman",
         backstory="An evil human character",
@@ -264,7 +264,7 @@ def test_multiple_constraints():
     )
     
     # Create player meeting all requirements
-    qualified_player = PlayerCharacter(
+    qualified_player = Character(
         char_id="qualified_player",
         name="QualifiedPlayer",
         backstory="A qualified character",
@@ -274,7 +274,7 @@ def test_multiple_constraints():
     )
     
     # Create player missing one requirement
-    unqualified_player = PlayerCharacter(
+    unqualified_player = Character(
         char_id="unqualified_player",
         name="UnqualifiedPlayer",
         backstory="An unqualified character",
@@ -315,7 +315,7 @@ def test_inventory_transfer_validation():
     )
     
     # Create players
-    small_player = PlayerCharacter(
+    small_player = Character(
         char_id="small_player",
         name="SmallPlayer",
         backstory="A small character",
@@ -324,7 +324,7 @@ def test_inventory_transfer_validation():
         properties={"size": "small"}
     )
     
-    medium_player = PlayerCharacter(
+    medium_player = Character(
         char_id="medium_player",
         name="MediumPlayer",
         backstory="A medium character",
@@ -377,7 +377,7 @@ def test_size_hierarchy():
         
         # Test with each player size
         for player_size_name, player_size_value in size_hierarchy.items():
-            player = PlayerCharacter(
+            player = Character(
                 char_id=f"{player_size_name}_player",
                 name=f"{player_size_name.title()}Player",
                 backstory="A test character",

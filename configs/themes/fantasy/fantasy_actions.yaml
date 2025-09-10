@@ -1,21 +1,4 @@
 actions:
-  pickup:
-    id: pickup
-    name: pickup
-    cost: 10
-    description: Pick up an object.
-    parameters:
-      - name: object_name
-        type: string
-        description: The name of the object to pick up.
-    requirements:
-      - type: object_in_room
-        object_name_param: object_name
-    effects:
-      - type: code_binding
-        function_module: motive.hooks.core_hooks
-        function_name: handle_pickup_action
-        observers: ["player"]
   light_torch:
     id: light_torch
     name: light torch

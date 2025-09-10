@@ -1,15 +1,15 @@
 """Test the look inventory functionality to view carried items."""
 
 import pytest
-from motive.game_objects import GameObject
-from motive.player import PlayerCharacter
+from motive.game_object import GameObject
+from motive.character import Character
 from motive.hooks.core_hooks import look_at_target
 
 
 def test_inventory_action_empty():
     """Test inventory action when player has no items."""
     # Create a player character with empty inventory
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -40,7 +40,7 @@ def test_inventory_action_empty():
 def test_inventory_action_with_items():
     """Test inventory action when player has items."""
     # Create a player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -105,7 +105,7 @@ def test_inventory_action_with_items():
 def test_inventory_action_single_item():
     """Test inventory action with a single item."""
     # Create a player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -150,7 +150,7 @@ def test_inventory_action_single_item():
 def test_inventory_action_with_properties():
     """Test inventory action with items that have properties."""
     # Create a player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",

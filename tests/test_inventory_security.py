@@ -2,9 +2,9 @@
 
 import pytest
 from motive.hooks.core_hooks import handle_pickup_action
-from motive.game_objects import GameObject
-from motive.game_rooms import Room
-from motive.player import PlayerCharacter
+from motive.game_object import GameObject
+from motive.room import Room
+from motive.character import Character
 
 
 def test_pickup_object_not_in_room():
@@ -31,7 +31,7 @@ def test_pickup_object_not_in_room():
     room2.add_object(test_object)
     
     # Create player in room1
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_char",
         name="TestPlayer",
         backstory="A test character",
@@ -76,7 +76,7 @@ def test_pickup_nonexistent_object():
     test_room = Room(room_id="test_room", name="Test Room", description="Empty room", exits={})
     
     # Create player
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_char",
         name="TestPlayer",
         backstory="A test character",
@@ -130,7 +130,7 @@ def test_pickup_object_already_in_inventory():
     test_room.add_object(test_object)
     
     # Create player with object already in inventory
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_char",
         name="TestPlayer",
         backstory="A test character",
@@ -178,7 +178,7 @@ def test_pickup_object_with_special_characters():
     test_room = Room(room_id="test_room", name="Test Room", description="Room", exits={})
     
     # Create player
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_char",
         name="TestPlayer",
         backstory="A test character",
@@ -245,7 +245,7 @@ def test_pickup_object_case_sensitivity_security():
     test_room.add_object(test_object)
     
     # Create player
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_char",
         name="TestPlayer",
         backstory="A test character",
@@ -320,7 +320,7 @@ def test_pickup_object_duplicate_ids():
     test_room.add_object(object2)  # This should overwrite the first one
     
     # Create player
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_char",
         name="TestPlayer",
         backstory="A test character",

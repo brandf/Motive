@@ -232,20 +232,17 @@ class GameMaster:
     async def run_game(self):
         """Main game loop."""
         self.game_logger.info("==================== GAME STARTING ====================")
-        print("\n==================== GAME STARTING ====================") # Keep for console output
 
         # Removed: await self._send_initial_messages()
 
         for round_num in range(1, self.num_rounds + 1):
             self.game_logger.info(f"--- Starting Round {round_num} of {self.num_rounds} ---")
-            print(f"\n--- Starting Round {round_num} of {self.num_rounds} ---") # Keep for console output
             
             # Filter out players who have quit
             active_players = [player for player in self.players if player.character.action_points != -1]
             
             if not active_players:
                 self.game_logger.info("No active players remaining. Game ending early.")
-                print("No active players remaining. Game ending early.")
                 break
                 
             for player in active_players:
@@ -259,13 +256,10 @@ class GameMaster:
                 # Check if player quit during their turn
                 if player.character.action_points == -1:
                     self.game_logger.info(f"Player {player.name} has quit the game.")
-                    print(f"Player {player.name} has quit the game.")
                     
             self.game_logger.info(f"=== Round {round_num} Complete ===")
-            print(f"=== Round {round_num} Complete ===") # Keep for console output
 
         self.game_logger.info("===================== GAME OVER ======================")
-        print("\n===================== GAME OVER ======================") # Keep for console output
         
         # Check win conditions and provide game summary
         self._check_win_conditions_and_summarize()
@@ -294,21 +288,17 @@ class GameMaster:
         if winners:
             winner_text = f"WINNERS: {', '.join(winners)}"
             self.game_logger.info(winner_text)
-            print(f"\n{winner_text}")
         else:
             no_winners_text = "No players achieved their motives."
             self.game_logger.info(no_winners_text)
-            print(f"\n{no_winners_text}")
         
         if losers:
             loser_text = f"LOSERS: {', '.join(losers)}"
             self.game_logger.info(loser_text)
-            print(f"{loser_text}")
         
         # Game summary
         summary_text = f"Game Summary:\n- Total players: {len(self.players)}\n- Winners: {len(winners)}\n- Losers: {len(losers)}"
         self.game_logger.info(summary_text)
-        print(summary_text)
 
     def _check_requirements(self, player_char: Character, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
         """Checks if all requirements for an action are met."""
@@ -680,9 +670,15 @@ class GameMaster:
         # Default to static cost from config (backward compatibility for int)                                                             
         # Handle both Pydantic objects and dictionaries from merged config
         if hasattr(action_config, 'cost'):
-            return action_config.cost
+            cost_raw = action_config.cost
         else:
-            return action_config.get('cost', 0)
+            cost_raw = action_config.get('cost', 0)
+        
+        # Handle cost as either integer or dictionary
+        if isinstance(cost_raw, dict):
+            return cost_raw.get('value', 0)  # Extract value from CostConfig dict
+        else:
+            return cost_raw
 
     def _distribute_events(self):
         """Distributes generated events to relevant players based on observer scopes."""
@@ -734,7 +730,6 @@ class GameMaster:
             return
 
         self.game_logger.info(f">>> It is {player.name}'s turn. (Round {round_num}) - AP: {player_char.action_points}")
-        print(f"\n>>> It is {player.name}'s turn. (Round {round_num}) - AP: {player_char.action_points}") # Keep for console output
 
         turn_in_progress = True
         while turn_in_progress and player_char.action_points > 0:
@@ -851,7 +846,6 @@ class GameMaster:
             player_input = response.content.strip().lower()
             self.game_logger.info(f"GM received chat from {player.name}:\n{player_input}")
             player.logger.info(f"GM received chat from {player.name}:\n{player_input}")
-            print(f"    '{player.name}' responded in {duration:.2f}s ({response_len} chars): {player_input}")
 
             # Check for explicit "end turn" command first
             if player_input == "end turn":
@@ -1069,7 +1063,6 @@ class GameMaster:
                     continue
 
         self.game_logger.info(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
-        print(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
 
     async def _handle_turn_end_confirmation(self, player: Player, player_char: Character):
         """Handles the turn end confirmation process with the player."""
@@ -1098,7 +1091,6 @@ class GameMaster:
         player_input = response.content.strip().lower()
         self.game_logger.info(f"GM received chat from {player.name} (Turn End Response):\n{player_input}")
         player.logger.info(f"GM received chat from {player.name} (Turn End Response):\n{player_input}")
-        print(f"    '{player.name}' responded in {duration:.2f}s ({response_len} chars): {player_input}")
         
         # Parse the response for turn end actions (only accept actions with > prefix)
         if "> quit" in response.content:

@@ -2,9 +2,9 @@
 
 import pytest
 from motive.hooks.core_hooks import handle_pickup_action
-from motive.game_objects import GameObject
-from motive.game_rooms import Room
-from motive.player import PlayerCharacter
+from motive.game_object import GameObject
+from motive.room import Room
+from motive.character import Character
 
 
 def test_tiny_gem_pickup():
@@ -34,7 +34,7 @@ def test_tiny_gem_pickup():
     )
     
     # Create small player
-    small_player = PlayerCharacter(
+    small_player = Character(
         char_id="small_player",
         name="SmallPlayer",
         backstory="A small character",
@@ -90,7 +90,7 @@ def test_large_sword_size_constraint():
     )
     
     # Create small player (should fail)
-    small_player = PlayerCharacter(
+    small_player = Character(
         char_id="small_player",
         name="SmallPlayer",
         backstory="A small character",
@@ -101,7 +101,7 @@ def test_large_sword_size_constraint():
     small_player.inventory = {}
     
     # Create large player (should succeed)
-    large_player = PlayerCharacter(
+    large_player = Character(
         char_id="large_player",
         name="LargePlayer",
         backstory="A large character",
@@ -164,7 +164,7 @@ def test_warrior_armor_class_constraint():
     )
     
     # Create mage player (should fail)
-    mage_player = PlayerCharacter(
+    mage_player = Character(
         char_id="mage_player",
         name="MagePlayer",
         backstory="A mage character",
@@ -175,7 +175,7 @@ def test_warrior_armor_class_constraint():
     mage_player.inventory = {}
     
     # Create warrior player (should succeed)
-    warrior_player = PlayerCharacter(
+    warrior_player = Character(
         char_id="warrior_player",
         name="WarriorPlayer",
         backstory="A warrior character",
@@ -238,7 +238,7 @@ def test_legendary_sword_level_constraint():
     )
     
     # Create low-level player (should fail)
-    low_level_player = PlayerCharacter(
+    low_level_player = Character(
         char_id="low_player",
         name="LowPlayer",
         backstory="A low-level character",
@@ -249,7 +249,7 @@ def test_legendary_sword_level_constraint():
     low_level_player.inventory = {}
     
     # Create high-level player (should succeed)
-    high_level_player = PlayerCharacter(
+    high_level_player = Character(
         char_id="high_player",
         name="HighPlayer",
         backstory="A high-level character",
@@ -312,7 +312,7 @@ def test_paladin_sword_multi_constraint():
     )
     
     # Create mage player (should fail on class)
-    mage_player = PlayerCharacter(
+    mage_player = Character(
         char_id="mage_player",
         name="MagePlayer",
         backstory="A mage character",
@@ -323,7 +323,7 @@ def test_paladin_sword_multi_constraint():
     mage_player.inventory = {}
     
     # Create low-level warrior (should fail on level)
-    low_warrior_player = PlayerCharacter(
+    low_warrior_player = Character(
         char_id="low_warrior",
         name="LowWarrior",
         backstory="A low-level warrior",
@@ -334,7 +334,7 @@ def test_paladin_sword_multi_constraint():
     low_warrior_player.inventory = {}
     
     # Create qualified paladin (should succeed)
-    paladin_player = PlayerCharacter(
+    paladin_player = Character(
         char_id="paladin_player",
         name="PaladinPlayer",
         backstory="A high-level warrior",
@@ -410,7 +410,7 @@ def test_elven_artifact_custom_constraints():
     )
     
     # Create human player (should fail on race)
-    human_player = PlayerCharacter(
+    human_player = Character(
         char_id="human_player",
         name="HumanPlayer",
         backstory="A human character",
@@ -421,7 +421,7 @@ def test_elven_artifact_custom_constraints():
     human_player.inventory = {}
     
     # Create evil elf (should fail on alignment)
-    evil_elf_player = PlayerCharacter(
+    evil_elf_player = Character(
         char_id="evil_elf",
         name="EvilElf",
         backstory="An evil elf character",
@@ -432,7 +432,7 @@ def test_elven_artifact_custom_constraints():
     evil_elf_player.inventory = {}
     
     # Create good elf (should succeed)
-    good_elf_player = PlayerCharacter(
+    good_elf_player = Character(
         char_id="good_elf",
         name="GoodElf",
         backstory="A good elf character",
@@ -513,7 +513,7 @@ def test_immovable_objects():
     )
     
     # Create any player
-    player = PlayerCharacter(
+    player = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",

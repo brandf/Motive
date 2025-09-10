@@ -2,7 +2,7 @@
 # This demonstrates how test configs can extend base configs
 
 includes:
-  - "../../configs/game.yaml"  # Include the main game config
+  - "../../../configs/game.yaml"  # Include the main game config
   - "test_hints.yaml"  # Add test-specific hints
 
 # Override game settings for testing
@@ -13,9 +13,9 @@ game_settings:
 # Add test-specific players
 players:
   - name: "TestPlayer1"
-    provider: "openai"
-    model: "gpt-4"
-  
+    provider: "google"
+    model: "gemini-2.5-flash"
+
   - name: "TestPlayer2"
-    provider: "openai"
-    model: "gpt-4"
+    provider: "google"
+    model: "gemini-2.5-flash"

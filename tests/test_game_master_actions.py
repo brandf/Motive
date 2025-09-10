@@ -9,9 +9,10 @@ from motive.config import (
     ActionConfig, CharacterConfig, RoomConfig, ExitConfig, ObjectInstanceConfig, 
     ActionRequirementConfig, ActionEffectConfig, ParameterConfig, GameSettings, CoreConfig
 ) # Added GameSettings and other config models
-from motive.player import Player, PlayerCharacter
-from motive.game_objects import GameObject
-from motive.game_rooms import Room
+from motive.player import Player
+from motive.character import Character
+from motive.game_object import GameObject
+from motive.room import Room
 from langchain_core.messages import AIMessage
 from unittest.mock import AsyncMock
 from pydantic import BaseModel

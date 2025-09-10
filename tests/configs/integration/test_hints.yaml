@@ -2,14 +2,20 @@
 # This can be included in test configs to provide validation hints
 
 hints:
-  - hint_id: "test_pickup"
-    hint_action: "> pickup Tiny Gem\n> look inventory"
+  - hint_id: "test_pickup_quoted"
+    hint_action: "> pickup \"Large Sword\"\n> pickup \"Warrior's Armor\""
     when:
       round: 1
-      players: ["Arion"]
+      players: ["TestPlayer1"]
+  
+  - hint_id: "test_pickup_unquoted"
+    hint_action: "> pickup Large Sword\n> pickup Warrior's Armor"
+    when:
+      round: 1
+      players: ["TestPlayer2"]
   
   - hint_id: "test_communication"
-    hint_action: "> say 'Hello there!'\n> whisper Arion 'secret message'"
+    hint_action: "> say 'Hello there!'\n> whisper TestPlayer2 'secret message'"
     when:
       round: 1
-      players: ["Lyra"]
+      players: ["TestPlayer1"]

@@ -116,8 +116,9 @@ actions:
         object_name_param: object_name
     effects:
       - type: code_binding
-        function_name: pickup_object
-        observers: ["player", "room_players"]
+        function_module: motive.hooks.core_hooks
+        function_name: handle_pickup_action
+        observers: ["player"]
   drop:
     id: drop
     name: drop

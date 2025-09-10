@@ -40,8 +40,14 @@ def generate_help_message(game_master: Any, player_char: Character, action_confi
                     description = action_cfg.description
                 else:
                     name = action_cfg.get('name', 'unknown')
-                    cost = action_cfg.get('cost', 0)
+                    cost_raw = action_cfg.get('cost', 0)
                     description = action_cfg.get('description', 'No description')
+                    
+                    # Handle cost as either integer or dictionary
+                    if isinstance(cost_raw, dict):
+                        cost = cost_raw.get('value', 0)  # Extract value from CostConfig dict
+                    else:
+                        cost = cost_raw
                 help_message_parts.append(f"- {name} ({cost} AP): {description}")
         else:
             # Category not found, show available categories
@@ -62,8 +68,14 @@ def generate_help_message(game_master: Any, player_char: Character, action_confi
                     description = action_cfg.description
                 else:
                     name = action_cfg.get('name', 'unknown')
-                    cost = action_cfg.get('cost', 0)
+                    cost_raw = action_cfg.get('cost', 0)
                     description = action_cfg.get('description', 'No description')
+                    
+                    # Handle cost as either integer or dictionary
+                    if isinstance(cost_raw, dict):
+                        cost = cost_raw.get('value', 0)  # Extract value from CostConfig dict
+                    else:
+                        cost = cost_raw
                 help_message_parts.append(f"  - {name} ({cost} AP): {description}")
         
         help_message_parts.append(f"\nUse 'help <category>' to see actions in a specific category (costs 5 AP).")
@@ -545,11 +557,19 @@ def handle_shout_action(game_master: Any, player_char: Character, action_config:
 
 def calculate_help_cost(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> int:
     """Calculate the actual cost for the help action based on parameters."""
-    # Extract the base cost value from CostConfig
-    if hasattr(action_config.cost, 'value'):
-        base_cost = action_config.cost.value
+    # Handle both Pydantic objects and dictionaries from merged config
+    if hasattr(action_config, 'cost'):
+        cost_raw = action_config.cost
     else:
-        base_cost = action_config.cost  # Fallback for integer costs
+        cost_raw = action_config.get('cost', 0)
+    
+    # Extract the base cost value from CostConfig
+    if hasattr(cost_raw, 'value'):
+        base_cost = cost_raw.value
+    elif isinstance(cost_raw, dict):
+        base_cost = cost_raw.get('value', 0)  # Extract value from CostConfig dict
+    else:
+        base_cost = cost_raw  # Fallback for integer costs
     
     # If a category is specified and not empty/whitespace, reduce cost by half
     category = params.get("category")

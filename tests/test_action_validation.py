@@ -9,9 +9,10 @@ from motive.config import (
     ActionConfig, CharacterConfig, RoomConfig, ExitConfig, ObjectInstanceConfig, 
     ActionRequirementConfig, ActionEffectConfig, ParameterConfig, GameSettings, CoreConfig
 )
-from motive.player import Player, PlayerCharacter
-from motive.game_objects import GameObject
-from motive.game_rooms import Room
+from motive.player import Player
+from motive.character import Character
+from motive.game_object import GameObject
+from motive.room import Room
 
 
 @pytest.fixture
@@ -45,7 +46,7 @@ def mock_game_master_validation():
                 self.logger = MagicMock()
                 self.logger.info = MagicMock()
                 self.logger.error = MagicMock()
-                self.character = PlayerCharacter(
+                self.character = Character(
                     char_id=f"hero_instance_{name}",
                     name=name,
                     backstory="",

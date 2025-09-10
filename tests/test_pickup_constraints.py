@@ -2,9 +2,9 @@
 
 import pytest
 from motive.hooks.core_hooks import handle_pickup_action
-from motive.game_objects import GameObject
-from motive.game_rooms import Room
-from motive.player import PlayerCharacter
+from motive.game_object import GameObject
+from motive.room import Room
+from motive.character import Character
 
 
 def test_pickup_immovable_object():
@@ -34,7 +34,7 @@ def test_pickup_immovable_object():
     )
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -102,7 +102,7 @@ def test_pickup_too_heavy_object():
     )
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -170,7 +170,7 @@ def test_pickup_magically_bound_object():
     )
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -238,7 +238,7 @@ def test_pickup_object_with_multiple_constraints():
     )
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -306,7 +306,7 @@ def test_pickup_normal_object_still_works():
     )
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -373,7 +373,7 @@ def test_pickup_constraint_case_insensitive():
     )
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",

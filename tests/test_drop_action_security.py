@@ -2,9 +2,9 @@
 
 import pytest
 from motive.hooks.core_hooks import handle_drop_action
-from motive.game_objects import GameObject
-from motive.game_rooms import Room
-from motive.player import PlayerCharacter
+from motive.game_object import GameObject
+from motive.room import Room
+from motive.character import Character
 
 
 def test_drop_action_malicious_input():
@@ -24,7 +24,7 @@ def test_drop_action_malicious_input():
     )
     
     # Create test player character
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -100,7 +100,7 @@ def test_drop_action_special_characters():
     )
     
     # Create test player character with object in inventory
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -161,7 +161,7 @@ def test_drop_action_unicode_characters():
     )
     
     # Create test player character with object in inventory
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -228,7 +228,7 @@ def test_drop_action_cross_room_exploit():
     )
     
     # Create test player character in room2 with object in inventory
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
@@ -308,7 +308,7 @@ def test_drop_action_inventory_integrity():
     )
     
     # Create test player character with multiple objects in inventory
-    player_char = PlayerCharacter(
+    player_char = Character(
         char_id="test_player",
         name="TestPlayer",
         backstory="A test character",
