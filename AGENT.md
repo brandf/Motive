@@ -221,13 +221,14 @@ Current core actions include: `move`, `say`, `look` (including `look inventory`)
 - **Tests should not depend on specific game.yaml content**: Tests that depend on specific configurations in `game.yaml` are fragile and will break whenever the configuration changes. Design tests to be independent of configuration content or use test-specific configurations.
 - **Don't ask permission for high-confidence operations**: When confidence is 8+ and rationale is provided, just run the operation (like `motive`). The user will reject if they don't want it run.
 - **CRITICAL: Always validate in motive before committing**: Never start the commit workflow (git add/commit/push) without first validating changes in `motive`. Tests can pass but real-world integration may still fail.
+- **CRITICAL: Run full motive validation before commit workflow**: Always run `motive` (with defaults) to validate the full game works before starting git commands. This is the final validation step.
+- **Use PowerShell syntax for git commands**: On Windows, use `;` instead of `&&` for command chaining. Example: `git add .; git commit -m "message"; git push`
 - **Don't ask permission for high-confidence git commits**: When commit assessment is 9-10/10 AND after successful `motive` validation, just proceed with staging, committing, and pushing. The user will reject if they don't want it.
-- **Don't ask permission for high-confidence commits**: After successful `motive` validation with test configs, automatically commit changes. The user will reject if they don't want it.
 - **Use `motive` with defaults for validation**: Simply run `motive` (no arguments needed) to validate changes, as it defaults to `configs/game.yaml` and auto-generates game IDs.
 - **Use test configs for specific validation**: Use `motive -c tests/configs/integration/game_test.yaml` to test with specific configurations, hints, and shorter game rounds. This is especially useful for debugging specific actions or behaviors.
 - **CRITICAL: Understand root cause before making changes**: Don't run off changing things before you understand the root cause of an issue. You're likely to do more harm than good. Always trace back to the source of the problem first - check config files, understand what's being merged, identify the actual issue before implementing fixes.
 - **Use platform-appropriate commands**: Always test/verify what platform we're on and use appropriate bash and/or PowerShell commands. On Windows, use PowerShell syntax (`;` instead of `&&` for command chaining).
-- **Batch git operations**: Use `&&` to chain git commands (e.g., `git add . && git commit -m "message" && git push`) to reduce approval requests.
+- **Batch git operations**: Use `;` to chain git commands on Windows (e.g., `git add .; git commit -m "message"; git push`) to reduce approval requests.
 
 ### Configuration Security
 - **Prefer structured over freeform configuration**: Use structured objects/dictionaries instead of freeform strings that require evaluation
