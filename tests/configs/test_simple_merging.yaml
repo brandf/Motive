@@ -1,9 +1,9 @@
+includes:
+  - "base_config.yaml"
+
 # Test simple additive merging (default behavior)
 id: test_simple_merging
 name: Test Simple Merging
-
-includes:
-  - "base_config.yaml"
 
 # Simple overrides - should work intuitively
 game_settings:

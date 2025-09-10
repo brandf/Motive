@@ -1,13 +1,13 @@
+# Include the edition (which will include theme, which will include core)
+includes:
+  - "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
+
 # Game settings
 game_settings:
   num_rounds: 2
   manual: "../MANUAL.md"
   initial_ap_per_turn: 20 # Set initial AP per turn for testing
 # hints: [] # No hints configured - clean state for production
-
-# Include the edition (which will include theme, which will include core)
-includes:
-  - "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
 
 # List of AI players
 players:

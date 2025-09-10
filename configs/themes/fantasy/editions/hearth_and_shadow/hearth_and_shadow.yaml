@@ -1,11 +1,11 @@
+# Include the theme this edition is based on
+includes:
+  - "../../fantasy.yaml"
+
 testid: hearth_and_shadow
 name: Hearth and Shadow
 theme_id: fantasy
 edition_id: hearth_and_shadow
-
-# Include the theme this edition is based on
-includes:
-  - "../../fantasy.yaml"
 rooms:
   town_square:
     id: town_square

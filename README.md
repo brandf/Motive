@@ -260,19 +260,21 @@ The main entry point is `configs/game.yaml`, which can include other configs usi
 
 ```yaml
 # configs/game.yaml
-game_settings:
-  num_rounds: 2
-  initial_ap_per_turn: 20
-
 # Include other configs (processed first, then this config merges on top)
 includes:
   - "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
+
+game_settings:
+  num_rounds: 2
+  initial_ap_per_turn: 20
 
 players:
   - name: "Arion"
     provider: "google"
     model: "gemini-2.5-flash"
 ```
+
+**Best Practice**: Always place `includes` directives at the top of your config files to make dependencies clear and easy to understand.
 
 ### Hierarchical Organization
 

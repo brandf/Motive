@@ -1,11 +1,11 @@
-# Test hierarchical config with multiple levels of includes
-id: test_hierarchical
-name: Test Hierarchical Config
-
 # Test multi-level includes (like core -> theme -> edition)
 includes:
   - "base_config.yaml"  # Base level
   - "override_config.yaml"  # Override level
+
+# Test hierarchical config with multiple levels of includes
+id: test_hierarchical
+name: Test Hierarchical Config
 
 # Override some settings for testing
 game_settings:
