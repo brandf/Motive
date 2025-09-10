@@ -42,6 +42,16 @@ Each player is assigned a unique character with secret motives (win conditions).
 - **Roleplay opportunities** for personality development
 - **Strategic depth** through motive compatibility/conflict analysis
 
+### Verifiable Training Data Generation
+Motive's gameplay engine enables complete introspection of game state at any turn, creating unprecedented opportunities for verifiable training data:
+- **Ground truth availability** for every game state, action, and outcome
+- **Question/answer pairs** with definitive answers based on actual game events
+- **Causal reasoning validation** through step-by-step game state reconstruction
+- **Social interaction verification** with complete conversation logs and context
+- **Strategic decision analysis** with known outcomes and alternative paths
+- **Tree-rollout datasets** enabling "game-multiverse" exploration from any decision point
+- **Reinforcement learning support** through complete action-reward trajectories with verifiable outcomes
+
 ### LLM-Optimized Design
 Motive is specifically designed for LLM players:
 - **Structured action syntax** (`> move north`, `> whisper Player "hello"`)
