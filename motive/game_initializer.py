@@ -18,7 +18,8 @@ from motive.config import (
 )
 from motive.game_objects import GameObject # Import GameObject
 from motive.game_rooms import Room
-from motive.player import Player, PlayerCharacter # Import Player and PlayerCharacter
+from motive.player import Player
+from motive.character import Character
 from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError
 
 class GameInitializer:
@@ -30,7 +31,7 @@ class GameInitializer:
 
         self.rooms: Dict[str, Room] = {}
         self.game_objects: Dict[str, GameObject] = {}
-        self.player_characters: Dict[str, PlayerCharacter] = {}
+        self.player_characters: Dict[str, Character] = {}
 
         # These will store the merged configurations
         self.game_object_types: Dict[str, ObjectTypeConfig] = {}
@@ -208,7 +209,7 @@ class GameInitializer:
                 char_motive = char_cfg['motive']
 
             # For now, motive is directly from character config. Will be updated for GM-9.                                                
-            player_char = PlayerCharacter(
+            player_char = Character(
                 char_id=f"{char_id}_instance_{i}", # Make character instance ID unique                                                
                 name=char_name,
                 backstory=char_backstory,

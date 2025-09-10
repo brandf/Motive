@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 from motive.game_objects import GameObject
-from motive.player import PlayerCharacter # Corrected import path for PlayerCharacter
+from motive.character import Character
 
 class Room:
     """Represents a live instance of a room in the game environment."""
@@ -21,7 +21,7 @@ class Room:
         self.objects = objects if objects else {}
         self.tags = set(tags) if tags else set()
         self.properties = properties if properties else {}
-        self.players: Dict[str, PlayerCharacter] = {} # New: Stores PlayerCharacter instances in the room
+        self.players: Dict[str, Character] = {} # New: Stores Character instances in the room
 
     def add_object(self, obj: GameObject):
         self.objects[obj.id] = obj
@@ -43,21 +43,21 @@ class Room:
                 return game_obj
         return None
 
-    def add_player(self, player_char: PlayerCharacter):
-        """Adds a PlayerCharacter to this room."""
+    def add_player(self, player_char: Character):
+        """Adds a Character to this room."""
         self.players[player_char.id] = player_char
         player_char.current_room_id = self.id
 
-    def remove_player(self, player_char_id: str) -> Optional[PlayerCharacter]:
-        """Removes a PlayerCharacter from this room."""
+    def remove_player(self, player_char_id: str) -> Optional[Character]:
+        """Removes a Character from this room."""
         return self.players.pop(player_char_id, None)
 
-    def get_player(self, player_char_id: str) -> Optional[PlayerCharacter]:
-        """Gets a PlayerCharacter in this room by ID."""
+    def get_player(self, player_char_id: str) -> Optional[Character]:
+        """Gets a Character in this room by ID."""
         return self.players.get(player_char_id)
 
-    def get_all_player_characters_in_room(self) -> List[PlayerCharacter]:
-        """Returns a list of all PlayerCharacter instances currently in this room."""
+    def get_all_characters_in_room(self) -> List[Character]:
+        """Returns a list of all Character instances currently in this room."""
         return list(self.players.values())
 
     def add_tag(self, tag: str):

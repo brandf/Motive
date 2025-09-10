@@ -7,7 +7,8 @@ import sys # Added for stdout logging
 import yaml # Added for YAML loading
 from typing import List, Dict, Any, Optional, Tuple # Added for type hints
 from pydantic import BaseModel, ValidationError # Added for Pydantic validation
-from motive.player import Player, PlayerCharacter # Import PlayerCharacter
+from motive.player import Player
+from motive.character import Character
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from motive.config import (
     GameConfig,
@@ -113,7 +114,7 @@ class GameMaster:
         # Initialize game state collections - these will be populated by GameInitializer
         self.rooms: Dict[str, Room] = {}
         self.game_objects: Dict[str, GameObject] = {}
-        self.player_characters: Dict[str, PlayerCharacter] = {}
+        self.player_characters: Dict[str, Character] = {}
 
         self.player_first_interaction_done: Dict[str, bool] = {} # Track if a player has had their first interaction
 
@@ -309,7 +310,7 @@ class GameMaster:
         self.game_logger.info(summary_text)
         print(summary_text)
 
-    def _check_requirements(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
+    def _check_requirements(self, player_char: Character, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
         """Checks if all requirements for an action are met."""
         current_room = self.rooms.get(player_char.current_room_id)
         if not current_room:
@@ -454,7 +455,7 @@ class GameMaster:
         
         return True, "", found_exit_data
 
-    def _execute_effects(self, player_char: PlayerCharacter, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    def _execute_effects(self, player_char: Character, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
         """Applies the effects of an action to the game state and generates feedback/events."""
         feedback_messages: List[str] = []
         events_generated: List[Event] = [] # Changed to list of Event objects
@@ -651,7 +652,7 @@ class GameMaster:
         # After processing all effects, add generated events to the main event queue
         return events_generated, feedback_messages
 
-    def _calculate_action_cost(self, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> int:
+    def _calculate_action_cost(self, player_char: Character, action_config: Any, params: Dict[str, Any]) -> int:
         """Calculate the actual cost for an action, using cost calculation function if available."""
         # Handle new cost configuration format
         if hasattr(action_config, 'cost') and isinstance(action_config.cost, dict):
@@ -1070,7 +1071,7 @@ class GameMaster:
         self.game_logger.info(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
         print(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
 
-    async def _handle_turn_end_confirmation(self, player: Player, player_char: PlayerCharacter):
+    async def _handle_turn_end_confirmation(self, player: Player, player_char: Character):
         """Handles the turn end confirmation process with the player."""
         self.game_logger.info(f"=== TURN END CONFIRMATION START for {player.name} ===")
         
@@ -1306,7 +1307,7 @@ class GameMaster:
         
         return unique_actions[:5]  # Limit to 5 example actions
 
-    def _get_action_display(self, player_char: PlayerCharacter, is_first_turn: bool = False, round_num: int = 1) -> str:
+    def _get_action_display(self, player_char: Character, is_first_turn: bool = False, round_num: int = 1) -> str:
         """Get standardized action display text."""
         # Generate example actions dynamically
         example_actions = self._get_example_actions()

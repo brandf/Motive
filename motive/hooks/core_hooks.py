@@ -1,11 +1,11 @@
 import logging
 from typing import List, Dict, Any, Tuple
 from motive.game_master import GameMaster # Circular import for now, will refine
-from motive.player import PlayerCharacter
+from motive.character import Character
 from motive.config import Event
 from datetime import datetime
 
-def generate_help_message(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def generate_help_message(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Generates a help message with available actions, optionally filtered by category."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -82,7 +82,7 @@ def generate_help_message(game_master: Any, player_char: PlayerCharacter, action
 
     return events_generated, feedback_messages
 
-def look_at_target(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def look_at_target(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Provides a detailed description of the current room or a specified object/character."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -185,7 +185,7 @@ def look_at_target(game_master: Any, player_char: PlayerCharacter, action_config
     
     return events_generated, feedback_messages
 
-def handle_move_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_move_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles the player character movement between rooms."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -291,7 +291,7 @@ def handle_move_action(game_master: Any, player_char: PlayerCharacter, action_co
     return events_generated, feedback_messages
  
 
-def handle_say_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_say_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles a player saying something to other players in the room."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -321,7 +321,7 @@ def handle_say_action(game_master: Any, player_char: PlayerCharacter, action_con
     
     return events_generated, feedback_messages
 
-def handle_pass_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_pass_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles the player passing their turn."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -341,7 +341,7 @@ def handle_pass_action(game_master: Any, player_char: PlayerCharacter, action_co
     
     return events_generated, feedback_messages
 
-def handle_read_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_read_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles a player reading text from an object."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -407,7 +407,7 @@ def handle_read_action(game_master: Any, player_char: PlayerCharacter, action_co
     
     return events_generated, feedback_messages
 
-def handle_whisper_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_whisper_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles a player whispering privately to a specific player in the same room."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -498,7 +498,7 @@ def handle_whisper_action(game_master: Any, player_char: PlayerCharacter, action
     
     return events_generated, feedback_messages
 
-def handle_shout_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_shout_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handles a player shouting loudly, potentially heard in adjacent rooms."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
@@ -543,7 +543,7 @@ def handle_shout_action(game_master: Any, player_char: PlayerCharacter, action_c
     
     return events_generated, feedback_messages
 
-def calculate_help_cost(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> int:
+def calculate_help_cost(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> int:
     """Calculate the actual cost for the help action based on parameters."""
     # Extract the base cost value from CostConfig
     if hasattr(action_config.cost, 'value'):
@@ -558,7 +558,7 @@ def calculate_help_cost(game_master: Any, player_char: PlayerCharacter, action_c
     
     return base_cost  # Full cost for general help
 
-def handle_pickup_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_pickup_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handle the pickup action - move an object from room to player inventory."""
     object_name = params.get("object_name")
     if not object_name:
@@ -642,7 +642,7 @@ def handle_pickup_action(game_master: Any, player_char: PlayerCharacter, action_
     return events, feedback_messages
 
 
-def handle_drop_action(game_master: Any, player_char: PlayerCharacter, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+def handle_drop_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
     """Handle drop action - move object from player inventory to current room."""
     from datetime import datetime
     

@@ -2,7 +2,7 @@
 
 from typing import Dict, Any, List, Tuple, Optional
 from motive.game_objects import GameObject
-from motive.player import PlayerCharacter
+from motive.character import Character
 from motive.config import Event
 from datetime import datetime
 
@@ -14,7 +14,7 @@ class InventoryConstraintError(Exception):
 
 def check_inventory_constraints(
     object_to_add: GameObject, 
-    target_player: PlayerCharacter, 
+    target_player: Character, 
     action_name: str = "inventory operation"
 ) -> Tuple[bool, Optional[str], Optional[Event]]:
     """
@@ -168,8 +168,8 @@ def check_inventory_constraints(
 
 def validate_inventory_transfer(
     object_to_transfer: GameObject,
-    from_player: Optional[PlayerCharacter],
-    to_player: PlayerCharacter,
+    from_player: Optional[Character],
+    to_player: Character,
     action_name: str = "inventory transfer"
 ) -> Tuple[bool, Optional[str], Optional[Event]]:
     """
