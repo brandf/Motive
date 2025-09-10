@@ -104,7 +104,7 @@ def main():
 Examples:
   motive                                    # Run with default config
   motive -c configs/game.yaml              # Run with specific config
-  motive -c configs/game_test.yaml         # Run test configuration
+  motive -c tests/configs/integration/game_test.yaml         # Run test configuration
   motive -c configs/game_new.yaml          # Run hierarchical config
   motive --game-id my-game-123             # Run with specific game ID
         """

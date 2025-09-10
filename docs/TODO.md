@@ -1,5 +1,10 @@
 # TODO List
 
+## Who is this for?
+
+- **Contributors and agents** looking for current priorities
+- **Maintainers** tracking progress at a glance
+
 ## High Priority Features
 
 ### Core Actions Implementation

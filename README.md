@@ -4,6 +4,20 @@
 
 Motive is a novel platform designed for the exploration and benchmarking of Large Language Models (LLMs) through interactive, turn-based games. It provides a unique environment where AI (or human) players can engage in complex scenarios, fostering the generation of valuable training data and facilitating research into advanced AI capabilities like long-context reasoning, planning, and social engineering.
 
+## Who is this for?
+
+- **Players** who want to play the game (read the Manual)
+- **Human contributors** building features and fixing bugs (read the Contributors guide)
+- **AI coding agents** implementing code and tests (read AGENT.md)
+- **Researchers** exploring LLM benchmarking and training data
+
+## Quick Start
+
+- **Players**: Read the [Game Manual](docs/MANUAL.md) first.
+- **Contributors**: Start with [docs/CONTRIBUTORS.md](docs/CONTRIBUTORS.md) for setup, architecture, and workflows. See current priorities in [docs/TODO.md](docs/TODO.md).
+- **AI Agents**: Follow the reading order in [docs/AGENT.md](docs/AGENT.md).
+- **Vibe Coders**: See [docs/VIBECODER.md](docs/VIBECODER.md).
+
 ## Purpose of Motive
 
 *   **Turn-Based Game with Chat Interface:** Motive enables the creation and execution of turn-based games with a chat-based interface. These games can be played by AI agents or human participants, with the potential for environments, characters, and objects to be dynamically balanced via AI simulation.
@@ -79,14 +93,7 @@ GM: You enter the tavern. You see Elara the bard tuning her lute.
 GM: Elara whispers back: "I've heard rumors about strange lights in the cemetery..."
 ```
 
-## Getting Started
-
-- **Players**: Start with the [Game Manual](docs/MANUAL.md)
-- **Contributors**: Read [CONTRIBUTORS.md](docs/CONTRIBUTORS.md) for setup and workflows
-- **AI Agents**: Follow the reading order in [AGENT.md](docs/AGENT.md)
-- **Vibe Coders**: Check out [VIBECODER.md](docs/VIBECODER.md) for collaboration tips
-
-For detailed documentation structure and reading paths, see [DOCS.md](docs/DOCS.md).
+For detailed documentation structure and reading paths, see [docs/DOCS.md](docs/DOCS.md).
 
 ## Technical Architecture
 
@@ -97,6 +104,8 @@ Motive is built around several key components:
 - **Event System**: Observable events driving social engineering gameplay
 - **Configuration System**: Hierarchical YAML-based content organization
 - **Theme System**: Modular content organization (core → themes → editions)
+
+For a deeper architectural overview and development setup, see [docs/CONTRIBUTORS.md](docs/CONTRIBUTORS.md).
 
 ## Training Data Generation
 
@@ -160,11 +169,13 @@ We welcome contributions to Motive! Whether you're interested in:
 - **AI research** (benchmarking, training data analysis)
 - **Documentation** (manuals, guides, examples)
 
-Please see [CONTRIBUTORS.md](CONTRIBUTORS.md) for detailed information about:
+Please see [docs/CONTRIBUTORS.md](docs/CONTRIBUTORS.md) for detailed information about:
 - Development environment setup
 - Architecture overview
 - Testing and development workflows
 - Git workflow and commit standards
+
+Current development priorities are tracked in [docs/TODO.md](docs/TODO.md).
 
 ## Documentation
 
@@ -174,6 +185,8 @@ Please see [CONTRIBUTORS.md](CONTRIBUTORS.md) for detailed information about:
 - **[docs/VIBECODER.md](docs/VIBECODER.md)** - Human-LLM collaboration lessons
 - **[docs/TODO.md](docs/TODO.md)** - Current development priorities
 - **[docs/DOCS.md](docs/DOCS.md)** - Documentation structure and relationships
+
+For active development planning, always check [docs/TODO.md](docs/TODO.md) after reading the contributors guide.
 
 ## License
 

@@ -2,6 +2,11 @@
 
 This document provides a comprehensive guide to the world of Motive, detailing the game mechanics, rules, environments, characters, and objects. It is designed to help players understand how to interact with the game world and achieve their objectives.
 
+## Who is this for?
+
+- **Players** learning how to play and win
+- **Game Masters/maintainers** verifying rules and action behavior
+
 ## Table of Contents
 
 *   Game Overview

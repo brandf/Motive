@@ -2,6 +2,10 @@
 
 This document shows how all the documentation files reference and link to each other.
 
+## Who is this for?
+
+- **Anyone navigating docs** who needs to understand what to read next
+
 ## Document Hierarchy and Target Audiences
 
 ```
@@ -90,6 +94,7 @@ docs/
 
 ### Config File References
 - `configs/game.yaml` → `../docs/MANUAL.md` - Manual path for system prompt
+ - Edition docs: e.g., `configs/themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.md` (narrative reference next to config)
 
 ## Key Design Principles
 
@@ -112,10 +117,12 @@ Motive/
 │   ├── AGENT.md                # AI coding agents only
 │   ├── VIBECODER.md            # Vibe coding humans only
 │   ├── TODO.md                 # All contributors
-│   └── DOCUMENTATION_STRUCTURE.md  # This file
+│   └── DOCS.md                 # Documentation structure and relationships (this file)
 └── configs/
     └── game.yaml               # References docs/MANUAL.md
 ```
+
+Note: Edition and theme narrative docs may live alongside their configuration for proximity, e.g., `configs/themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.md`. Reference them from `docs/` as needed.
 
 This structure ensures:
 - Clear separation of concerns

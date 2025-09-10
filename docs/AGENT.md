@@ -2,6 +2,11 @@
 
 This file contains essential guidance for AI agents working on the Motive project. It serves as a living guide for maintaining high engineering quality and avoiding common pitfalls.
 
+## Who is this for?
+
+- **AI coding agents** executing changes end-to-end using tests and checklists
+- **Human maintainers** instructing agents via named workflows
+
 ## Required Reading Order
 
 **Before starting any work, read these documents in order:**
@@ -11,11 +16,101 @@ This file contains essential guidance for AI agents working on the Motive projec
 3. **[VIBECODER.md](VIBECODER.md)** - Human-LLM collaboration lessons
 4. **This file (AGENT.md)** - AI-specific workflows and guidelines (builds on CONTRIBUTORS.md)
 
+## Quick Links
+
+- Project overview: [../README.md](../README.md)
+- Contributors guide: [CONTRIBUTORS.md](CONTRIBUTORS.md)
+- Human‑LLM collaboration: [VIBECODER.md](VIBECODER.md)
+- Player manual: [MANUAL.md](MANUAL.md)
+- Documentation map: [DOCS.md](DOCS.md)
+
 ## AI-Specific Context
 
 This file assumes you've read [CONTRIBUTORS.md](CONTRIBUTORS.md) and understand the project architecture, setup, and development workflows. This section focuses on AI-specific considerations and workflows that differ from human contributors.
 
 ## AI-Specific Development Workflow
+
+### At‑a‑Glance Workflow
+
+- Write failing tests first (prefer integration tests)
+- Implement the minimal change to pass
+- Validate locally with `motive -c tests/configs/integration/game_test.yaml`
+- Run full test suite: `pytest tests/ -v`
+- Commit using the checklist below
+
+## Named Workflows (Agent-Callable)
+
+Each workflow has: purpose, when to use, required inputs, confidence gate, steps, and exit criteria. Agents should announce the workflow name when starting.
+
+### 1) Debugging Workflow
+- Purpose: Diagnose and fix a failing test or real-world issue
+- Use when: A test fails, a regression is reported, or logs indicate a defect
+- Inputs: Failing test name/path, error message/trace, recent changes (if any)
+- Confidence gate: Proceed to run `motive` only at 9–10/10 confidence; otherwise stick to tests
+- Steps:
+  1. Reproduce with `pytest` targeted tests
+  2. Add/adjust a failing test to capture the defect precisely
+  3. Implement minimal fix; re-run targeted tests, then full suite
+  4. If needed, validate with `motive -c tests/configs/integration/game_test.yaml`
+  5. Prepare commit; run checklists
+- Exit: All targeted tests pass; full suite green; optional `motive` run successful
+
+### 2) New Feature Workflow (TDD)
+- Purpose: Add a feature or action with confidence
+- Use when: Implementing a new capability from TODOs or design
+- Inputs: Feature description, acceptance criteria, impacted files
+- Confidence gate: 8+/10 before code edits; 9–10/10 before `motive`
+- Steps:
+  1. Write failing tests expressing desired behavior (unit/integration)
+  2. Implement minimal code to pass
+  3. Refactor while keeping green
+  4. Validate with test config if behavior spans configs
+  5. Update docs (README/CONTRIBUTORS/AGENT/MANUAL as needed)
+- Exit: Tests pass, docs updated, optional `motive` validation
+
+### 3) Refactor Workflow (No Behavior Change)
+- Purpose: Improve structure without altering behavior
+- Use when: Code clarity/maintainability changes are needed
+- Inputs: Scope and invariants; affected modules
+- Confidence gate: Prohibit `motive` unless behavior could be impacted; rely on tests
+- Steps:
+  1. Establish safety nets (tests/coverage)
+  2. Refactor in small steps; run tests often
+  3. Keep public APIs stable; avoid config changes
+- Exit: All tests green; no behavior changes observed
+
+### 4) Config Change Workflow
+- Purpose: Safely modify YAML configs (themes, editions, actions)
+- Use when: Editing `configs/**.yaml` or adding content
+- Inputs: Target file(s), intended change, merge/patch strategy
+- Confidence gate: Validate with `motive-util config --validate`; run tests touching config
+- Steps:
+  1. Make minimal config change
+  2. Validate includes/merges; inspect `--raw-config` if needed
+  3. Run relevant tests; add integration tests if behavior-driven
+- Exit: Validation clean; tests green
+
+### 5) Commit Workflow
+- Purpose: Safely stage and push changes
+- Use when: After successful local validation
+- Inputs: Summary of changes and linked tests/docs
+- Confidence gate: 9–10/10 required before push
+- Steps:
+  1. Run Pre-Commit Assessment Checklist
+  2. Generate message; stage; commit; push with platform-appropriate commands
+  3. Verify via `git status` and recent log
+- Exit: Changes pushed; repo clean
+
+### 6) Training Data Workflow
+- Purpose: Curate and publish training datasets from logs
+- Use when: A high-quality run is ready to be processed
+- Inputs: Source run ID/path; target dataset name
+- Confidence gate: Ensure high data quality; follow publishing rules
+- Steps:
+  1. `motive-util training copy`
+  2. `motive-util training process`
+  3. `motive-util training publish -n <name> -f`
+- Exit: Dataset published with metadata complete
 
 ### Testing Philosophy (CRITICAL)
 - **Default to tests over paid runs**: Running `motive` triggers paid LLM calls. Prefer unit/integration tests which stub external LLMs
@@ -125,7 +220,7 @@ When issues are found in `motive` that should have been caught by tests, follow 
 - **Test requirement type implementations**: When adding new requirement types (like `player_in_room`), create integration tests that verify the requirement checking logic works correctly with real player and room data. Test both success and failure cases.
 - **Verify Pydantic field names**: When working with configuration, always check the actual field names in the Pydantic model definitions rather than assuming names (e.g., `target_player_param` not `player_name_param`).
 - **Inventory security is critical**: Always create comprehensive security tests for inventory management actions (pickup, drop, give, trade). Test for object duplication, unauthorized access, malicious input, and cross-room exploits.
-- **Use test configs for validation**: Use `configs/game_test.yaml` or create specific test configs with hints before running `motive` to ensure LLM players test the specific functionality being validated. This keeps production configs clean.
+- **Use test configs for validation**: Use `tests/configs/integration/game_test.yaml` or create specific test configs with hints before running `motive` to ensure LLM players test the specific functionality being validated. This keeps production configs clean.
 - **Keep production configs clean**: Use test configs for validation instead of adding temporary hints to production files. This ensures production configurations remain clean and don't include test-specific content.
 - **Tests should not depend on specific game.yaml content**: Tests that depend on specific configurations in `game.yaml` are fragile and will break whenever the configuration changes. Design tests to be independent of configuration content or use test-specific configurations.
 
@@ -165,8 +260,8 @@ Before committing changes, verify all items are complete:
 - [ ] Documentation updated: `AGENT.md`, `VIBECODER.md`, `README.md` as needed
 - [ ] New lessons learned added to appropriate documentation files
 
-#### **Pre-Validation Checklist (Before `motive`)**
-- [ ] **Use test configs for validation**: Use `configs/game_test.yaml` or create specific test configs with hints instead of modifying production `configs/game.yaml`
+#### **Pre-Validation Checklist (Before `motive`)
+- [ ] **Use test configs for validation**: Use `tests/configs/integration/game_test.yaml` or create specific test configs with hints instead of modifying production `configs/game.yaml`
 - [ ] **Verify test config syntax**: Ensure test configuration files are valid and won't cause parsing errors
 - [ ] **Target specific actions**: Test configs should direct players to execute the exact actions needed to validate the new feature or bug fix
 
@@ -218,7 +313,7 @@ Before committing changes, verify all items are complete:
 ## Getting Started
 
 ### Prerequisites
-- Python 3.13+ with virtual environment
+- Python 3.10+ with virtual environment
 - Required packages from `requirements.txt`
 - API keys for LLM providers (see `env.example.txt`)
 

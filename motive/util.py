@@ -691,7 +691,7 @@ Configuration Analysis Examples:
   motive-util config                           # Analyze default config
   motive-util config -c configs/game.yaml -A  # Show actions from core config
   motive-util config -c configs/game_new.yaml -I  # Show include info
-  motive-util config -c configs/game_test.yaml -a  # Show all information
+  motive-util config -c tests/configs/integration/game_test.yaml -a  # Show all information
   motive-util config --raw-config              # Output merged config as YAML
   motive-util config --raw-config-json         # Output merged config as JSON
   motive-util config --validate                # Validate config through Pydantic

@@ -2,6 +2,12 @@
 
 This guide is for human contributors who want to understand the architecture, development workflows, and how to contribute to the Motive project.
 
+## Who is this for?
+
+- **Human developers** contributing code, tests, and content
+- **AI coding agents** following TDD and workflow checklists
+- **Reviewers** looking for architecture and process references
+
 ## Quick Start
 
 1. **Read the project overview**: Start with [README.md](../README.md) to understand what Motive is and its goals
@@ -172,7 +178,7 @@ source venv/bin/activate
 # Run the application
 motive                                    # Run with default config (with validation)
 motive -c configs/game_new.yaml          # Run with hierarchical config
-motive -c configs/game_test.yaml         # Run test configuration
+motive -c tests/configs/integration/game_test.yaml  # Run test configuration (self‑contained)
 motive --no-validate                     # Run without Pydantic validation (debugging)
 motive --game-id my-custom-game          # Run with custom game ID (default: auto-generated timestamp)
 ```
@@ -393,7 +399,7 @@ Before committing changes, verify all items are complete:
 - [ ] New lessons learned added to appropriate documentation files
 
 #### **Pre-Validation Checklist (Before `motive`)**
-- [ ] **Use test configs for validation**: Use `configs/game_test.yaml` or create specific test configs with hints instead of modifying production `configs/game.yaml`
+- [ ] **Use test configs for validation**: Use `tests/configs/integration/game_test.yaml` or create specific test configs with hints instead of modifying production `configs/game.yaml`
 - [ ] **Verify test config syntax**: Ensure test configuration files are valid and won't cause parsing errors
 - [ ] **Target specific actions**: Test configs should direct players to execute the exact actions needed to validate the new feature or bug fix
 
@@ -497,4 +503,4 @@ Beyond environments, variations in characters and objects will also be explored,
 - **Player Manual**: [MANUAL.md](MANUAL.md) - Everything players need to know
 - **AI Agent Guidelines**: [AGENT.md](AGENT.md) - For AI coding agents
 - **LLM Collaboration**: [VIBECODER.md](VIBECODER.md) - Human-LLM collaboration lessons
-- **Current TODOs**: [TODO.md](TODO.md) - Active development tasks
+- **Current TODOs**: [TODO.md](TODO.md) - Active development tasks (review this after setup to align work with priorities)

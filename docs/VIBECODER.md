@@ -1,68 +1,129 @@
 # VIBECODER.md
 
-This file contains lessons learned about working effectively with LLMs while coding. These lessons help human developers become better at collaborating with AI agents on this project.
+This guide explains how to collaborate effectively with AI coding assistants on Motive using workflow-driven practices, shared conventions, and ready-to-use prompts.
 
-## LLM Collaboration Lessons
+## Who is this for?
 
-### **Mode Awareness**
-- **Always check if you're in Agent mode vs Ask mode**: Agent mode gives the LLM access to tools and allows direct execution. Ask mode only provides information. If you forget to switch modes, the LLM will be unable to perform actions you request.
-- **Don't interrupt LLM workflows**: If an LLM is in the middle of a systematic workflow (like issue resolution), let it complete the process rather than interrupting with new requests.
+- **Human developers** collaborating with LLMs on Motive
+- **AI agents** seeking to align with human collaboration patterns
 
-### **Tool Access and Execution**
-- **LLMs can run tests directly**: When following test-driven development workflows, LLMs can execute `pytest` commands directly to verify fixes work.
-- **LLMs can modify files**: Agent mode allows LLMs to read, write, and modify files directly without asking for permission each time.
-- **Trust the workflow**: If you've established a good workflow (like the Real-World Issue Resolution Workflow), trust the LLM to follow it systematically.
+## Collaboration Principles
 
-### **Communication Patterns**
-- **Be explicit about expectations**: When you want an LLM to run tests or execute commands, state it clearly rather than asking "is it ok to...?"
-- **Provide confidence estimates**: When LLMs want to run expensive operations (like `motive.main`), they should provide confidence estimates (1-10 scale) with rationale.
-- **Accept/reject model**: For expensive operations, use an accept/reject model where the LLM provides the estimate and rationale, then you decide.
+- **Stay in a workflow**: Prefer named workflows over ad‑hoc steps
+- **Be explicit**: State goals, constraints, and acceptance criteria
+- **Gate expensive actions**: Require confidence estimates before paid/long operations
+- **Keep docs live**: Update `AGENT.md` and this file when new patterns emerge
+- **Prefer tests**: Validate with failing tests before running `motive`
 
-### **Workflow Integration**
-- **Systematic approaches work better**: LLMs excel at following structured workflows (like the Real-World Issue Resolution Workflow) rather than ad-hoc problem solving.
-- **Document lessons immediately**: When LLMs learn something new, they should add it to `AGENT.md` or `VIBECODER.md` immediately to prevent forgetting.
-- **Generalize from specific issues**: After fixing a specific problem, LLMs should consider what broader lessons can be learned and documented.
+## Named Collaboration Workflows
 
-### **Quality Assurance**
-- **Test-first approach**: LLMs should write failing tests first, then implement fixes, then verify tests pass.
-- **Integration over mocking**: Prefer integration tests with real objects over heavy mocking for better confidence.
-- **Full test suite validation**: After any change, run the full test suite to ensure no regressions.
+Use these from the human side to instruct an agent, or from the agent side to announce intent. Each includes: when to use, required inputs, steps, confidence gate, exit criteria, and a prompt template.
 
-### **Configuration and Field Names**
-- **Verify field names in Pydantic models**: When working with configuration, always check the actual field names in the Pydantic model definitions rather than assuming names.
-- **Consistency across configs**: Ensure configuration field names match between YAML files and Pydantic models.
-- **Test configuration parsing**: Create tests that verify configuration structure is parsed correctly before testing business logic.
+### 1) Pair Debugging Workflow
+- When: A test fails or a runtime defect is suspected
+- Inputs: failing test path/name, stack trace, last relevant edits
+- Steps:
+  1. Reproduce locally with targeted `pytest`
+  2. Write or refine a failing test that isolates the defect
+  3. Implement a minimal fix and re-run tests
+  4. Run the full suite; optionally validate with `motive -c tests/configs/integration/game_test.yaml`
+- Confidence gate: 9–10/10 before running `motive`
+- Exit: Failing test passes, full suite green, optional `motive` pass
+- Prompt template:
+  """
+  Start Pair Debugging Workflow on <test_path>::<test_name>.
+  Provide: root cause hypothesis, failing test delta, minimal fix, confidence (1–10), and whether to run motive.
+  """
 
-### **Error Handling and Debugging**
-- **Read error messages carefully**: LLMs should parse error messages thoroughly to understand root causes (e.g., AttributeError about missing fields).
-- **Fix root causes, not symptoms**: When errors occur, identify and fix the underlying issue rather than just making tests pass.
-- **Use systematic debugging**: Follow structured approaches to debugging rather than random trial and error.
+### 2) Feature Delivery Workflow
+- When: Implementing a new feature or action
+- Inputs: feature summary, acceptance criteria, affected modules/configs
+- Steps:
+  1. Write failing tests capturing acceptance criteria
+  2. Implement minimal code to pass
+  3. Refactor with tests green
+  4. Update docs (README/CONTRIBUTORS/AGENT/MANUAL)
+- Confidence gate: 8+/10 before edits; 9–10/10 before `motive`
+- Exit: Tests pass; docs updated; optional `motive` validation
+- Prompt template:
+  """
+  Start Feature Delivery Workflow: <feature_title>.
+  Provide: tests first, implementation diff summary, docs updated, confidence, and run plan.
+  """
 
-### **Documentation and Knowledge Management**
-- **Living documentation**: Keep `AGENT.md` and `VIBECODER.md` updated as lessons are learned.
-- **Specific examples**: Include concrete examples and code snippets in documentation rather than abstract principles.
-- **Cross-reference related concepts**: Link related lessons and concepts for better discoverability.
+### 3) Refactor Safety Workflow
+- When: Structural improvements without behavior changes
+- Inputs: scope, invariants, impacted files
+- Steps:
+  1. Ensure coverage exists; add tests if needed
+  2. Refactor in small steps; run tests frequently
+  3. Keep APIs and schemas stable
+- Confidence gate: Rely on tests; avoid `motive` unless behavior might change
+- Exit: Tests green; no behavior change
+- Prompt template:
+  """
+  Start Refactor Safety Workflow for <area>.
+  Provide: scope, invariants, step plan, and test confirmation.
+  """
 
-### **Project-Specific Patterns**
-- **Follow established conventions**: Use existing patterns in the codebase (like `target_player_param` instead of `player_name_param`).
-- **Check import paths**: Verify correct import paths by checking where classes are actually defined.
-- **Use real constructors**: Build objects with their true signatures so tests mirror production.
+### 4) Config Evolution Workflow
+- When: Changing YAML configs (themes/editions/actions)
+- Inputs: target config path(s), intended change, merge/patch strategy
+- Steps:
+  1. Apply minimal change
+  2. Validate with `motive-util config --validate` (and `--raw-config` if needed)
+  3. Add/execute integration tests that exercise the config
+- Confidence gate: Validation must be clean before `motive`
+- Exit: Validation passes; related tests green
+- Prompt template:
+  """
+  Start Config Evolution Workflow on <config_path>.
+  Provide: change summary, validation results, and test outcomes.
+  """
 
-## Best Practices for Human-LLM Collaboration
+### 5) Commit & Push Workflow
+- When: After successful local validation
+- Inputs: change summary, linked tests, docs updates
+- Steps:
+  1. Run Pre‑Commit Assessment Checklist (see AGENT.md)
+  2. Generate message; stage; commit; push
+  3. Verify status and recent log
+- Confidence gate: 9–10/10 before push
+- Exit: Changes pushed; repo clean
+- Prompt template:
+  """
+  Start Commit & Push Workflow.
+  Provide: checklist results, commit message, and verification outputs.
+  """
 
-1. **Set clear expectations**: Be explicit about what you want the LLM to do
-2. **Trust systematic workflows**: Let LLMs follow established processes
-3. **Provide feedback on confidence estimates**: Help LLMs calibrate their confidence levels
-4. **Review and approve changes**: Check LLM work before accepting expensive operations
-5. **Document lessons learned**: Keep both `AGENT.md` and `VIBECODER.md` updated
-6. **Encourage generalization**: Ask LLMs to consider broader lessons from specific fixes
+### 6) Training Data Publication Workflow
+- When: Curating and publishing a dataset from a high‑quality run
+- Inputs: source log/run id, dataset name
+- Steps:
+  1. `motive-util training copy`
+  2. `motive-util training process`
+  3. `motive-util training publish -n <name> -f`
+- Confidence gate: Ensure data quality and metadata completeness
+- Exit: Published dataset with metadata
+- Prompt template:
+  """
+  Start Training Data Publication Workflow for <run_id> as <dataset_name>.
+  Provide: copy/process/publish outputs and a quality summary.
+  """
 
-## Common Pitfalls to Avoid
+## Communication Conventions
 
-- **Interrupting workflows**: Don't break LLM processes mid-execution
-- **Asking for permission repeatedly**: Trust LLMs to follow established patterns
-- **Ignoring error messages**: Read and understand errors before proceeding
-- **Not documenting lessons**: Let valuable insights get lost
-- **Ad-hoc problem solving**: Prefer systematic approaches over random fixes
+- **Confidence statement**: Provide a numeric confidence 1–10 with a brief rationale
+- **Status updates**: 1–2 sentences before/after tool use outlining what happened and what’s next
+- **Abort conditions**: If confidence <7/10, stop and switch to tests or ask for clarification
+- **Tool assumptions**: Assume non‑interactive flags and no pagers when executing commands
 
-This file should be updated whenever new insights are gained about effective human-LLM collaboration patterns.
+## Quick Tips (Reference)
+
+- Check Agent vs Ask mode before requesting actions
+- Prefer integration tests; avoid heavy mocking
+- Verify Pydantic field names and config paths
+- Read errors carefully; fix root causes
+- Keep docs updated when patterns change
+
+This file evolves alongside `AGENT.md`. When you discover effective collaboration patterns, add them here with a concise workflow entry and prompt template.
