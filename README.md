@@ -122,6 +122,7 @@ motive                                    # Run with default config (with valida
 motive -c configs/game_new.yaml          # Run with hierarchical config
 motive -c configs/game_test.yaml         # Run test configuration
 motive --no-validate                     # Run without Pydantic validation (debugging)
+motive --game-id my-custom-game          # Run with custom game ID (default: auto-generated timestamp)
 
 # Analyze configurations
 motive-analyze                           # Analyze default config
@@ -136,7 +137,7 @@ motive-analyze --raw-config              # Show merged config as YAML
 | Option | Description |
 |--------|-------------|
 | `-c, --config` | Path to game configuration file (default: configs/game.yaml) |
-| `--game-id` | Specific game ID to use (default: auto-generated) |
+| `--game-id` | Specific game ID to use (default: auto-generated timestamp format like `2025-09-09_18hr_52min_48sec_a1b2c3d4`) |
 | `--no-validate` | Skip Pydantic validation of merged configuration (for debugging) |
 | `--version` | Show version information |
 
@@ -490,6 +491,7 @@ Actions generate events that may or may not be observed by other players:
 - **Private Actions**: Some actions (like `look inventory`) are only visible to the acting player
 - **Room-Scoped Actions**: Actions like `say` are visible to all players in the same room
 - **Adjacent Room Actions**: Actions like `pickup` may be visible to players in adjacent rooms
+- **Game Logging**: All game events are logged to `logs/{theme_id}/{edition_id}/{game_id}/` with human-readable game IDs like `2025-09-09_18hr_52min_48sec_a1b2c3d4`
 
 ## Future Development: Environment Generation and Training Data
 
