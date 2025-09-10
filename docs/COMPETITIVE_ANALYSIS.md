@@ -22,12 +22,25 @@ No surveyed platform combines all four in a single, research-grade, text-first, 
 - **Relevance to Motive**: Audience and surface interaction are similar, but Motive's focus is research-grade data and evaluation.
 - **Links**: [AI Dungeon (Wikipedia)](https://en.wikipedia.org/wiki/AI_Dungeon)
 
+#### What Motive should learn from this
+- **Frictionless onboarding**: Offer instant-play templates and starter scenarios so users/agents can experience Motive in seconds.
+- **Session continuity tools**: Provide lightweight memory and summarization utilities (checkpoints, chapter summaries) to manage long contexts.
+- **Community UGC loops**: Encourage shareable scenarios/editions with discoverability and curation to grow content organically.
+- **Collaborative play**: Keep streamlined support for co-op/multiplayer story sessions where appropriate.
+- **Safety playbook**: Design clear guardrails and transparent policies to avoid moderation pitfalls seen in open-ended generation.
+
 ### NovelAI
 - **What it is**: AI-assisted writing platform for authors/roleplayers; privacy- and control-focused.
 - **Strengths**: Coherent long-form generation, style control, encryption/privacy.
 - **Limitations**: Not a game engine; lacks benchmarking, verifiable labels, or agent-vs-agent settings.
 - **Relevance to Motive**: Overlap in narrative tooling; diverges on research focus and structured gameplay.
 - **Links**: [NovelAI overview](https://novelai.net)
+
+#### What Motive should learn from this
+- **Editor-grade UX**: Rich prompt controls, style presets, and guidance affordances improve output consistency and user trust.
+- **Privacy posture**: Document strong data-handling practices for logs/datasets (clear retention, opt-outs, redactions).
+- **Memory scaffolding**: Provide explicit slots for world facts, personas, and goals to stabilize long-form coherence.
+- **Quality modes**: Offer tunable generation “modes” for speed vs. coherence when harvesting training data.
 
 ### KoboldAI
 - **What it is**: Open-source local/hosted AI storytelling UI supporting many models.
@@ -36,12 +49,22 @@ No surveyed platform combines all four in a single, research-grade, text-first, 
 - **Relevance to Motive**: Similar interface vibe; different goals.
 - **Links**: [KoboldAI GitHub](https://github.com/KoboldAI/KoboldAI-Client)
 
+#### What Motive should learn from this
+- **Pluggable backends**: Clean abstractions to swap model providers and prompting strategies.
+- **Local-first pathways**: Make local/offline runs easy for privacy-sensitive workflows and reproducibility.
+- **Power-user controls**: Expose advanced knobs (sampling, constraints) while keeping defaults sane.
+- **Profiles & presets**: Save and share configuration profiles for repeatable experiments.
+
 ### Dreamily
 - **What it is**: Simple AI writing assistant for casual story creation.
 - **Strengths**: Ease of use.
 - **Limitations**: Not research-oriented; no state introspection or verifiable labels.
 - **Relevance to Motive**: Minimal.
 - **Links**: [Dreamily](https://dreamily.ai)
+
+#### What Motive should learn from this
+- **Guided simplicity**: Provide a “minimal” flow with opinionated defaults for fast trials and demos.
+- **Gentle constraints**: Offer light scaffolding to keep outputs on-track without heavy configuration.
 
 ---
 
@@ -54,12 +77,23 @@ No surveyed platform combines all four in a single, research-grade, text-first, 
 - **Relevance to Motive**: Closest on text-first RL; Motive adds social info asymmetry and narrative editions.
 - **Links**: [TextWorld GitHub](https://github.com/microsoft/TextWorld)
 
+#### What Motive should learn from this
+- **Procedural task generators**: Parameterized quest/goal generation for scalable evaluation suites.
+- **Seeded determinism**: Strict seeding for reproducible runs and comparable results.
+- **Curriculum difficulty**: Adjustable complexity knobs to scaffold learning and benchmarking tiers.
+- **Standardized metrics**: Task-specific success, efficiency, and reasoning metrics for leaderboards.
+
 ### Jericho
 - **What it is**: RL framework for classic interactive fiction (Z-Machine/Glulx) games.
 - **Strengths**: Access to canonical IF games; strong baselines and interfaces.
 - **Limitations**: Focus on parser IF; limited multi-agent/social play; limited labeling for social reasoning.
 - **Relevance to Motive**: Similar action interfaces; Motive focuses on multi-agent and verifiable social state.
 - **Links**: [Jericho GitHub](https://github.com/microsoft/jericho)
+
+#### What Motive should learn from this
+- **Compatibility layers**: Stable APIs to interface with external IF content and tools.
+- **Baseline agents & evals**: Publish baselines and evaluation harnesses to anchor progress.
+- **Action-space shaping**: Provide constrained action suggestions to reduce search without removing flexibility.
 
 ### LIGHT (FAIR)
 - **What it is**: A large-scale, grounded text environment for dialogue and embodied interactions.
@@ -68,12 +102,22 @@ No surveyed platform combines all four in a single, research-grade, text-first, 
 - **Relevance to Motive**: Overlap on social dialogue; Motive emphasizes rules, AP costs, and verifiable events.
 - **Links**: [LIGHT Paper/Project](https://parl.ai/projects/light/)
 
+#### What Motive should learn from this
+- **Persona conditioning**: Rich character personas and social goals to drive believable interactions.
+- **Dialogue datasets**: Curate and release supervised dialogue corpora derived from games (with consent/redaction).
+- **Social commonsense probes**: Tasks evaluating beliefs, intentions, and deception.
+
 ### NetHack Learning Environment (NLE)
 - **What it is**: RL benchmark built on the game NetHack.
 - **Strengths**: Procedural complexity; long-horizon planning; strong baselines.
 - **Limitations**: Not natural language-first; limited conversational/social dynamics.
 - **Relevance to Motive**: Shares long-horizon challenge; Motive is language- and social-reasoning-first.
 - **Links**: [NLE GitHub](https://github.com/facebookresearch/nle)
+
+#### What Motive should learn from this
+- **Scorecards & tiers**: Clear metrics and difficulty ladders to track improvements.
+- **Hard exploration regimes**: Design scenarios that stress sparse signals and long-term planning.
+- **Robust baselines**: Maintain competitive baselines to prevent benchmark stagnation.
 
 ### ScienceWorld (AI2)
 - **What it is**: Text-based science tasks with procedural worlds and goals.
@@ -82,12 +126,22 @@ No surveyed platform combines all four in a single, research-grade, text-first, 
 - **Relevance to Motive**: Similar text-task framing; Motive targets social reasoning and deception.
 - **Links**: [ScienceWorld GitHub](https://github.com/allenai/ScienceWorld)
 
+#### What Motive should learn from this
+- **Task schemas**: Well-specified tasks with verifiable success conditions and graders.
+- **Goal decomposition**: Encourage chain-of-thought style subgoal execution (without leaking answers in eval).
+- **Domain packs**: Themed task bundles (science, intrigue, diplomacy) with consistent interfaces.
+
 ### ALFWorld (ALFRED → text)
 - **What it is**: Text variant of embodied household tasks (ALFRED) for language agents.
 - **Strengths**: Instruction following; task structure.
 - **Limitations**: Household domain; single-agent.
 - **Relevance to Motive**: Different domain; Motive emphasizes social, multi-agent narrative play.
 - **Links**: [ALFWorld GitHub](https://github.com/alfworld/alfworld)
+
+#### What Motive should learn from this
+- **Transfer protocols**: Clean mappings between text actions and other modalities for future multimodal work.
+- **Instruction templates**: Consistent task phrasing to reduce ambiguity and improve generalization.
+- **Eval parity**: Run identical logic across variants (text-only vs. richer contexts) to measure transfer.
 
 ### BabyAI
 - **What it is**: Gridworld instruction-following platform for sample-efficient learning.
@@ -96,12 +150,22 @@ No surveyed platform combines all four in a single, research-grade, text-first, 
 - **Relevance to Motive**: Shares instruction-following lens; Motive is natural-language-first with social stakes.
 - **Links**: [BabyAI GitHub](https://github.com/mila-iqia/babyai)
 
+#### What Motive should learn from this
+- **Curriculum builder**: Progressive difficulty tracks for skills (navigation, deception, alliance-building).
+- **Teacher policies**: Scripted mentors for data generation and agent bootstrapping.
+- **Sample efficiency**: Design evaluations that reward learning speed, not just final skill.
+
 ### WebArena / MiniWoB++
 - **What they are**: Web task benchmarks for autonomous agents in realistic or micro web tasks.
 - **Strengths**: Real-world utility; diverse tasks; agent tooling.
 - **Limitations**: Not narrative; limited social deception mechanics; evaluation differs.
 - **Relevance to Motive**: Adjacent agent benchmarks; Motive focuses on narrative, deception, and multi-agent play.
 - **Links**: [WebArena GitHub](https://github.com/web-arena-x/webarena), [MiniWoB++ GitHub](https://github.com/stanfordnlp/miniwob-plusplus)
+
+#### What Motive should learn from this
+- **Instrumentation**: Fine-grained logging of perceptions, actions, and rewards for downstream analysis.
+- **Sandboxing**: Safe execution and isolation principles for agent operations.
+- **Task suites**: Bundles of small, targeted tasks for ablative testing of capabilities.
 
 ---
 
@@ -114,6 +178,11 @@ No surveyed platform combines all four in a single, research-grade, text-first, 
 - **Relevance to Motive**: Inspirational for engine design; Motive adds research scaffolding and datasets.
 - **Links**: [Evennia](https://www.evennia.com)
 
+#### What Motive should learn from this
+- **Plugin architecture**: Clear extension points (hooks, scripts, channels) for community additions.
+- **Admin tooling**: Management commands, live reloading, and web clients for ops efficiency.
+- **Docs-first**: Strong, example-rich documentation accelerates onboarding and contributions.
+
 ---
 
 ## Where Motive Stands Out
@@ -122,6 +191,19 @@ No surveyed platform combines all four in a single, research-grade, text-first, 
 - **Game-multiverse datasets** through tree rollouts for RL, planning, and counterfactuals.
 - **Social observability** as a core mechanic for deception, alliance, and knowledge modeling.
 - **Config-first content pipeline** enabling reproducible themes/editions and clean ablations.
+
+## Cross-Platform Lessons
+
+- **Benchmarks and baselines**: Publish standard tasks, metrics, and strong baselines to guide progress (TextWorld, Jericho, NLE).
+- **Curriculum and difficulty ladders**: Progressive complexity and skill curricula accelerate learning (BabyAI, TextWorld).
+- **Procedural generation with determinism**: Seeded worlds/tasks at varied complexity enable scale and reproducibility (TextWorld, NLE).
+- **Instrumentation-first**: Rich logs and graders enable verifiable QA and causal analysis (WebArena/MiniWoB++, ScienceWorld).
+- **Persona and dialogue grounding**: Structured personas/goals improve social realism and evaluation (LIGHT, AI Dungeon).
+- **Pluggable architecture**: Swappable models/backends and saved presets unlock experimentation (KoboldAI, Evennia).
+- **Privacy and safety posture**: Clear data handling, redaction, and moderation practices sustain trust (NovelAI, AI Dungeon lessons).
+- **Community UGC loops**: Discovery, sharing, and curation mechanisms drive content growth (AI Dungeon, Evennia).
+- **Transfer and multimodality**: Align text tasks with other modalities to study transfer (ALFWorld).
+- **Admin and ops tooling**: Management commands, live reload, and web clients improve iteration speed (Evennia).
 
 ## Gaps and Opportunities
 
