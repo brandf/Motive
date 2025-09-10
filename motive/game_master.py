@@ -752,16 +752,8 @@ class GameMaster:
                 for event in player_observations:
                     observation_messages.append(f"• {event.message}")
 
-            # Dynamically generate current room description and action prompt
-            room_description_parts = [current_room.description]
-            if current_room.objects:
-                object_names = [obj.name for obj in current_room.objects.values()]
-                room_description_parts.append(f"You also see: {', '.join(object_names)}.")
-            if current_room.exits:
-                exit_names = [exit_data['name'] for exit_data in current_room.exits.values() if not exit_data.get('is_hidden', False)]
-                if exit_names:
-                    room_description_parts.append(f"Exits: {', '.join(exit_names)}.")
-            current_room_description = " ".join(room_description_parts)
+            # Get formatted room description from the Room object
+            current_room_description = current_room.get_formatted_description()
 
             action_prompt = self._get_action_display(player_char, is_first_turn=False, round_num=round_num)
 

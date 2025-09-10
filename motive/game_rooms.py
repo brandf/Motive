@@ -69,5 +69,24 @@ class Room:
     def has_tag(self, tag: str) -> bool:
         return tag in self.tags
 
+    def get_formatted_description(self) -> str:
+        """Returns a formatted description of the room with objects and exits in outline format."""
+        room_description_parts = [self.description]
+        
+        if self.objects:
+            object_names = [obj.name for obj in self.objects.values()]
+            room_description_parts.append(f"\n\n**Objects in the room:**")
+            for obj_name in object_names:
+                room_description_parts.append(f"\n  • {obj_name}")
+        
+        if self.exits:
+            exit_names = [exit_data['name'] for exit_data in self.exits.values() if not exit_data.get('is_hidden', False)]
+            if exit_names:
+                room_description_parts.append(f"\n\n**Exits:**")
+                for exit_name in exit_names:
+                    room_description_parts.append(f"\n  • {exit_name}")
+        
+        return "".join(room_description_parts)
+
     def __repr__(self):
         return f"Room(id='{self.id}', name='{self.name}', objects={list(self.objects.keys())})"
