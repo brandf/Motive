@@ -776,7 +776,7 @@ class GameMaster:
                 else:
                     char_type_name = char_type_cfg.get('name', char_type_id)
                 article = "an" if char_type_name.lower().startswith(('a', 'e', 'i', 'o', 'u')) else "a"
-                character_assignment = f"You are {player_char.name}, {article} {char_type_name}.\nYour motive is: {player_char.motive}"
+                character_assignment = f"**Character:**\nYou are {player_char.name}, {article} {char_type_name}.\n\n**Motive:**\n{player_char.motive}"
 
                 # Gather observations for the first interaction too
                 player_observations = self.player_observations.get(player_char.id, [])
@@ -800,7 +800,7 @@ class GameMaster:
                 
                 first_human_message_parts.extend([
                     f"{first_action_prompt}",
-                    f"Action Points: {player_char.action_points} AP",
+                    f"**Action Points:** {player_char.action_points} AP",
                     f"What do you do?"
                 ])
                 
