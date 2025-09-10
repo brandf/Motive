@@ -25,8 +25,8 @@ from motive.config import (
     CharacterConfig, # Re-added for direct usage
     Event # Added for event handling
 )
-from motive.game_objects import GameObject # Import GameObject
-from motive.game_rooms import Room # Import Room
+from motive.game_object import GameObject # Import GameObject
+from motive.room import Room # Import Room
 from motive.action_parser import parse_player_response # Import the new action parser
 from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError # Import custom exceptions
 from motive.game_initializer import GameInitializer # Import GameInitializer

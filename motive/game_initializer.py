@@ -16,8 +16,8 @@ from motive.config import (
     # CharacterInstanceConfig # Removed this as it does not exist
     CoreConfig, # Added CoreConfig
 )
-from motive.game_objects import GameObject # Import GameObject
-from motive.game_rooms import Room
+from motive.game_object import GameObject # Import GameObject
+from motive.room import Room
 from motive.player import Player
 from motive.character import Character
 from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError

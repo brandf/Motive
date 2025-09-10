@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Optional
-from motive.game_objects import GameObject
+from motive.game_object import GameObject
 from motive.character import Character
 
 class Room:

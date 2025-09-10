@@ -3,8 +3,8 @@ Test room description formatting improvements.
 """
 import pytest
 from unittest.mock import Mock
-from motive.game_rooms import Room
-from motive.game_objects import GameObject
+from motive.room import Room
+from motive.game_object import GameObject
 
 
 class TestRoomDescriptionFormatting:

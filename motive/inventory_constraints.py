@@ -1,7 +1,7 @@
 """Inventory constraint system for objects and players."""
 
 from typing import Dict, Any, List, Tuple, Optional
-from motive.game_objects import GameObject
+from motive.game_object import GameObject
 from motive.character import Character
 from motive.config import Event
 from datetime import datetime
