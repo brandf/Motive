@@ -570,9 +570,12 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
         return [], [f"Error: Character is in an unknown room: {player_char.current_room_id}."]
     
     # Find the object in the room
+    # Strip quotes from object_name for comparison
+    clean_object_name = object_name.strip('"\'')
+    
     target_object = None
     for obj_id, obj in current_room.objects.items():
-        if obj.name.lower() == object_name.lower():
+        if obj.name.lower() == clean_object_name.lower():
             target_object = obj
             break
     
