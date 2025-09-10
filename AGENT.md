@@ -230,6 +230,13 @@ Current core actions include: `move`, `say`, `look` (including `look inventory`)
 - **Use platform-appropriate commands**: Always test/verify what platform we're on and use appropriate bash and/or PowerShell commands. On Windows, use PowerShell syntax (`;` instead of `&&` for command chaining).
 - **Batch git operations**: Use `;` to chain git commands on Windows (e.g., `git add .; git commit -m "message"; git push`) to reduce approval requests.
 
+### TODO Management
+- **Use TODO.md instead of Cursor agent TODO system**: All task tracking should be done in the `TODO.md` file, not the Cursor agent TODO tool
+- **Keep TODO.md updated and prioritized**: When completing work, update `TODO.md` to mark items as completed and re-prioritize remaining items
+- **Categorize TODOs by priority and feature area**: Use clear sections (High/Medium/Low Priority) and group by feature type for better organization
+- **Include original IDs for reference**: When migrating from agent TODOs, preserve the original ID for traceability
+- **Don't use the Cursor agent todo_write tool**: This system is unreliable and doesn't persist properly - use the markdown file instead
+
 ### Configuration Security
 - **Prefer structured over freeform configuration**: Use structured objects/dictionaries instead of freeform strings that require evaluation
 - **Design for extensibility**: Include placeholder fields for future expansion even if not immediately implemented
