@@ -306,7 +306,7 @@ class GameMaster:
             print(f"{loser_text}")
         
         # Game summary
-        summary_text = f"\nGame Summary:\n- Total players: {len(self.players)}\n- Winners: {len(winners)}\n- Losers: {len(losers)}"
+        summary_text = f"Game Summary:\n- Total players: {len(self.players)}\n- Winners: {len(winners)}\n- Losers: {len(losers)}"
         self.game_logger.info(summary_text)
         print(summary_text)
 
