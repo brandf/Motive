@@ -1119,7 +1119,9 @@ class GameMaster:
                     other_actions.append(trimmed_line)
             
             if other_actions:
-                warning_msg = f"Note: You submitted other actions ({', '.join(other_actions)}) during turn end confirmation. These were ignored. Actions can only be performed during your active turn."
+                # Format ignored actions with line breaks like AP exhaustion feedback
+                ignored_actions_text = "\n".join([f"- {action}" for action in other_actions])
+                warning_msg = f"Note: You submitted other actions during turn end confirmation. These were ignored. Actions can only be performed during your active turn.\n\n**Ignored actions:**\n{ignored_actions_text}"
                 warning_message = HumanMessage(content=warning_msg)
                 player.add_message(warning_message)
                 player.logger.info(f"GM sent chat to {player.name} (Warning):\n{warning_msg}")
