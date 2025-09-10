@@ -1,0 +1,51 @@
+# Test simple additive merging (default behavior)
+id: test_simple_merging
+name: Test Simple Merging
+
+includes:
+  - "base_config.yaml"
+
+# Simple overrides - should work intuitively
+game_settings:
+  num_rounds: 2  # Override base value
+  initial_ap_per_turn: 30  # Override base value
+
+# Add new actions - should be appended to base actions
+actions:
+  new_action:
+    id: new_action
+    name: New Action
+    description: This is a new action added by simple merging
+    cost: 15
+    category: "test"
+
+# Add new objects - should be appended to base objects
+object_types:
+  new_object:
+    id: new_object
+    name: New Object
+    description: This is a new object added by simple merging
+    tags: ["new", "test"]
+    properties:
+      value: 42
+
+# Nested merging - should merge dictionaries
+rooms:
+  new_room:
+    id: new_room
+    name: New Room
+    description: A new room added by simple merging
+    exits: {}
+    objects: {}
+    tags: ["new"]
+    properties:
+      temperature: "warm"
+  base_room:
+    id: base_room
+    name: Base Room
+    description: A room from the base config
+    exits: {}
+    objects: {}
+    tags: ["base"]
+    properties:
+      temperature: "cool"

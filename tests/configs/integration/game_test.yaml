@@ -1,0 +1,21 @@
+# Test game configuration with hierarchical includes
+# This demonstrates how test configs can extend base configs
+
+includes:
+  - "../../configs/game.yaml"  # Include the main game config
+  - "test_hints.yaml"  # Add test-specific hints
+
+# Override game settings for testing
+game_settings:
+  num_rounds: 1  # Shorter test game
+  initial_ap_per_turn: 50  # More AP for testing
+
+# Add test-specific players
+players:
+  - name: "TestPlayer1"
+    provider: "openai"
+    model: "gpt-4"
+  
+  - name: "TestPlayer2"
+    provider: "openai"
+    model: "gpt-4"

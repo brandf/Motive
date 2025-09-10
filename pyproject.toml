@@ -1,6 +1,26 @@
 [project]
 name = "motive"
 version = "0.0.1"
+description = "A platform for LLM benchmarking and synthetic dataset production through turn-based games"
+authors = [
+    {name = "Brandon Furtwangler", email = "brandon.furtwangler@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0.0",
+    "langchain-core>=0.1.0",
+    "langchain-openai>=0.1.0",
+    "langchain-google-genai>=1.0.0",
+    "langchain-anthropic>=0.1.0",
+    "httpx>=0.25.0",
+]
+
+[project.scripts]
+motive = "motive.cli:main"
+motive-analyze = "motive.analyze:main"
 
 [tool.black]
 line-length = 88

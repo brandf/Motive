@@ -1,0 +1,11 @@
+# This file has invalid YAML syntax
+id: invalid_syntax
+name: Invalid Syntax
+
+# Invalid YAML - missing quotes around string with special characters
+actions:
+  invalid_action:
+    id: invalid_action
+    name: Invalid Action
+    description: This action has invalid YAML syntax with special chars: \x00\x01
+    cost: 5

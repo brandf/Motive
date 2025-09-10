@@ -1,0 +1,15 @@
+# Cycle B (a -> b -> c -> a)
+id: cycle_b
+name: Cycle B
+
+includes:
+  - "cycle_c.yaml"
+
+# Some content
+actions:
+  cycle_b_action:
+    id: cycle_b_action
+    name: Cycle B Action
+    description: This action is part of a deep cycle
+    cost: 5
+

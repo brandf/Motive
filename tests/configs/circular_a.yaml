@@ -1,0 +1,13 @@
+id: circular_a
+name: Circular A
+
+includes:
+  - "circular_b.yaml"
+
+# Some content
+actions:
+  test_action_a:
+    id: test_action_a
+    name: Test Action A
+    description: This is a test action
+    cost: 10

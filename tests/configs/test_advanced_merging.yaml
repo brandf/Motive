@@ -1,0 +1,70 @@
+# Test advanced merging with patch operations
+id: test_advanced_merging
+name: Test Advanced Merging
+
+includes:
+  - "base_config.yaml"
+  - "override_config.yaml"
+
+# Override with final values
+game_settings:
+  num_rounds: 999
+  initial_ap_per_turn: 999
+
+# Advanced list merging with strategies
+actions:
+  base_action:
+    id: base_action
+    name: Base Action Override
+    description: This overrides the base action completely
+    cost: 999
+  new_advanced_action:
+    id: new_advanced_action
+    name: New Advanced Action
+    description: This is a new action added via advanced merging
+    cost: 50
+
+# Use unique merging for tags (remove duplicates)
+object_types:
+  test_object:
+    id: test_object
+    name: Test Object
+    description: This object tests advanced merging
+    tags:
+      - __merge_strategy__: "merge_unique"
+      - "base"
+      - "advanced"
+      - "test"
+    properties:
+      base_value: 1
+      advanced_value: 2
+
+# Use remove strategy for exclusions
+excluded_actions:
+  - __merge_strategy__: "remove_items"
+  - "base_action"  # Remove this action
+  - "old_action"   # Remove this action
+
+# Use prepend strategy for priority items
+priority_actions:
+  - __merge_strategy__: "prepend"
+  - id: urgent_action
+    name: Urgent Action
+    description: This action should be first
+    cost: 1
+
+# Use insert strategy for specific positioning
+ordered_items:
+  - __merge_strategy__: "insert"
+    __merge_params__:
+      position: 1
+  - "inserted_item_1"
+  - "inserted_item_2"
+
+# Use smart merging (auto-detect strategy)
+smart_list:
+  - __merge_strategy__: "smart_merge"
+  - id: smart_item_1
+    name: Smart Item 1
+  - id: smart_item_2
+    name: Smart Item 2

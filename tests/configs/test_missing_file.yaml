@@ -1,0 +1,16 @@
+# Test missing file handling
+id: test_missing_file
+name: Test Missing File
+
+includes:
+  - "nonexistent_file.yaml"  # This file doesn't exist
+  - "core.yaml"  # This should work
+
+# Some content
+actions:
+  test_missing_action:
+    id: test_missing_action
+    name: Test Missing Action
+    description: This action tests missing file handling
+    cost: 5
+

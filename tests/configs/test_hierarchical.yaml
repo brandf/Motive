@@ -1,0 +1,32 @@
+# Test hierarchical config with multiple levels of includes
+id: test_hierarchical
+name: Test Hierarchical Config
+
+# Test multi-level includes (like core -> theme -> edition)
+includes:
+  - "base_config.yaml"  # Base level
+  - "override_config.yaml"  # Override level
+
+# Override some settings for testing
+game_settings:
+  num_rounds: 1
+  initial_ap_per_turn: 50
+
+# Add test-specific content
+actions:
+  hierarchical_test_action:
+    id: hierarchical_test_action
+    name: Hierarchical Test Action
+    description: This action tests hierarchical config loading
+    cost: 5
+    category: "test"
+
+# Add test-specific players
+players:
+  - name: "TestPlayer1"
+    provider: "openai"
+    model: "gpt-4"
+  
+  - name: "TestPlayer2"
+    provider: "openai"
+    model: "gpt-4"

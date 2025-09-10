@@ -1,0 +1,20 @@
+# Test relative path resolution
+id: test_relative_paths
+name: Test Relative Paths
+
+includes:
+  - "../../configs/core.yaml"  # Go up two levels to root, then into configs
+  - "subdir/nested_config.yaml"  # Go into subdirectory
+
+# Override some settings
+game_settings:
+  num_rounds: 1
+  initial_ap_per_turn: 100
+
+# Add test-specific data
+actions:
+  test_relative_action:
+    id: test_relative_action
+    name: Test Relative Action
+    description: This action tests relative path resolution
+    cost: 5

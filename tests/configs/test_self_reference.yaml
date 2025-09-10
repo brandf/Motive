@@ -1,0 +1,15 @@
+# Test self-reference detection
+id: test_self_reference
+name: Test Self Reference
+
+includes:
+  - "test_self_reference.yaml"  # Self-reference
+
+# Some content
+actions:
+  test_self_action:
+    id: test_self_action
+    name: Test Self Action
+    description: This action tests self-reference detection
+    cost: 5
+

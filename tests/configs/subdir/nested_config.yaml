@@ -1,0 +1,17 @@
+# Nested config that includes another config
+id: nested_config
+name: Nested Config
+
+includes:
+  - "../deep_nested.yaml"  # Go up and then into another file
+
+# Add some nested data
+object_types:
+  nested_object:
+    id: nested_object
+    name: Nested Object
+    description: This object comes from a nested config
+    tags: ["nested", "test"]
+    properties:
+      depth: 2
+

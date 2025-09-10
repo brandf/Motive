@@ -1,0 +1,16 @@
+# Deep nested config
+id: deep_nested
+name: Deep Nested Config
+
+# This config has no includes, it's a leaf node
+
+# Add some deep nested data
+character_types:
+  deep_character:
+    id: deep_character
+    name: Deep Character
+    description: A character from a deeply nested config
+    tags: ["deep", "nested", "test"]
+    properties:
+      depth: 3
+

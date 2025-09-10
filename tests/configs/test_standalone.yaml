@@ -1,0 +1,118 @@
+# Standalone test configuration that doesn't depend on main game configs
+# This tests the system's ability to handle completely self-contained configs
+
+id: test_standalone
+name: Test Standalone Config
+
+# Game settings
+game_settings:
+  num_rounds: 1
+  manual: "../../MANUAL.md"
+  initial_ap_per_turn: 20
+
+# Define theme and edition information directly
+theme_id: test_theme
+theme_name: Test Theme
+edition_id: test_edition
+edition_name: Test Edition
+
+# Define all actions directly (no includes)
+actions:
+  test_move:
+    id: test_move
+    name: Test Move
+    description: Move in a test direction
+    cost: 10
+    category: movement
+    parameters:
+      - name: direction
+        type: string
+        description: Direction to move
+    requirements:
+      - type: exit_exists
+        value: true
+
+  test_pickup:
+    id: test_pickup
+    name: Test Pickup
+    description: Pick up a test object
+    cost: 10
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: Name of object to pick up
+    requirements:
+      - type: object_in_room
+        value: true
+
+  test_look:
+    id: test_look
+    name: Test Look
+    description: Look around the test room
+    cost: 10
+    category: observation
+    parameters:
+      - name: target
+        type: string
+        description: What to look at
+        optional: true
+
+# Define object types directly
+object_types:
+  test_object:
+    id: test_object
+    name: Test Object
+    description: A simple test object
+    tags: ["portable", "test"]
+    properties:
+      value: 42
+      test_property: "test_value"
+
+# Define rooms directly
+rooms:
+  test_room:
+    id: test_room
+    name: Test Room
+    description: A simple test room
+    exits:
+      north: test_room_2
+    objects:
+      test_object_1:
+        object_type_id: test_object
+        name: Test Object 1
+        description: First test object
+    tags: ["test"]
+    properties:
+      temperature: "room_temperature"
+
+  test_room_2:
+    id: test_room_2
+    name: Test Room 2
+    description: Another test room
+    exits:
+      south: test_room
+    objects: {}
+    tags: ["test"]
+    properties:
+      temperature: "cool"
+
+# Define characters directly
+characters:
+  test_character:
+    id: test_character
+    name: Test Character
+    description: A test character
+    backstory: "This is a test character for standalone testing"
+    motive: "To test the standalone config system"
+    tags: ["test"]
+    properties:
+      level: 1
+      health: 100
+
+# Players for testing
+players:
+  - name: "StandaloneTestPlayer"
+    provider: "openai"
+    model: "gpt-4"
+

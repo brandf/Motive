@@ -1,0 +1,33 @@
+# Override config that should override base_config
+id: override_config
+name: Override Config
+
+# Override settings
+game_settings:
+  num_rounds: 2
+  initial_ap_per_turn: 20
+
+# Override actions
+actions:
+  override_action:
+    id: override_action
+    name: Override Action
+    description: This action overrides base_action
+    cost: 20
+  
+  shared_action:
+    id: shared_action
+    name: Shared Action Override
+    description: This action overrides shared_action
+    cost: 20
+
+# Override objects
+object_types:
+  override_object:
+    id: override_object
+    name: Override Object
+    description: This object overrides base_object
+    tags: ["override"]
+    properties:
+      value: 2
+

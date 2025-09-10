@@ -10,9 +10,14 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
     # Normalize action_line for matching by making it lowercase and stripping all whitespace
     normalized_action_line = action_line.lower().strip()
 
-    for act_name_key, action_cfg in available_actions.items():
-        # Use action_cfg.name for matching against the player input
-        normalized_act_name = action_cfg.name.lower().strip()
+    for act_name_key, action_cfg in available_actions.items():   
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(action_cfg, 'name'):
+            action_name = action_cfg.name
+        else:
+            action_name = action_cfg.get('name', act_name_key)
+        # Use action_cfg.name for matching against the player input                                                                   
+        normalized_act_name = action_name.lower().strip()
         if normalized_action_line.startswith(normalized_act_name):
             if len(normalized_act_name) > longest_match_len:
                 longest_match_len = len(normalized_act_name)
@@ -25,18 +30,36 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
     if not action_config:
         return None # Should not happen if found_action_name is from available_actions
 
-    # Extract parameter string from the original action_line based on the length of the *matched action name*
-    # Use action_config.name for slicing, as it's the actual string that matched within the input
-    param_string = action_line[len(action_config.name):].strip()
+    # Extract parameter string from the original action_line based on the length of the *matched action name*                         
+    # Handle both Pydantic objects and dictionaries from merged config
+    if hasattr(action_config, 'name'):
+        action_name = action_config.name
+    else:
+        action_name = action_config.get('name', found_action_name)
+    # Use action_config.name for slicing, as it's the actual string that matched within the input                                     
+    param_string = action_line[len(action_name):].strip()
     
     # Special handling for 'look at' syntax
-    if action_config.name.lower() == "look" and param_string.lower().startswith("at "):
+    if action_name.lower() == "look" and param_string.lower().startswith("at "):
         param_string = param_string[len("at "):].strip()
 
     params: Dict[str, Any] = {}
-    if action_config.parameters:
-        if len(action_config.parameters) == 1 and action_config.parameters[0].type == "string":
-            param_name = action_config.parameters[0].name
+    # Handle both Pydantic objects and dictionaries from merged config
+    if hasattr(action_config, 'parameters'):
+        parameters = action_config.parameters
+    else:
+        parameters = action_config.get('parameters', [])
+    
+    if parameters:
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(parameters[0], 'type'):
+            param_type = parameters[0].type
+            param_name = parameters[0].name
+        else:
+            param_type = parameters[0].get('type', 'string')
+            param_name = parameters[0].get('name', 'target')
+            
+        if len(parameters) == 1 and param_type == "string":
             # If param_string is empty, treat as if parameter was not provided
             if not param_string:
                 params[param_name] = None
@@ -48,7 +71,7 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                 params[param_name] = param_string
         else:
             # Handle multiple parameters - try to parse them intelligently
-            if len(action_config.parameters) == 2 and all(p.type == "string" for p in action_config.parameters):
+            if len(parameters) == 2 and all((p.get('type') if hasattr(p, 'get') else p.type) == "string" for p in parameters):
                 # Special case for two string parameters (like whisper: player + phrase)
                 # Look for quoted phrase at the end
                 import re
@@ -63,18 +86,18 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                         (rest.startswith('"') and rest.endswith('"'))):
                         quoted_content = rest[1:-1]
                         # Assign to parameters in order
-                        params[action_config.parameters[0].name] = first_param
-                        params[action_config.parameters[1].name] = quoted_content
+                        params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = first_param
+                        params[parameters[1].get('name', 'param2') if hasattr(parameters[1], 'get') else parameters[1].name] = quoted_content
                     else:
                         # Fallback: assign first word to first param, rest to second
-                        params[action_config.parameters[0].name] = first_param
-                        params[action_config.parameters[1].name] = rest
+                        params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = first_param
+                        params[parameters[1].get('name', 'param2') if hasattr(parameters[1], 'get') else parameters[1].name] = rest
                 else:
                     # Fallback: assign raw string to first parameter
-                    params[action_config.parameters[0].name] = param_string
-            elif "target" in [p.name for p in action_config.parameters]:
+                    params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = param_string
+            elif "target" in [(p.get('name', '') if hasattr(p, 'get') else p.name) for p in parameters]:
                 params["target"] = param_string
-            elif action_config.parameters:
+            elif parameters:
                 # This case means we couldn't parse all expected parameters for a defined action.
                 pass
     return action_config, params
@@ -114,7 +137,12 @@ def _suggest_similar_action(action_line: str, available_actions: Dict[str, Actio
     action_line_lower = action_line.lower().strip()
     
     # Get all available action names
-    available_names = [action_cfg.name for action_cfg in available_actions.values()]
+    available_names = []
+    for action_cfg in available_actions.values():
+        if hasattr(action_cfg, 'name'):
+            available_names.append(action_cfg.name)
+        else:
+            available_names.append(action_cfg.get('name', 'unknown'))
     
     # Check for common typos or partial matches
     for name in available_names:

@@ -1,0 +1,15 @@
+# Test deep cycle detection (a -> b -> c -> a)
+id: test_deep_cycle
+name: Test Deep Cycle
+
+includes:
+  - "cycle_b.yaml"
+
+# Some content
+actions:
+  test_deep_cycle_action:
+    id: test_deep_cycle_action
+    name: Test Deep Cycle Action
+    description: This action tests deep cycle detection
+    cost: 5
+

@@ -17,20 +17,19 @@ from motive.game_rooms import Room
 @pytest.fixture
 def mock_game_master_validation():
     with (
-        patch('os.makedirs'),
-        patch('logging.FileHandler') as mock_file_handler_class,
-        patch('os.path.join', return_value='mock/log/path'),
-        patch('motive.player.create_llm_client', return_value=MagicMock()),
-        patch('motive.player.Player') as mock_player_class,
-        patch('motive.game_initializer.GameInitializer._load_yaml_config') as mock_load_yaml_config,
-        patch('motive.game_master.GameMaster._load_manual_content') as mock_load_manual_content,
-        patch('sys.stdout') as mock_stdout,
-        patch('motive.hooks.core_hooks.look_at_target', return_value=([MagicMock()], ["Mock look feedback"])),
-        patch('motive.hooks.core_hooks.generate_help_message', return_value=([MagicMock()], ["Mock help feedback"])),
-        patch('motive.hooks.core_hooks.handle_move_action', return_value=([MagicMock()], ["Mock move feedback"])),
-        patch('motive.hooks.core_hooks.handle_say_action', return_value=([MagicMock()], ["Mock say feedback"])),
-        patch('motive.hooks.core_hooks.handle_pickup_action', return_value=([MagicMock()], ["Mock pickup feedback"]))
-    ):
+            patch('os.makedirs'),
+            patch('logging.FileHandler') as mock_file_handler_class, 
+            patch('motive.player.create_llm_client', return_value=MagicMock()),                                                           
+            patch('motive.player.Player') as mock_player_class,      
+            patch('motive.game_initializer.GameInitializer._load_yaml_config') as mock_load_yaml_config,                                  
+            patch('motive.game_master.GameMaster._load_manual_content') as mock_load_manual_content,                                      
+            patch('sys.stdout') as mock_stdout,
+            patch('motive.hooks.core_hooks.look_at_target', return_value=([MagicMock()], ["Mock look feedback"])),                        
+            patch('motive.hooks.core_hooks.generate_help_message', return_value=([MagicMock()], ["Mock help feedback"])),                 
+            patch('motive.hooks.core_hooks.handle_move_action', return_value=([MagicMock()], ["Mock move feedback"])),                    
+            patch('motive.hooks.core_hooks.handle_say_action', return_value=([MagicMock()], ["Mock say feedback"])),                      
+            patch('motive.hooks.core_hooks.handle_pickup_action', return_value=([MagicMock()], ["Mock pickup feedback"]))                 
+        ):
         mock_file_handler_instance = MagicMock()
         mock_file_handler_instance.level = 20  # INFO level
         mock_file_handler_class.return_value = mock_file_handler_instance
@@ -132,30 +131,22 @@ def mock_game_master_validation():
             }
         )
 
-        mock_game_config = MagicMock(spec=GameConfig)
-        mock_game_config.game_settings = MagicMock(spec=GameSettings)
-        mock_game_config.game_settings.num_rounds = 1
-        mock_game_config.game_settings.core_config_path = "mock/core.yaml"
-        mock_game_config.game_settings.theme_config_path = "mock/theme.yaml"
-        mock_game_config.game_settings.edition_config_path = "mock/edition.yaml"
-        mock_game_config.game_settings.manual = "mock/manual.md"
-        mock_game_config.game_settings.initial_ap_per_turn = 20
-        mock_game_config.players = [
-            PlayerConfig(name="TestPlayer", provider="mock", model="mock-model"),
+        # Create a proper hierarchical config for testing
+        from motive.config_loader import ConfigLoader
+        import os
+        loader = ConfigLoader(base_path=os.path.join(os.path.dirname(__file__), '..'))
+        config_data = loader.load_config('configs/game.yaml')
+        
+        # Override with test-specific settings
+        config_data['game_settings']['num_rounds'] = 1
+        config_data['game_settings']['initial_ap_per_turn'] = 20
+        config_data['players'] = [
+            {"name": "TestPlayer", "provider": "mock", "model": "mock-model"}
         ]
-        mock_game_config.theme_config = dummy_theme_config
-        mock_game_config.edition_config = dummy_edition_config
+        
+        mock_game_config = GameConfig(**config_data)
 
-        def mock_load_yaml_config_side_effect(file_path: str, config_model):
-            if config_model == CoreConfig:
-                return dummy_core_config
-            elif config_model == ThemeConfig:
-                return dummy_theme_config
-            elif config_model == EditionConfig:
-                return dummy_edition_config
-            raise ValueError(f"Unexpected config_model: {config_model.__name__}")
-
-        mock_load_yaml_config.side_effect = mock_load_yaml_config_side_effect
+        # No need for mock config loading with hierarchical configs
         mock_load_manual_content.return_value = "Mock manual content."
 
         gm = GameMaster(game_config=mock_game_config, game_id="test_game_id")

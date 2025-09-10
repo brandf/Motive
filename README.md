@@ -118,7 +118,14 @@ To start the game:
 source venv/bin/activate
 
 # Run the application
-python -m motive.main
+motive                                    # Run with default config
+motive -c configs/game_new.yaml          # Run with hierarchical config
+motive -c configs/game_test.yaml         # Run test configuration
+
+# Analyze configurations
+motive-analyze                           # Analyze default config
+motive-analyze -c configs/game_new.yaml -I  # Show include information
+motive-analyze -a                        # Show all information
 ```
 
 ## Troubleshooting
@@ -230,6 +237,102 @@ We welcome contributions to Motive! If you're interested in improving the platfo
 ## Game Manual
 
 For details on how the game works and its mechanics, please refer to the [MANUAL.md](MANUAL.md).
+
+## Configuration System
+
+Motive uses a flexible hierarchical configuration system that allows you to organize game content across multiple YAML files. This system supports both simple additive merging and advanced patch-based composition.
+
+### Basic Configuration Structure
+
+The main entry point is `configs/game.yaml`, which can include other configs using the `includes` directive:
+
+```yaml
+# configs/game.yaml
+game_settings:
+  num_rounds: 2
+  initial_ap_per_turn: 20
+
+# Include other configs (processed first, then this config merges on top)
+includes:
+  - "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
+
+players:
+  - name: "Arion"
+    provider: "google"
+    model: "gemini-2.5-flash"
+```
+
+### Hierarchical Organization
+
+Configs are organized in a logical hierarchy:
+- **`core.yaml`** - Core game mechanics and actions
+- **`themes/fantasy/fantasy.yaml`** - Fantasy theme content (includes core.yaml)
+- **`themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml`** - Specific edition (includes fantasy.yaml)
+
+### Include Processing
+
+1. **Include directives are processed first** (like C++ includes)
+2. **Later includes override earlier ones** in merge order
+3. **Current config merges on top** of all included configs
+4. **Circular dependencies are detected** and reported clearly
+
+### Merging Strategies
+
+#### Simple Merging (Default)
+- **Dictionaries**: Merge keys, with later values overriding earlier ones
+- **Lists**: Append items (additive only)
+- **Nested structures**: Recursively merge
+
+#### Advanced Merging
+For sophisticated composition, you can use merge strategies:
+
+```yaml
+# List merging strategies
+tags:
+  - __merge_strategy__: "merge_unique"  # Remove duplicates
+  - "base"
+  - "advanced"
+  - "base"  # Duplicate will be removed
+
+priority_actions:
+  - __merge_strategy__: "prepend"  # Add to beginning
+  - id: urgent_action
+    name: Urgent Action
+    cost: 1
+```
+
+#### Patch References (Advanced)
+Reference and modify existing objects:
+
+```yaml
+# Reference an existing action and patch it
+patched_action:
+  __ref__: "actions.base_action"
+  __patches__:
+    - operation: "set"
+      field: "cost"
+      value: 5
+    - operation: "add"
+      field: "tags"
+      items: ["patched"]
+```
+
+### Available Merge Strategies
+
+- `override` - Replace entire list
+- `append` - Add to end (default)
+- `prepend` - Add to beginning  
+- `merge_unique` - Remove duplicates
+- `remove_items` - Remove specific items
+- `insert` - Insert at specific positions
+- `key_based` - Merge objects by ID field
+- `smart_merge` - Auto-detect appropriate strategy
+
+### Testing Configurations
+
+- **Unit tests**: Use isolated configs in `tests/configs/` (no main game dependencies)
+- **Integration tests**: Use configs in `tests/configs/integration/` (can reference main game configs)
+- **Standalone testing**: Create self-contained configs for testing specific features
 
 ## Configuration Analysis
 

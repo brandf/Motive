@@ -144,20 +144,44 @@ def mock_game_master_logging():
             }
         )
 
-        mock_game_config = MagicMock(spec=GameConfig)
-        mock_game_config.game_settings = MagicMock(spec=GameSettings)
-        mock_game_config.game_settings.num_rounds = 1
-        mock_game_config.game_settings.core_config_path = "mock/core.yaml"
-        mock_game_config.game_settings.theme_config_path = "mock/theme.yaml"
-        mock_game_config.game_settings.edition_config_path = "mock/edition.yaml"
-        mock_game_config.game_settings.manual = "mock/manual.md"
-        mock_game_config.game_settings.initial_ap_per_turn = 20
-        mock_game_config.players = [
-            PlayerConfig(name="Arion", provider="mock", model="mock-model"),
-            PlayerConfig(name="Kael", provider="mock", model="mock-model"),
-        ]
-        mock_game_config.theme_config = dummy_theme_config
-        mock_game_config.edition_config = dummy_edition_config
+        # Create a mock game config with merged dictionary structure
+        mock_game_config = {
+            'game_settings': {
+                'num_rounds': 1,
+                'core_config_path': "mock/core.yaml",
+                'theme_config_path': "mock/theme.yaml",
+                'edition_config_path': "mock/edition.yaml",
+                'manual': "mock/manual.md",
+                'initial_ap_per_turn': 20
+            },
+            'players': [
+                PlayerConfig(name="Arion", provider="mock", model="mock-model"),
+                PlayerConfig(name="Kael", provider="mock", model="mock-model"),
+            ],
+            'theme_config': dummy_theme_config,
+            'edition_config': dummy_edition_config,
+            'actions': {
+                "look": {"id": "look", "name": "look", "cost": 10, "description": "Look around.", "parameters": [{"name": "target", "type": "string", "description": "The name of the object or character to look at."}], "requirements": [], "effects": [{"type": "code_binding", "function_module": "motive.hooks.core_hooks", "function_name": "look_at_target", "observers": ["player"]}]},
+                "help": {"id": "help", "name": "help", "cost": 10, "description": "Get help.", "parameters": [], "requirements": [], "effects": [{"type": "code_binding", "function_module": "motive.hooks.core_hooks", "function_name": "generate_help_message", "observers": ["player"]}]},
+                "move": {"id": "move", "name": "move", "cost": 10, "description": "Move in a specified direction.", "parameters": [{"name": "direction", "type": "string", "description": "The direction to move (e.g., north, south, east, west)."}], "requirements": [{"type": "exit_exists", "direction_param": "direction"}], "effects": [{"type": "code_binding", "function_module": "motive.hooks.core_hooks", "function_name": "handle_move_action", "observers": ["player"]}]},
+                "say": {"id": "say", "name": "say", "cost": 10, "description": "Say something to other players in the room.", "parameters": [{"name": "phrase", "type": "string", "description": "The phrase to say."}], "requirements": [], "effects": [{"type": "code_binding", "function_module": "motive.hooks.core_hooks", "function_name": "handle_say_action", "observers": ["player", "room_players"]}]},
+                "pickup": {"id": "pickup", "name": "pickup", "cost": 10, "description": "Pick up an object.", "parameters": [{"name": "object_name", "type": "string", "description": "The name of the object to pick up."}], "requirements": [{"type": "object_in_room", "object_name_param": "object_name"}], "effects": [{"type": "code_binding", "function_module": "motive.hooks.core_hooks", "function_name": "handle_pickup_action", "observers": ["player"]}]},
+                "light_torch": {"id": "light_torch", "name": "light torch", "cost": 10, "description": "Light a torch you are holding.", "parameters": [{"name": "object_name", "type": "string", "description": "The name of the torch to light."}], "requirements": [{"type": "player_has_object_in_inventory", "object_name_param": "object_name"}, {"type": "object_property_equals", "object_name_param": "object_name", "property": "is_lit", "value": False}], "effects": [{"type": "set_property", "target_type": "object", "target_id_param": "object_name", "property": "is_lit", "value": True}, {"type": "generate_event", "message": "{player_name} lights the {object_name}.", "observers": ["room_players"]}]}
+            },
+            'object_types': {
+                "torch": {"id": "torch", "name": "Torch", "description": "A torch.", "tags": ["light_source"], "properties": {"is_lit": False}},
+                "generic_fountain": {"id": "generic_fountain", "name": "Fountain", "description": "A basic fountain.", "tags": [], "properties": {}},
+                "generic_sign": {"id": "generic_sign", "name": "Sign", "description": "A generic sign.", "tags": [], "properties": {}}
+            },
+            'character_types': {
+                "hero": {"id": "hero", "name": "Hero", "backstory": "A brave adventurer.", "motive": "Defeat evil."},
+                "elara": {"id": "elara", "name": "Elara", "backstory": "A cunning rogue.", "motive": "Steal the Amulet of Shadows."}
+            },
+            'rooms': {
+                "start_room": {"id": "start_room", "name": "Starting Room", "description": "A simple starting room.", "exits": {"north": {"id": "north_exit", "name": "North", "destination_room_id": "other_room"}}, "objects": {"room_fountain": {"id": "room_fountain", "name": "Fountain", "object_type_id": "generic_fountain", "current_room_id": "start_room"}}},
+                "other_room": {"id": "other_room", "name": "Another Room", "description": "A dark, dusty room.", "exits": {"south": {"id": "south_exit", "name": "South", "destination_room_id": "start_room"}}}
+            }
+        }
 
         def mock_load_yaml_config_side_effect(file_path: str, config_model: BaseModel):
             if config_model == CoreConfig:

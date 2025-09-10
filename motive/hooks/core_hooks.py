@@ -15,7 +15,11 @@ def generate_help_message(game_master: Any, player_char: PlayerCharacter, action
     # Group actions by category
     actions_by_category = {}
     for action_id, action_cfg in game_master.game_actions.items():
-        category = action_cfg.category or "other"
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(action_cfg, 'category'):
+            category = action_cfg.category or "other"
+        else:
+            category = action_cfg.get('category', 'other')
         if category not in actions_by_category:
             actions_by_category[category] = []
         actions_by_category[category].append(action_cfg)
@@ -29,7 +33,16 @@ def generate_help_message(game_master: Any, player_char: PlayerCharacter, action
             category = matching_categories[0]
             help_message_parts = [f"Actions in '{category}' category:"]
             for action_cfg in actions_by_category[category]:
-                help_message_parts.append(f"- {action_cfg.name} ({action_cfg.cost} AP): {action_cfg.description}")
+                # Handle both Pydantic objects and dictionaries from merged config
+                if hasattr(action_cfg, 'name'):
+                    name = action_cfg.name
+                    cost = action_cfg.cost
+                    description = action_cfg.description
+                else:
+                    name = action_cfg.get('name', 'unknown')
+                    cost = action_cfg.get('cost', 0)
+                    description = action_cfg.get('description', 'No description')
+                help_message_parts.append(f"- {name} ({cost} AP): {description}")
         else:
             # Category not found, show available categories
             available_categories = sorted(actions_by_category.keys())
@@ -42,7 +55,16 @@ def generate_help_message(game_master: Any, player_char: PlayerCharacter, action
         for category in sorted(actions_by_category.keys()):
             help_message_parts.append(f"\n{category.upper()}:")
             for action_cfg in actions_by_category[category]:
-                help_message_parts.append(f"  - {action_cfg.name} ({action_cfg.cost} AP): {action_cfg.description}")
+                # Handle both Pydantic objects and dictionaries from merged config
+                if hasattr(action_cfg, 'name'):
+                    name = action_cfg.name
+                    cost = action_cfg.cost
+                    description = action_cfg.description
+                else:
+                    name = action_cfg.get('name', 'unknown')
+                    cost = action_cfg.get('cost', 0)
+                    description = action_cfg.get('description', 'No description')
+                help_message_parts.append(f"  - {name} ({cost} AP): {description}")
         
         help_message_parts.append(f"\nUse 'help <category>' to see actions in a specific category (costs 5 AP).")
     

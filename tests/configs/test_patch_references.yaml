@@ -1,0 +1,78 @@
+# Test patch-based references (advanced feature)
+id: test_patch_references
+name: Test Patch References
+
+includes:
+  - "base_config.yaml"
+
+# Reference an existing action and patch it
+actions:
+  move_action_patched:
+    __ref__: "base_action"  # Reference the base action
+    __patches__:
+      - operation: "set"
+        field: "cost"
+        value: 5  # Change cost from 10 to 5
+      - operation: "set"
+        field: "description"
+        value: "This is a patched version of the base action"
+      - operation: "add"
+        field: "tags"
+        items: ["patched", "modified"]
+      - operation: "set_path"
+        path: "requirements.0.value"
+        value: 15  # Modify nested requirement
+
+# Reference an existing object and patch it
+object_types:
+  patched_object:
+    __ref__: "base_object"
+    __patches__:
+      - operation: "set"
+        field: "name"
+        value: "Patched Base Object"
+      - operation: "merge"
+        field: "properties"
+        value:
+          new_property: "new_value"
+          patched: true
+      - operation: "add"
+        field: "tags"
+        items: ["patched", "enhanced"]
+
+# Conditional patching
+conditional_action:
+  __ref__: "base_action"
+  __patches__:
+    - operation: "if"
+      if: "environment == 'development'"
+      patches:
+        - operation: "set"
+          field: "cost"
+          value: 1  # Free in development
+    - operation: "unless"
+      unless: "environment == 'production'"
+      patches:
+        - operation: "add"
+          field: "tags"
+          items: ["debug"]
+
+# Complex patching with multiple operations
+complex_patch:
+  __ref__: "base_object"
+  __patches__:
+    - operation: "set"
+      field: "name"
+      value: "Complex Patched Object"
+    - operation: "unset"
+      field: "old_property"
+    - operation: "set_path"
+      path: "nested.deep.value"
+      value: "deeply_nested_value"
+    - operation: "add"
+      field: "tags"
+      items: ["complex", "patched", "advanced"]
+    - operation: "remove"
+      field: "tags"
+      items: ["old_tag"]
+

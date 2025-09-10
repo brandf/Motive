@@ -1,0 +1,15 @@
+# Test configuration with hints for validation
+# This can be included in test configs to provide validation hints
+
+hints:
+  - hint_id: "test_pickup"
+    hint_action: "> pickup Tiny Gem\n> look inventory"
+    when:
+      round: 1
+      players: ["Arion"]
+  
+  - hint_id: "test_communication"
+    hint_action: "> say 'Hello there!'\n> whisper Arion 'secret message'"
+    when:
+      round: 1
+      players: ["Lyra"]

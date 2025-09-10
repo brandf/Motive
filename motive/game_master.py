@@ -37,12 +37,22 @@ class GameMaster:
     # Accept a pre-validated GameConfig object directly
     def __init__(self, game_config: GameConfig, game_id: str):
         self.players = []
-        self.num_rounds = game_config.game_settings.num_rounds
-        self.game_id = game_id
+        
         # Resolve manual path relative to the configs directory (where game.yaml is located)
         import os
         configs_dir = os.path.dirname(os.path.abspath("configs/game.yaml"))
-        self.manual_path = os.path.join(configs_dir, game_config.game_settings.manual)
+        
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(game_config, 'game_settings'):
+            # Pydantic object
+            self.num_rounds = game_config.game_settings.num_rounds
+            self.manual_path = os.path.join(configs_dir, game_config.game_settings.manual)
+        else:
+            # Dictionary from merged config
+            self.num_rounds = game_config['game_settings']['num_rounds']
+            self.manual_path = os.path.join(configs_dir, game_config['game_settings']['manual'])
+            
+        self.game_id = game_id
 
         self.game_config = game_config # Assign game_config earlier
 
@@ -65,12 +75,30 @@ class GameMaster:
             self.game_logger.setLevel(logging.INFO)
 
         # Initialize GameInitializer with the basic logger
-        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger, self.game_config.game_settings.initial_ap_per_turn)
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(game_config, 'game_settings'):
+            initial_ap = game_config.game_settings.initial_ap_per_turn
+        else:
+            initial_ap = game_config['game_settings']['initial_ap_per_turn']
+        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger, initial_ap)
 
-        # Load Theme and Edition configurations
+        # Load configurations from merged config
         self.game_initializer._load_configurations()
-        self.theme = self.game_initializer.theme_cfg.id
-        self.edition = self.game_initializer.edition_cfg.id
+        
+        # Extract theme and edition IDs from merged config
+        if hasattr(game_config, 'theme_id') and game_config.theme_id:
+            self.theme = game_config.theme_id
+        elif 'theme_id' in game_config and game_config['theme_id']:
+            self.theme = game_config['theme_id']
+        else:
+            self.theme = "unknown"
+            
+        if hasattr(game_config, 'edition_id') and game_config.edition_id:
+            self.edition = game_config.edition_id
+        elif 'edition_id' in game_config and game_config['edition_id']:
+            self.edition = game_config['edition_id']
+        else:
+            self.edition = "unknown"
 
         # Now that theme and edition are known, set up the full logging
         self.log_dir = self._setup_logging()
@@ -79,9 +107,7 @@ class GameMaster:
 
         self.manual_content = self._load_manual_content()
 
-        # Store loaded configs in game_config for broader access
-        game_config.theme_config = self.game_initializer.theme_cfg
-        game_config.edition_config = self.game_initializer.edition_cfg
+        # Configs are already merged in game_config via hierarchical loading
         # self.game_config = game_config # Store the full game config # Moved to earlier
 
         # Initialize game state collections - these will be populated by GameInitializer
@@ -100,7 +126,11 @@ class GameMaster:
         self.event_queue: List[Event] = [] # All events generated during a turn
         self.player_observations: Dict[str, List[Event]] = {} # Events specific to each player
 
-        self._initialize_players(game_config.players)
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(game_config, 'players'):
+            self._initialize_players(game_config.players)
+        else:
+            self._initialize_players(game_config['players'])
         
         # Now, use the initializer to set up the game world
         self.game_initializer.initialize_game_world(self.players)
@@ -113,7 +143,11 @@ class GameMaster:
         self.game_character_types = self.game_initializer.game_character_types
 
         # Pass initial AP to GameInitializer for character instantiation
-        self.game_initializer.initial_ap_per_turn = self.game_config.game_settings.initial_ap_per_turn
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(game_config, 'game_settings'):
+            self.game_initializer.initial_ap_per_turn = game_config.game_settings.initial_ap_per_turn
+        else:
+            self.game_initializer.initial_ap_per_turn = game_config['game_settings']['initial_ap_per_turn']
 
         # Initialize player_observations for all players
         for player in self.players:
@@ -152,11 +186,8 @@ class GameMaster:
     def _setup_logging(self):
         """Sets up the logging directory and configures the GM logger."""
         base_log_dir = "logs"
-        # Create a unique, sortable directory name for this game run
-        timestamp = datetime.now().strftime("%Y-%m-%d_%Hhr_%Mmin_%Ssec")
-        unique_game_folder = f"({timestamp}) {self.game_id}"
-        
-        game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, unique_game_folder)
+        # Use game_id directly for folder name (should be sortable if game_id includes timestamp)
+        game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, self.game_id)
         os.makedirs(game_log_dir, exist_ok=True)
 
         # Remove all existing handlers from the logger before reconfiguring
@@ -217,7 +248,11 @@ class GameMaster:
                 break
                 
             for player in active_players:
-                player.character.action_points = self.game_config.game_settings.initial_ap_per_turn # Reset AP from config
+                # Handle both Pydantic objects and dictionaries from merged config
+                if hasattr(self.game_config, 'game_settings'):
+                    player.character.action_points = self.game_config.game_settings.initial_ap_per_turn
+                else:
+                    player.character.action_points = self.game_config['game_settings']['initial_ap_per_turn']
                 await self._execute_player_turn(player, round_num)
                 
                 # Check if player quit during their turn
@@ -282,14 +317,28 @@ class GameMaster:
 
         found_exit_data: Optional[Dict[str, Any]] = None # To store exit data if found
 
-        for req in action_config.requirements:
-            if req.type == "player_has_tag":
-                if not player_char.has_tag(req.tag):
-                    return False, f"Player does not have tag '{req.tag}'.", None
-            elif req.type == "object_in_room":
-                object_name = params.get(req.object_name_param)
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(action_config, 'requirements'):
+            requirements = action_config.requirements
+        else:
+            requirements = action_config.get('requirements', [])
+        
+        for req in requirements:
+            # Handle both Pydantic objects and dictionaries from merged config
+            if hasattr(req, 'type'):
+                req_type = req.type
+            else:
+                req_type = req.get('type', '')
+                
+            if req_type == "player_has_tag":
+                tag = req.tag if hasattr(req, 'tag') else req.get('tag', '')
+                if not player_char.has_tag(tag):
+                    return False, f"Player does not have tag '{tag}'.", None
+            elif req_type == "object_in_room":
+                object_name_param = req.object_name_param if hasattr(req, 'object_name_param') else req.get('object_name_param', 'object_name')
+                object_name = params.get(object_name_param)
                 if not object_name:
-                    return False, f"Missing parameter '{req.object_name_param}' for object_in_room requirement.", None
+                    return False, f"Missing parameter '{object_name_param}' for object_in_room requirement.", None
                 
                 obj_found = False
                 for obj in current_room.objects.values():
@@ -298,10 +347,11 @@ class GameMaster:
                         break
                 if not obj_found:
                     return False, f"Object '{object_name}' not in room.", None
-            elif req.type == "object_in_inventory":
-                object_name = params.get(req.object_name_param)
+            elif req_type == "object_in_inventory":
+                object_name_param = req.object_name_param if hasattr(req, 'object_name_param') else req.get('object_name_param', 'object_name')
+                object_name = params.get(object_name_param)
                 if not object_name:
-                    return False, f"Missing parameter '{req.object_name_param}' for object_in_inventory requirement.", None
+                    return False, f"Missing parameter '{object_name_param}' for object_in_inventory requirement.", None
                 
                 obj_found = False
                 for obj in player_char.inventory.values():
@@ -310,10 +360,11 @@ class GameMaster:
                         break
                 if not obj_found:
                     return False, f"Object '{object_name}' not in inventory.", None
-            elif req.type == "object_possession_allowed":
-                object_name = params.get(req.object_name_param)
+            elif req_type == "object_possession_allowed":
+                object_name_param = req.object_name_param if hasattr(req, 'object_name_param') else req.get('object_name_param', 'object_name')
+                object_name = params.get(object_name_param)
                 if not object_name:
-                    return False, f"Missing parameter '{req.object_name_param}' for object_possession_allowed requirement.", None
+                    return False, f"Missing parameter '{object_name_param}' for object_possession_allowed requirement.", None
                 
                 # Find the object in the room
                 target_object = None
@@ -336,10 +387,11 @@ class GameMaster:
                 if "magically_bound" in target_object.tags:
                     return False, f"Cannot pick up '{object_name}' - it is magically bound to this location.", None
                 
-            elif req.type == "object_property_equals":
-                object_name = params.get(req.object_name_param)
+            elif req_type == "object_property_equals":
+                object_name_param = req.object_name_param if hasattr(req, 'object_name_param') else req.get('object_name_param', 'object_name')
+                object_name = params.get(object_name_param)
                 if not object_name:
-                    return False, f"Missing parameter '{req.object_name_param}' for object_property_equals requirement.", None
+                    return False, f"Missing parameter '{object_name_param}' for object_property_equals requirement.", None
                 
                 obj_found = player_char.get_item_in_inventory(object_name) # Check inventory first
                 if not obj_found:
@@ -349,19 +401,23 @@ class GameMaster:
                 if not obj_found:
                     return False, f"Object '{object_name}' not found for property check.", None
                 
-                if obj_found.get_property(req.property) != req.value:
-                    return False, f"Object '{object_name}' property '{req.property}' is not '{req.value}'.", None
-            elif req.type == "player_has_object_in_inventory":
-                object_name = params.get(req.object_name_param)
+                property_name = req.property if hasattr(req, 'property') else req.get('property', '')
+                property_value = req.value if hasattr(req, 'value') else req.get('value', '')
+                if obj_found.get_property(property_name) != property_value:
+                    return False, f"Object '{object_name}' property '{property_name}' is not '{property_value}'.", None
+            elif req_type == "player_has_object_in_inventory":
+                object_name_param = req.object_name_param if hasattr(req, 'object_name_param') else req.get('object_name_param', 'object_name')
+                object_name = params.get(object_name_param)
                 if object_name is None:
-                    return False, f"Missing parameter '{req.object_name_param}' for player_has_object_in_inventory requirement.", None
+                    return False, f"Missing parameter '{object_name_param}' for player_has_object_in_inventory requirement.", None
                 
                 if not player_char.has_item_in_inventory(object_name):
                     return False, f"Player does not have '{object_name}' in inventory.", None
-            elif req.type == "exit_exists":
-                direction = params.get(req.direction_param)
+            elif req_type == "exit_exists":
+                direction_param = req.direction_param if hasattr(req, 'direction_param') else req.get('direction_param', 'direction')
+                direction = params.get(direction_param)
                 if not direction:
-                    return False, f"Missing parameter '{req.direction_param}' for exit_exists requirement.", None
+                    return False, f"Missing parameter '{direction_param}' for exit_exists requirement.", None
                 
                 found_exit = None
                 for exit_id, exit_data in current_room.exits.items():
@@ -372,10 +428,11 @@ class GameMaster:
                 if not found_exit:
                     return False, f"No visible exit in the '{direction}' direction.", None
                 found_exit_data = found_exit # Store for returning
-            elif req.type == "player_in_room":
-                player_name = params.get(req.target_player_param)
+            elif req_type == "player_in_room":
+                target_player_param = req.target_player_param if hasattr(req, 'target_player_param') else req.get('target_player_param', 'player')
+                player_name = params.get(target_player_param)
                 if not player_name:
-                    return False, f"Missing parameter '{req.target_player_param}' for player_in_room requirement.", None
+                    return False, f"Missing parameter '{target_player_param}' for player_in_room requirement.", None
                 
                 # Check if the target player is in the same room
                 target_player = None
@@ -407,20 +464,42 @@ class GameMaster:
             feedback_messages.append(f"Error: Character is in an unknown room: {player_char.current_room_id}.")
             return [], feedback_messages
 
-        for effect in action_config.effects:
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(action_config, 'effects'):
+            effects = action_config.effects
+        else:
+            effects = action_config.get('effects', [])
+        
+        for effect in effects:
+            # Handle both Pydantic objects and dictionaries from merged config
+            if hasattr(effect, 'target_id_param'):
+                target_id_param = effect.target_id_param
+            else:
+                target_id_param = effect.get('target_id_param', None)
+                
+            if hasattr(effect, 'target_id'):
+                target_id = effect.target_id
+            else:
+                target_id = effect.get('target_id', None)
+                
+            if hasattr(effect, 'target_type'):
+                target_type = effect.target_type
+            else:
+                target_type = effect.get('target_type', 'player')
+                
             target_instance = None
-            target_id_from_param = params.get(effect.target_id_param) if effect.target_id_param else None
-            target_id = effect.target_id or target_id_from_param
+            target_id_from_param = params.get(target_id_param) if target_id_param else None
+            target_id = target_id or target_id_from_param
 
-            if effect.target_type == "player":
+            if target_type == "player":
                 # For player target, the instance is always the current player_char
                 target_instance = player_char
-            elif effect.target_type == "room":
+            elif target_type == "room":
                 if target_id:
                     target_instance = self.rooms.get(target_id)
                 elif player_char.current_room_id: # Default to current room if target_id not specified
                     target_instance = self.rooms.get(player_char.current_room_id)
-            elif effect.target_type == "object":
+            elif target_type == "object":
                 if target_id:
                     # Check player inventory first
                     target_instance = player_char.get_item_in_inventory(target_id)
@@ -431,47 +510,106 @@ class GameMaster:
                             target_instance = current_room.get_object(target_id)
             
             # Execute effects based on type
-            if effect.type == "add_tag":
-                if target_instance and effect.tag:
-                    target_instance.add_tag(effect.tag)
-                    feedback_messages.append(f"The {effect.target_type} '{target_instance.name}' gains the tag: '{effect.tag}'.")
+            # Handle both Pydantic objects and dictionaries from merged config
+            if hasattr(effect, 'type'):
+                effect_type = effect.type
+            else:
+                effect_type = effect.get('type', '')
+                
+            if hasattr(effect, 'tag'):
+                effect_tag = effect.tag
+            else:
+                effect_tag = effect.get('tag', '')
+                
+            if hasattr(effect, 'target_type'):
+                effect_target_type = effect.target_type
+            else:
+                effect_target_type = effect.get('target_type', 'player')
+                
+            if effect_type == "add_tag":
+                if target_instance and effect_tag:
+                    target_instance.add_tag(effect_tag)
+                    feedback_messages.append(f"The {effect_target_type} '{target_instance.name}' gains the tag: '{effect_tag}'.")
                 else:
-                    self.game_logger.warning(f"add_tag effect missing target or tag for action '{action_config.name}'.")
+                    # Handle both Pydantic objects and dictionaries from merged config
+                    if hasattr(action_config, 'name'):
+                        action_name = action_config.name
+                    else:
+                        action_name = action_config.get('name', 'unknown')
+                    self.game_logger.warning(f"add_tag effect missing target or tag for action '{action_name}'.")
 
-            elif effect.type == "remove_tag":
-                if target_instance and effect.tag:
-                    target_instance.remove_tag(effect.tag)
-                    feedback_messages.append(f"The {effect.target_type} '{target_instance.name}' loses the tag: '{effect.tag}'.")
+            elif effect_type == "remove_tag":
+                if target_instance and effect_tag:
+                    target_instance.remove_tag(effect_tag)
+                    feedback_messages.append(f"The {effect_target_type} '{target_instance.name}' loses the tag: '{effect_tag}'.")
                 else:
-                    self.game_logger.warning(f"remove_tag effect missing target or tag for action '{action_config.name}'.")
+                    # Handle both Pydantic objects and dictionaries from merged config
+                    if hasattr(action_config, 'name'):
+                        action_name = action_config.name
+                    else:
+                        action_name = action_config.get('name', 'unknown')
+                    self.game_logger.warning(f"remove_tag effect missing target or tag for action '{action_name}'.")
 
-            elif effect.type == "set_property":
-                if target_instance and effect.property and effect.value is not None:
-                    target_instance.set_property(effect.property, effect.value)
-                    feedback_messages.append(f"The {effect.target_type} '{target_instance.name}'s '{effect.property}' is now '{effect.value}'.")
+            elif effect_type == "set_property":
+                # Handle both Pydantic objects and dictionaries from merged config
+                if hasattr(effect, 'property'):
+                    effect_property = effect.property
                 else:
-                    self.game_logger.warning(f"set_property effect missing target, property, or value for action '{action_config.name}'.")
+                    effect_property = effect.get('property', '')
+                    
+                if hasattr(effect, 'value'):
+                    effect_value = effect.value
+                else:
+                    effect_value = effect.get('value', None)
+                    
+                if target_instance and effect_property and effect_value is not None:
+                    target_instance.set_property(effect_property, effect_value)
+                    feedback_messages.append(f"The {effect_target_type} '{target_instance.name}'s '{effect_property}' is now '{effect_value}'.")
+                else:
+                    # Handle both Pydantic objects and dictionaries from merged config
+                    if hasattr(action_config, 'name'):
+                        action_name = action_config.name
+                    else:
+                        action_name = action_config.get('name', 'unknown')
+                    self.game_logger.warning(f"set_property effect missing target, property, or value for action '{action_name}'.")
 
-            elif effect.type == "generate_event":
-                if effect.message and effect.observers:
-                    event_message = effect.message.format(**params, player_name=player_char.name) # Add player_name to params for formatting
+            elif effect_type == "generate_event":
+                # Handle both Pydantic objects and dictionaries from merged config
+                if hasattr(effect, 'message'):
+                    effect_message = effect.message
+                else:
+                    effect_message = effect.get('message', '')
+                    
+                if hasattr(effect, 'observers'):
+                    effect_observers = effect.observers
+                else:
+                    effect_observers = effect.get('observers', [])
+                    
+                if effect_message and effect_observers:
+                    event_message = effect_message.format(**params, player_name=player_char.name) # Add player_name to params for formatting
                     events_generated.append(Event(
                         message=event_message,
                         event_type="action_event", # A generic type for now
                         source_room_id=player_char.current_room_id,
                         timestamp=datetime.now().isoformat(),
                         related_player_id=player_char.id,
-                        observers=effect.observers
+                        observers=effect_observers
                     ))
                     feedback_messages.append(event_message) # Player sees their own immediate events
 
-            elif effect.type == "code_binding":
-                if effect.function_name:
+            elif effect_type == "code_binding":
+                # Handle both Pydantic objects and dictionaries from merged config
+                if hasattr(effect, 'function_name'):
+                    effect_function_name = effect.function_name
+                else:
+                    effect_function_name = effect.get('function_name', '')
+                    
+                if effect_function_name:
                     try:
                         # Use convention-based import: assume core_hooks for now
                         # TODO: Make this more flexible for different hook modules
                         import motive.hooks.core_hooks as core_hooks
-                        hook_function = getattr(core_hooks, effect.function_name)
+                        hook_function = getattr(core_hooks, effect_function_name)
                         
                         hook_events_and_feedback = hook_function(self, player_char, action_config, params) # Expecting a tuple: (List[Event], List[str])
                         hook_events = hook_events_and_feedback[0]
@@ -481,15 +619,30 @@ class GameMaster:
                         events_generated.extend(hook_events) # Extend with actual Event objects
 
                     except (ImportError, AttributeError, KeyError, IndexError) as e: # Added KeyError for globals lookup
-                        error_message = f"Error calling code binding for action '{action_config.name}': {e}"
+                        # Handle both Pydantic objects and dictionaries from merged config
+                        if hasattr(action_config, 'name'):
+                            action_name = action_config.name
+                        else:
+                            action_name = action_config.get('name', 'unknown')
+                        error_message = f"Error calling code binding for action '{action_name}': {e}"
                         self.game_logger.error(error_message)
                         feedback_messages.append(f"An error occurred while trying to process your action: {e}")
                     except Exception as e:
-                        error_message = f"An unexpected error occurred in code binding for action '{action_config.name}': {e}"
+                        # Handle both Pydantic objects and dictionaries from merged config
+                        if hasattr(action_config, 'name'):
+                            action_name = action_config.name
+                        else:
+                            action_name = action_config.get('name', 'unknown')
+                        error_message = f"An unexpected error occurred in code binding for action '{action_name}': {e}"
                         self.game_logger.error(error_message)
                         feedback_messages.append(f"An unexpected error occurred: {e}")
                 else:
-                    self.game_logger.warning(f"code_binding effect for '{action_config.name}' missing function_name.")
+                    # Handle both Pydantic objects and dictionaries from merged config
+                    if hasattr(action_config, 'name'):
+                        action_name = action_config.name
+                    else:
+                        action_name = action_config.get('name', 'unknown')
+                    self.game_logger.warning(f"code_binding effect for '{action_name}' missing function_name.")
                     feedback_messages.append(f"An error occurred due to missing code binding configuration.")
 
             else:
@@ -523,8 +676,12 @@ class GameMaster:
             elif action_config.cost.type == 'static':
                 return action_config.cost.value or 0
         
-        # Default to static cost from config (backward compatibility for int)
-        return action_config.cost
+        # Default to static cost from config (backward compatibility for int)                                                             
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(action_config, 'cost'):
+            return action_config.cost
+        else:
+            return action_config.get('cost', 0)
 
     def _distribute_events(self):
         """Distributes generated events to relevant players based on observer scopes."""
@@ -618,8 +775,13 @@ class GameMaster:
                                 f"Now, based on the manual and your character, respond with your actions."
 
                 # Character Assignment and Motive
-                char_type_id = player_char.id.split('_instance')[0]
-                char_type_name = self.game_character_types[char_type_id].name
+                char_type_id = player_char.id.split('_instance')[0]  
+                char_type_cfg = self.game_character_types[char_type_id]
+                # Handle both Pydantic objects and dictionaries from merged config
+                if hasattr(char_type_cfg, 'name'):
+                    char_type_name = char_type_cfg.name
+                else:
+                    char_type_name = char_type_cfg.get('name', char_type_id)
                 article = "an" if char_type_name.lower().startswith(('a', 'e', 'i', 'o', 'u')) else "a"
                 character_assignment = f"You are {player_char.name}, {article} {char_type_name}.\nYour motive is: {player_char.motive}"
 
@@ -735,7 +897,13 @@ class GameMaster:
             elif invalid_actions:
                 # Penalty for providing invalid actions
                 # Get valid action names for better feedback
-                valid_action_names = [action.name for action, _ in parsed_actions] if parsed_actions else []
+                valid_action_names = []
+                if parsed_actions:
+                    for action, _ in parsed_actions:
+                        if hasattr(action, 'name'):
+                            valid_action_names.append(action.name)
+                        else:
+                            valid_action_names.append(action.get('name', ''))
                 example_actions = self._get_example_actions()
                 
                 feedback_parts = [
@@ -754,7 +922,14 @@ class GameMaster:
                 self.game_logger.error(f"{player.name} provided invalid actions. Turn ended.")
                 self.game_logger.error(f"Invalid actions were: {invalid_actions}")
                 if parsed_actions:
-                    self.game_logger.error(f"Valid actions were: {[(action.name, params) for action, params in parsed_actions]}")
+                    valid_actions_log = []
+                    for action, params in parsed_actions:
+                        if hasattr(action, 'name'):
+                            action_name = action.name
+                        else:
+                            action_name = action.get('name', '')
+                        valid_actions_log.append((action_name, params))
+                    self.game_logger.error(f"Valid actions were: {valid_actions_log}")
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
@@ -775,20 +950,31 @@ class GameMaster:
                 actions_skipped_due_to_ap = []
                 
                 for action_config, params in parsed_actions:
+                    # Handle both Pydantic objects and dictionaries from merged config
+                    if hasattr(action_config, 'name'):
+                        action_name = action_config.name
+                    else:
+                        action_name = action_config.get('name', '')
+                        
                     action_specific_feedback: List[str] = []
                     if player_char.action_points <= 0:
                         # Track remaining actions that couldn't be processed due to AP exhaustion
                         remaining_actions = parsed_actions[parsed_actions.index((action_config, params)):]
                         for remaining_action_config, remaining_params in remaining_actions:
-                            actions_skipped_due_to_ap.append(f"{remaining_action_config.name} {remaining_params}")
+                            # Handle both Pydantic objects and dictionaries from merged config
+                            if hasattr(remaining_action_config, 'name'):
+                                remaining_action_name = remaining_action_config.name
+                            else:
+                                remaining_action_name = remaining_action_config.get('name', '')
+                            actions_skipped_due_to_ap.append(f"{remaining_action_name} {remaining_params}")
                         break # Exit inner loop for actions
 
                     # Calculate actual cost using cost calculation function if available
                     actual_cost = self._calculate_action_cost(player_char, action_config, params)
                     
                     if actual_cost > player_char.action_points:
-                        action_specific_feedback.append(f"Action '{action_config.name}' costs {actual_cost} AP, but you only have {player_char.action_points} AP. Skipping this action.")
-                        actions_skipped_due_to_ap.append(f"{action_config.name} {params}")
+                        action_specific_feedback.append(f"Action '{action_name}' costs {actual_cost} AP, but you only have {player_char.action_points} AP. Skipping this action.")
+                        actions_skipped_due_to_ap.append(f"{action_name} {params}")
                         self.game_logger.info(action_specific_feedback[-1])
                         # Don't set all_actions_in_response_valid = False for AP exhaustion - this is normal gameplay
                     else:
@@ -798,8 +984,8 @@ class GameMaster:
                             action_events, action_specific_feedback_list = self._execute_effects(player_char, action_config, params)
                             action_specific_feedback.extend(action_specific_feedback_list)
                             
-                            # Track if help action was performed
-                            if action_config.name == "help":
+                            # Track if help action was performed     
+                            if action_name == "help":
                                 help_action_performed = True
                             
                             # Add generated events to the main event queue
@@ -808,12 +994,12 @@ class GameMaster:
                             # Distribute events immediately after action execution
                             self._distribute_events()
                             
-                            # Mark hint as executed if this action matches a hint
-                            self._mark_hint_executed(player.name, action_config.name, params)
+                            # Mark hint as executed if this action matches a hint                                                         
+                            self._mark_hint_executed(player.name, action_name, params)
                             
-                            self.game_logger.info(f"Action '{action_config.name}' executed by {player_char.name} (cost: {actual_cost} AP). Remaining AP: {player_char.action_points}")
+                            self.game_logger.info(f"Action '{action_name}' executed by {player_char.name} (cost: {actual_cost} AP). Remaining AP: {player_char.action_points}")
                         else:
-                            action_specific_feedback.append(f"Cannot perform '{action_config.name}': {req_message}. Skipping this action.")
+                            action_specific_feedback.append(f"Cannot perform '{action_name}': {req_message}. Skipping this action.")
                             self.game_logger.info(action_specific_feedback[-1])
                             all_actions_in_response_valid = False
 
@@ -821,7 +1007,7 @@ class GameMaster:
                         # Calculate AP info for this action
                         ap_before = player_char.action_points + actual_cost
                         ap_after = player_char.action_points
-                        response_feedback_messages.append(f"- **{action_config.name.capitalize()} Action:** (Cost: {actual_cost} AP, Remaining: {ap_after} AP)")
+                        response_feedback_messages.append(f"- **{action_name.capitalize()} Action:** (Cost: {actual_cost} AP, Remaining: {ap_after} AP)")
                         response_feedback_messages.extend([f"  - {msg}" for msg in action_specific_feedback])
 
                 # After processing all actions in the response
@@ -854,7 +1040,14 @@ class GameMaster:
                     
                     # Log detailed information about what went wrong
                     self.game_logger.error(f"{player.name} had invalid/unexecutable actions in response. Turn ended.")
-                    self.game_logger.error(f"Parsed actions were: {[(action.name, params) for action, params in parsed_actions]}")
+                    # Handle both Pydantic objects and dictionaries from merged config
+                    action_names = []
+                    for action, params in parsed_actions:
+                        if hasattr(action, 'name'):
+                            action_names.append(action.name)
+                        else:
+                            action_names.append(action.get('name', 'unknown'))
+                    self.game_logger.error(f"Parsed actions were: {[(action_names[i], params) for i, (action, params) in enumerate(parsed_actions)]}")
                     self.game_logger.error(f"Action feedback that caused failure: {response_feedback_messages}")
                     
                     # Send final penalty feedback
@@ -948,11 +1141,17 @@ class GameMaster:
 
     def _get_applicable_hints(self, player_name: str, round_num: int) -> List[str]:
         """Get hints that apply to the current player and round."""
-        if not hasattr(self.game_config.game_settings, 'hints') or not self.game_config.game_settings.hints:
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(self.game_config, 'game_settings'):
+            hints = getattr(self.game_config.game_settings, 'hints', None)
+        else:
+            hints = self.game_config.get('game_settings', {}).get('hints', None)
+            
+        if not hints:
             return []
         
         applicable_hints = []
-        for hint in self.game_config.game_settings.hints:
+        for hint in hints:
             # Check if hint has already been executed by this player
             hint_id = hint.get("hint_id", "")
             if hint_id and hint_id in self.executed_hints and player_name in self.executed_hints[hint_id]:
@@ -1019,10 +1218,16 @@ class GameMaster:
 
     def _mark_hint_executed(self, player_name: str, action_name: str, params: Dict[str, Any]):
         """Mark a hint as executed if the action matches a hint."""
-        if not hasattr(self.game_config.game_settings, 'hints') or not self.game_config.game_settings.hints:
+        # Handle both Pydantic objects and dictionaries from merged config
+        if hasattr(self.game_config, 'game_settings'):
+            hints = getattr(self.game_config.game_settings, 'hints', None)
+        else:
+            hints = self.game_config.get('game_settings', {}).get('hints', None)
+            
+        if not hints:
             return
         
-        for hint in self.game_config.game_settings.hints:
+        for hint in hints:
             hint_id = hint.get("hint_id", "")
             if not hint_id:
                 continue
@@ -1062,11 +1267,20 @@ class GameMaster:
         
         # Collect actions by category
         actions_by_category = {}
-        for action_id, action_cfg in self.game_actions.items():
-            category = action_cfg.category or "other"
+        for action_id, action_cfg in self.game_actions.items():      
+            # Handle both Pydantic objects and dictionaries from merged config
+            if hasattr(action_cfg, 'category'):
+                category = action_cfg.category or "other"
+            else:
+                category = action_cfg.get('category', 'other')
             if category not in actions_by_category:
                 actions_by_category[category] = []
-            actions_by_category[category].append(action_cfg.name)
+            # Handle both Pydantic objects and dictionaries from merged config
+            if hasattr(action_cfg, 'name'):
+                action_name = action_cfg.name
+            else:
+                action_name = action_cfg.get('name', action_id)
+            actions_by_category[category].append(action_name)
         
         # Build example actions list prioritizing core categories
         example_actions = []

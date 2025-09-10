@@ -137,12 +137,14 @@ class EditionConfig(BaseModel):
 class GameSettings(BaseModel):
     """General game settings."""
     num_rounds: int = Field(..., gt=0, description="Number of rounds the game will run.")
-    core_config_path: str = Field(..., description="Path to the core YAML configuration file.")
-    theme_config_path: str = Field(..., description="Path to the theme YAML configuration file.")
-    edition_config_path: str = Field(..., description="Path to the edition YAML configuration file.")
     manual: str = Field("MANUAL.md", description="Path to the game manual markdown file.")
     initial_ap_per_turn: int = Field(20, description="Initial action points per player per turn. Defaults to 20 for testing.")
     hints: Optional[List[Dict[str, Any]]] = Field(None, description="Optional hints to guide LLM players toward specific actions for validation.")
+    
+    # Legacy fields for backward compatibility (deprecated)
+    core_config_path: Optional[str] = Field(None, description="DEPRECATED: Use includes instead.")
+    theme_config_path: Optional[str] = Field(None, description="DEPRECATED: Use includes instead.")
+    edition_config_path: Optional[str] = Field(None, description="DEPRECATED: Use includes instead.")
 
 class GameConfig(BaseModel):
     """Overall game configuration."""
@@ -151,4 +153,18 @@ class GameConfig(BaseModel):
     core_config: Optional[CoreConfig] = None # New: CoreConfig
     theme_config: Optional[ThemeConfig] = None
     edition_config: Optional[EditionConfig] = None
+    # Support for standalone configs that define theme/edition directly
+    theme_id: Optional[str] = None
+    theme_name: Optional[str] = None
+    edition_id: Optional[str] = None
+    edition_name: Optional[str] = None
+    
+    # Support for hierarchical configs that merge everything into one structure
+    actions: Optional[Dict[str, Any]] = None
+    object_types: Optional[Dict[str, Any]] = None
+    character_types: Optional[Dict[str, Any]] = None
+    rooms: Optional[Dict[str, Any]] = None
+    characters: Optional[Dict[str, Any]] = None
+    id: Optional[str] = None
+    name: Optional[str] = None
 

@@ -1,0 +1,33 @@
+# Base config that gets overridden
+id: base_config
+name: Base Config
+
+# Base settings
+game_settings:
+  num_rounds: 1
+  initial_ap_per_turn: 10
+
+# Base actions
+actions:
+  base_action:
+    id: base_action
+    name: Base Action
+    description: This action should be overridden
+    cost: 10
+  
+  shared_action:
+    id: shared_action
+    name: Shared Action
+    description: This action should be overridden
+    cost: 10
+
+# Base objects
+object_types:
+  base_object:
+    id: base_object
+    name: Base Object
+    description: This object should be overridden
+    tags: ["base"]
+    properties:
+      value: 1
+

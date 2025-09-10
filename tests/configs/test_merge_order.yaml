@@ -1,0 +1,21 @@
+# Test merge order (later includes should override earlier ones)
+id: test_merge_order
+name: Test Merge Order
+
+includes:
+  - "base_config.yaml"  # This should be loaded first
+  - "override_config.yaml"  # This should override base_config
+
+# This config should override everything
+game_settings:
+  num_rounds: 999
+  initial_ap_per_turn: 999
+
+# Some content
+actions:
+  test_merge_action:
+    id: test_merge_action
+    name: Test Merge Action
+    description: This action tests merge order
+    cost: 5
+

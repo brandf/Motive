@@ -15,15 +15,17 @@ This file contains essential guidance for AI agents working on the Motive projec
 ### Current State and Priorities
 - **Core actions implementation**: Building fundamental actions available to all players
 - **Testing infrastructure**: Establishing robust test coverage for reliable development
-- **Real-world validation**: Using `motive.main` runs to validate functionality with actual LLM players
+always best to what beha- **Real-world validation**: Using `motive` runs to validate functionality with actual LLM players. 
 
 ## Development Workflow
 
 ### Testing Philosophy
-- **Default to tests over paid runs**: Running `python -m motive.main` triggers paid LLM calls. Prefer unit/integration tests which stub external LLMs.
+- **Default to tests over paid runs**: Running `motive` triggers paid LLM calls. Prefer unit/integration tests which stub external LLMs.
 - **Favor integration tests over heavy mocking**: Write tests that exercise real code paths and types. Mock only external services (e.g., LLM APIs, filesystem/network), not core logic.
 - **Use real constructors and APIs**: Build objects with their true signatures so tests mirror production.
 - **Tests should prove real fixes**: Add integration tests that fail before a fix and pass after.
+- **Focus on catching real issues, not coverage metrics**: It's fine to measure test coverage occasionally, but don't get hung up on it. The important thing is that the tests are catching REAL issues and preventing expensive `motive` runs that use LLMs. Use the most appropriate test methods including mocks, test configs, and integration tests to get confidence in our code.
+- **Think about correct behavior from the game's perspective when fixing tests**: While fixing tests, always consider what the correct behavior should be from the game's perspective. The goal isn't just getting tests to pass—it's to end up with tests that are testing the intended/desired behavior. If a test expectation seems wrong, question whether the test or the implementation should change based on what makes sense for the game mechanics and player experience.
 
 ### Quality Gates
 - **Confidence scale (1–10) before paid runs**:
@@ -31,7 +33,7 @@ This file contains essential guidance for AI agents working on the Motive projec
   - 7–8: Integration tests cover new logic end-to-end with stubs, logs verified
   - 5–6: Unit tests pass but integration coverage is partial
   - ≤4: Significant unknowns, heavy mocking, or flakiness; do not run paid flows
-- **Gate to run `motive.main`**: Only after tests are green, logs look correct, and configs are validated
+- **Gate to run `motive`**: Only after tests are green, logs look correct, and configs are validated
 
 ### Code Organization Principles
 - **Use convention-based imports**: Rely on naming conventions rather than explicit module specifications
@@ -69,9 +71,11 @@ This file contains essential guidance for AI agents working on the Motive projec
 - **Don't change tests to pass**: When a test exposes a real defect, update the implementation first
 - **Don't self‑observe**: The acting player should not receive their own event as an observation
 - **Don't use freeform configuration**: Structured config prevents security issues and improves maintainability
+- **Don't clear unfinished TODOs without express permission**: TODOs represent work in progress and should only be cleared when explicitly authorized by the user
+- **Don't YOLO large features**: Avoid implementing massive changes without following TDD workflow, as this leads to extensive cleanup and test fixing
 
 ### Real-World Issue Resolution
-When issues are found in `motive.main` that should have been caught by tests:
+When issues are found in `motive` that should have been caught by tests:
 
 1. **Issue Analysis**: Evaluate preventability, identify root cause, assess test gap
 2. **Test-First Fix**: Write failing test first, confirm it fails, fix root cause, verify test passes
@@ -85,19 +89,19 @@ Before committing changes, verify all items are complete:
 #### **Code Quality & Testing**
 - [ ] All tests pass: `pytest tests/ -v`
 - [ ] No linter errors: `pytest tests/ --tb=short` (check for any failures)
-- [ ] Real-world validation passed: `motive.main` completed successfully
+- [ ] Real-world validation passed: `motive` completed successfully
 - [ ] No temporary debug code or print statements left in production code
 
 #### **Configuration & Documentation**
 - [ ] Configuration files updated correctly (e.g., `configs/core.yaml`, `configs/game.yaml`)
-- [ ] **Temporary hint configurations removed from `configs/game.yaml`** (if added for testing)
+- [ ] **Production configs remain clean**: No temporary hints or test-specific configurations in production files
 - [ ] Documentation updated: `AGENT.md`, `VIBECODER.md`, `README.md` as needed
 - [ ] New lessons learned added to appropriate documentation files
 
-#### **Pre-Validation Checklist (Before `motive.main`)**
-- [ ] **Add temporary hints for validation**: Add appropriate hints to `configs/game.yaml` to guide LLM players to test the specific functionality being validated
-- [ ] **Verify hint syntax**: Ensure hint configurations are valid and won't cause parsing errors
-- [ ] **Target specific actions**: Hints should direct players to execute the exact actions needed to validate the new feature or bug fix
+#### **Pre-Validation Checklist (Before `motive`)**
+- [ ] **Use test configs for validation**: Use `configs/game_test.yaml` or create specific test configs with hints instead of modifying production `configs/game.yaml`
+- [ ] **Verify test config syntax**: Ensure test configuration files are valid and won't cause parsing errors
+- [ ] **Target specific actions**: Test configs should direct players to execute the exact actions needed to validate the new feature or bug fix
 
 #### **Code Organization**
 - [ ] New test files created for new functionality
@@ -123,7 +127,7 @@ Before committing changes, verify all items are complete:
 6. **Verify operations**: Run `git status` and `git log --oneline -3` to confirm success
 
 ### Confidence Levels for Commits
-- **9-10/10**: All tests pass, `motive.main` successful, documentation updated, no temporary code
+- **9-10/10**: All tests pass, `motive` successful, documentation updated, no temporary code
 - **7-8/10**: Most tests pass, minor issues that don't affect core functionality
 - **<7/10**: Do not commit - fix issues first
 
@@ -139,7 +143,7 @@ Before committing changes, verify all items are complete:
 2. Review `README.md` for project overview
 3. Check `configs/` directory for configuration structure
 4. Run `pytest tests/` to verify test suite
-5. Start with integration tests before running `motive.main`
+5. Start with integration tests before running `motive`
 
 ### Where to Find More Info
 - **`README.md`**: Project setup and overview
@@ -176,6 +180,35 @@ Current core actions include: `move`, `say`, `look` (including `look inventory`)
 - **Learn from failures**: If something goes wrong during implementation, always walk away with a lesson to add to `AGENT.md` for how to prevent the mistake in the future
 - **Test coverage before implementation**: Ensure comprehensive test coverage exists before writing production code
 
+### TDD Failure Analysis: Why YOLO'ing Large Features is Dangerous
+**The Problem**: Implementing massive architectural changes (like hierarchical config system) without following TDD leads to:
+- Breaking dozens of existing tests that were working before
+- Spending extensive time in "fix everything that broke" mode
+- Loss of confidence in the codebase state
+- Difficulty determining what's actually working vs. what's broken
+
+**The TDD Solution**: For large features, follow this approach:
+1. **Write failing tests** that describe the new behavior you want
+2. **Implement minimal changes** to make those tests pass
+3. **Gradually migrate** existing tests to use the new system
+4. **Refactor** while keeping all tests green
+
+**Why This Matters**: The hierarchical config system change broke the fundamental contract between configs and the rest of the codebase (Pydantic objects → dictionaries). This should have been caught by tests written first, not discovered after implementation.
+
+### Why Agents Don't Follow TDD Guidance
+**Root Causes**:
+- **Overconfidence**: Thinking "I understand the codebase well enough to implement this safely"
+- **Impatience**: Wanting to see the feature working quickly rather than following the disciplined approach
+- **Scope Creep**: Starting with a small change but then expanding it into a massive refactor
+- **Not Reading Guidance**: Failing to re-read `AGENT.md` before starting major work
+
+**Prevention Strategies**:
+- **Always re-read `AGENT.md`** before starting any significant work
+- **Break large features into smaller, testable increments**
+- **Write the test first, even if it feels slow**
+- **Ask yourself**: "What's the smallest change I can make to get this working?"
+- **When in doubt, follow the TDD workflow explicitly**
+
 ### Testing Specifics
 - **Check import paths when writing tests**: Verify correct import paths by checking where classes are actually defined
 - **Test edge cases in configuration evaluation**: Test missing fields, empty values, and invalid combinations
@@ -183,13 +216,13 @@ Current core actions include: `move`, `say`, `look` (including `look inventory`)
 - **Test requirement type implementations**: When adding new requirement types (like `player_in_room`), create integration tests that verify the requirement checking logic works correctly with real player and room data. Test both success and failure cases.
 - **Verify Pydantic field names**: When working with configuration, always check the actual field names in the Pydantic model definitions rather than assuming names (e.g., `target_player_param` not `player_name_param`).
 - **Inventory security is critical**: Always create comprehensive security tests for inventory management actions (pickup, drop, give, trade). Test for object duplication, unauthorized access, malicious input, and cross-room exploits.
-- **Use hints strategically for validation**: Add temporary hints to `configs/game.yaml` before running `motive.main` to ensure LLM players test the specific functionality being validated. Clean up hints before committing to maintain a clean production state.
-- **Always revert hints before committing**: Temporary hints added for validation must be removed/reverted to clean state before committing feature changes. This ensures the production configuration remains clean and doesn't include test-specific hints.
+- **Use test configs for validation**: Use `configs/game_test.yaml` or create specific test configs with hints before running `motive` to ensure LLM players test the specific functionality being validated. This keeps production configs clean.
+- **Keep production configs clean**: Use test configs for validation instead of adding temporary hints to production files. This ensures production configurations remain clean and don't include test-specific content.
 - **Tests should not depend on specific game.yaml content**: Tests that depend on specific configurations in `game.yaml` are fragile and will break whenever the configuration changes. Design tests to be independent of configuration content or use test-specific configurations.
-- **Don't ask permission for high-confidence operations**: When confidence is 8+ and rationale is provided, just run the operation (like `motive.main`). The user will reject if they don't want it run.
-- **CRITICAL: Always validate in motive.main before committing**: Never start the commit workflow (git add/commit/push) without first validating changes in `motive.main`. Tests can pass but real-world integration may still fail.
-- **Don't ask permission for high-confidence git commits**: When commit assessment is 9-10/10 AND after successful `motive.main` validation, just proceed with staging, committing, and pushing. The user will reject if they don't want it.
-- **Don't ask permission for hint cleanup and commits**: After successful `motive.main` validation, automatically clean up temporary hints and commit changes. The user will reject if they don't want it.
+- **Don't ask permission for high-confidence operations**: When confidence is 8+ and rationale is provided, just run the operation (like `motive`). The user will reject if they don't want it run.
+- **CRITICAL: Always validate in motive before committing**: Never start the commit workflow (git add/commit/push) without first validating changes in `motive`. Tests can pass but real-world integration may still fail.
+- **Don't ask permission for high-confidence git commits**: When commit assessment is 9-10/10 AND after successful `motive` validation, just proceed with staging, committing, and pushing. The user will reject if they don't want it.
+- **Don't ask permission for high-confidence commits**: After successful `motive` validation with test configs, automatically commit changes. The user will reject if they don't want it.
 - **Use platform-appropriate commands**: Always test/verify what platform we're on and use appropriate bash and/or PowerShell commands. On Windows, use PowerShell syntax (`;` instead of `&&` for command chaining).
 - **Batch git operations**: Use `&&` to chain git commands (e.g., `git add . && git commit -m "message" && git push`) to reduce approval requests.
 
@@ -228,9 +261,9 @@ When issues are found in `motive.main` that should have been caught by tests, fo
 - **Cross-component interaction tests**: Test how different modules work together
 
 ### 4. **Validation and Prevention**
-- **Achieve high confidence**: Get to 9-10 confidence level before running `motive.main`
-- **CRITICAL: Always validate in motive.main before committing**: Never start the commit workflow (git add/commit/push) without first validating changes in `motive.main`. Tests can pass but real-world integration may still fail.
-- **Use hints for reproduction**: After fixing, use the hint system to try reproducing the original issue in `motive.main`
+- **Achieve high confidence**: Get to 9-10 confidence level before running `motive`
+- **CRITICAL: Always validate in motive before committing**: Never start the commit workflow (git add/commit/push) without first validating changes in `motive`. Tests can pass but real-world integration may still fail.
+- **Use hints for reproduction**: After fixing, use the hint system to try reproducing the original issue in `motive`
 - **Document the lesson**: Add the specific test pattern to `AGENT.md` to prevent similar issues
 
 ### 5. **Learning and Generalization**
@@ -248,7 +281,7 @@ Issue: "Unsupported requirement type: player_in_room" in whisper action
 3. Confirm fails: Test fails with current code
 4. Fix: Implement player_in_room requirement checking
 5. Verify: Test passes, full suite passes
-6. Validate: Run motive.main with whisper hints to confirm fix
+6. Validate: Run `motive -c configs/game_test.yaml` to confirm fix
 7. Document: Add lesson about testing requirement types
 8. Generalize: Add lesson about verifying Pydantic field names
 9. Update workflow: Add learning and generalization step

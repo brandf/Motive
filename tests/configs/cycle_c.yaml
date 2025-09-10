@@ -1,0 +1,15 @@
+# Cycle C (a -> b -> c -> a)
+id: cycle_c
+name: Cycle C
+
+includes:
+  - "test_deep_cycle.yaml"  # This creates the cycle back to a
+
+# Some content
+actions:
+  cycle_c_action:
+    id: cycle_c_action
+    name: Cycle C Action
+    description: This action completes the deep cycle
+    cost: 5
+

@@ -1,12 +1,13 @@
 # Game settings
 game_settings:
   num_rounds: 2
-  core_config_path: "core.yaml"
-  theme_config_path: "themes/fantasy/fantasy.yaml"
-  edition_config_path: "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
   manual: "../MANUAL.md"
   initial_ap_per_turn: 20 # Set initial AP per turn for testing
 # hints: [] # No hints configured - clean state for production
+
+# Include the edition (which will include theme, which will include core)
+includes:
+  - "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
 
 # List of AI players
 players:

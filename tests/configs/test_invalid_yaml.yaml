@@ -1,0 +1,15 @@
+# Test invalid YAML handling
+id: test_invalid_yaml
+name: Test Invalid YAML
+
+includes:
+  - "invalid_syntax.yaml"  # This file has invalid YAML
+
+# Some content
+actions:
+  test_invalid_action:
+    id: test_invalid_action
+    name: Test Invalid Action
+    description: This action tests invalid YAML handling
+    cost: 5
+

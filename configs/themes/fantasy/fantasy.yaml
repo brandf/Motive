@@ -1,5 +1,9 @@
 id: fantasy
 name: Fantasy Theme
+
+# Include the core configuration this theme is based on
+includes:
+  - "../../core.yaml"
 object_types:
   torch:
     id: torch
