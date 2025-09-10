@@ -9,12 +9,12 @@ This document provides a comprehensive guide to the world of Motive, detailing t
 
 ## Table of Contents
 
-*   Game Overview
-*   Game Mechanics: Turns, Actions, and Observability
-*   Player Roles, Characters, and Motives (Win Conditions)
-*   Game Environments: Rooms, Exits, and Objects
-*   Player Actions: Categories and Parameters
-*   Communication and Social Engineering
+*   [Game Overview](#game-overview)
+*   [Game Mechanics: Turns, Actions, and Observability](#game-mechanics-turns-actions-and-observability)
+*   [Player Roles, Characters, and Motives (Win Conditions)](#player-roles-characters-and-motives-win-conditions)
+*   [Game Environments: Rooms, Exits, and Objects](#game-environment-rooms-exits-and-objects)
+*   [Player Actions: Categories and Parameters](#player-actions-categories-and-parameters)
+*   [Communication and Social Engineering](#communication-and-social-engineering)
 
 ## Game Overview
 
@@ -97,6 +97,8 @@ Performing an action results in changes to the game state and the generation of 
 
 The following core actions are currently implemented and available to all players:
 
+> **Note**: See [docs/TODO.md](TODO.md) for planned actions like `give`, `trade`, `throw`, and `use`.
+
 #### **Movement Actions**
 - **`move`**: Move in a specified direction through room exits
 - **`look`**: Look around the current room or examine specific objects
@@ -139,6 +141,8 @@ Objects in Motive can have various constraints that prevent them from being pick
 ### Planned Future Actions
 
 The following actions are planned for future implementation:
+
+> **Reference**: Implementation status and priorities are tracked in [docs/TODO.md](TODO.md).
 
 #### **Throw Action**
 - **Syntax:** `> throw <inventory object> <exit>`

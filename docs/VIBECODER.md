@@ -126,4 +126,10 @@ Use these from the human side to instruct an agent, or from the agent side to an
 - Read errors carefully; fix root causes
 - Keep docs updated when patterns change
 
+## Related Documentation
+
+- **Agent workflows**: [AGENT.md](AGENT.md) - Named workflows for agents
+- **Contributor guide**: [CONTRIBUTORS.md](CONTRIBUTORS.md) - Architecture and setup
+- **Current priorities**: [TODO.md](TODO.md) - Development roadmap
+
 This file evolves alongside `AGENT.md`. When you discover effective collaboration patterns, add them here with a concise workflow entry and prompt template.

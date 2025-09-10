@@ -11,10 +11,10 @@ This guide is for human contributors who want to understand the architecture, de
 ## Quick Start
 
 1. **Read the project overview**: Start with [README.md](../README.md) to understand what Motive is and its goals
-2. **Set up development environment**: Follow the setup instructions below
-3. **Understand the architecture**: Review the architecture section
+2. **Set up development environment**: Follow the [setup instructions](#development-environment-setup) below
+3. **Understand the architecture**: Review the [architecture section](#architecture-overview)
 4. **Run tests**: Ensure everything works with `pytest tests/`
-5. **Start contributing**: Follow the development workflow guidelines
+5. **Start contributing**: Follow the [development workflow guidelines](#development-workflow)
 
 ## Development Environment Setup
 
@@ -163,6 +163,8 @@ pytest tests/test_inventory_constraints.py -v
 # Run with coverage
 pytest tests/ --cov=motive --cov-report=html
 ```
+
+> **See also**: [Testing Philosophy](#testing-philosophy) and [Pre-Commit Checklist](#pre-commit-checklist)
 
 ### Running the Application
 
@@ -504,3 +506,4 @@ Beyond environments, variations in characters and objects will also be explored,
 - **AI Agent Guidelines**: [AGENT.md](AGENT.md) - For AI coding agents
 - **LLM Collaboration**: [VIBECODER.md](VIBECODER.md) - Human-LLM collaboration lessons
 - **Current TODOs**: [TODO.md](TODO.md) - Active development tasks (review this after setup to align work with priorities)
+- **Documentation Map**: [DOCS.md](DOCS.md) - How all docs relate to each other

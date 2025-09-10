@@ -23,6 +23,7 @@ This file contains essential guidance for AI agents working on the Motive projec
 - Human‑LLM collaboration: [VIBECODER.md](VIBECODER.md)
 - Player manual: [MANUAL.md](MANUAL.md)
 - Documentation map: [DOCS.md](DOCS.md)
+- Current priorities: [TODO.md](TODO.md)
 
 ## AI-Specific Context
 
@@ -332,6 +333,7 @@ Before committing changes, verify all items are complete:
 - **`tests/`**: Test examples and patterns
 - **`logs/`**: Real game execution logs for reference
 - **`VIBECODER.md`**: Human-LLM collaboration lessons
+- **`TODO.md`**: Current development priorities
 
 ## Core Actions Definition
 

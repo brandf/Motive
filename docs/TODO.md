@@ -4,6 +4,7 @@
 
 - **Contributors and agents** looking for current priorities
 - **Maintainers** tracking progress at a glance
+- **Players** interested in upcoming features (see [MANUAL.md](MANUAL.md) for current actions)
 
 ## High Priority Features
 
