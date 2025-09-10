@@ -201,12 +201,14 @@ class GameInitializer:
                 char_name = char_cfg.name
                 char_backstory = char_cfg.backstory
                 char_motive = char_cfg.motive
+                char_aliases = getattr(char_cfg, 'aliases', [])
             else:
                 # Handle dictionary from merged config
                 char_id = char_cfg['id']
                 char_name = char_cfg['name']
                 char_backstory = char_cfg['backstory']
                 char_motive = char_cfg['motive']
+                char_aliases = char_cfg.get('aliases', [])
 
             # For now, motive is directly from character config. Will be updated for GM-9.                                                
             player_char = Character(
@@ -215,7 +217,8 @@ class GameInitializer:
                 backstory=char_backstory,
                 motive=char_motive,
                 current_room_id=start_room_id,
-                action_points=self.initial_ap_per_turn # Use configurable initial AP                                                      
+                action_points=self.initial_ap_per_turn, # Use configurable initial AP
+                aliases=char_aliases
             )
             player.character = player_char # Link player to character
             self.player_characters[player_char.id] = player_char

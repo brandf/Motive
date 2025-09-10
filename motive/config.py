@@ -113,6 +113,7 @@ class CharacterConfig(BaseModel):
     name: str
     backstory: str
     motive: str # Could be a list of motives later
+    aliases: List[str] = []  # Alternative names for this character
 
 class ThemeConfig(BaseModel):
     """Configuration for a game theme (e.g., 'Fantasy')."""

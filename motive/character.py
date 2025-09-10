@@ -14,7 +14,8 @@ class Character:
         inventory: Optional[Dict[str, GameObject]] = None,
         tags: Optional[List[str]] = None,
         properties: Optional[Dict[str, Any]] = None,
-        action_points: int = 3 # Default action points
+        action_points: int = 3, # Default action points
+        aliases: Optional[List[str]] = None
     ):
         self.id = char_id
         self.name = name
@@ -25,6 +26,7 @@ class Character:
         self.tags = set(tags) if tags else set()
         self.properties = properties if properties else {}
         self.action_points = action_points
+        self.aliases = aliases if aliases else []
 
     def add_item_to_inventory(self, item: GameObject):
         self.inventory[item.id] = item

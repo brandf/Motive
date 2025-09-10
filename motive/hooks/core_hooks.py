@@ -454,14 +454,22 @@ def handle_whisper_action(game_master: Any, player_char: Character, action_confi
         ))
         return events_generated, feedback_messages
 
-    # Find the target player in the current room
+    # Find the target player in the current room by name or alias
     target_player = None
     for player_id in current_room.player_ids:
         if player_id in game_master.players:
             player = game_master.players[player_id]
+            # Check if the player name matches
             if player.name.lower() == target_player_name.lower():
                 target_player = player
                 break
+            
+            # Check if any character alias matches
+            if hasattr(player, 'character') and player.character:
+                character_aliases = getattr(player.character, 'aliases', [])
+                if any(alias.lower() == target_player_name.lower() for alias in character_aliases):
+                    target_player = player
+                    break
 
     if not target_player:
         feedback_messages.append(f"You don't see any player named '{target_player_name}' in this room.")
