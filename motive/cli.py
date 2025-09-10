@@ -16,7 +16,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from motive.game_master import GameMaster
 from motive.config import GameConfig
-from motive.config_loader import load_game_config
+from motive.config_loader import load_game_config, load_and_validate_game_config
 
 
 def setup_logging():
@@ -27,20 +27,18 @@ def setup_logging():
     )
 
 
-def load_config(config_path: str) -> GameConfig:
-    """Load game configuration from file."""
+def load_config(config_path: str, validate: bool = True) -> GameConfig:
+    """Load game configuration from file with optional validation."""
     try:
         # Check if it's a hierarchical config
         with open(config_path, 'r', encoding='utf-8') as f:
             raw_config = yaml.safe_load(f)
         
         if 'includes' in raw_config:
-            # Use hierarchical config loader
+            # Use hierarchical config loader with validation
             base_path = str(Path(config_path).parent)
             config_file = Path(config_path).name
-            config_data = load_game_config(config_file, base_path)
-            # The hierarchical loader returns the merged data directly
-            return GameConfig(**config_data)
+            return load_and_validate_game_config(config_file, base_path, validate=validate)
         else:
             # Traditional config loading
             with open(config_path, 'r', encoding='utf-8') as f:
@@ -51,11 +49,17 @@ def load_config(config_path: str) -> GameConfig:
         print(f"Error: Configuration file '{config_path}' not found.", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"Error loading configuration: {e}", file=sys.stderr)
+        # Check if it's a validation error
+        if hasattr(e, 'validation_errors') and e.validation_errors:
+            print(f"Configuration validation failed:", file=sys.stderr)
+            for error in e.validation_errors:
+                print(f"  - {error}", file=sys.stderr)
+        else:
+            print(f"Error loading configuration: {e}", file=sys.stderr)
         sys.exit(1)
 
 
-async def run_game(config_path: str, game_id: str = None):
+async def run_game(config_path: str, game_id: str = None, validate: bool = True):
     """Run a Motive game with the specified configuration."""
     # Load environment variables
     load_dotenv()
@@ -71,7 +75,7 @@ async def run_game(config_path: str, game_id: str = None):
     
     # Load configuration
     print(f"Loading configuration from: {config_path}")
-    game_config = load_config(config_path)
+    game_config = load_config(config_path, validate=validate)
     
     # Check LangSmith configuration
     if os.getenv("LANGCHAIN_TRACING_V2") == "true":
@@ -118,6 +122,12 @@ Examples:
     )
     
     parser.add_argument(
+        '--no-validate',
+        action='store_true',
+        help='Skip Pydantic validation of merged configuration (for debugging)'
+    )
+    
+    parser.add_argument(
         '--version',
         action='version',
         version='%(prog)s 0.0.1'
@@ -131,7 +141,8 @@ Examples:
         sys.exit(1)
     
     # Run the game
-    asyncio.run(run_game(args.config, args.game_id))
+    validate = not args.no_validate
+    asyncio.run(run_game(args.config, args.game_id, validate=validate))
 
 
 if __name__ == '__main__':

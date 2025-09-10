@@ -41,6 +41,19 @@ def load_config(config_path: str) -> Dict[str, Any]:
         sys.exit(1)
 
 
+def show_raw_config(config: Dict[str, Any], format_type: str = 'yaml') -> None:
+    """Output the raw merged configuration."""
+    print(f"Merged Configuration ({format_type.upper()}):")
+    print("=" * 50)
+    
+    if format_type == 'json':
+        print(json.dumps(config, indent=2, default=str))
+    else:  # yaml
+        print(yaml.dump(config, default_flow_style=False, sort_keys=False))
+    
+    print()
+
+
 def show_summary(config: Dict[str, Any]) -> None:
     """Display a summary of the configuration."""
     print("Configuration Summary:")
@@ -216,6 +229,10 @@ Examples:
   motive-analyze -c configs/game.yaml -A  # Show actions from core config
   motive-analyze -c configs/game_new.yaml -I  # Show include info
   motive-analyze -c configs/game_test.yaml -a  # Show all information
+  motive-analyze --raw-config              # Output merged config as YAML
+  motive-analyze --raw-config-json         # Output merged config as JSON
+  motive-analyze --validate                # Validate config through Pydantic
+  motive-analyze --raw-config --validate   # Output merged config after validation
         """
     )
     
@@ -262,6 +279,24 @@ Examples:
     )
     
     parser.add_argument(
+        '--raw-config',
+        action='store_true',
+        help='Output the merged configuration as YAML (useful for debugging config merging)'
+    )
+    
+    parser.add_argument(
+        '--raw-config-json',
+        action='store_true',
+        help='Output the merged configuration as JSON (useful for debugging config merging)'
+    )
+    
+    parser.add_argument(
+        '--validate',
+        action='store_true',
+        help='Validate the merged configuration through Pydantic models before output'
+    )
+    
+    parser.add_argument(
         '--version',
         action='version',
         version='%(prog)s 0.0.1'
@@ -283,6 +318,31 @@ Examples:
     print()
     
     config = load_config(args.config)
+    
+    # Handle validation if requested
+    if args.validate:
+        print("Validating configuration through Pydantic models...")
+        try:
+            from motive.config_validator import validate_merged_config
+            validated_config = validate_merged_config(config)
+            print("Configuration validation successful!")
+            print()
+        except Exception as e:
+            print(f"Configuration validation failed: {e}")
+            if hasattr(e, 'validation_errors') and e.validation_errors:
+                print("Validation errors:")
+                for error in e.validation_errors:
+                    print(f"  - {error}")
+            sys.exit(1)
+    
+    # Handle raw config output
+    if args.raw_config:
+        show_raw_config(config, 'yaml')
+        return  # Don't show other information when outputting raw config
+    
+    if args.raw_config_json:
+        show_raw_config(config, 'json')
+        return  # Don't show other information when outputting raw config
     
     # Show summary by default
     show_summary(config)

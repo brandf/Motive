@@ -256,3 +256,31 @@ def load_game_config(config_path: str = "game.yaml", base_path: str = "configs")
     """
     loader = ConfigLoader(base_path)
     return loader.load_config(config_path)
+
+
+def load_and_validate_game_config(config_path: str = "game.yaml", base_path: str = "configs", validate: bool = True):
+    """
+    Load a game configuration with includes and optionally validate it.
+    
+    Args:
+        config_path: Path to the main config file
+        base_path: Base directory for config files
+        validate: Whether to validate the merged config through Pydantic models
+        
+    Returns:
+        If validate=True: Validated GameConfig object
+        If validate=False: Merged configuration dictionary
+        
+    Raises:
+        ConfigLoadError: If config loading fails
+        ConfigValidationError: If validation fails (when validate=True)
+    """
+    # Load the merged configuration
+    config_data = load_game_config(config_path, base_path)
+    
+    if validate:
+        # Import here to avoid circular imports
+        from .config_validator import validate_merged_config
+        return validate_merged_config(config_data)
+    else:
+        return config_data

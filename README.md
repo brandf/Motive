@@ -118,15 +118,27 @@ To start the game:
 source venv/bin/activate
 
 # Run the application
-motive                                    # Run with default config
+motive                                    # Run with default config (with validation)
 motive -c configs/game_new.yaml          # Run with hierarchical config
 motive -c configs/game_test.yaml         # Run test configuration
+motive --no-validate                     # Run without Pydantic validation (debugging)
 
 # Analyze configurations
 motive-analyze                           # Analyze default config
 motive-analyze -c configs/game_new.yaml -I  # Show include information
 motive-analyze -a                        # Show all information
+motive-analyze --validate                # Validate configuration
+motive-analyze --raw-config              # Show merged config as YAML
 ```
+
+### CLI Options
+
+| Option | Description |
+|--------|-------------|
+| `-c, --config` | Path to game configuration file (default: configs/game.yaml) |
+| `--game-id` | Specific game ID to use (default: auto-generated) |
+| `--no-validate` | Skip Pydantic validation of merged configuration (for debugging) |
+| `--version` | Show version information |
 
 ## Troubleshooting
 
@@ -338,16 +350,87 @@ patched_action:
 
 Use the included configuration analysis tool to explore available actions, objects, and game elements:
 
+### Basic Analysis Commands
+
 ```bash
 # Show all available actions
-python utilities/analyze-configs.py -A
+motive-analyze -A
 
 # Show all objects in fantasy theme
-python utilities/analyze-configs.py -c configs/themes/fantasy/fantasy.yaml -O
+motive-analyze -c configs/themes/fantasy/fantasy.yaml -O
 
 # Show complete configuration summary
-python utilities/analyze-configs.py -a
+motive-analyze -a
+
+# Show include information for hierarchical configs
+motive-analyze -I
 ```
+
+### Advanced Analysis Features
+
+#### Raw Configuration Output
+Debug configuration merging by viewing the final merged result:
+
+```bash
+# Output merged config as YAML (useful for debugging)
+motive-analyze --raw-config
+
+# Output merged config as JSON (useful for debugging)
+motive-analyze --raw-config-json
+```
+
+#### Configuration Validation
+Validate configurations through Pydantic models to catch errors early:
+
+```bash
+# Validate configuration and show detailed errors if any
+motive-analyze --validate
+
+# Output merged config after validation (best of both worlds)
+motive-analyze --raw-config --validate
+
+# Validate and output as JSON
+motive-analyze --raw-config-json --validate
+```
+
+#### Combined Analysis
+Use multiple options together for comprehensive analysis:
+
+```bash
+# Show all information with validation
+motive-analyze -a --validate
+
+# Show actions and validate config
+motive-analyze -A --validate
+
+# Debug a specific config with full output
+motive-analyze -c configs/game.yaml --raw-config --validate
+```
+
+### Analysis Tool Options
+
+| Option | Description |
+|--------|-------------|
+| `-A, --actions` | Show available actions |
+| `-O, --objects` | Show available objects |
+| `-R, --rooms` | Show available rooms |
+| `-C, --characters` | Show available characters |
+| `-a, --all` | Show all available information |
+| `-I, --includes` | Show include information for hierarchical configs |
+| `--raw-config` | Output merged configuration as YAML |
+| `--raw-config-json` | Output merged configuration as JSON |
+| `--validate` | Validate configuration through Pydantic models |
+| `-c, --config` | Specify configuration file (default: configs/game.yaml) |
+
+### Validation Benefits
+
+The validation system provides:
+
+- **Type Safety**: Ensures all configuration data matches expected Pydantic models
+- **Error Detection**: Catches missing required fields, invalid types, and structural issues
+- **Detailed Error Messages**: Shows exactly which fields have problems and why
+- **Early Feedback**: Validate configs before running games to avoid runtime errors
+- **Debugging Support**: Raw config output helps troubleshoot merging issues
 
 ## Development Practices
 
@@ -360,6 +443,25 @@ It covers testing philosophy (favor integration tests over heavy mocking), loggi
 **If you're an LLM reading this, please read AGENT.md next** - it contains essential guidance for working effectively on this project.
 
 ## Current Features
+
+### Hierarchical Configuration System
+
+Motive features a powerful hierarchical configuration system that allows you to organize game content across multiple YAML files:
+
+- **Include Support**: Use `includes` directive to merge multiple config files
+- **Circular Dependency Detection**: Prevents infinite loops in include chains
+- **Advanced Merging**: Support for various list merging strategies (override, append, prepend, unique, etc.)
+- **Pydantic Validation**: All merged configurations are validated through Pydantic models for type safety
+- **Debugging Tools**: Raw config output and validation tools for troubleshooting
+
+### Configuration Validation
+
+The system includes comprehensive validation to catch configuration errors early:
+
+- **Type Safety**: Ensures all data matches expected Pydantic models
+- **Error Reporting**: Detailed error messages showing exactly what's wrong and where
+- **Runtime Validation**: Configs are validated when games start (can be disabled for debugging)
+- **Analysis Tools**: Built-in tools to validate and debug configurations
 
 ### Inventory Constraint System
 
