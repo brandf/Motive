@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, conint
+from pydantic import BaseModel, Field, conint, field_validator
 from typing import List, Dict, Any, Optional, Literal, Union
 
 class PlayerConfig(BaseModel):
@@ -107,12 +107,59 @@ class RoomConfig(BaseModel):
     tags: List[str] = []
     properties: Dict[str, Any] = {}
 
+class MotiveConditionGroup(BaseModel):
+    """A group of conditions with an explicit operator."""
+    operator: Literal["AND", "OR"] = Field(..., description="How to combine conditions: AND (all must pass) or OR (any must pass).")
+    conditions: List[ActionRequirementConfig] = Field(..., description="List of conditions to evaluate.")
+
+class MotiveConfig(BaseModel):
+    """Configuration for a character motive with success/failure conditions."""
+    id: str = Field(..., description="Unique identifier for the motive.")
+    description: str = Field(..., description="Description shown to the player.")
+    success_conditions: Union[ActionRequirementConfig, MotiveConditionGroup] = Field(default=[], description="Single condition or group with explicit operator.")
+    failure_conditions: Union[ActionRequirementConfig, MotiveConditionGroup] = Field(default=[], description="Single condition or group with explicit operator.")
+    
+    @field_validator('success_conditions', 'failure_conditions', mode='before')
+    @classmethod
+    def convert_conditions(cls, v):
+        """Convert raw YAML data to proper condition objects."""
+        if not v:
+            return ActionRequirementConfig(type="player_has_tag", tag="dummy")
+        
+        # If it's already a proper object, return it
+        if isinstance(v, (ActionRequirementConfig, MotiveConditionGroup)):
+            return v
+        
+        # If it's a single condition (dict with 'type')
+        if isinstance(v, dict) and 'type' in v:
+            return ActionRequirementConfig(**v)
+        
+        # If it's a list of conditions
+        if isinstance(v, list):
+            if len(v) == 1:
+                # Single condition in a list
+                return ActionRequirementConfig(**v[0])
+            else:
+                # Multiple conditions - require explicit operator
+                if not isinstance(v[0], dict) or 'operator' not in v[0]:
+                    raise ValueError("Multiple conditions require explicit 'operator' field (AND or OR)")
+                
+                operator = v[0]['operator']
+                conditions = []
+                for condition_dict in v[1:]:
+                    conditions.append(ActionRequirementConfig(**condition_dict))
+                
+                return MotiveConditionGroup(operator=operator, conditions=conditions)
+        
+        return ActionRequirementConfig(type="player_has_tag", tag="dummy")
+
 class CharacterConfig(BaseModel):
     """Configuration for a character type or specific character."""
     id: str = Field(..., description="Unique identifier for the character.")
     name: str
     backstory: str
-    motive: str # Could be a list of motives later
+    motive: Optional[str] = None  # Legacy single motive field for backward compatibility
+    motives: Optional[List[MotiveConfig]] = None  # New multiple motives field
     aliases: List[str] = []  # Alternative names for this character
 
 class ThemeConfig(BaseModel):

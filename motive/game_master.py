@@ -276,7 +276,7 @@ class GameMaster:
         self._check_win_conditions_and_summarize()
 
     def _check_win_conditions_and_summarize(self):
-        """Checks if any players achieved their motives and provides a game summary."""
+        """Checks if any players achieved their motives and provides a detailed game summary."""
         winners = []
         losers = []
         
@@ -284,32 +284,67 @@ class GameMaster:
             if player.character.action_points == -1:  # Player quit
                 losers.append(f"{player.name} (quit)")
                 continue
-                
-            # For now, we'll implement a simple win condition check
-            # In a real game, this would check if the player's motive was achieved
-            # based on game state, objects collected, actions taken, etc.
             
-            # Placeholder: Check if player has any items in inventory as a simple win condition
-            if player.character.inventory:
-                winners.append(f"{player.name} (achieved motive: {player.character.motive})")
+            # Get detailed motive information
+            char = player.character
+            motive_name = char.selected_motive.id if char.selected_motive else "legacy_motive"
+            motive_desc = char.motive
+            
+            # Check motive success/failure using the new system
+            success_result = char.check_motive_success(self)
+            failure_result = char.check_motive_failure(self)
+            
+            # Success requires BOTH success conditions AND no failure conditions (redemption logic)
+            if success_result and not failure_result:
+                winners.append(f"{player.name} ({char.name}) - Motive '{motive_name}': {motive_desc}")
+            elif failure_result:
+                losers.append(f"{player.name} ({char.name}) - Motive '{motive_name}' FAILED: {motive_desc}")
             else:
-                losers.append(f"{player.name} (failed to achieve motive: {player.character.motive})")
+                # Neither success nor failure conditions met - player didn't achieve motive
+                losers.append(f"{player.name} ({char.name}) - Motive '{motive_name}' NOT ACHIEVED: {motive_desc}")
         
-        # Log and display results
+        # Log and display results with human-readable formatting
+        self.game_logger.info("=" * 60)
+        self.game_logger.info("🏆 GAME RESULTS")
+        self.game_logger.info("=" * 60)
+        
         if winners:
-            winner_text = f"WINNERS: {', '.join(winners)}"
-            self.game_logger.info(winner_text)
+            self.game_logger.info("✅ WINNERS:")
+            for winner in winners:
+                self.game_logger.info(f"   🎉 {winner}")
         else:
-            no_winners_text = "No players achieved their motives."
-            self.game_logger.info(no_winners_text)
+            self.game_logger.info("❌ No players achieved their motives.")
         
         if losers:
-            loser_text = f"LOSERS: {', '.join(losers)}"
-            self.game_logger.info(loser_text)
+            self.game_logger.info("\n❌ LOSERS:")
+            for loser in losers:
+                self.game_logger.info(f"   💔 {loser}")
         
-        # Game summary
-        summary_text = f"Game Summary:\n- Total players: {len(self.players)}\n- Winners: {len(winners)}\n- Losers: {len(losers)}"
-        self.game_logger.info(summary_text)
+        # Enhanced human-readable game summary
+        self.game_logger.info("\n" + "=" * 60)
+        self.game_logger.info("📊 GAME SUMMARY")
+        self.game_logger.info("=" * 60)
+        self.game_logger.info(f"👥 Total Players: {len(self.players)}")
+        self.game_logger.info(f"🏆 Winners: {len(winners)}")
+        self.game_logger.info(f"💔 Losers: {len(losers)}")
+        self.game_logger.info("=" * 60)
+        
+        # Detailed motive condition trees for all players
+        self.game_logger.info("\n" + "=" * 60)
+        self.game_logger.info("🌳 DETAILED MOTIVE CONDITION TREES")
+        self.game_logger.info("=" * 60)
+        
+        for player in self.players:
+            if player.character.action_points == -1:  # Player quit
+                continue
+            
+            char = player.character
+            condition_tree = char.get_motive_condition_tree(self)
+            self.game_logger.info(f"\n👤 {player.name} ({char.name}):")
+            self.game_logger.info(condition_tree)
+            self.game_logger.info("-" * 40)
+        
+        self.game_logger.info("=" * 60)
 
     def _check_requirements(self, player_char: Character, action_config: ActionConfig, params: Dict[str, Any]) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
         """Checks if all requirements for an action are met."""
@@ -769,6 +804,15 @@ class GameMaster:
                 for event in player_observations:
                     observation_messages.append(f"• {event.message}")
 
+            # Check motive status and add debug logging
+            motive_status_message = player_char.get_motive_status_message(self)
+            if motive_status_message:
+                observation_messages.append(motive_status_message)
+            
+            # Log detailed motive condition tree (non-chat logging)
+            condition_tree = player_char.get_motive_condition_tree(self)
+            self.game_logger.info(f"Motive condition tree for {player.name} ({player_char.name}):\n{condition_tree}")
+
             # Get formatted room description from the Room object
             current_room_description = current_room.get_formatted_description()
 
@@ -793,6 +837,15 @@ class GameMaster:
                     observation_messages.append("**Recent Events:**")
                     for event in player_observations:
                         observation_messages.append(f"• {event.message}")
+                
+                # Check motive status for first interaction too
+                motive_status_message = player_char.get_motive_status_message(self)
+                if motive_status_message:
+                    observation_messages.append(motive_status_message)
+                
+                # Log detailed motive condition tree for first interaction
+                condition_tree = player_char.get_motive_condition_tree(self)
+                self.game_logger.info(f"Initial motive condition tree for {player.name} ({player_char.name}):\n{condition_tree}")
 
                 # Construct the first HumanMessage with character, motive, and initial room description
                 first_action_prompt = self._get_action_display(player_char, is_first_turn=True, round_num=round_num)

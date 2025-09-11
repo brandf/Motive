@@ -97,6 +97,36 @@ class GameInitializer:
         
         self.game_logger.info(f"Total loaded: {len(self.game_object_types)} object types, {len(self.game_actions)} actions, {len(self.game_character_types)} character types, {len(self.game_characters)} characters.")
 
+    def _convert_conditions(self, conditions_data):
+        """Convert conditions from YAML dict format to MotiveConfig format."""
+        from motive.config import ActionRequirementConfig, MotiveConditionGroup
+        
+        if not conditions_data:
+            return ActionRequirementConfig(type="player_has_tag", tag="dummy")  # Default empty condition
+        
+        # If it's a single condition (dict with 'type')
+        if isinstance(conditions_data, dict) and 'type' in conditions_data:
+            return ActionRequirementConfig(**conditions_data)
+        
+        # If it's a list of conditions
+        if isinstance(conditions_data, list):
+            if len(conditions_data) == 1:
+                # Single condition in a list
+                return ActionRequirementConfig(**conditions_data[0])
+            else:
+                # Multiple conditions - require explicit operator
+                if not isinstance(conditions_data[0], dict) or 'operator' not in conditions_data[0]:
+                    raise ValueError("Multiple conditions require explicit 'operator' field (AND or OR)")
+                
+                operator = conditions_data[0]['operator']
+                conditions = []
+                for condition_dict in conditions_data[1:]:
+                    conditions.append(ActionRequirementConfig(**condition_dict))
+                
+                return MotiveConditionGroup(operator=operator, conditions=conditions)
+        
+        return ActionRequirementConfig(type="player_has_tag", tag="dummy")  # Default fallback
+
     def _load_yaml_config(self, file_path: str, config_model: BaseModel) -> BaseModel:
         """Loads and validates a YAML configuration file against a Pydantic model."""
         try:
@@ -217,22 +247,49 @@ class GameInitializer:
                 char_id = char_cfg.id
                 char_name = char_cfg.name
                 char_backstory = char_cfg.backstory
-                char_motive = char_cfg.motive
+                char_motive = getattr(char_cfg, 'motive', None)  # Legacy single motive
+                char_motives = getattr(char_cfg, 'motives', None)  # New multiple motives
                 char_aliases = getattr(char_cfg, 'aliases', [])
             else:
                 # Handle dictionary from merged config
                 char_id = char_cfg['id']
                 char_name = char_cfg['name']
                 char_backstory = char_cfg['backstory']
-                char_motive = char_cfg['motive']
+                char_motive = char_cfg.get('motive', None)  # Legacy single motive
+                char_motives = char_cfg.get('motives', None)  # New multiple motives
                 char_aliases = char_cfg.get('aliases', [])
 
-            # For now, motive is directly from character config. Will be updated for GM-9.                                                
+            # Convert motives dictionaries to MotiveConfig objects if needed
+            converted_motives = None
+            if char_motives:
+                from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
+                converted_motives = []
+                for motive_dict in char_motives:
+                    if isinstance(motive_dict, dict):
+                        # Convert success_conditions
+                        success_conditions = self._convert_conditions(motive_dict.get('success_conditions', []))
+                        
+                        # Convert failure_conditions  
+                        failure_conditions = self._convert_conditions(motive_dict.get('failure_conditions', []))
+                        
+                        # Create MotiveConfig object
+                        converted_motives.append(MotiveConfig(
+                            id=motive_dict['id'],
+                            description=motive_dict['description'],
+                            success_conditions=success_conditions,
+                            failure_conditions=failure_conditions
+                        ))
+                    else:
+                        # Already a MotiveConfig object
+                        converted_motives.append(motive_dict)
+
+            # Create character with new motives system support
             player_char = Character(
                 char_id=f"{char_id}_instance_{i}", # Make character instance ID unique                                                
                 name=char_name,
                 backstory=char_backstory,
-                motive=char_motive,
+                motive=char_motive,  # Legacy single motive
+                motives=converted_motives,  # New multiple motives (converted)
                 current_room_id=start_room_id,
                 action_points=self.initial_ap_per_turn, # Use configurable initial AP
                 aliases=char_aliases

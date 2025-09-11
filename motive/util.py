@@ -195,7 +195,21 @@ def show_characters(config: Dict[str, Any]) -> None:
     for char_name in sorted(characters.keys()):
         char = characters[char_name]
         print(f"- {char.get('name', char_name)}: {char.get('backstory', 'No backstory')}")
-        print(f"  Motive: {char.get('motive', 'No motive')}")
+        
+        # Handle both legacy single motive and new multiple motives
+        if 'motives' in char and char['motives']:
+            motives = char['motives']
+            if isinstance(motives, list) and len(motives) > 0:
+                print(f"  Motives: {len(motives)} available")
+                for i, motive in enumerate(motives, 1):
+                    motive_desc = motive.get('description', 'No description') if isinstance(motive, dict) else str(motive)
+                    print(f"    {i}. {motive_desc}")
+            else:
+                print(f"  Motive: No motive")
+        elif 'motive' in char:
+            print(f"  Motive: {char.get('motive', 'No motive')}")
+        else:
+            print(f"  Motive: No motive")
         print()
 
 

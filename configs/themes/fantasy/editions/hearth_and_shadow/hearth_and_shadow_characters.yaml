@@ -1,8 +1,8 @@
-# Hearth and Shadow Edition - Blackwater Town Characters
-# A diverse cast of characters with compelling backstories and multiple potential motives
+# Hearth and Shadow Edition - Blackwater Town Characters with Multiple Motives
+# Example of the new motives system where characters have multiple possible motives
 
 characters:
-  # The Investigator
+  # The Investigator with multiple possible motives
   detective_thorne:
     id: detective_thorne
     name: Detective James Thorne
@@ -15,10 +15,52 @@ characters:
       suspects, and his weathered face tells the story of many sleepless nights spent 
       on the case. His partner was killed by the cult, and he has a sick daughter who 
       needs expensive medicine - creating a dangerous vulnerability that the cult could exploit.
-    motive: "Uncover the truth behind the mayor's disappearance and bring the cult to justice. Protect the remaining townsfolk from further harm. Restore order and peace to Blackwater. Keep the hearth of hope burning bright against the shadow of despair."
+    motives:
+      - id: investigate_mayor
+        description: "Uncover the truth behind the mayor's disappearance and bring the cult to justice. Protect the remaining townsfolk from further harm."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: found_mayor
+          - type: player_has_tag
+            tag: cult_exposed
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: mayor_dead
+          - type: player_has_tag
+            tag: cult_succeeded
+      - id: protect_daughter
+        description: "Protect your sick daughter by finding the medicine she needs and keeping her safe from the cult."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: medicine_found
+          - type: player_has_tag
+            tag: daughter_safe
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: daughter_taken
+          - type: player_has_tag
+            tag: daughter_dead
+      - id: avenge_partner
+        description: "Avenge your murdered partner by destroying the cult and bringing their killers to justice."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: partner_avenged
+          - type: player_has_tag
+            tag: cult_destroyed
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: cult_escaped
+          - type: player_has_tag
+            tag: partner_forgotten
     aliases: [james, detective, thorn, investigator, sleuth]
 
-  # The Troubled Priest
+  # The Troubled Priest with multiple possible motives
   father_marcus:
     id: father_marcus
     name: Father Marcus
@@ -32,10 +74,52 @@ characters:
       Now he knows their plans but revealing them would endanger everyone he loves. 
       His internal struggle between duty and fear, truth and protection, drives his 
       every action. He prays for divine guidance but fears he has already damned himself.
-    motive: "Protect his flock from the growing darkness. Seek redemption for his past failures. Expose the cult's activities without endangering innocent lives. Find the strength to confront the evil that threatens his town. Reignite the sacred hearth of faith that the shadows have tried to extinguish."
+    motives:
+      - id: protect_flock
+        description: "Protect your congregation from the growing darkness and keep them safe from the cult's influence."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: congregation_safe
+          - type: player_has_tag
+            tag: church_protected
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: congregation_corrupted
+          - type: player_has_tag
+            tag: church_desecrated
+      - id: seek_redemption
+        description: "Seek redemption for your past failures and find the strength to confront the evil that threatens your town."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: redemption_found
+          - type: player_has_tag
+            tag: faith_restored
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: faith_lost
+          - type: player_has_tag
+            tag: damned_forever
+      - id: expose_cult_safely
+        description: "Expose the cult's activities without endangering innocent lives, revealing their plans to the right people."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: cult_exposed_safely
+          - type: player_has_tag
+            tag: innocents_protected
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: innocents_harmed
+          - type: player_has_tag
+            tag: cult_warned
     aliases: [marcus, father, priest, cleric, confessor, shepherd]
 
-  # The Guild Master
+  # The Guild Master with multiple possible motives
   guild_master_elena:
     id: guild_master_elena
     name: Guild Master Elena
@@ -46,134 +130,47 @@ characters:
       of contacts throughout the region. She has been quietly investigating the 
       disappearances on her own, using her guild's resources to gather intelligence. 
       Her calm demeanor masks a fierce determination to protect her town and her people.
-    motive: "Coordinate the town's defense against the cult threat. Train and equip new adventurers to fight the darkness. Gather intelligence about the cult's plans and activities. Restore the guild's reputation and bring in new members."
+    motives:
+      - id: coordinate_defense
+        description: "Coordinate the town's defense against the cult threat and train new adventurers to fight the darkness."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: town_defended
+          - type: player_has_tag
+            tag: adventurers_trained
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: town_fallen
+          - type: player_has_tag
+            tag: guild_destroyed
+      - id: gather_intelligence
+        description: "Gather intelligence about the cult's plans and activities to help the town prepare for their next move."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: cult_plans_discovered
+          - type: player_has_tag
+            tag: intelligence_network_active
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: intelligence_compromised
+          - type: player_has_tag
+            tag: cult_escaped
+      - id: restore_guild_reputation
+        description: "Restore the guild's reputation and bring in new members to strengthen the town's defenses."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: guild_reputation_restored
+          - type: player_has_tag
+            tag: new_members_recruited
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: guild_disbanded
+          - type: player_has_tag
+            tag: reputation_ruined
     aliases: [elena, guild, master, leader, commander, veteran]
-
-  # The Barkeep
-  barkeep_gareth:
-    id: barkeep_gareth
-    name: Gareth the Barkeep
-    backstory: |
-      The owner of the Rusty Anchor Tavern, Gareth is a gruff but friendly man who 
-      knows everyone's business and keeps their secrets. His tavern serves as a 
-      gathering place for locals and travelers alike, and his sharp ears have picked 
-      up countless rumors and whispers. He maintains a network of informants and 
-      has connections to both the legitimate and criminal elements of the town. 
-      His loyalty to Blackwater runs deep, but his greatest fear is that his 
-      teenage daughter will be taken by the cult like so many others. He has 
-      been secretly paying protection money to The Raven to keep her safe, 
-      but the cost is bleeding him dry and forcing him to make difficult choices.
-    motive: "Protect his tavern and customers from the growing threat. Use his information network to help solve the mystery. Maintain the town's social fabric during these dark times. Ensure the safety of his family and friends. Keep the hearth of community burning bright in the face of shadowy threats."
-    aliases: [gareth, barkeep, tavern, owner, innkeeper, host]
-
-  # The Thief Leader
-  the_raven:
-    id: the_raven
-    name: The Raven
-    backstory: |
-      The mysterious leader of Blackwater's thieves' guild, known only as "The Raven," 
-      operates from a hidden underground chamber accessible only through secret passages. 
-      This shadowy figure has been quietly gathering information about the cult's 
-      activities and has discovered that some of their own members have gone missing. 
-      The Raven's high-backed chair serves as the center of power in this hidden world, 
-      and their stolen goods and secret documents contain valuable information about 
-      the town's troubles. Once a noble who lost everything to corruption, The Raven 
-      now walks a fine line between criminal and protector, using their network to 
-      fight greater evils while profiting from the chaos. They have a personal vendetta 
-      against the cult for destroying their family, but their methods are often as 
-      ruthless as their enemies.
-    motive: "Protect the thieves' guild from the cult's influence. Use stolen information to gain leverage over the cult. Ensure the safety of their criminal network. Profit from the chaos while maintaining some semblance of order. Walk the line between shadow and light, using darkness to fight darkness."
-    aliases: [raven, thief, leader, boss, shadow, mastermind]
-
-  # The Bank Manager
-  manager_wilson:
-    id: manager_wilson
-    name: Manager Wilson
-    backstory: |
-      The nervous manager of Blackwater Bank, Wilson has been struggling with mysterious 
-      withdrawals and suspicious transactions that have left him constantly worried. 
-      The vault door stands open more often than it should, and there are whispers of 
-      missing funds and unexplained disappearances. Wilson's once-pristine bank has 
-      become a repository of the town's secrets, and he knows that the financial 
-      records contain clues about the cult's activities. His fear for his own safety 
-      battles with his duty to protect the town's wealth.
-    motive: "Protect the bank's assets from further theft. Uncover the truth behind the mysterious transactions. Ensure the safety of his employees and customers. Restore the bank's reputation and financial stability."
-    aliases: [wilson, manager, banker, treasurer, vaultkeeper]
-
-  # The Suspicious Merchant
-  merchant_corwin:
-    id: merchant_corwin
-    name: Merchant Corwin
-    backstory: |
-      A merchant in the Market District who seems to be involved in more than just 
-      legitimate trade, Corwin often gathers with other suspicious merchants in 
-      hushed conversations. His stall is one of the few that remains open, but 
-      his goods seem to change frequently, and he has connections to both the 
-      legitimate and criminal elements of the town. He knows more about the 
-      cult's activities than he lets on, and his information could be valuable 
-      to those seeking to uncover the truth.
-    motive: "Protect his business interests from the cult's influence. Use his information to gain advantage over competitors. Ensure the safety of his family and associates. Profit from the chaos while maintaining his cover."
-    aliases: [corwin, merchant, trader, shopkeeper, peddler, vendor]
-
-  # The Forest Watcher
-  ranger_lyra:
-    id: ranger_lyra
-    name: Ranger Lyra
-    backstory: |
-      A ranger who patrols the Old Forest Path and the surrounding wilderness, 
-      Lyra has noticed strange activity in the forest and has been tracking 
-      suspicious footprints and other signs of recent passage. Her connection 
-      to the natural world gives her insights that others miss, and she has 
-      discovered evidence of the cult's activities in the deeper parts of the 
-      forest. Her knowledge of the land and its secrets makes her a valuable 
-      ally, but her solitary nature makes her reluctant to trust others.
-    motive: "Protect the forest from the cult's dark influence. Track down the source of the mysterious forest activity. Ensure the safety of travelers on the forest path. Preserve the natural balance of the wilderness."
-    aliases: [lyra, ranger, watcher, scout, tracker, guardian]
-
-  # The Cult Informant
-  informant_sarah:
-    id: informant_sarah
-    name: Sarah the Informant
-    backstory: |
-      A former cult member who managed to escape the Secret Cult Chamber, Sarah 
-      now lives in fear of being recaptured. She was once a devoted follower, 
-      but witnessing the cult's true nature - including the ritual murder of 
-      her own sister - shattered her faith. She knows the cult's plans and 
-      activities, but her information comes at a price. She has been hiding 
-      in the town, trying to blend in with the regular citizens while 
-      gathering information about the cult's movements. Her knowledge could 
-      be the key to stopping the cult, but her fear and paranoia make her 
-      a difficult ally to work with. She carries a small vial of poison, 
-      ready to end her own life rather than be recaptured.
-    motive: "Stay hidden from the cult while gathering information. Help others escape the cult's influence. Seek revenge against her former captors. Find a way to live a normal life again."
-    aliases: [sarah, informant, spy, escapee, survivor, witness]
-
-  # The Town Guard
-  guard_captain_reed:
-    id: guard_captain_reed
-    name: Captain Reed
-    backstory: |
-      The captain of Blackwater's town guard, Reed has been struggling to maintain 
-      order in a town where disappearances and strange occurrences have become 
-      commonplace. His guards are often absent or ineffective, and he suspects 
-      that some of them may be involved in the cult's activities. His duty to 
-      protect the town conflicts with his limited resources and the growing 
-      threat of the cult. He carries the weight of responsibility for the 
-      town's safety on his shoulders.
-    motive: "Restore order and security to Blackwater. Root out corruption within the guard ranks. Protect the townsfolk from further harm. Bring the cult to justice through proper channels."
-    aliases: [reed, captain, guard, commander, captain, lawman]
-
-  # The Mysterious Stranger
-  stranger_valdris:
-    id: stranger_valdris
-    name: Valdris the Stranger
-    backstory: |
-      A mysterious figure who arrived in Blackwater recently, Valdris seems to 
-      know more about the town's troubles than he reveals. His knowledge of 
-      the cult and its activities suggests that he may have encountered 
-      similar threats elsewhere. He carries ancient artifacts and speaks 
-      of dark powers and ancient evils. His motives are unclear, and his 
-      true identity remains a mystery. He may be an ally, an enemy, or 
-      something else entirely.
-    motive: "Uncover the truth about the cult's ancient origins. Use his knowledge to gain power and influence. Protect the world from the cult's dark plans. Seek revenge for past wrongs committed by the cult."
-    aliases: [valdris, stranger, mysterious, wanderer, ancient, mystic]
