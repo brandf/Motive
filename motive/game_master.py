@@ -217,7 +217,7 @@ class GameMaster:
 
     def _initialize_players(self, player_configs: list[PlayerConfig]):
         """Initializes players based on the provided list of PlayerConfig objects."""
-        self.game_logger.info("Initializing players from configuration...")
+        self.game_logger.info("👥 Initializing players from configuration...")
         for p_config in player_configs:
             player = Player(
                 name=p_config.name,
@@ -226,28 +226,28 @@ class GameMaster:
                 log_dir=self.log_dir  # Pass the log directory to the player
             )
             self.players.append(player)
-            self.game_logger.info(f"  - Initialized player: {player.name} using {p_config.provider}/{p_config.model}")
+            self.game_logger.info(f"  🤖 Initialized player: {player.name} using {p_config.provider}/{p_config.model}")
             self.player_first_interaction_done[player.name] = False # Initialize for tracking
 
     async def run_game(self):
         """Main game loop."""
-        self.game_logger.info("==================== GAME STARTING ====================")
+        self.game_logger.info("🚀 ==================== GAME STARTING ====================")
         
         # Log game settings for training data metadata
-        self.game_logger.info("Game settings:")
+        self.game_logger.info("⚙️ Game settings:")
         if hasattr(self.game_config, 'game_settings'):
-            self.game_logger.info(f"  num_rounds: {self.game_config.game_settings.num_rounds}")
-            self.game_logger.info(f"  initial_ap_per_turn: {self.game_config.game_settings.initial_ap_per_turn}")
-            self.game_logger.info(f"  manual: {self.game_config.game_settings.manual}")
+            self.game_logger.info(f"  🔄 num_rounds: {self.game_config.game_settings.num_rounds}")
+            self.game_logger.info(f"  ⚡ initial_ap_per_turn: {self.game_config.game_settings.initial_ap_per_turn}")
+            self.game_logger.info(f"  📖 manual: {self.game_config.game_settings.manual}")
         else:
-            self.game_logger.info(f"  num_rounds: {self.game_config['game_settings']['num_rounds']}")
-            self.game_logger.info(f"  initial_ap_per_turn: {self.game_config['game_settings']['initial_ap_per_turn']}")
-            self.game_logger.info(f"  manual: {self.game_config['game_settings']['manual']}")
+            self.game_logger.info(f"  🔄 num_rounds: {self.game_config['game_settings']['num_rounds']}")
+            self.game_logger.info(f"  ⚡ initial_ap_per_turn: {self.game_config['game_settings']['initial_ap_per_turn']}")
+            self.game_logger.info(f"  📖 manual: {self.game_config['game_settings']['manual']}")
 
         # Removed: await self._send_initial_messages()
 
         for round_num in range(1, self.num_rounds + 1):
-            self.game_logger.info(f"--- Starting Round {round_num} of {self.num_rounds} ---")
+            self.game_logger.info(f"🎯 --- Starting Round {round_num} of {self.num_rounds} ---")
             
             # Filter out players who have quit
             active_players = [player for player in self.players if player.character.action_points != -1]
@@ -268,9 +268,9 @@ class GameMaster:
                 if player.character.action_points == -1:
                     self.game_logger.info(f"Player {player.name} has quit the game.")
                     
-            self.game_logger.info(f"=== Round {round_num} Complete ===")
+            self.game_logger.info(f"✅ === Round {round_num} Complete ===")
 
-        self.game_logger.info("===================== GAME OVER ======================")
+        self.game_logger.info("🏁 ===================== GAME OVER ======================")
         
         # Check win conditions and provide game summary
         self._check_win_conditions_and_summarize()
@@ -785,7 +785,7 @@ class GameMaster:
             self.game_logger.error(f"Player {player.name} has no assigned character. Skipping turn.")
             return
 
-        self.game_logger.info(f">>> It is {player.name}'s turn. (Round {round_num}) - AP: {player_char.action_points}")
+        self.game_logger.info(f"🎮 >>> It is {player.name}'s turn. (Round {round_num}) - AP: {player_char.action_points}")
 
         turn_in_progress = True
         while turn_in_progress and player_char.action_points > 0:
@@ -1060,22 +1060,22 @@ class GameMaster:
                         # Calculate AP info for this action
                         ap_before = player_char.action_points + actual_cost
                         ap_after = player_char.action_points
-                        response_feedback_messages.append(f"- **{action_name.capitalize()} Action:** (Cost: {actual_cost} AP, Remaining: {ap_after} AP)")
+                        response_feedback_messages.append(f"- ⚔️ **{action_name.capitalize()} Action:** (Cost: {actual_cost} AP, Remaining: {ap_after} AP)")
                         response_feedback_messages.extend([f"  - {msg}" for msg in action_specific_feedback])
 
                 # After processing all actions in the response
                 if response_feedback_messages:
                     combined_feedback = "\n".join([
-                        "**Your Actions for this turn:**",
+                        "📋 **Your Actions for this turn:**",
                         "\n".join(response_feedback_messages)
                     ])
                 else:
-                    combined_feedback = "No specific feedback for actions performed this turn."
+                    combined_feedback = "ℹ️ No specific feedback for actions performed this turn."
                 
                 # Add feedback about actions skipped due to AP exhaustion
                 if actions_skipped_due_to_ap:
                     skipped_actions_text = "\n".join([f"- {action}" for action in actions_skipped_due_to_ap])
-                    combined_feedback += f"\n\n**Actions skipped due to insufficient AP:**\n{skipped_actions_text}"
+                    combined_feedback += f"\n\n⚠️ **Actions skipped due to insufficient AP:**\n{skipped_actions_text}"
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
@@ -1085,14 +1085,14 @@ class GameMaster:
                 if not all_actions_in_response_valid:
                     # If any action in the response was invalid or couldn't be performed, end the turn as a penalty.
                     feedback_parts = [
-                        "One or more actions in your response were invalid or could not be performed.",
-                        "Your turn ends prematurely as a penalty."
+                        "❌ One or more actions in your response were invalid or could not be performed.",
+                        "⏰ Your turn ends prematurely as a penalty."
                     ]
                     penalty_feedback = "\n".join(feedback_parts)
                     player_char.action_points = 0 # End turn as penalty
                     
                     # Log detailed information about what went wrong
-                    self.game_logger.error(f"{player.name} had invalid/unexecutable actions in response. Turn ended.")
+                    self.game_logger.error(f"❌ {player.name} had invalid/unexecutable actions in response. Turn ended.")
                     # Handle both Pydantic objects and dictionaries from merged config
                     action_names = []
                     for action, params in parsed_actions:
@@ -1116,7 +1116,7 @@ class GameMaster:
                 elif player_char.action_points <= 0:
                     # If all actions were valid but AP ran out, turn ends naturally.
                     feedback = "You have used all your Action Points for this turn. Your turn has ended."
-                    self.game_logger.info(f"{player.name} used all AP. Turn ended.")
+                    self.game_logger.info(f"⚡ {player.name} used all AP. Turn ended.")
 
                     # Wait for player to confirm turn end (no separate feedback needed)
                     await self._handle_turn_end_confirmation(player, player_char)
@@ -1132,7 +1132,7 @@ class GameMaster:
 
     async def _handle_turn_end_confirmation(self, player: Player, player_char: Character):
         """Handles the turn end confirmation process with the player."""
-        self.game_logger.info(f"=== TURN END CONFIRMATION START for {player.name} ===")
+        self.game_logger.info(f"⏰ === TURN END CONFIRMATION START for {player.name} ===")
         
         # Send turn end confirmation message
         confirmation_message = (
@@ -1160,14 +1160,14 @@ class GameMaster:
         
         # Parse the response for turn end actions (only accept actions with > prefix)
         if "> quit" in response.content:
-            self.game_logger.info(f"Player {player.name} chose to quit the game.")
-            player.logger.info(f"Player {player.name} chose to quit the game.")
+            self.game_logger.info(f"🚪 Player {player.name} chose to quit the game.")
+            player.logger.info(f"🚪 Player {player.name} chose to quit the game.")
             # Mark player as quit (we'll handle this in the main game loop)
             player_char.action_points = -1  # Special marker for quit
             return False  # Player quit
         elif "> continue" in response.content:
-            self.game_logger.info(f"Player {player.name} chose to continue.")
-            player.logger.info(f"Player {player.name} chose to continue.")
+            self.game_logger.info(f"✅ Player {player.name} chose to continue.")
+            player.logger.info(f"✅ Player {player.name} chose to continue.")
             
             # Check for any other actions in the response and warn about them
             other_actions = []
@@ -1192,7 +1192,7 @@ class GameMaster:
             player.logger.info(f"Player {player.name} gave unclear response, defaulting to continue.")
             return True  # Player continues
         
-        self.game_logger.info(f"=== TURN END CONFIRMATION COMPLETE for {player.name} ===")
+        self.game_logger.info(f"✅ === TURN END CONFIRMATION COMPLETE for {player.name} ===")
 
     def _get_applicable_hints(self, player_name: str, round_num: int) -> List[str]:
         """Get hints that apply to the current player and round."""

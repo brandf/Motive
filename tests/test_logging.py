@@ -211,12 +211,12 @@ def mock_game_master_logging():
             # Re-assign get_response_and_update_history with desired mock behavior
             if player_instance.name == "Arion":
                 player_instance.character = Character(
-                    char_id="hero_instance_0", name="Arion", backstory="", motive="Defeat evil.", current_room_id="start_room", action_points=20
+                    char_id="hero_instance_0", name="Arion", backstory="a Hero", motive="Defeat evil.", current_room_id="start_room", action_points=20
                 )
                 player_instance.get_response_and_update_history = AsyncMock(return_value=AIMessage(content="> help"))
             elif player_instance.name == "Kael":
                 player_instance.character = Character(
-                    char_id="hero_instance_1", name="Kael", backstory="", motive="Defeat evil.", current_room_id="start_room", action_points=20
+                    char_id="hero_instance_1", name="Kael", backstory="a Hero", motive="Defeat evil.", current_room_id="start_room", action_points=20
                 )
                 player_instance.get_response_and_update_history = AsyncMock(return_value=AIMessage(content="> say \"hello!\""))
             
@@ -266,8 +266,8 @@ async def test_chat_message_logging(mock_game_master_logging):
 
     # Verify GM received chat from Arion from gm.game_logger
     gm.game_logger.info.assert_any_call("GM received chat from Arion:\n> help")
-    # Verify GM sent feedback to Arion from gm.game_logger
-    gm.game_logger.info.assert_any_call("GM sent chat to Arion (Feedback):\n**Your Actions for this turn:**\n- **Help Action:** (Cost: 10 AP, Remaining: 10 AP)\n  - Mock help feedback")
+    # Verify GM sent feedback to Arion from gm.game_logger (with emoji)
+    gm.game_logger.info.assert_any_call("GM sent chat to Arion (Feedback):\n📋 **Your Actions for this turn:**\n- ⚔️ **Help Action:** (Cost: 10 AP, Remaining: 10 AP)\n  - Mock help feedback")
 
     # Simulate Kael's turn (sends a "say" message)
     await gm._execute_player_turn(player_kael, 1)
@@ -300,8 +300,8 @@ async def test_chat_message_logging(mock_game_master_logging):
 
     # Verify GM received chat from Kael from gm.game_logger
     gm.game_logger.info.assert_any_call("GM received chat from Kael:\n> say \"hello!\"")
-    # Verify GM sent feedback to Kael from gm.game_logger
-    gm.game_logger.info.assert_any_call("GM sent chat to Kael (Feedback):\n**Your Actions for this turn:**\n- **Say Action:** (Cost: 10 AP, Remaining: 10 AP)\n  - Mock say feedback")
+    # Verify GM sent feedback to Kael from gm.game_logger (with emoji)
+    gm.game_logger.info.assert_any_call("GM sent chat to Kael (Feedback):\n📋 **Your Actions for this turn:**\n- ⚔️ **Say Action:** (Cost: 10 AP, Remaining: 10 AP)\n  - Mock say feedback")
 
 @pytest.mark.asyncio
 async def test_action_execution_logging_with_ap_cost(mock_game_master_logging):
