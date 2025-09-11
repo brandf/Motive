@@ -45,10 +45,26 @@ class GameInitializer:
         self.edition_cfg: Optional[EditionConfig] = None
 
     def initialize_game_world(self, players: List[Player]):
-        # Load configurations from the merged game config
-        self._load_configurations()
-        self._instantiate_rooms_and_objects()
-        self._instantiate_player_characters(players)
+        # Collect initialization data for consolidated reporting
+        init_data = {
+            'config_loaded': False,
+            'rooms_created': 0,
+            'objects_placed': 0,
+            'characters_assigned': [],
+            'warnings': []
+        }
+        
+        # Load configurations
+        self._load_configurations_silent(init_data)
+        
+        # Instantiate rooms and objects
+        self._instantiate_rooms_and_objects_silent(init_data)
+        
+        # Instantiate player characters
+        self._instantiate_player_characters_silent(players, init_data)
+        
+        # Log consolidated initialization report
+        self._log_initialization_report(init_data)
 
     def _load_configurations(self):
         """Loads configurations from the already-merged game config."""
@@ -69,33 +85,209 @@ class GameInitializer:
         # Extract actions from merged config
         if 'actions' in raw_config and raw_config['actions']:
             self.game_actions.update(raw_config['actions'])
-            self.game_logger.info(f"⚔️ Loaded {len(raw_config['actions'])} actions from merged config.")
         
         # Extract object types from merged config
         if 'object_types' in raw_config and raw_config['object_types']:
             self.game_object_types.update(raw_config['object_types'])
-            self.game_logger.info(f"📦 Loaded {len(raw_config['object_types'])} object types from merged config.")
         
         # Extract character types from merged config
         if 'character_types' in raw_config and raw_config['character_types']:
             self.game_character_types.update(raw_config['character_types'])
-            self.game_logger.info(f"👥 Loaded {len(raw_config['character_types'])} character types from merged config.")
         
         # Extract characters from merged config
         if 'characters' in raw_config and raw_config['characters']:
             self.game_characters.update(raw_config['characters'])
-            self.game_logger.info(f"🎭 Loaded {len(raw_config['characters'])} characters from merged config.")
         
         # Extract rooms from merged config
         if 'rooms' in raw_config and raw_config['rooms']:
             self.game_rooms = raw_config['rooms']
-            self.game_logger.info(f"🏠 Loaded {len(raw_config['rooms'])} rooms from merged config.")
         else:
             # Initialize empty rooms if none defined
             self.game_rooms = {}
-            self.game_logger.info("⚠️ No rooms defined in config.")
+            self.game_logger.warning("No rooms defined in config.")
         
-        self.game_logger.info(f"📊 Total loaded: {len(self.game_object_types)} object types, {len(self.game_actions)} actions, {len(self.game_character_types)} character types, {len(self.game_characters)} characters.")
+        self.game_logger.info(f"📊 Configuration Summary: {len(self.game_object_types)} object types, {len(self.game_actions)} actions, {len(self.game_character_types)} character types, {len(self.game_characters)} characters, {len(self.game_rooms)} rooms.")
+
+    def _load_configurations_silent(self, init_data):
+        """Loads configurations silently, collecting data for consolidated reporting."""
+        # With hierarchical configs, everything is already merged into game_config
+        # We need to extract the merged data from the raw config dict
+        
+        # Get the raw merged config data
+        if hasattr(self.game_config, 'model_dump'):
+            raw_config = self.game_config.model_dump()
+        elif hasattr(self.game_config, '__dict__'):
+            raw_config = self.game_config.__dict__
+        else:
+            # If it's already a dictionary, use it directly
+            raw_config = self.game_config
+        
+        # Extract actions from merged config
+        if 'actions' in raw_config and raw_config['actions']:
+            self.game_actions.update(raw_config['actions'])
+        
+        # Extract object types from merged config
+        if 'object_types' in raw_config and raw_config['object_types']:
+            self.game_object_types.update(raw_config['object_types'])
+        
+        # Extract character types from merged config
+        if 'character_types' in raw_config and raw_config['character_types']:
+            self.game_character_types.update(raw_config['character_types'])
+        
+        # Extract characters from merged config
+        if 'characters' in raw_config and raw_config['characters']:
+            self.game_characters.update(raw_config['characters'])
+        
+        # Extract rooms from merged config
+        if 'rooms' in raw_config and raw_config['rooms']:
+            self.game_rooms = raw_config['rooms']
+        else:
+            # Initialize empty rooms if none defined
+            self.game_rooms = {}
+            init_data['warnings'].append("No rooms defined in config.")
+        
+        init_data['config_loaded'] = True
+
+    def _instantiate_rooms_and_objects_silent(self, init_data):
+        """Instantiates rooms and objects silently, collecting data for consolidated reporting."""
+        for room_id, room_cfg in self.game_rooms.items():
+            room = Room(
+                room_id=room_cfg['id'],
+                name=room_cfg['name'],
+                description=room_cfg['description'],
+                exits=room_cfg.get('exits', {}),
+                tags=room_cfg.get('tags', []),
+                properties=room_cfg.get('properties', {})
+            )
+            self.rooms[room_id] = room
+            init_data['rooms_created'] += 1
+
+            # Place objects defined within the room config
+            if room_cfg.get('objects'):
+                for obj_id, obj_instance_cfg in room_cfg['objects'].items():
+                    obj_type = self.game_object_types.get(obj_instance_cfg['object_type_id'])
+                    if obj_type:
+                        final_tags = set(obj_type.get('tags', [])).union(obj_instance_cfg.get('tags', []))
+                        final_properties = {**obj_type.get('properties', {}), **obj_instance_cfg.get('properties', {})}
+
+                        game_obj = GameObject(
+                            obj_id=obj_instance_cfg['id'],
+                            name=obj_instance_cfg.get('name') or obj_type.get('name'),
+                            description=obj_instance_cfg.get('description') or obj_type.get('description'),
+                            current_location_id=room.id,
+                            tags=list(final_tags),
+                            properties=final_properties
+                        )
+                        room.add_object(game_obj)
+                        self.game_objects[game_obj.id] = game_obj
+                        init_data['objects_placed'] += 1
+                    else:
+                        init_data['warnings'].append(f"Object type '{obj_instance_cfg['object_type_id']}' not found for object '{obj_instance_cfg['id']}' in room '{room.id}'. Skipping.")
+
+    def _instantiate_player_characters_silent(self, players: List[Player], init_data):
+        """Instantiates player characters silently, collecting data for consolidated reporting."""
+        # Use characters if available, otherwise fall back to character_types
+        available_character_ids = []
+        if hasattr(self, 'game_characters') and self.game_characters:
+            available_character_ids = list(self.game_characters.keys())
+        elif self.game_character_types:
+            available_character_ids = list(self.game_character_types.keys())
+        
+        if not available_character_ids:
+            init_data['warnings'].append("No characters defined in merged configuration. Cannot assign characters to players.")
+            return
+        
+        # Find a suitable starting room (e.g., the first room defined in the merged config)
+        start_room_id = next(iter(self.game_rooms.keys()), None)
+        if not start_room_id:
+            init_data['warnings'].append("No rooms defined in merged configuration. Cannot assign starting room for players.")
+            return
+
+        for i, player in enumerate(players):
+            char_id_to_assign = available_character_ids[i % len(available_character_ids)]
+            # Use characters if available, otherwise fall back to character_types
+            if hasattr(self, 'game_characters') and self.game_characters:
+                char_cfg = self.game_characters[char_id_to_assign]
+            else:
+                char_cfg = self.game_character_types[char_id_to_assign]                                              
+
+            # Handle both Pydantic objects and dictionaries from merged config
+            if hasattr(char_cfg, 'id'):
+                char_id = char_cfg.id
+                char_name = char_cfg.name
+                char_backstory = char_cfg.backstory
+                char_motive = getattr(char_cfg, 'motive', None)  # Legacy single motive
+                char_motives = getattr(char_cfg, 'motives', None)  # New multiple motives
+                char_aliases = getattr(char_cfg, 'aliases', [])
+            else:
+                # Handle dictionary from merged config
+                char_id = char_cfg['id']
+                char_name = char_cfg['name']
+                char_backstory = char_cfg['backstory']
+                char_motive = char_cfg.get('motive', None)  # Legacy single motive
+                char_motives = char_cfg.get('motives', None)  # New multiple motives
+                char_aliases = char_cfg.get('aliases', [])
+
+            # Convert motives dictionaries to MotiveConfig objects if needed
+            converted_motives = None
+            if char_motives:
+                from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
+                converted_motives = []
+                for motive_dict in char_motives:
+                    if isinstance(motive_dict, dict):
+                        # Convert success_conditions
+                        success_conditions = self._convert_conditions(motive_dict.get('success_conditions', []))
+                        
+                        # Convert failure_conditions  
+                        failure_conditions = self._convert_conditions(motive_dict.get('failure_conditions', []))
+                        
+                        # Create MotiveConfig object
+                        converted_motives.append(MotiveConfig(
+                            id=motive_dict['id'],
+                            description=motive_dict['description'],
+                            success_conditions=success_conditions,
+                            failure_conditions=failure_conditions
+                        ))
+                    else:
+                        # Already a MotiveConfig object
+                        converted_motives.append(motive_dict)
+
+            # Create character with new motives system support
+            player_char = Character(
+                char_id=f"{char_id}_instance_{i}", # Make character instance ID unique                                                
+                name=char_name,
+                backstory=char_backstory,
+                motive=char_motive,  # Legacy single motive
+                motives=converted_motives,  # New multiple motives (converted)
+                current_room_id=start_room_id,
+                action_points=self.initial_ap_per_turn, # Use configurable initial AP
+                aliases=char_aliases
+            )
+            player.character = player_char # Link player to character
+            self.player_characters[player_char.id] = player_char
+            self.rooms[start_room_id].add_player(player_char) # Add player to the room
+            init_data['characters_assigned'].append(f"{player_char.name} to {player.name}")
+
+    def _log_initialization_report(self, init_data):
+        """Logs a consolidated initialization report."""
+        report_lines = ["🏗️ Game Initialization Report:"]
+        
+        if init_data['config_loaded']:
+            report_lines.append(f"  📊 Configuration: {len(self.game_object_types)} object types, {len(self.game_actions)} actions, {len(self.game_character_types)} character types, {len(self.game_characters)} characters, {len(self.game_rooms)} rooms")
+        
+        report_lines.append(f"  🏠 Rooms: Created {init_data['rooms_created']} rooms and placed {init_data['objects_placed']} objects")
+        
+        if init_data['characters_assigned']:
+            report_lines.append(f"  🎭 Characters: Assigned {len(init_data['characters_assigned'])} characters")
+            for assignment in init_data['characters_assigned']:
+                report_lines.append(f"    • {assignment}")
+        
+        if init_data['warnings']:
+            report_lines.append(f"  ⚠️ Warnings: {len(init_data['warnings'])} issues")
+            for warning in init_data['warnings']:
+                report_lines.append(f"    • {warning}")
+        
+        self.game_logger.info("\n".join(report_lines))
 
     def _convert_conditions(self, conditions_data):
         """Convert conditions from YAML dict format to MotiveConfig format."""
@@ -179,6 +371,9 @@ class GameInitializer:
 
     def _instantiate_rooms_and_objects(self):
         self.game_logger.info("🏗️ Instantiating rooms and objects...")
+        rooms_created = 0
+        objects_placed = 0
+        
         for room_id, room_cfg in self.game_rooms.items():
             room = Room(
                 room_id=room_cfg['id'],
@@ -189,7 +384,7 @@ class GameInitializer:
                 properties=room_cfg.get('properties', {})
             )
             self.rooms[room_id] = room
-            self.game_logger.info(f"  🏠 Created room: {room.name} ({room.id})")
+            rooms_created += 1
 
             # Place objects defined within the room config
             if room_cfg.get('objects'):
@@ -209,9 +404,11 @@ class GameInitializer:
                         )
                         room.add_object(game_obj)
                         self.game_objects[game_obj.id] = game_obj
-                        self.game_logger.info(f"    📦 Placed object {game_obj.name} ({game_obj.id}) in {room.name}")
+                        objects_placed += 1
                     else:
-                        self.game_logger.warning(f"⚠️ Object type '{obj_instance_cfg['object_type_id']}' not found for object '{obj_instance_cfg['id']}' in room '{room.id}'. Skipping.")
+                        self.game_logger.warning(f"Object type '{obj_instance_cfg['object_type_id']}' not found for object '{obj_instance_cfg['id']}' in room '{room.id}'. Skipping.")
+        
+        self.game_logger.info(f"Created {rooms_created} rooms and placed {objects_placed} objects.")
 
     def _instantiate_player_characters(self, players: List[Player]):
         self.game_logger.info("🎭 Instantiating player characters and assigning to players...")
@@ -219,19 +416,17 @@ class GameInitializer:
         available_character_ids = []
         if hasattr(self, 'game_characters') and self.game_characters:
             available_character_ids = list(self.game_characters.keys())
-            self.game_logger.info(f"🎯 Using {len(available_character_ids)} characters from characters section")
         elif self.game_character_types:
             available_character_ids = list(self.game_character_types.keys())
-            self.game_logger.info(f"🎯 Using {len(available_character_ids)} characters from character_types section")
         
         if not available_character_ids:
-            self.game_logger.error("❌ No characters defined in merged configuration. Cannot assign characters to players.")
+            self.game_logger.error("No characters defined in merged configuration. Cannot assign characters to players.")
             return
         
         # Find a suitable starting room (e.g., the first room defined in the merged config)
         start_room_id = next(iter(self.game_rooms.keys()), None)
         if not start_room_id:
-            self.game_logger.error(f"❌ No rooms defined in merged configuration. Cannot assign starting room for players.")
+            self.game_logger.error("No rooms defined in merged configuration. Cannot assign starting room for players.")
             return
 
         for i, player in enumerate(players):
@@ -297,4 +492,4 @@ class GameInitializer:
             player.character = player_char # Link player to character
             self.player_characters[player_char.id] = player_char
             self.rooms[start_room_id].add_player(player_char) # Add player to the room
-            self.game_logger.info(f"  👤 Assigned {player_char.name} ({player_char.id}) to player {player.name} in room {start_room_id}.")
+            self.game_logger.info(f"Assigned {player_char.name} to {player.name}")

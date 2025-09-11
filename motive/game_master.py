@@ -217,7 +217,6 @@ class GameMaster:
 
     def _initialize_players(self, player_configs: list[PlayerConfig]):
         """Initializes players based on the provided list of PlayerConfig objects."""
-        self.game_logger.info("👥 Initializing players from configuration...")
         for p_config in player_configs:
             player = Player(
                 name=p_config.name,
@@ -226,7 +225,6 @@ class GameMaster:
                 log_dir=self.log_dir  # Pass the log directory to the player
             )
             self.players.append(player)
-            self.game_logger.info(f"  🤖 Initialized player: {player.name} using {p_config.provider}/{p_config.model}")
             self.player_first_interaction_done[player.name] = False # Initialize for tracking
 
     async def run_game(self):
@@ -234,20 +232,15 @@ class GameMaster:
         self.game_logger.info("🚀 ==================== GAME STARTING ====================")
         
         # Log game settings for training data metadata
-        self.game_logger.info("⚙️ Game settings:")
         if hasattr(self.game_config, 'game_settings'):
-            self.game_logger.info(f"  🔄 num_rounds: {self.game_config.game_settings.num_rounds}")
-            self.game_logger.info(f"  ⚡ initial_ap_per_turn: {self.game_config.game_settings.initial_ap_per_turn}")
-            self.game_logger.info(f"  📖 manual: {self.game_config.game_settings.manual}")
+            self.game_logger.info(f"⚙️ Game Settings: {self.game_config.game_settings.num_rounds} rounds, {self.game_config.game_settings.initial_ap_per_turn} AP/turn")
         else:
-            self.game_logger.info(f"  🔄 num_rounds: {self.game_config['game_settings']['num_rounds']}")
-            self.game_logger.info(f"  ⚡ initial_ap_per_turn: {self.game_config['game_settings']['initial_ap_per_turn']}")
-            self.game_logger.info(f"  📖 manual: {self.game_config['game_settings']['manual']}")
+            self.game_logger.info(f"⚙️ Game Settings: {self.game_config['game_settings']['num_rounds']} rounds, {self.game_config['game_settings']['initial_ap_per_turn']} AP/turn")
 
         # Removed: await self._send_initial_messages()
 
         for round_num in range(1, self.num_rounds + 1):
-            self.game_logger.info(f"🎯 --- Starting Round {round_num} of {self.num_rounds} ---")
+            self.game_logger.info(f"🎯 Round {round_num} of {self.num_rounds}")
             
             # Filter out players who have quit
             active_players = [player for player in self.players if player.character.action_points != -1]
@@ -268,7 +261,7 @@ class GameMaster:
                 if player.character.action_points == -1:
                     self.game_logger.info(f"Player {player.name} has quit the game.")
                     
-            self.game_logger.info(f"✅ === Round {round_num} Complete ===")
+            self.game_logger.info(f"✅ Round {round_num} complete")
 
         self.game_logger.info("🏁 ===================== GAME OVER ======================")
         
@@ -774,9 +767,72 @@ class GameMaster:
                     # Don't let players observe their own events - they already get feedback
                     if event.related_player_id != player_char.id:
                         self.player_observations[player_char.id].append(event)
-                        self.game_logger.info(f"👁️ OBSERVED - Player {player.name} in {player_char.current_room_id} observed event from {event.source_room_id}: '{event.message}' (Type: {event.event_type})")
         
         self.event_queue.clear() # Clear the queue after distributing all events
+
+    def _get_event_observation_details(self, event) -> List[str]:
+        """Generate detailed observation breakdown for an event showing which players observed it and why others didn't."""
+        details = []
+        
+        # Get the room where the event occurred
+        event_room = self.rooms.get(event.source_room_id)
+        if not event_room:
+            details.append("    ⚠️ Event room not found - cannot determine observers")
+            return details
+        
+        # Get all players in the event room
+        players_in_room = []
+        players_outside_room = []
+        
+        for player in self.players:
+            player_char = player.character
+            if not player_char:
+                continue
+                
+            if player_char.current_room_id == event.source_room_id:
+                players_in_room.append(player)
+            else:
+                players_outside_room.append(player)
+        
+        # Show players in the room and their observation status
+                if players_in_room:
+                    for player in players_in_room:
+                        player_char = player.character
+                        observes, reason = self._determine_observation_status(event, player_char)
+                        checkbox = "☑️" if observes else "☐"
+                        details.append(f"    {checkbox} {player.name} ({player_char.name}) - {reason}")
+        
+        # Show players outside the room
+        if players_outside_room:
+            for player in players_outside_room:
+                player_char = player.character
+                details.append(f"    ☐ {player.name} ({player_char.name}) - Not in event room")
+        
+        return details
+
+    def _determine_observation_status(self, event, player_char) -> Tuple[bool, str]:
+        """Determine if a player observes an event and why."""
+        # Check if player is the event originator (they don't observe their own events)
+        if event.related_player_id == player_char.id:
+            return False, "Event originator (gets direct feedback instead)"
+        
+        # Check observer scopes
+        if "all_players" in event.observers:
+            return True, "All players observer"
+        elif "player" in event.observers and event.related_player_id == player_char.id:
+            return True, "Target player observer"
+        elif "room_players" in event.observers and player_char.current_room_id == event.source_room_id:
+            return True, "Room players observer"
+        elif "adjacent_rooms" in event.observers:
+            # Check if player's current room is adjacent to event_room
+            event_room = self.rooms.get(event.source_room_id)
+            if event_room:
+                for exit_data in event_room.exits.values():
+                    if exit_data['destination_room_id'] == player_char.current_room_id:
+                        return True, "Adjacent room observer"
+            return False, "Not in adjacent room"
+        else:
+            return False, "No matching observer scope"
 
     async def _execute_player_turn(self, player: Player, round_num: int):
         """Executes a single player's turn, allowing multiple actions until AP are spent or turn ends."""
@@ -827,7 +883,7 @@ class GameMaster:
             if is_first_interaction:
                 character_assignment = player_char.get_introduction_message()
                 message_content_parts.append(character_assignment)
-                message_content_parts.append(f"Initial location: {current_room_description}")
+                message_content_parts.append(f"**🏠 Initial location:**\n{current_room_description}")
             
             # Add observations (if any)
             if observation_messages:
@@ -854,15 +910,15 @@ class GameMaster:
                 
                 system_msg = SystemMessage(content=system_prompt)
                 player.add_message(system_msg)
-                self.game_logger.info(f"GM sent chat to {player.name} (SYSTEM, with manual: {self.manual_path}):\n{system_prompt[:50]}...")
-                player.logger.info(f"GM sent chat to {player.name} (SYSTEM):\n{system_prompt}")
+                self.game_logger.info(f"GM ➡️ {player.name} (SYSTEM, with manual: {self.manual_path}):\n{system_prompt[:50]}...")
+                player.logger.info(f"{player.name} ⬅️ GM (SYSTEM):\n{system_prompt}")
                 self.player_first_interaction_done[player_char.id] = True
             
             # Send the main message
             human_msg = HumanMessage(content=message_content)
             player.add_message(human_msg)
-            self.game_logger.info(f"GM sent chat to {player.name}:\n{message_content}")
-            player.logger.info(f"GM sent chat to {player.name}:\n{message_content}")
+            self.game_logger.info(f"GM ➡️ {player.name}:\n{message_content}")
+            player.logger.info(f"{player.name} ⬅️ GM:\n{message_content}")
 
             start_time = time.time()
             response = await player.get_response_and_update_history(player.chat_history)
@@ -871,8 +927,8 @@ class GameMaster:
             response_len = len(response.content)
 
             player_input = response.content.strip().lower()
-            self.game_logger.info(f"GM received chat from {player.name}:\n{player_input}")
-            player.logger.info(f"GM received chat from {player.name}:\n{player_input}")
+            self.game_logger.info(f"GM ⬅️ {player.name}:\n{player_input}")
+            player.logger.info(f"{player.name} ➡️ GM:\n{player_input}")
 
             # Check for explicit "end turn" command first
             if player_input == "end turn":
@@ -880,8 +936,8 @@ class GameMaster:
                 turn_in_progress = False
                 feedback_message = HumanMessage(content=feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM sent chat to {player.name} (Feedback):\n{feedback}")
-                self.game_logger.info(f"GM sent chat to {player.name} (Feedback):\n{feedback}")
+                player.logger.info(f"{player.name} ⬅️ GM (Feedback):\n{feedback}")
+                self.game_logger.info(f"GM ➡️ {player.name} (Feedback):\n{feedback}")
                 continue # Continue to the while loop condition to end the turn
 
             # Parse all actions from the player's response
@@ -901,8 +957,8 @@ class GameMaster:
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
-                self.game_logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
+                player.logger.info(f"{player.name} ⬅️ GM (Feedback):\n{combined_feedback}")
+                self.game_logger.info(f"GM ➡️ {player.name} (Feedback):\n{combined_feedback}")
                 
                 # Wait for player to confirm turn end
                 await self._handle_turn_end_confirmation(player, player_char)
@@ -947,8 +1003,8 @@ class GameMaster:
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
-                self.game_logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
+                player.logger.info(f"{player.name} ⬅️ GM (Feedback):\n{combined_feedback}")
+                self.game_logger.info(f"GM ➡️ {player.name} (Feedback):\n{combined_feedback}")
                 
                 # Wait for player to confirm turn end
                 await self._handle_turn_end_confirmation(player, player_char)
@@ -962,6 +1018,9 @@ class GameMaster:
 
                 # Track actions that couldn't be executed due to AP exhaustion
                 actions_skipped_due_to_ap = []
+                
+                # Collect all executed actions for logging
+                executed_actions = []
                 
                 for action_config, params in parsed_actions:
                     # Handle both Pydantic objects and dictionaries from merged config
@@ -989,7 +1048,6 @@ class GameMaster:
                     if actual_cost > player_char.action_points:
                         action_specific_feedback.append(f"Action '{action_name}' costs {actual_cost} AP, but you only have {player_char.action_points} AP. Skipping this action.")
                         actions_skipped_due_to_ap.append(f"{action_name} {params}")
-                        self.game_logger.info(action_specific_feedback[-1])
                         # Don't set all_actions_in_response_valid = False for AP exhaustion - this is normal gameplay
                     else:
                         requirements_met, req_message, exit_data = self._check_requirements(player_char, action_config, params)
@@ -1005,16 +1063,18 @@ class GameMaster:
                             # Add generated events to the main event queue
                             self.event_queue.extend(action_events)
                             
-                            # Distribute events immediately after action execution
-                            self._distribute_events()
-                            
                             # Mark hint as executed if this action matches a hint                                                         
                             self._mark_hint_executed(player.name, action_name, params)
                             
-                            self.game_logger.info(f"Action '{action_name}' executed by {player_char.name} (cost: {actual_cost} AP). Remaining AP: {player_char.action_points}")
+                            # Collect action info for batch logging
+                            executed_actions.append({
+                                'name': action_name,
+                                'cost': actual_cost,
+                                'remaining_ap': player_char.action_points,
+                                'feedback': action_specific_feedback_list
+                            })
                         else:
                             action_specific_feedback.append(f"Cannot perform '{action_name}': {req_message}. Skipping this action.")
-                            self.game_logger.info(action_specific_feedback[-1])
                             all_actions_in_response_valid = False
 
                     if action_specific_feedback:
@@ -1023,6 +1083,26 @@ class GameMaster:
                         ap_after = player_char.action_points
                         response_feedback_messages.append(f"- ⚔️ **{action_name.capitalize()} Action:** (Cost: {actual_cost} AP, Remaining: {ap_after} AP)")
                         response_feedback_messages.extend([f"  - {msg}" for msg in action_specific_feedback])
+                
+                # Log all executed actions in a single report
+                if executed_actions:
+                    action_report_lines = [f"🎬 Action Execution Report for {player_char.name}:"]
+                    for action in executed_actions:
+                        action_report_lines.append(f"  • {action['name']} (Cost: {action['cost']} AP, Remaining: {action['remaining_ap']} AP)")
+                    self.game_logger.info("\n".join(action_report_lines))
+                
+                # Log detailed observation reports before distributing events (since _distribute_events clears the queue)
+                if self.event_queue:
+                    observation_report_lines = [f"👁️ Observation Report for {player_char.name}:"]
+                    for event in self.event_queue:
+                        observation_report_lines.append(f"  • {event.message} (Type: {event.event_type})")
+                        # Add detailed observation breakdown for this event
+                        observation_details = self._get_event_observation_details(event)
+                        observation_report_lines.extend(observation_details)
+                    self.game_logger.info("\n".join(observation_report_lines))
+                
+                # Distribute all events after all actions are processed
+                self._distribute_events()
 
                 # After processing all actions in the response
                 if response_feedback_messages:
@@ -1040,8 +1120,8 @@ class GameMaster:
 
                 feedback_message = HumanMessage(content=combined_feedback)
                 player.add_message(feedback_message)
-                player.logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
-                self.game_logger.info(f"GM sent chat to {player.name} (Feedback):\n{combined_feedback}")
+                player.logger.info(f"{player.name} ⬅️ GM (Feedback):\n{combined_feedback}")
+                self.game_logger.info(f"GM ➡️ {player.name} (Feedback):\n{combined_feedback}")
 
                 if not all_actions_in_response_valid:
                     # If any action in the response was invalid or couldn't be performed, end the turn as a penalty.
@@ -1106,8 +1186,8 @@ class GameMaster:
         
         confirmation_msg = HumanMessage(content=confirmation_message)
         player.add_message(confirmation_msg)
-        player.logger.info(f"GM sent chat to {player.name} (Turn End Confirmation):\n{confirmation_message}")
-        self.game_logger.info(f"GM sent chat to {player.name} (Turn End Confirmation):\n{confirmation_message}")
+        player.logger.info(f"{player.name} ⬅️ GM (Turn End Confirmation):\n{confirmation_message}")
+        self.game_logger.info(f"GM ➡️ {player.name} (Turn End Confirmation):\n{confirmation_message}")
         
         # Get player's response
         start_time = time.time()
@@ -1116,8 +1196,8 @@ class GameMaster:
         response_len = len(response.content)
         
         player_input = response.content.strip().lower()
-        self.game_logger.info(f"GM received chat from {player.name} (Turn End Response):\n{player_input}")
-        player.logger.info(f"GM received chat from {player.name} (Turn End Response):\n{player_input}")
+        self.game_logger.info(f"GM ⬅️ {player.name} (Turn End Response):\n{player_input}")
+        player.logger.info(f"{player.name} ➡️ GM (Turn End Response):\n{player_input}")
         
         # Parse the response for turn end actions (only accept actions with > prefix)
         if "> quit" in response.content:
@@ -1143,8 +1223,8 @@ class GameMaster:
                 warning_msg = f"Note: You submitted other actions during turn end confirmation. These were ignored. Actions can only be performed during your active turn.\n\n**Ignored actions:**\n{ignored_actions_text}"
                 warning_message = HumanMessage(content=warning_msg)
                 player.add_message(warning_message)
-                player.logger.info(f"GM sent chat to {player.name} (Warning):\n{warning_msg}")
-                self.game_logger.info(f"GM sent chat to {player.name} (Warning):\n{warning_msg}")
+                player.logger.info(f"{player.name} ⬅️ GM (Warning):\n{warning_msg}")
+                self.game_logger.info(f"GM ➡️ {player.name} (Warning):\n{warning_msg}")
             
             return True  # Player continues
         else:

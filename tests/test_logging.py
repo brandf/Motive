@@ -254,10 +254,10 @@ async def test_chat_message_logging(mock_game_master_logging):
     assert len(arion_logged_messages) > 0, "No log messages were captured for Arion"
     
     # Check for key expected messages (more flexible matching)
-    arion_has_system_message = any("GM sent chat to Arion (SYSTEM)" in msg for msg in arion_logged_messages)
+    arion_has_system_message = any("Arion ⬅️ GM (SYSTEM)" in msg for msg in arion_logged_messages)  
     arion_has_character_message = any("You are Arion, a Hero" in msg for msg in arion_logged_messages)
-    arion_has_received_message = any("GM received chat from Arion" in msg for msg in arion_logged_messages)
-    arion_has_feedback_message = any("GM sent chat to Arion (Feedback)" in msg for msg in arion_logged_messages)
+    arion_has_received_message = any("Arion ➡️ GM" in msg for msg in arion_logged_messages)
+    arion_has_feedback_message = any("Arion ⬅️ GM (Feedback)" in msg for msg in arion_logged_messages)
     
     assert arion_has_system_message, "Missing system message for Arion"
     assert arion_has_character_message, "Missing character assignment message for Arion"
@@ -265,9 +265,9 @@ async def test_chat_message_logging(mock_game_master_logging):
     assert arion_has_feedback_message, "Missing feedback message for Arion"
 
     # Verify GM received chat from Arion from gm.game_logger
-    gm.game_logger.info.assert_any_call("GM received chat from Arion:\n> help")
+    gm.game_logger.info.assert_any_call("GM ⬅️ Arion:\n> help")
     # Verify GM sent feedback to Arion from gm.game_logger (with emoji)
-    gm.game_logger.info.assert_any_call("GM sent chat to Arion (Feedback):\n📋 **Your Actions for this turn:**\n- ⚔️ **Help Action:** (Cost: 10 AP, Remaining: 10 AP)\n  - Mock help feedback")
+    gm.game_logger.info.assert_any_call("GM ➡️ Arion (Feedback):\n📋 **Your Actions for this turn:**\n- ⚔️ **Help Action:** (Cost: 10 AP, Remaining: 10 AP)\n  - Mock help feedback")
 
     # Simulate Kael's turn (sends a "say" message)
     await gm._execute_player_turn(player_kael, 1)
@@ -288,10 +288,10 @@ async def test_chat_message_logging(mock_game_master_logging):
     assert len(kael_logged_messages) > 0, "No log messages were captured for Kael"
     
     # Check for key expected messages (more flexible matching)
-    kael_has_system_message = any("GM sent chat to Kael (SYSTEM)" in msg for msg in kael_logged_messages)
+    kael_has_system_message = any("Kael ⬅️ GM (SYSTEM)" in msg for msg in kael_logged_messages)
     kael_has_character_message = any("You are Kael, a Hero" in msg for msg in kael_logged_messages)
-    kael_has_received_message = any("GM received chat from Kael" in msg for msg in kael_logged_messages)
-    kael_has_feedback_message = any("GM sent chat to Kael (Feedback)" in msg for msg in kael_logged_messages)
+    kael_has_received_message = any("Kael ➡️ GM" in msg for msg in kael_logged_messages)
+    kael_has_feedback_message = any("Kael ⬅️ GM (Feedback)" in msg for msg in kael_logged_messages)
     
     assert kael_has_system_message, "Missing system message for Kael"
     assert kael_has_character_message, "Missing character assignment message for Kael"
@@ -299,9 +299,9 @@ async def test_chat_message_logging(mock_game_master_logging):
     assert kael_has_feedback_message, "Missing feedback message for Kael"
 
     # Verify GM received chat from Kael from gm.game_logger
-    gm.game_logger.info.assert_any_call("GM received chat from Kael:\n> say \"hello!\"")
+    gm.game_logger.info.assert_any_call("GM ⬅️ Kael:\n> say \"hello!\"")
     # Verify GM sent feedback to Kael from gm.game_logger (with emoji)
-    gm.game_logger.info.assert_any_call("GM sent chat to Kael (Feedback):\n📋 **Your Actions for this turn:**\n- ⚔️ **Say Action:** (Cost: 10 AP, Remaining: 10 AP)\n  - Mock say feedback")
+    gm.game_logger.info.assert_any_call("GM ➡️ Kael (Feedback):\n📋 **Your Actions for this turn:**\n- ⚔️ **Say Action:** (Cost: 10 AP, Remaining: 10 AP)\n  - Mock say feedback")
 
 @pytest.mark.asyncio
 async def test_action_execution_logging_with_ap_cost(mock_game_master_logging):
@@ -312,8 +312,8 @@ async def test_action_execution_logging_with_ap_cost(mock_game_master_logging):
     # Simulate Arion's turn (sends a "help" message)
     await gm._execute_player_turn(player_arion, 1)
 
-    # Verify action execution is logged once with AP cost
-    gm.game_logger.info.assert_any_call("Action 'help' executed by Arion (cost: 10 AP). Remaining AP: 10")
+    # Verify action execution is logged in batch format with AP cost
+    gm.game_logger.info.assert_any_call("🎬 Action Execution Report for Arion:\n  • help (Cost: 10 AP, Remaining: 10 AP)")
     
     # Simulate Kael's turn (sends a "say" message)
     player_kael = gm.players[1]
@@ -321,5 +321,5 @@ async def test_action_execution_logging_with_ap_cost(mock_game_master_logging):
 
     await gm._execute_player_turn(player_kael, 1)
 
-    # Verify action execution is logged once with AP cost
-    gm.game_logger.info.assert_any_call("Action 'say' executed by Kael (cost: 10 AP). Remaining AP: 10")
+    # Verify action execution is logged in batch format with AP cost
+    gm.game_logger.info.assert_any_call("🎬 Action Execution Report for Kael:\n  • say (Cost: 10 AP, Remaining: 10 AP)")

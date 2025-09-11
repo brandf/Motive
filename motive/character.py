@@ -96,7 +96,7 @@ class Character:
 
     def get_introduction_message(self) -> str:
         """Generate a character introduction message for the player."""
-        return f"**👤 Character:**\nYou are {self.name}, {self.backstory}.\n\n**🎯 Motive:**\n{self.motive}"
+        return f"**👤 Character:**\nYou are {self.name}, {self.backstory}\n\n**🎯 Motive:**\n{self.motive}"
 
     def _evaluate_condition_group(self, condition_group, game_master) -> bool:
         """Evaluate a single condition or condition group."""

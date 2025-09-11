@@ -163,9 +163,6 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
         if target_object:
             obj_description = f"You look at the {target_object.name}. {target_object.description}"
             feedback_messages.append(obj_description)
-            if target_object.properties:
-                props = ", ".join([f"{k}: {v}" for k, v in target_object.properties.items()])
-                feedback_messages.append(f"It has properties: {props}.")
             event_message = f"Player {player_char.name} looked at {target_object.name}."
             events_generated.append(Event(
                 message=event_message,
