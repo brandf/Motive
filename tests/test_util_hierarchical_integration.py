@@ -1,29 +1,29 @@
 #!/usr/bin/env python3
 """
-Test analyze tool integration with hierarchical configuration system.
+Test motive-util tool integration with hierarchical configuration system.
 """
 
 import pytest
 import tempfile
 import os
 from pathlib import Path
-from motive.analyze import analyze_main
+from motive.util import util_main
 from io import StringIO
 import sys
 
 
-class TestAnalyzeHierarchicalIntegration:
-    """Test analyze tool integration with hierarchical configs."""
+class TestUtilHierarchicalIntegration:
+    """Test motive-util tool integration with hierarchical configs."""
     
-    def test_analyze_hierarchical_config(self):
-        """Test that analyze tool can analyze hierarchical configs."""
+    def test_util_hierarchical_config(self):
+        """Test that motive-util tool can analyze hierarchical configs."""
         # Capture stdout
         old_stdout = sys.stdout
         sys.stdout = captured_output = StringIO()
         
         try:
             # Test with hierarchical config
-            analyze_main(["-c", "configs/game.yaml", "-I"])
+            util_main(["config", "-c", "configs/game.yaml", "-I"])
             
             output = captured_output.getvalue()
             
@@ -40,8 +40,8 @@ class TestAnalyzeHierarchicalIntegration:
         finally:
             sys.stdout = old_stdout
     
-    def test_analyze_traditional_config(self):
-        """Test that analyze tool can analyze traditional configs."""
+    def test_util_traditional_config(self):
+        """Test that motive-util tool can analyze traditional configs."""
         # Create a traditional config
         traditional_config = """
 game_settings:
@@ -76,7 +76,7 @@ actions:
             sys.stdout = captured_output = StringIO()
             
             try:
-                analyze_main(["-c", temp_path])
+                util_main(["config", "-c", temp_path])
                 
                 output = captured_output.getvalue()
                 
@@ -92,14 +92,14 @@ actions:
         finally:
             os.unlink(temp_path)
     
-    def test_analyze_include_information(self):
-        """Test that analyze tool shows include information correctly."""
+    def test_util_include_information(self):
+        """Test that motive-util tool shows include information correctly."""
         # Capture stdout
         old_stdout = sys.stdout
         sys.stdout = captured_output = StringIO()
         
         try:
-            analyze_main(["-c", "configs/game.yaml", "-I"])
+            util_main(["config", "-c", "configs/game.yaml", "-I"])
             
             output = captured_output.getvalue()
             
@@ -111,15 +111,15 @@ actions:
         finally:
             sys.stdout = old_stdout
     
-    def test_analyze_error_handling(self):
-        """Test that analyze tool handles errors gracefully."""
+    def test_util_error_handling(self):
+        """Test that motive-util tool handles errors gracefully."""
         # Test missing file
         old_stderr = sys.stderr
         sys.stderr = captured_stderr = StringIO()
         
         try:
             with pytest.raises(SystemExit):
-                analyze_main(["-c", "nonexistent_config.yaml"])
+                util_main(["config", "-c", "nonexistent_config.yaml"])
             
             error_output = captured_stderr.getvalue()
             assert "Error" in error_output
@@ -127,14 +127,14 @@ actions:
         finally:
             sys.stderr = old_stderr
     
-    def test_analyze_all_information(self):
-        """Test that analyze tool shows all information when requested."""
+    def test_util_all_information(self):
+        """Test that motive-util tool shows all information when requested."""
         # Capture stdout
         old_stdout = sys.stdout
         sys.stdout = captured_output = StringIO()
         
         try:
-            analyze_main(["-c", "configs/game.yaml", "-a"])
+            util_main(["config", "-c", "configs/game.yaml", "-a"])
             
             output = captured_output.getvalue()
             
@@ -153,21 +153,21 @@ actions:
         finally:
             sys.stdout = old_stdout
     
-    def test_analyze_merge_conflicts(self):
-        """Test that analyze tool handles merge conflicts correctly."""
+    def test_util_merge_conflicts(self):
+        """Test that motive-util tool handles merge conflicts correctly."""
         # This test is removed because it creates temporary files with includes
         # to non-existent files, which is not a realistic scenario.
         # Merge conflict testing is covered by other integration tests.
         pass
     
-    def test_analyze_deep_nesting(self):
-        """Test that analyze tool handles deeply nested configs correctly."""
+    def test_util_deep_nesting(self):
+        """Test that motive-util tool handles deeply nested configs correctly."""
         # Capture stdout
         old_stdout = sys.stdout
         sys.stdout = captured_output = StringIO()
         
         try:
-            analyze_main(["-c", "tests/configs/test_relative_paths.yaml", "-a"])
+            util_main(["config", "-c", "tests/configs/test_relative_paths.yaml", "-a"])
             
             output = captured_output.getvalue()
             
