@@ -29,12 +29,22 @@ class TestCharacterSnapshotReport:
         char1 = Mock(spec=Character)
         char1.name = "Detective James Thorne"
         char1.current_room_id = "town_square"
-        char1.inventory = ["notebook", "magnifying_glass"]
-        
+        # Mock inventory as a dictionary of GameObjects
+        mock_item1 = Mock()
+        mock_item1.name = "notebook"
+        mock_item2 = Mock()
+        mock_item2.name = "magnifying_glass"
+        char1.inventory = {"notebook_id": mock_item1, "magnifying_glass_id": mock_item2}
+
         char2 = Mock(spec=Character)
         char2.name = "Father Marcus"
         char2.current_room_id = "church"
-        char2.inventory = ["holy_water", "prayer_book"]
+        # Mock inventory as a dictionary of GameObjects
+        mock_item3 = Mock()
+        mock_item3.name = "holy_water"
+        mock_item4 = Mock()
+        mock_item4.name = "prayer_book"
+        char2.inventory = {"holy_water_id": mock_item3, "prayer_book_id": mock_item4}
         
         player1 = Mock(spec=Player)
         player1.name = "Player_1"
@@ -77,7 +87,7 @@ class TestCharacterSnapshotReport:
         char = Mock(spec=Character)
         char.name = "Test Character"
         char.current_room_id = "test_room"
-        char.inventory = []
+        char.inventory = {}
         
         player = Mock(spec=Player)
         player.name = "Player_1"
@@ -99,7 +109,10 @@ class TestCharacterSnapshotReport:
         char = Mock(spec=Character)
         char.name = "Test Character"
         char.current_room_id = "unknown_room"
-        char.inventory = ["item1"]
+        # Mock inventory as a dictionary of GameObjects
+        mock_item = Mock()
+        mock_item.name = "item1"
+        char.inventory = {"item1_id": mock_item}
         
         player = Mock(spec=Player)
         player.name = "Player_1"
@@ -135,7 +148,18 @@ class TestCharacterSnapshotReport:
         char = Mock(spec=Character)
         char.name = "Test Character"
         char.current_room_id = "test_room"
-        char.inventory = ["item1", "item2", "item3"]
+        # Mock inventory as a dictionary of GameObjects
+        mock_item1 = Mock()
+        mock_item1.name = "item1"
+        mock_item2 = Mock()
+        mock_item2.name = "item2"
+        mock_item3 = Mock()
+        mock_item3.name = "item3"
+        char.inventory = {
+            "item1_id": mock_item1,
+            "item2_id": mock_item2,
+            "item3_id": mock_item3
+        }
         
         player = Mock(spec=Player)
         player.name = "Player_1"

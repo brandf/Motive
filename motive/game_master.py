@@ -299,7 +299,7 @@ class GameMaster:
             
             # Get inventory
             if char.inventory:
-                inventory_str = ", ".join(char.inventory)
+                inventory_str = ", ".join(item.name for item in char.inventory.values())
             else:
                 inventory_str = "(empty)"
             

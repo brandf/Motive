@@ -59,7 +59,8 @@ def load_config(config_path: str, validate: bool = True) -> GameConfig:
         sys.exit(1)
 
 
-async def run_game(config_path: str, game_id: str = None, validate: bool = True):
+async def run_game(config_path: str, game_id: str = None, validate: bool = True, 
+                  rounds: int = None, ap: int = None, manual: str = None, hint: str = None):
     """Run a Motive game with the specified configuration."""
     # Load environment variables
     load_dotenv()
@@ -76,6 +77,28 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True)
     # Load configuration
     print(f"Loading configuration from: {config_path}")
     game_config = load_config(config_path, validate=validate)
+    
+    # Apply command line overrides
+    if rounds is not None:
+        print(f"Overriding rounds: {game_config.game_settings.num_rounds} -> {rounds}")
+        game_config.game_settings.num_rounds = rounds
+    if ap is not None:
+        print(f"Overriding action points: {game_config.game_settings.initial_ap_per_turn} -> {ap}")
+        game_config.game_settings.initial_ap_per_turn = ap
+    if manual is not None:
+        print(f"Overriding manual: {game_config.game_settings.manual} -> {manual}")
+        game_config.game_settings.manual = manual
+    if hint is not None:
+        print(f"Adding hint: {hint}")
+        # Add hint to game settings
+        if game_config.game_settings.hints is None:
+            game_config.game_settings.hints = []
+        # Create a simple hint that shows every round for all players
+        game_config.game_settings.hints.append({
+            "hint_id": "cli_hint",
+            "hint_action": f"> {hint}",
+            "when": {}  # Empty when condition means always show
+        })
     
     # Check LangSmith configuration
     if os.getenv("LANGCHAIN_TRACING_V2") == "true":
@@ -133,6 +156,28 @@ Examples:
         version='%(prog)s 0.0.1'
     )
     
+    # Game settings overrides
+    parser.add_argument(
+        '--rounds',
+        type=int,
+        help='Number of rounds to run (overrides config)'
+    )
+    parser.add_argument(
+        '--ap',
+        type=int,
+        help='Initial action points per turn (overrides config)'
+    )
+    parser.add_argument(
+        '--manual',
+        type=str,
+        help='Path to game manual (overrides config)'
+    )
+    parser.add_argument(
+        '--hint',
+        type=str,
+        help='Add a hint that will be shown to all players every round'
+    )
+    
     args = parser.parse_args()
     
     # Validate config file exists
@@ -142,7 +187,8 @@ Examples:
     
     # Run the game
     validate = not args.no_validate
-    asyncio.run(run_game(args.config, args.game_id, validate=validate))
+    asyncio.run(run_game(args.config, args.game_id, validate=validate, 
+                        rounds=args.rounds, ap=args.ap, manual=args.manual, hint=args.hint))
 
 
 if __name__ == '__main__':
