@@ -174,3 +174,286 @@ characters:
           - type: player_has_tag
             tag: reputation_ruined
     aliases: [elena, guild, master, leader, commander, veteran]
+
+  # The Missing Mayor with multiple possible motives
+  mayor_victoria_blackwater:
+    id: mayor_victoria_blackwater
+    name: Mayor Victoria Blackwater
+    backstory: |
+      The charismatic mayor who disappeared three months ago, leaving the town in chaos. 
+      She was secretly investigating the cult's infiltration of her own administration and 
+      was close to exposing them when she vanished. Her family has a long history in 
+      Blackwater, and she was beloved by the townspeople. She's been held captive by the 
+      cult, who hope to use her knowledge of the town's defenses and her influence over 
+      the people to further their dark plans. Her disappearance has left a power vacuum 
+      that the cult has been exploiting.
+    motives:
+      - id: escape_and_return
+        description: "Escape from cult captivity and return to lead the town to safety, restoring order and hope."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: escaped_captivity
+          - type: player_has_tag
+            tag: restored_leadership
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: cult_ritual_completed
+          - type: player_has_tag
+            tag: town_lost_forever
+      - id: expose_corruption
+        description: "Reveal which of her trusted advisors were cult members and restore honest governance to the town."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: corruption_exposed
+          - type: player_has_tag
+            tag: honest_governance_restored
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: cult_takes_control
+          - type: player_has_tag
+            tag: trust_destroyed
+      - id: protect_family_legacy
+        description: "Ensure the Blackwater family name isn't tarnished by the town's current state and preserve their honor."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: family_honor_preserved
+          - type: player_has_tag
+            tag: blackwater_legacy_secured
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: family_name_ruined
+          - type: player_has_tag
+            tag: legacy_destroyed
+    aliases: [victoria, mayor, blackwater, leader, politician, administrator]
+
+  # The Healer with Secrets
+  dr_sarah_chen:
+    id: dr_sarah_chen
+    name: Dr. Sarah Chen
+    backstory: |
+      A skilled physician who arrived in Blackwater six months ago, ostensibly to help 
+      with the town's medical needs. She's actually a former cult member who defected 
+      and is now trying to atone by healing the sick and injured. She knows more about 
+      the cult's methods than she's willing to admit, including their use of dark magic 
+      to create the mysterious illnesses affecting townspeople. Her medical knowledge 
+      combined with her cult background makes her both valuable and dangerous to both sides.
+    motives:
+      - id: heal_the_afflicted
+        description: "Cure the mysterious illness affecting townspeople and find a way to reverse cult corruption."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: illness_cured
+          - type: player_has_tag
+            tag: corruption_reversed
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: plague_spreads
+          - type: player_has_tag
+            tag: cult_magic_stronger
+      - id: redeem_past_sins
+        description: "Make amends for her past cult involvement by saving innocent lives and protecting the town."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: lives_saved
+          - type: player_has_tag
+            tag: atonement_achieved
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: past_revealed
+          - type: player_has_tag
+            tag: cult_recruits_her
+      - id: protect_her_secret
+        description: "Keep her cult past hidden while still helping the town, fearing exposure would destroy her credibility."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: secret_maintained
+          - type: player_has_tag
+            tag: trust_preserved
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: identity_exposed
+          - type: player_has_tag
+            tag: credibility_lost
+    aliases: [sarah, doctor, chen, physician, healer, medic]
+
+  # The Corrupt Guard Captain
+  captain_marcus_omalley:
+    id: captain_marcus_omalley
+    name: Captain Marcus "Ironjaw" O'Malley
+    backstory: |
+      The town's guard captain who has been secretly working with the cult for months, 
+      providing them with information and turning a blind eye to their activities. He's 
+      motivated by greed and the promise of power, but recent events have made him 
+      question his choices. His family doesn't know about his corruption, and he fears 
+      what the cult might do to them if he tries to back out. His position gives him 
+      access to the town's defenses and security information, making him valuable to both sides.
+    motives:
+      - id: maintain_power
+        description: "Keep his position and the wealth the cult provides while avoiding detection by the town's defenders."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: position_secured
+          - type: player_has_tag
+            tag: wealth_preserved
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: corruption_exposed
+          - type: player_has_tag
+            tag: cult_abandons_him
+      - id: protect_family
+        description: "Shield his family from the cult's wrath if he tries to back out of their arrangement."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: family_safe
+          - type: player_has_tag
+            tag: cult_threat_eliminated
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: family_harmed
+          - type: player_has_tag
+            tag: cult_retaliation
+      - id: seek_redemption
+        description: "Break free from the cult's control and help bring them down, despite the personal cost."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: cult_control_broken
+          - type: player_has_tag
+            tag: justice_served
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: cult_stronger
+          - type: player_has_tag
+            tag: redemption_failed
+    aliases: [marcus, captain, omalley, ironjaw, guard, security]
+
+  # The Mysterious Stranger
+  lysander_the_wanderer:
+    id: lysander_the_wanderer
+    name: Lysander the Wanderer
+    backstory: |
+      A traveling scholar and former member of a secret order that opposes dark cults. 
+      He arrived in Blackwater just before the disappearances began, claiming to be 
+      researching local folklore. He has ancient knowledge about the cult's methods and 
+      goals, but revealing too much could put the entire town at risk. His order has 
+      strict rules about when and how to intervene, and he must balance the safety of 
+      the many against the needs of the few. He carries ancient artifacts and forbidden 
+      knowledge that could either save or doom the town.
+    motives:
+      - id: destroy_the_cult
+        description: "Use his knowledge to permanently eliminate the cult threat, even if it means sacrificing the town."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: cult_destroyed
+          - type: player_has_tag
+            tag: dark_magic_banished
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: cult_ritual_completed
+          - type: player_has_tag
+            tag: dark_power_unleashed
+      - id: preserve_knowledge
+        description: "Protect the ancient secrets he carries, even if it means letting some people die to prevent greater evil."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: knowledge_preserved
+          - type: player_has_tag
+            tag: greater_evil_prevented
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: secrets_stolen
+          - type: player_has_tag
+            tag: knowledge_corrupted
+      - id: find_the_artifact
+        description: "Locate a powerful artifact the cult seeks before they can use it to complete their dark ritual."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: artifact_found
+          - type: player_has_tag
+            tag: ritual_prevented
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: artifact_corrupted
+          - type: player_has_tag
+            tag: ritual_completed
+    aliases: [lysander, wanderer, scholar, researcher, stranger, sage]
+
+  # The Information Broker
+  bella_whisper_nightshade:
+    id: bella_whisper_nightshade
+    name: Bella "Whisper" Nightshade
+    backstory: |
+      A former thief and current information broker who runs a network of spies throughout 
+      the region. She knows everyone's secrets and sells information to the highest bidder. 
+      She's been playing both sides - selling information to the cult while also helping 
+      the town's defenders. Her network of contacts includes everyone from street urchins 
+      to high-ranking officials, and she has dirt on nearly everyone in town. She's 
+      motivated by profit and survival, but recent events have forced her to consider 
+      which side she truly wants to win.
+    motives:
+      - id: profit_from_chaos
+        description: "Make as much money as possible from the town's crisis by selling information to all sides."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: maximum_profit_achieved
+          - type: player_has_tag
+            tag: network_expanded
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: market_collapsed
+          - type: player_has_tag
+            tag: caught_in_crossfire
+      - id: protect_her_network
+        description: "Keep her spy network safe from both the cult and the town's defenders as the conflict escalates."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: network_safe
+          - type: player_has_tag
+            tag: contacts_protected
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: network_compromised
+          - type: player_has_tag
+            tag: contacts_turned
+      - id: choose_a_side
+        description: "Finally decide whether to fully support the cult or help the town, as the conflict escalates beyond control."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: side_chosen
+          - type: player_has_tag
+            tag: commitment_made
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: caught_playing_both_sides
+          - type: player_has_tag
+            tag: forced_to_choose
+    aliases: [bella, whisper, nightshade, broker, spy, informant]

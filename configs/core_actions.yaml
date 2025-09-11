@@ -134,7 +134,8 @@ actions:
         object_name_param: object_name
     effects:
       - type: code_binding
-        function_name: drop_object
+        function_module: motive.hooks.core_hooks
+        function_name: handle_drop_action
         observers: ["player", "room_players"]
   read:
     id: read

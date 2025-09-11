@@ -36,7 +36,7 @@ import uuid # Added for UUID logging
 
 class GameMaster:
     # Accept a pre-validated GameConfig object directly
-    def __init__(self, game_config: GameConfig, game_id: str):
+    def __init__(self, game_config: GameConfig, game_id: str, deterministic: bool = False):
         self.players = []
         
         # Resolve manual path relative to the configs directory (where game.yaml is located)
@@ -54,6 +54,7 @@ class GameMaster:
             self.manual_path = os.path.join(configs_dir, game_config['game_settings']['manual'])
             
         self.game_id = game_id
+        self.deterministic = deterministic
 
         self.game_config = game_config # Assign game_config earlier
 
@@ -81,7 +82,7 @@ class GameMaster:
             initial_ap = game_config.game_settings.initial_ap_per_turn
         else:
             initial_ap = game_config['game_settings']['initial_ap_per_turn']
-        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger, initial_ap)
+        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger, initial_ap, self.deterministic)
 
         # Load configurations from merged config
         self.game_initializer._load_configurations()

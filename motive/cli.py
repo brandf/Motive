@@ -60,10 +60,17 @@ def load_config(config_path: str, validate: bool = True) -> GameConfig:
 
 
 async def run_game(config_path: str, game_id: str = None, validate: bool = True, 
-                  rounds: int = None, ap: int = None, manual: str = None, hint: str = None):
+                  rounds: int = None, ap: int = None, manual: str = None, hint: str = None, 
+                  deterministic: bool = False, players: int = None):
     """Run a Motive game with the specified configuration."""
     # Load environment variables
     load_dotenv()
+    
+    # Setup deterministic mode if requested
+    if deterministic:
+        import random
+        random.seed(42)  # Fixed seed for reproducibility
+        print("Running in deterministic mode with fixed random seed (42)")
     
     # Setup logging
     setup_logging()
@@ -100,6 +107,33 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
             "when": {}  # Empty when condition means always show
         })
     
+    # Handle players count override
+    if players is not None:
+        print(f"Overriding player count: {len(game_config.players)} -> {players}")
+        if players <= 0:
+            # Handle zero or negative players
+            game_config.players = []
+        elif players < len(game_config.players):
+            # Use first N players
+            game_config.players = game_config.players[:players]
+        elif players > len(game_config.players):
+            # Create additional players by duplicating existing ones
+            original_players = game_config.players.copy()
+            additional_needed = players - len(game_config.players)
+            
+            for i in range(additional_needed):
+                # Pick a random player to duplicate (or cycle through if deterministic)
+                if deterministic:
+                    source_player = original_players[i % len(original_players)]
+                else:
+                    import random
+                    source_player = random.choice(original_players)
+                
+                # Create a new player with modified name
+                new_player = source_player.model_copy()
+                new_player.name = f"{source_player.name}_{i + 1}"
+                game_config.players.append(new_player)
+    
     # Check LangSmith configuration
     if os.getenv("LANGCHAIN_TRACING_V2") == "true":
         print("LangSmith tracing is enabled. Ensure LANGCHAIN_API_KEY is set in .env.")
@@ -108,7 +142,7 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
     
     # Run the game
     try:
-        gm = GameMaster(game_config=game_config, game_id=game_id)
+        gm = GameMaster(game_config=game_config, game_id=game_id, deterministic=deterministic)
         await gm.run_game()
     except KeyboardInterrupt:
         print("\nGame interrupted by user.")
@@ -177,6 +211,16 @@ Examples:
         type=str,
         help='Add a hint that will be shown to all players every round'
     )
+    parser.add_argument(
+        '--deterministic',
+        action='store_true',
+        help='Run in deterministic mode with fixed random seed for reproducible results'
+    )
+    parser.add_argument(
+        '--players',
+        type=int,
+        help='Number of players to use (overrides config). If more than config players, creates additional players by duplicating existing ones. If more than available characters, will error.'
+    )
     
     args = parser.parse_args()
     
@@ -188,7 +232,8 @@ Examples:
     # Run the game
     validate = not args.no_validate
     asyncio.run(run_game(args.config, args.game_id, validate=validate, 
-                        rounds=args.rounds, ap=args.ap, manual=args.manual, hint=args.hint))
+                        rounds=args.rounds, ap=args.ap, manual=args.manual, hint=args.hint,
+                        deterministic=args.deterministic, players=args.players))
 
 
 if __name__ == '__main__':

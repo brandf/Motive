@@ -23,11 +23,12 @@ from motive.character import Character
 from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError
 
 class GameInitializer:
-    def __init__(self, game_config: GameConfig, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20):
+    def __init__(self, game_config: GameConfig, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20, deterministic: bool = False):
         self.game_config = game_config # This is the overall GameConfig loaded from config.yaml
         self.game_id = game_id
         self.game_logger = game_logger
         self.initial_ap_per_turn = initial_ap_per_turn # Store initial AP per turn
+        self.deterministic = deterministic # Store deterministic flag
 
         self.rooms: Dict[str, Room] = {}
         self.game_objects: Dict[str, GameObject] = {}
@@ -203,8 +204,17 @@ class GameInitializer:
             init_data['warnings'].append("No rooms defined in merged configuration. Cannot assign starting room for players.")
             return
 
+        # Randomly assign characters to players (no duplicates)
+        import random
+        if not self.deterministic:
+            # Random assignment in normal mode
+            char_assignments = random.sample(available_character_ids, len(players))
+        else:
+            # Deterministic assignment (first N characters in order)
+            char_assignments = available_character_ids[:len(players)]
+
         for i, player in enumerate(players):
-            char_id_to_assign = available_character_ids[i % len(available_character_ids)]
+            char_id_to_assign = char_assignments[i]
             # Use characters if available, otherwise fall back to character_types
             if hasattr(self, 'game_characters') and self.game_characters:
                 char_cfg = self.game_characters[char_id_to_assign]
@@ -261,7 +271,8 @@ class GameInitializer:
                 motives=converted_motives,  # New multiple motives (converted)
                 current_room_id=start_room_id,
                 action_points=self.initial_ap_per_turn, # Use configurable initial AP
-                aliases=char_aliases
+                aliases=char_aliases,
+                deterministic=self.deterministic  # Pass deterministic flag
             )
             player.character = player_char # Link player to character
             self.player_characters[player_char.id] = player_char
@@ -423,14 +434,28 @@ class GameInitializer:
             self.game_logger.error("No characters defined in merged configuration. Cannot assign characters to players.")
             return
         
+        # Check if we have enough characters for all players
+        if len(players) > len(available_character_ids):
+            self.game_logger.error(f"Not enough characters for all players. Need {len(players)} characters but only have {len(available_character_ids)} available.")
+            return
+        
         # Find a suitable starting room (e.g., the first room defined in the merged config)
         start_room_id = next(iter(self.game_rooms.keys()), None)
         if not start_room_id:
             self.game_logger.error("No rooms defined in merged configuration. Cannot assign starting room for players.")
             return
 
+        # Randomly assign characters to players (no duplicates)
+        import random
+        if not self.deterministic:
+            # Random assignment in normal mode
+            char_assignments = random.sample(available_character_ids, len(players))
+        else:
+            # Deterministic assignment (first N characters in order)
+            char_assignments = available_character_ids[:len(players)]
+
         for i, player in enumerate(players):
-            char_id_to_assign = available_character_ids[i % len(available_character_ids)]
+            char_id_to_assign = char_assignments[i]
             # Use characters if available, otherwise fall back to character_types
             if hasattr(self, 'game_characters') and self.game_characters:
                 char_cfg = self.game_characters[char_id_to_assign]
@@ -487,7 +512,8 @@ class GameInitializer:
                 motives=converted_motives,  # New multiple motives (converted)
                 current_room_id=start_room_id,
                 action_points=self.initial_ap_per_turn, # Use configurable initial AP
-                aliases=char_aliases
+                aliases=char_aliases,
+                deterministic=self.deterministic  # Pass deterministic flag
             )
             player.character = player_char # Link player to character
             self.player_characters[player_char.id] = player_char

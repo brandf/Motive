@@ -19,7 +19,8 @@ class Character:
         tags: Optional[List[str]] = None,
         properties: Optional[Dict[str, Any]] = None,
         action_points: int = 3, # Default action points
-        aliases: Optional[List[str]] = None
+        aliases: Optional[List[str]] = None,
+        deterministic: bool = False  # Use deterministic selection instead of random
     ):
         self.id = char_id
         self.name = name
@@ -36,8 +37,11 @@ class Character:
             self.selected_motive = selected_motive
             self.motive = selected_motive.description  # For backward compatibility
         elif motives and len(motives) > 0:
-            # Randomly select a motive if none was pre-selected
-            self.selected_motive = random.choice(motives)
+            # Select a motive - use deterministic selection if requested, otherwise random
+            if deterministic:
+                self.selected_motive = motives[0]  # Always pick first motive in deterministic mode
+            else:
+                self.selected_motive = random.choice(motives)
             self.motive = self.selected_motive.description  # For backward compatibility
         elif motive:
             # Legacy single motive
