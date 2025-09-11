@@ -88,6 +88,19 @@ class ConfigValidator:
         for action_id, action_data in actions.items():
             try:
                 ActionConfig(**action_data)
+                
+                # Additional validation: ensure all actions have positive cost (except special -1 for pass)
+                cost = action_data.get('cost', 0)
+                if isinstance(cost, dict):
+                    cost_value = cost.get('value', 0)
+                else:
+                    cost_value = cost
+                
+                if cost_value <= 0 and cost_value != -1:
+                    error_msg = f"Action '{action_id}': Cost must be positive (got {cost_value}). Use -1 for 'consume all AP' actions like 'pass'."
+                    validation_errors.append(error_msg)
+                    self.logger.error(f"Action cost validation error: {error_msg}")
+                
             except ValidationError as e:
                 error_msg = f"Action '{action_id}': {self._format_single_pydantic_error(e)}"
                 validation_errors.append(error_msg)

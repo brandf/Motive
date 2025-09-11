@@ -278,6 +278,64 @@ class GameMaster:
         # Check win conditions and provide game summary
         self._check_win_conditions_and_summarize()
 
+    async def run_game_worker(self):
+        """Worker version of run_game with structured progress output for parallel monitoring."""
+        # Print structured progress information that the parallel runner can parse
+        print(f"WORKER_START: {self.game_id}")
+        
+        # Still log to file but suppress most stdout output
+        self.game_logger.info("🚀 ==================== GAME STARTING (WORKER MODE) ====================")
+        
+        # Log game settings for training data metadata
+        if hasattr(self.game_config, 'game_settings'):
+            print(f"WORKER_ROUNDS: {self.game_config.game_settings.num_rounds}")
+            print(f"WORKER_PLAYERS: {len(self.players)}")
+            self.game_logger.info(f"⚙️ Game Settings: {self.game_config.game_settings.num_rounds} rounds, {self.game_config.game_settings.initial_ap_per_turn} AP/turn")
+        else:
+            print(f"WORKER_ROUNDS: {self.game_config['game_settings']['num_rounds']}")
+            print(f"WORKER_PLAYERS: {len(self.players)}")
+            self.game_logger.info(f"⚙️ Game Settings: {self.game_config['game_settings']['num_rounds']} rounds, {self.game_config['game_settings']['initial_ap_per_turn']} AP/turn")
+
+        for round_num in range(1, self.num_rounds + 1):
+            print(f"WORKER_ROUND_START: {round_num}")
+            self.game_logger.info(f"🎯 Round {round_num} of {self.num_rounds}")
+            
+            # Log character snapshot report before each round
+            self.game_logger.info(self._generate_character_snapshot_report())
+            
+            # Filter out players who have quit
+            active_players = [player for player in self.players if player.character.action_points != -1]
+            
+            if not active_players:
+                print("WORKER_GAME_END: No active players")
+                self.game_logger.info("No active players remaining. Game ending early.")
+                break
+                
+            for player in active_players:
+                # Handle both Pydantic objects and dictionaries from merged config
+                if hasattr(self.game_config, 'game_settings'):
+                    player.character.action_points = self.game_config.game_settings.initial_ap_per_turn
+                else:
+                    player.character.action_points = self.game_config['game_settings']['initial_ap_per_turn']
+                
+                print(f"WORKER_PLAYER_TURN: {player.name}")
+                await self._execute_player_turn_worker(player, round_num)
+                print(f"WORKER_TURN_COMPLETE: {player.name}")
+                
+                # Check if player quit during their turn
+                if player.character.action_points == -1:
+                    print(f"WORKER_PLAYER_QUIT: {player.name}")
+                    self.game_logger.info(f"Player {player.name} has quit the game.")
+                    
+            print(f"WORKER_ROUND_END: {round_num}")
+            self.game_logger.info(f"✅ Round {round_num} complete")
+
+        print("WORKER_GAME_END: Complete")
+        self.game_logger.info("🏁 ===================== GAME OVER ======================")
+        
+        # Check win conditions and provide game summary
+        self._check_win_conditions_and_summarize()
+
     def _generate_character_snapshot_report(self) -> str:
         """Generate a snapshot report of all characters' locations and inventories."""
         report_lines = ["📊 Character Snapshot Report:"]
@@ -767,9 +825,15 @@ class GameMaster:
         
         # Handle cost as either integer or dictionary
         if isinstance(cost_raw, dict):
-            return cost_raw.get('value', 0)  # Extract value from CostConfig dict
+            cost_value = cost_raw.get('value', 0)  # Extract value from CostConfig dict
         else:
-            return cost_raw
+            cost_value = cost_raw
+        
+        # Special case: -1 means consume all remaining AP (for pass action)
+        if cost_value == -1:
+            return player_char.action_points
+        
+        return cost_value
 
     def _distribute_events(self):
         """Distributes generated events to relevant players based on observer scopes."""
@@ -1217,6 +1281,23 @@ class GameMaster:
                     continue
 
         self.game_logger.info(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
+
+    async def _execute_player_turn_worker(self, player: Player, round_num: int):
+        """Worker version of _execute_player_turn that automatically handles turn end confirmations."""
+        # Temporarily patch the turn end confirmation method to be a no-op
+        original_handle_turn_end_confirmation = self._handle_turn_end_confirmation
+        
+        async def no_op_turn_end_confirmation(player, player_char):
+            self.game_logger.info(f"Worker mode: Skipping turn end confirmation for {player.name}")
+        
+        self._handle_turn_end_confirmation = no_op_turn_end_confirmation
+        
+        try:
+            # Call the original method
+            await self._execute_player_turn(player, round_num)
+        finally:
+            # Restore the original method
+            self._handle_turn_end_confirmation = original_handle_turn_end_confirmation
 
     async def _handle_turn_end_confirmation(self, player: Player, player_char: Character):
         """Handles the turn end confirmation process with the player."""

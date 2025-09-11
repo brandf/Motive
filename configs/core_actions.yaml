@@ -157,7 +157,7 @@ actions:
   pass:
     id: pass
     name: pass
-    cost: 0
+    cost: -1  # Special value meaning "consume all remaining AP"
     description: End your turn without taking any action.
     category: system
     parameters: []

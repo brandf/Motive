@@ -1,0 +1,25 @@
+# Test configuration for parallel game testing
+# Uses simple setup with mocked LLMs
+
+includes:
+  - "../../configs/game.yaml"
+
+# Override for parallel testing
+game_settings:
+  num_rounds: 2
+  initial_ap_per_turn: 30
+  manual: "docs/MANUAL.md"
+
+# Simple test players (will be mocked in tests)
+players:
+  - name: "Player1"
+    provider: "google"
+    model: "gemini-2.5-flash"
+    
+  - name: "Player2" 
+    provider: "google"
+    model: "gemini-2.5-flash"
+
+# Use a simple theme for testing
+theme: "fantasy"
+edition: "hearth_and_shadow"
