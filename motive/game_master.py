@@ -186,10 +186,13 @@ class GameMaster:
 
     def _setup_logging(self):
         """Sets up the logging directory and configures the GM logger."""
-        base_log_dir = "logs"
+        import os
+        disable_file_logging = os.environ.get("MOTIVE_DISABLE_FILE_LOGGING") == "1"
+        base_log_dir = os.environ.get("MOTIVE_LOG_DIR", "logs")
         # Use game_id directly for folder name (should be sortable if game_id includes timestamp)
         game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, self.game_id)
-        os.makedirs(game_log_dir, exist_ok=True)
+        if not disable_file_logging:
+            os.makedirs(game_log_dir, exist_ok=True)
 
         # Remove all existing handlers from the logger before reconfiguring
         for handler in list(self.game_logger.handlers):
@@ -198,12 +201,15 @@ class GameMaster:
         # Set the level for the game logger (now that it's the main logger)
         self.game_logger.setLevel(logging.INFO)
 
-        # File handler for game.log
-        game_narrative_file = os.path.join(game_log_dir, "game.log")
-        game_file_handler = logging.FileHandler(game_narrative_file, encoding="utf-8")
-        game_formatter = logging.Formatter('%(asctime)s - %(message)s') # Simpler format for narrative
-        game_file_handler.setFormatter(game_formatter)
-        self.game_logger.addHandler(game_file_handler)
+        # File handler for game.log (skip in tests when disabled)
+        log_targets = ["stdout"]
+        if not disable_file_logging:
+            game_narrative_file = os.path.join(game_log_dir, "game.log")
+            game_file_handler = logging.FileHandler(game_narrative_file, encoding="utf-8")
+            game_formatter = logging.Formatter('%(asctime)s - %(message)s') # Simpler format for narrative
+            game_file_handler.setFormatter(game_formatter)
+            self.game_logger.addHandler(game_file_handler)
+            log_targets.insert(0, game_narrative_file)
 
         # Stream handler for stdout
         stdout_handler = logging.StreamHandler(sys.stdout)
@@ -211,7 +217,7 @@ class GameMaster:
         stdout_handler.setFormatter(stdout_formatter)
         self.game_logger.addHandler(stdout_handler)
 
-        self.game_logger.info(f"Game narrative logging to {game_narrative_file} and stdout.")
+        self.game_logger.info(f"Game narrative logging to {' and '.join(log_targets)}.")
         
         return game_log_dir
 
@@ -795,12 +801,12 @@ class GameMaster:
                 players_outside_room.append(player)
         
         # Show players in the room and their observation status
-                if players_in_room:
-                    for player in players_in_room:
-                        player_char = player.character
-                        observes, reason = self._determine_observation_status(event, player_char)
-                        checkbox = "☑️" if observes else "☐"
-                        details.append(f"    {checkbox} {player.name} ({player_char.name}) - {reason}")
+        if players_in_room:
+            for player in players_in_room:
+                player_char = player.character
+                observes, reason = self._determine_observation_status(event, player_char)
+                checkbox = "☑️" if observes else "☐"
+                details.append(f"    {checkbox} {player.name} ({player_char.name}) - {reason}")
         
         # Show players outside the room
         if players_outside_room:

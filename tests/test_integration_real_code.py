@@ -19,6 +19,7 @@ from motive.room import Room
 from motive.hooks.core_hooks import look_at_target, generate_help_message, handle_pickup_action, handle_read_action
 
 
+@pytest.mark.sandbox_integration
 class TestRealCodeIntegration:
     """Test that the real code fixes actually work."""
     

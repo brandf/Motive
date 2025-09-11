@@ -4,7 +4,7 @@ includes:
 
 # Game settings
 game_settings:
-  num_rounds: 2
+  num_rounds: 30
   manual: "../docs/MANUAL.md"
   initial_ap_per_turn: 30 # High AP for strategic gameplay
 # hints: [] # No hints configured - clean state for production
@@ -16,5 +16,17 @@ players:
     model: "gemini-2.5-flash"
 
   - name: "Player_2"
+    provider: "google"
+    model: "gemini-2.5-flash"
+    
+  - name: "Player_3"
+    provider: "google"
+    model: "gemini-2.5-flash"
+    
+  - name: "Player_4"
+    provider: "google"
+    model: "gemini-2.5-flash"
+    
+  - name: "Player_5"
     provider: "google"
     model: "gemini-2.5-flash"

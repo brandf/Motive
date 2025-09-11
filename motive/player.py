@@ -28,14 +28,16 @@ class Player:
         # Prevent logs from propagating to the root logger
         logger.propagate = False
 
-        # Create a file handler
-        player_log_file = os.path.join(self.log_dir, f"{self.name}_chat.log")
-        handler = logging.FileHandler(player_log_file, mode="w", encoding="utf-8")
-        formatter = logging.Formatter("%(asctime)s - %(message)s")
-        handler.setFormatter(formatter)
+        # Create a file handler unless disabled
+        disable_file_logging = os.environ.get("MOTIVE_DISABLE_FILE_LOGGING") == "1"
+        if not disable_file_logging:
+            player_log_file = os.path.join(self.log_dir, f"{self.name}_chat.log")
+            handler = logging.FileHandler(player_log_file, mode="w", encoding="utf-8")
+            formatter = logging.Formatter("%(asctime)s - %(message)s")
+            handler.setFormatter(formatter)
 
         # Add the handler to the logger if it doesn't have one already
-        if not logger.handlers:
+        if not logger.handlers and not disable_file_logging:
             logger.addHandler(handler)
 
         return logger

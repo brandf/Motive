@@ -11,6 +11,7 @@ from motive.cli import load_config
 from motive.config_loader import ConfigLoader
 
 
+@pytest.mark.sandbox_integration
 class TestCLIHierarchicalIntegration:
     """Test CLI integration with hierarchical configs."""
     

@@ -35,3 +35,7 @@ exclude = ["logs*", "tests*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+markers = [
+    "sandbox_integration: deterministic end-to-end tests with mocked LLMs",
+    "llm_integration: live LLM integration tests (skipped unless LIVE_LLM=1)",
+]

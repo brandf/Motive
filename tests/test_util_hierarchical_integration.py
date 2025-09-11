@@ -12,6 +12,10 @@ from io import StringIO
 import sys
 
 
+import pytest
+
+
+@pytest.mark.sandbox_integration
 class TestUtilHierarchicalIntegration:
     """Test motive-util tool integration with hierarchical configs."""
     

@@ -12,6 +12,10 @@ from motive.game_master import GameMaster
 from motive.config import GameConfig, GameSettings, PlayerConfig
 
 
+import pytest
+
+
+@pytest.mark.sandbox_integration
 class TestGameMasterHierarchicalIntegration:
     """Test GameMaster integration with hierarchical configs."""
     
