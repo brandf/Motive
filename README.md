@@ -96,6 +96,8 @@ This historical context helps explain why Motive's design choices—like structu
 - **Hierarchical Configuration**: Flexible YAML-based game content organization
 - **Observability System**: Event-driven information distribution
 - **Inventory Constraints**: Realistic object interaction limitations
+- **Character-Specific Starting Locations**: Characters start in contextually appropriate rooms with narrative reasons
+- **CLI Customization**: Flexible command-line arguments for rounds, players, hints, and deterministic mode
 - **Training Data Pipeline**: Comprehensive tools for curating LLM training data
 - **Theme/Edition System**: Modular content organization (core → fantasy → hearth_and_shadow)
 
@@ -117,7 +119,8 @@ This historical context helps explain why Motive's design choices—like structu
 ### Hearth and Shadow Edition
 The current flagship edition features a fantasy town with:
 - **11 interconnected rooms** (tavern, guild, church, bank, etc.)
-- **5 unique characters** with complex motives and backstories
+- **8 unique characters** with complex motives and backstories
+- **Character-specific starting locations** with narrative reasons
 - **Strategic connections** including hidden passages and secret tunnels
 - **Rich object interactions** with story-driven items and tools
 

@@ -262,6 +262,22 @@ class GameInitializer:
                         # Already a MotiveConfig object
                         converted_motives.append(motive_dict)
 
+            # Select initial room based on character configuration
+            selected_room_id = self._select_initial_room(char_cfg, start_room_id)
+            
+            # Find the reason for the selected room
+            initial_room_reason = None
+            if hasattr(char_cfg, 'initial_rooms') and char_cfg.initial_rooms:
+                for room_config in char_cfg.initial_rooms:
+                    if room_config.room_id == selected_room_id:
+                        initial_room_reason = room_config.reason
+                        break
+            elif isinstance(char_cfg, dict) and 'initial_rooms' in char_cfg:
+                for room_config in char_cfg['initial_rooms']:
+                    if room_config['room_id'] == selected_room_id:
+                        initial_room_reason = room_config['reason']
+                        break
+            
             # Create character with new motives system support
             player_char = Character(
                 char_id=f"{char_id}_instance_{i}", # Make character instance ID unique                                                
@@ -269,14 +285,18 @@ class GameInitializer:
                 backstory=char_backstory,
                 motive=char_motive,  # Legacy single motive
                 motives=converted_motives,  # New multiple motives (converted)
-                current_room_id=start_room_id,
+                current_room_id=selected_room_id,
                 action_points=self.initial_ap_per_turn, # Use configurable initial AP
                 aliases=char_aliases,
                 deterministic=self.deterministic  # Pass deterministic flag
             )
+            
+            # Store the initial room reason for use in initial turn message
+            player_char.initial_room_reason = initial_room_reason
+            
             player.character = player_char # Link player to character
             self.player_characters[player_char.id] = player_char
-            self.rooms[start_room_id].add_player(player_char) # Add player to the room
+            self.rooms[selected_room_id].add_player(player_char) # Add player to the room
             init_data['characters_assigned'].append(f"{player_char.name} to {player.name}")
 
     def _log_initialization_report(self, init_data):
@@ -421,6 +441,64 @@ class GameInitializer:
         
         self.game_logger.info(f"Created {rooms_created} rooms and placed {objects_placed} objects.")
 
+    def _select_initial_room(self, char_config, default_room_id: str) -> str:
+        """Select an initial room for a character based on their configuration."""
+        import random
+        
+        # Check if character has initial_rooms configured
+        initial_rooms = None
+        if hasattr(char_config, 'initial_rooms') and char_config.initial_rooms:
+            initial_rooms = char_config.initial_rooms
+        elif isinstance(char_config, dict) and 'initial_rooms' in char_config:
+            initial_rooms = char_config['initial_rooms']
+        
+        if not initial_rooms:
+            # No custom initial rooms, use default
+            return default_room_id
+        
+        # Convert to list if it's a dict (from merged config)
+        if isinstance(initial_rooms, dict):
+            initial_rooms = list(initial_rooms.values())
+        
+        # Select room based on weighted random choice
+        rooms = []
+        weights = []
+        
+        for room_config in initial_rooms:
+            room_id = room_config.room_id if hasattr(room_config, 'room_id') else room_config['room_id']
+            chance = room_config.chance if hasattr(room_config, 'chance') else room_config['chance']
+            
+            # Only include rooms that exist in the game
+            if room_id in self.game_rooms:
+                rooms.append(room_id)
+                weights.append(chance)
+        
+        if not rooms:
+            # No valid rooms found, use default
+            return default_room_id
+        
+        # Normalize weights if they exceed 100% (user-friendly for story writers)
+        total_weight = sum(weights)
+        if total_weight > 100:
+            # Normalize proportionally to sum to 100
+            weights = [int(weight * 100 / total_weight) for weight in weights]
+            # Ensure we don't have any zero weights (minimum 1%)
+            weights = [max(1, weight) for weight in weights]
+            # Re-normalize to ensure they sum to 100
+            total_weight = sum(weights)
+            if total_weight != 100:
+                # Adjust the largest weight to make it exactly 100
+                max_idx = weights.index(max(weights))
+                weights[max_idx] += (100 - total_weight)
+        
+        # Use weighted random choice
+        if self.deterministic:
+            # In deterministic mode, always pick the first room
+            return rooms[0]
+        else:
+            # Use random.choices for weighted selection
+            return random.choices(rooms, weights=weights, k=1)[0]
+
     def _instantiate_player_characters(self, players: List[Player]):
         self.game_logger.info("🎭 Instantiating player characters and assigning to players...")
         # Use characters if available, otherwise fall back to character_types
@@ -440,8 +518,8 @@ class GameInitializer:
             return
         
         # Find a suitable starting room (e.g., the first room defined in the merged config)
-        start_room_id = next(iter(self.game_rooms.keys()), None)
-        if not start_room_id:
+        default_start_room_id = next(iter(self.game_rooms.keys()), None)
+        if not default_start_room_id:
             self.game_logger.error("No rooms defined in merged configuration. Cannot assign starting room for players.")
             return
 
@@ -503,6 +581,22 @@ class GameInitializer:
                         # Already a MotiveConfig object
                         converted_motives.append(motive_dict)
 
+            # Select initial room based on character configuration
+            selected_room_id = self._select_initial_room(char_cfg, start_room_id)
+            
+            # Find the reason for the selected room
+            initial_room_reason = None
+            if hasattr(char_cfg, 'initial_rooms') and char_cfg.initial_rooms:
+                for room_config in char_cfg.initial_rooms:
+                    if room_config.room_id == selected_room_id:
+                        initial_room_reason = room_config.reason
+                        break
+            elif isinstance(char_cfg, dict) and 'initial_rooms' in char_cfg:
+                for room_config in char_cfg['initial_rooms']:
+                    if room_config['room_id'] == selected_room_id:
+                        initial_room_reason = room_config['reason']
+                        break
+            
             # Create character with new motives system support
             player_char = Character(
                 char_id=f"{char_id}_instance_{i}", # Make character instance ID unique                                                
@@ -510,12 +604,16 @@ class GameInitializer:
                 backstory=char_backstory,
                 motive=char_motive,  # Legacy single motive
                 motives=converted_motives,  # New multiple motives (converted)
-                current_room_id=start_room_id,
+                current_room_id=selected_room_id,
                 action_points=self.initial_ap_per_turn, # Use configurable initial AP
                 aliases=char_aliases,
                 deterministic=self.deterministic  # Pass deterministic flag
             )
+            
+            # Store the initial room reason for use in initial turn message
+            player_char.initial_room_reason = initial_room_reason
+            
             player.character = player_char # Link player to character
             self.player_characters[player_char.id] = player_char
-            self.rooms[start_room_id].add_player(player_char) # Add player to the room
+            self.rooms[selected_room_id].add_player(player_char) # Add player to the room
             self.game_logger.info(f"Assigned {player_char.name} to {player.name}")

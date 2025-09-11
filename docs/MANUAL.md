@@ -4,8 +4,7 @@ This document provides a comprehensive guide to the world of Motive, detailing t
 
 ## Who is this for?
 
-- **Players** learning how to play and win
-- **Game Masters/maintainers** verifying rules and action behavior
+- **Players** learning how to play and win (both human and AI players)
 
 ## Table of Contents
 
@@ -29,7 +28,8 @@ The game unfolds over a series of rounds, with each player taking a turn within 
 **Player Turn Sequence:**
 
 1.  **Information from GM:** At the beginning of a player's turn, the GM provides the following information:
-    *   (First round only) Your assigned character and motive - this must be accomplish to win the game.
+    *   (First round only) Your assigned character and motive - this must be accomplished to win the game.
+    *   (First round only) Your initial location with a narrative reason explaining why you're there.
     *   A list of 'observations' – these are the observable events triggered by other players' actions since your last turn, or on the first round it will be a description of the initial room.
     *   A subset of the available actions as examples for what can be done
       - the (1 AP) 'help' action provides the player a menu-like experience for choosing an action
@@ -54,9 +54,9 @@ The game world is structured as a collection of **rooms** connected by **exits**
 
 **Key Environmental Elements:**
 
-*   **Rooms:** Distinct locations within the game world. Each room has a descriptive text. All players begin the game in a designated starting room (e.g., a town square or dungeon entrance), though the specific theme and layout can vary.
+*   **Rooms:** Distinct locations within the game world. Each room has a descriptive text. Players begin the game in character-specific starting locations that make narrative sense for their role and backstory.
 *   **Exits:** Connections between rooms. Exits allow players to move from one room to an adjacent one. The GM will provide a list of visible exits from a player's current room.
-*   **Objects:** Interactable items within the game. Objects can be located in rooms or carried by players in their **inventory**. To maintain simplicity in initial versions, there are no "container" type objects (e.g., chests that hold other items). Objects can be manipulated through player actions.
+*   **Objects:** Interactable items within the game. Objects can be located in rooms or carried by players in their **inventory**. Objects can be manipulated through player actions.
 
 ## Player Actions: Categories and Parameters
 
@@ -82,22 +82,11 @@ Actions are organized into the following categories:
 4.  **Interaction**: Actions for interacting with objects (`read`)
 5.  **System**: Actions for game management (`help`, `pass`)
 
-### Action Design Principles
-
-Motive follows a consistent design pattern:
-- **Actions are verbs**: Commands like `look`, `pickup`, `move`
-- **Parameters are nouns**: Targets like `inventory`, `sword`, `north`
-- **Costs are balanced**: Most actions cost 10 AP, with system actions costing less
-- **Requirements are declarative**: Actions specify what conditions must be met
-- **Effects are observable**: Actions generate events that other players may observe
-
 Performing an action results in changes to the game state and the generation of events. These events are then processed by the GM to determine which players observe them, creating the observability mechanic that drives strategic gameplay.
 
 ### Current Core Actions
 
 The following core actions are currently implemented and available to all players:
-
-> **Note**: See [docs/TODO.md](TODO.md) for planned actions like `give`, `trade`, `throw`, and `use`.
 
 #### **Movement Actions**
 - **`move`**: Move in a specified direction through room exits
@@ -119,50 +108,17 @@ The following core actions are currently implemented and available to all player
 - **`help`**: Get help with available actions (costs 1 AP)
 - **`pass`**: End your turn without taking any action (costs 0 AP)
 
-### Inventory Constraint System
+### Inventory Constraints
 
-Objects in Motive can have various constraints that prevent them from being picked up or transferred:
+Some objects in the game cannot be picked up or moved due to various constraints:
 
-#### **Constraint Types**
-- **`immovable`**: Object cannot be moved (e.g., fountains, statues)
-- **`too_heavy`**: Object is too heavy for the player to carry
-- **`magically_bound`**: Object is bound to a location by magic
-- **`requires_size`**: Player must be a certain size (tiny, small, medium, large, huge)
-- **`requires_class`**: Player must be a specific class (warrior, mage, rogue, etc.)
-- **`requires_level`**: Player must be a certain level or higher
-- **`custom_constraints`**: Complex constraints defined in object properties
+- **Immovable objects**: Fountains, statues, and other fixed structures
+- **Heavy objects**: Items too heavy for the player to carry
+- **Magically bound items**: Objects bound to a location by magic
+- **Restricted items**: Objects that require specific character attributes (size, class, level, etc.)
 
-#### **Constraint Examples**
-- A `Legendary Sword` requires level 15+ to wield
-- `Warrior's Armor` can only be worn by warrior-class characters
-- A `Huge Boulder` requires large or huge size to move
-- An `Elven Artifact` has custom constraints requiring elf race and good alignment
+When you attempt to pick up a constrained object, the GM will inform you why it cannot be moved.
 
-### Planned Future Actions
-
-The following actions are planned for future implementation:
-
-> **Reference**: Implementation status and priorities are tracked in [docs/TODO.md](TODO.md).
-
-#### **Throw Action**
-- **Syntax:** `> throw <inventory object> <exit>`
-- **Description:** Removes an object from the player's inventory and places it in an adjacent room via the specified exit
-- **Strategic Use:** Allows tactical positioning without being present
-
-#### **Use Action (Generic Object Manipulation)**
-- **Syntax:** `> use <inventory object>`
-- **Description:** Generic object state manipulation defined declaratively in YAML
-- **Examples:** 
-  - `> use torch` could light/extinguish based on current state
-  - `> use key` could unlock doors
-
-#### **Give/Trade Actions**
-- **Syntax:** `> give <object> to <player>` / `> trade <object> for <object> with <player>`
-- **Description:** Safe item transfer between players with queued observation system
-
-#### **Enhanced Look Action**
-- **Syntax:** `> look <object>`
-- **Description:** State-dependent object descriptions that change based on object tags and room conditions
 
 ## Communication and Social Engineering
 
@@ -181,4 +137,4 @@ Communication between players is a vital component of Motive, routed entirely th
     *   Players in the destination room see: "[Player] entered the room from [Direction]."
 *   **Strategic importance:** This direction-specific information is crucial when multiple exits exist, allowing players to track each other's movements and make informed tactical decisions.
 
-This system allows LLM players to engage in complex social interactions, form alliances, spread misinformation, and strategize based on what they believe other players know or don't know. The ability to control who sees and hears what fosters a rich environment for emergent gameplay and offers significant potential for analyzing LLM reasoning and planning capabilities.
+This system allows players to engage in complex social interactions, form alliances, spread misinformation, and strategize based on what they believe other players know or don't know. The ability to control who sees and hears what fosters a rich environment for emergent gameplay and strategic depth.

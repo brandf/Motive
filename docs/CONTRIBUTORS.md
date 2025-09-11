@@ -183,6 +183,14 @@ motive -c configs/game_new.yaml          # Run with hierarchical config
 motive -c tests/configs/integration/game_test.yaml  # Run test configuration (self‑contained)
 motive --no-validate                     # Run without Pydantic validation (debugging)
 motive --game-id my-custom-game          # Run with custom game ID (default: auto-generated timestamp)
+
+# Game customization options
+motive --rounds 5                        # Override number of rounds
+motive --ap 30                           # Override action points per turn
+motive --players 4                       # Override number of players (creates duplicates if needed)
+motive --hint "Work together to solve the mystery"  # Add persistent hint for all players
+motive --deterministic                   # Run with fixed random seed for reproducible results
+motive --manual docs/custom_manual.md    # Override manual file path
 ```
 
 ### Configuration Analysis
@@ -465,9 +473,18 @@ Motive includes a sophisticated inventory constraint system that prevents object
 
 Players have limited Action Points (AP) per turn, creating strategic decision-making:
 
-- **Default AP**: 20 AP per turn
+- **Default AP**: 20 AP per turn (configurable via `--ap` CLI argument)
 - **Action Costs**: Most actions cost 10 AP, system actions cost less
 - **AP Exhaustion**: Clear feedback when actions are skipped due to insufficient AP
+
+### Character-Specific Starting Locations
+
+Characters now start in contextually appropriate locations with narrative reasons:
+
+- **Weighted Random Selection**: Characters can have multiple possible starting rooms with different probabilities
+- **Narrative Integration**: Each starting location includes a story reason that appears in the initial turn message
+- **Deterministic Mode**: In deterministic mode, characters always start in their first configured room
+- **Weight Normalization**: If character room chances exceed 100%, they are automatically normalized proportionally
 
 ### Observability System
 

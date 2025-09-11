@@ -925,7 +925,12 @@ class GameMaster:
             if is_first_interaction:
                 character_assignment = player_char.get_introduction_message()
                 message_content_parts.append(character_assignment)
-                message_content_parts.append(f"**🏠 Initial location:**\n{current_room_description}")
+                
+                # Add initial location with character's reason
+                initial_location_text = f"**🏠 Initial location:**\n{current_room_description}"
+                if hasattr(player_char, 'initial_room_reason') and player_char.initial_room_reason:
+                    initial_location_text += f"\n\n{player_char.initial_room_reason}"
+                message_content_parts.append(initial_location_text)
             
             # Add observations (if any)
             if observation_messages:

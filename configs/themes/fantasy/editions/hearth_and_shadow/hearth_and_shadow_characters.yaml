@@ -15,6 +15,19 @@ characters:
       suspects, and his weathered face tells the story of many sleepless nights spent 
       on the case. His partner was killed by the cult, and he has a sick daughter who 
       needs expensive medicine - creating a dangerous vulnerability that the cult could exploit.
+    initial_rooms:
+      - room_id: town_square
+        chance: 40
+        reason: "Examining the scene of the latest disappearance. Your notebook is filled with clues, and you're determined to find the truth behind the mayor's vanishing and bring the cult to justice."
+      - room_id: tavern
+        chance: 30
+        reason: "Questioning witnesses and gathering information. The barkeep has been helpful, and you're here to piece together the timeline of events leading to the mayor's disappearance."
+      - room_id: bank
+        chance: 20
+        reason: "Following a lead about suspicious financial transactions. The bank manager is nervous, and you suspect there's more to the mayor's disappearance than meets the eye."
+      - room_id: adventurer_guild
+        chance: 10
+        reason: "Seeking help from Guild Master Elena. You need allies in your investigation, and the guild's resources could be invaluable in tracking down the cult."
     motives:
       - id: investigate_mayor
         description: "Uncover the truth behind the mayor's disappearance and bring the cult to justice. Protect the remaining townsfolk from further harm."
@@ -74,6 +87,16 @@ characters:
       Now he knows their plans but revealing them would endanger everyone he loves. 
       His internal struggle between duty and fear, truth and protection, drives his 
       every action. He prays for divine guidance but fears he has already damned himself.
+    initial_rooms:
+      - room_id: church
+        chance: 60
+        reason: "Your spiritual home. You've been spending more time here lately, seeking divine guidance for the terrible secret you carry. The crypt entrance seems to call to you, a reminder of the dark ritual you were forced to perform."
+      - room_id: town_square
+        chance: 20
+        reason: "Ministering to the troubled townspeople. Your heart aches to see the growing darkness in their eyes, knowing that your silence about the cult's plans may be contributing to their suffering."
+      - room_id: tavern
+        chance: 20
+        reason: "Seeking to comfort the troubled souls who gather here. The barkeep knows you're a regular, and you're here to offer spiritual guidance to those who need it most."
     motives:
       - id: protect_flock
         description: "Protect your congregation from the growing darkness and keep them safe from the cult's influence."
@@ -130,6 +153,16 @@ characters:
       of contacts throughout the region. She has been quietly investigating the 
       disappearances on her own, using her guild's resources to gather intelligence. 
       Her calm demeanor masks a fierce determination to protect her town and her people.
+    initial_rooms:
+      - room_id: adventurer_guild
+        chance: 60
+        reason: "Reviewing intelligence reports and coordinating the town's defense. Your desk is covered with maps and correspondence, and you're planning how to use your network of contacts to combat the growing cult threat."
+      - room_id: town_square
+        chance: 20
+        reason: "Patrolling and assessing the town's security. As guild master, you're responsible for coordinating the defense, and you're here to evaluate the current threat level and plan your next move."
+      - room_id: tavern
+        chance: 20
+        reason: "Meeting with your network of contacts and gathering intelligence. The barkeep is a trusted ally, and you're here to learn about any new developments in the cult's activities."
     motives:
       - id: coordinate_defense
         description: "Coordinate the town's defense against the cult threat and train new adventurers to fight the darkness."
@@ -187,6 +220,16 @@ characters:
       cult, who hope to use her knowledge of the town's defenses and her influence over 
       the people to further their dark plans. Her disappearance has left a power vacuum 
       that the cult has been exploiting.
+    initial_rooms:
+      - room_id: secret_underground_chamber
+        chance: 50
+        reason: "You've been held captive here for weeks, but you've finally managed to work free your restraints. You can hear distant chanting and the sound of heavy footsteps above. You must escape before they return to complete their dark ritual."
+      - room_id: town_hall
+        chance: 30
+        reason: "Having recently escaped from cult captivity, you're hiding here trying to piece together which of your trusted advisors betrayed you while staying hidden from the cult's agents who still hunt you."
+      - room_id: church
+        chance: 20
+        reason: "Seeking sanctuary after your escape from cult captivity. Father Marcus has been helping you hide while you try to understand the full scope of the cult's infiltration of your administration."
     motives:
       - id: escape_and_return
         description: "Escape from cult captivity and return to lead the town to safety, restoring order and hope."
@@ -243,6 +286,19 @@ characters:
       the cult's methods than she's willing to admit, including their use of dark magic 
       to create the mysterious illnesses affecting townspeople. Her medical knowledge 
       combined with her cult background makes her both valuable and dangerous to both sides.
+    initial_rooms:
+      - room_id: medical_clinic
+        chance: 40
+        reason: "Tending to the sick and injured. Your former cult knowledge helps you recognize the dark magic symptoms, but you must be careful not to reveal too much about your past while still helping the townspeople."
+      - room_id: town_square
+        chance: 30
+        reason: "Making your rounds to check on the health of the townspeople. You're particularly concerned about the mysterious illnesses that seem to be spreading, knowing they bear the hallmarks of cult magic."
+      - room_id: tavern
+        chance: 20
+        reason: "Gathering information about the town's condition while trying to blend in. The barkeep trusts you, and you're here to learn about any new cases of the strange illness."
+      - room_id: church
+        chance: 10
+        reason: "Seeking spiritual guidance for your troubled soul. Your past cult involvement weighs heavily on you, and you're praying for the strength to help the town without revealing your dark history."
     motives:
       - id: heal_the_afflicted
         description: "Cure the mysterious illness affecting townspeople and find a way to reverse cult corruption."
@@ -299,6 +355,19 @@ characters:
       question his choices. His family doesn't know about his corruption, and he fears 
       what the cult might do to them if he tries to back out. His position gives him 
       access to the town's defenses and security information, making him valuable to both sides.
+    initial_rooms:
+      - room_id: town_square
+        chance: 40
+        reason: "Conducting your regular patrol, but you're actually gathering information for your cult contacts while maintaining your cover as the town's protector."
+      - room_id: tavern
+        chance: 30
+        reason: "Meeting with your cult contact in a back booth. The barkeep knows to look the other way, and you're discussing the latest intelligence about the town's defenders."
+      - room_id: bank
+        chance: 20
+        reason: "Collecting your monthly 'consultation fee' from the cult. The bank manager is one of your few trusted allies, and you're here to secure your family's financial future."
+      - room_id: guard_barracks
+        chance: 10
+        reason: "Reviewing security reports and planning your next move. Your corruption weighs heavily on you, but you're too deep in the cult's web to escape easily."
     motives:
       - id: maintain_power
         description: "Keep his position and the wealth the cult provides while avoiding detection by the town's defenders."
@@ -356,6 +425,19 @@ characters:
       strict rules about when and how to intervene, and he must balance the safety of 
       the many against the needs of the few. He carries ancient artifacts and forbidden 
       knowledge that could either save or doom the town.
+    initial_rooms:
+      - room_id: tavern
+        chance: 40
+        reason: "Researching local folklore and gathering information about the town's history. Your ancient texts suggest this place holds the key to understanding the cult's true purpose, and you're here to piece together the puzzle."
+      - room_id: town_square
+        chance: 30
+        reason: "Studying the cult symbols and ancient markings. Your scholarly knowledge tells you these symbols point to something deeper, and you're here to investigate the connection between the town's history and the current disappearances."
+      - room_id: old_forest_path
+        chance: 20
+        reason: "Examining ancient stone markers and studying the town's mystical geography. Your order's teachings suggest that the cult's power is tied to the land itself, and you're here to understand the deeper forces at work."
+      - room_id: church
+        chance: 10
+        reason: "Examining religious artifacts and ancient texts. The church's history may hold clues about the cult's origins, and you're here to study the connection between faith and the dark forces threatening the town."
     motives:
       - id: destroy_the_cult
         description: "Use his knowledge to permanently eliminate the cult threat, even if it means sacrificing the town."
@@ -413,6 +495,19 @@ characters:
       to high-ranking officials, and she has dirt on nearly everyone in town. She's 
       motivated by profit and survival, but recent events have forced her to consider 
       which side she truly wants to win.
+    initial_rooms:
+      - room_id: tavern
+        chance: 25
+        reason: "Meeting with contacts and gathering intelligence. The barkeep is one of your most valuable sources, and you're here to collect information about the latest developments in the town's power struggle."
+      - room_id: town_square
+        chance: 25
+        reason: "Observing the townspeople and gathering information. Your keen eyes miss nothing, and you're here to assess the current situation and identify new opportunities for profit."
+      - room_id: thieves_den
+        chance: 25
+        reason: "Reviewing reports from your spy network and planning your next moves. Your desk is covered with documents and correspondence, and you're coordinating your information-gathering operations across the region."
+      - room_id: market_district
+        chance: 25
+        reason: "Buying and selling information while maintaining your cover as a simple merchant. Your network of contacts includes everyone from street urchins to high-ranking officials, and you're here to gather intelligence about the town's current state."
     motives:
       - id: profit_from_chaos
         description: "Make as much money as possible from the town's crisis by selling information to all sides."

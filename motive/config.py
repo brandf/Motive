@@ -153,6 +153,12 @@ class MotiveConfig(BaseModel):
         
         return ActionRequirementConfig(type="player_has_tag", tag="dummy")
 
+class InitialRoomConfig(BaseModel):
+    """Configuration for a character's initial room with reason."""
+    room_id: str = Field(..., description="ID of the room where this character can start.")
+    chance: int = Field(..., ge=0, le=100, description="Percentage chance (0-100) of starting in this room.")
+    reason: str = Field(..., description="Story reason for why the character is in this location.")
+
 class CharacterConfig(BaseModel):
     """Configuration for a character type or specific character."""
     id: str = Field(..., description="Unique identifier for the character.")
@@ -161,6 +167,7 @@ class CharacterConfig(BaseModel):
     motive: Optional[str] = None  # Legacy single motive field for backward compatibility
     motives: Optional[List[MotiveConfig]] = None  # New multiple motives field
     aliases: List[str] = []  # Alternative names for this character
+    initial_rooms: Optional[List[InitialRoomConfig]] = None  # Character-specific starting locations
 
 class ThemeConfig(BaseModel):
     """Configuration for a game theme (e.g., 'Fantasy')."""
