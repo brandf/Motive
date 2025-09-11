@@ -248,6 +248,9 @@ class GameMaster:
         for round_num in range(1, self.num_rounds + 1):
             self.game_logger.info(f"🎯 Round {round_num} of {self.num_rounds}")
             
+            # Log character snapshot report before each round
+            self.game_logger.info(self._generate_character_snapshot_report())
+            
             # Filter out players who have quit
             active_players = [player for player in self.players if player.character.action_points != -1]
             
@@ -273,6 +276,38 @@ class GameMaster:
         
         # Check win conditions and provide game summary
         self._check_win_conditions_and_summarize()
+
+    def _generate_character_snapshot_report(self) -> str:
+        """Generate a snapshot report of all characters' locations and inventories."""
+        report_lines = ["📊 Character Snapshot Report:"]
+        
+        for player in self.players:
+            char = player.character
+            player_name = player.name
+            char_name = char.name
+            
+            # Get room name
+            room_name = "Unknown"
+            if char.current_room_id in self.rooms:
+                room = self.rooms[char.current_room_id]
+                if hasattr(room, 'name'):
+                    room_name = room.name
+                else:
+                    room_name = f"Unknown ({char.current_room_id})"
+            else:
+                room_name = f"Unknown ({char.current_room_id})"
+            
+            # Get inventory
+            if char.inventory:
+                inventory_str = ", ".join(char.inventory)
+            else:
+                inventory_str = "(empty)"
+            
+            report_lines.append(f"  👤 {player_name} ({char_name})")
+            report_lines.append(f"    • Location: {room_name}")
+            report_lines.append(f"    • Inventory: {inventory_str}")
+        
+        return "\n".join(report_lines)
 
     def _check_win_conditions_and_summarize(self):
         """Checks if any players achieved their motives and provides a detailed game summary."""
