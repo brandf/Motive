@@ -41,13 +41,13 @@ class TestRoomDescriptionFormatting:
         # Verify the formatting
         expected = """A bustling town square with a fountain in the center.
 
-**Objects in the room:**
+**📦 Objects in the room:**
   • Fountain
   • Town Statue
   • Tiny Gem
   • Large Sword
 
-**Exits:**
+**🚪 Exits:**
   • West Gate
   • East Gate"""
         
@@ -78,7 +78,7 @@ class TestRoomDescriptionFormatting:
         
         expected = """A small room with various items.
 
-**Objects in the room:**
+**📦 Objects in the room:**
   • Torch
   • Rusty Key"""
         
@@ -103,7 +103,7 @@ class TestRoomDescriptionFormatting:
         
         expected = """A crossroads with multiple paths.
 
-**Exits:**
+**🚪 Exits:**
   • North Path
   • South Path"""
         
@@ -146,7 +146,7 @@ class TestRoomDescriptionFormatting:
         
         expected = """A room with visible and hidden exits.
 
-**Exits:**
+**🚪 Exits:**
   • Visible Exit"""
         
         assert current_room_description == expected

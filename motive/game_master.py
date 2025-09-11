@@ -774,7 +774,7 @@ class GameMaster:
                     # Don't let players observe their own events - they already get feedback
                     if event.related_player_id != player_char.id:
                         self.player_observations[player_char.id].append(event)
-                        self.game_logger.info(f"OBSERVED - Player {player.name} in {player_char.current_room_id} observed event from {event.source_room_id}: '{event.message}' (Type: {event.event_type})")
+                        self.game_logger.info(f"👁️ OBSERVED - Player {player.name} in {player_char.current_room_id} observed event from {event.source_room_id}: '{event.message}' (Type: {event.event_type})")
         
         self.event_queue.clear() # Clear the queue after distributing all events
 
@@ -800,7 +800,7 @@ class GameMaster:
             player_observations = self.player_observations.get(player_char.id, [])
             observation_messages: List[str] = []
             if player_observations:
-                observation_messages.append("**Recent Events:**")
+                observation_messages.append("**📰 Recent Events:**")
                 for event in player_observations:
                     observation_messages.append(f"• {event.message}")
 
@@ -816,96 +816,57 @@ class GameMaster:
             # Get formatted room description from the Room object
             current_room_description = current_room.get_formatted_description()
 
-            action_prompt = self._get_action_display(player_char, is_first_turn=False, round_num=round_num)
+            # Check if this is the first interaction for this player
+            is_first_interaction = not self.player_first_interaction_done.get(player_char.id, False)
+            action_prompt = self._get_action_display(player_char, is_first_turn=is_first_interaction, round_num=round_num)
 
-            # Handle the very first interaction differently
-            if not self.player_first_interaction_done.get(player_char.id, False):
-                # Include the full manual content in the system prompt for the LLM
+            # Construct the message content
+            message_content_parts = []
+            
+            # Add character assignment and initial location for first interaction
+            if is_first_interaction:
+                character_assignment = player_char.get_introduction_message()
+                message_content_parts.append(character_assignment)
+                message_content_parts.append(f"Initial location: {current_room_description}")
+            
+            # Add observations (if any)
+            if observation_messages:
+                message_content_parts.append("\n".join(observation_messages))
+                # Clear observations for this player after presenting them
+                self.player_observations[player_char.id] = []
+            
+            # Add action prompt and AP info
+            message_content_parts.extend([
+                f"{action_prompt}",
+                f"**⚡ Action Points:**\n{player_char.action_points} AP",
+                f"🤔 What do you do?"
+            ])
+            
+            message_content = "\n\n".join(message_content_parts)
+            
+            # Send system message for first interaction only
+            if is_first_interaction:
                 system_prompt = f"You are a player in a text-based adventure game. Below is the game manual. Read it carefully to understand the rules, your role, and how to interact with the game world.\n\n" \
                                 f"--- GAME MANUAL START ---\n{self.manual_content}\n--- GAME MANUAL END ---\n\n" \
                                 f"IMPORTANT: All actions must be on their own line and start with '>' (e.g., '> look', '> move west', '> say hello'). " \
                                 f"Without the '>' prefix, your actions will be ignored and you'll receive a penalty.\n\n" \
                                 f"Now, based on the manual and your character, respond with your actions."
-
-                # Character Assignment and Motive
-                character_assignment = player_char.get_introduction_message()
-
-                # Gather observations for the first interaction too
-                player_observations = self.player_observations.get(player_char.id, [])
-                observation_messages: List[str] = []
-                if player_observations:
-                    observation_messages.append("**Recent Events:**")
-                    for event in player_observations:
-                        observation_messages.append(f"• {event.message}")
                 
-                # Check motive status for first interaction too
-                motive_status_message = player_char.get_motive_status_message(self)
-                if motive_status_message:
-                    observation_messages.append(motive_status_message)
-                
-                # Log detailed motive condition tree for first interaction
-                condition_tree = player_char.get_motive_condition_tree(self)
-                self.game_logger.info(f"Initial motive condition tree for {player.name} ({player_char.name}):\n{condition_tree}")
-
-                # Construct the first HumanMessage with character, motive, and initial room description
-                first_action_prompt = self._get_action_display(player_char, is_first_turn=True, round_num=round_num)
-                first_human_message_parts = [
-                    character_assignment,
-                    f"Initial location: {current_room_description}"
-                ]
-                
-                if observation_messages:
-                    first_human_message_parts.append("\n".join(observation_messages))
-                    # Clear observations for this player after presenting them
-                    self.player_observations[player_char.id] = []
-                
-                first_human_message_parts.extend([
-                    f"{first_action_prompt}",
-                    f"**Action Points:** {player_char.action_points} AP",
-                    f"What do you do?"
-                ])
-                
-                first_human_message_content = "\n\n".join(first_human_message_parts)
-
                 system_msg = SystemMessage(content=system_prompt)
-                human_msg = HumanMessage(content=first_human_message_content)
-
                 player.add_message(system_msg)
-                player.add_message(human_msg)
                 self.game_logger.info(f"GM sent chat to {player.name} (SYSTEM, with manual: {self.manual_path}):\n{system_prompt[:50]}...")
-                self.game_logger.info(f"GM sent chat to {player.name}:\n{first_human_message_content}")
                 player.logger.info(f"GM sent chat to {player.name} (SYSTEM):\n{system_prompt}")
-                player.logger.info(f"GM sent chat to {player.name}:\n{first_human_message_content}")
+                self.player_first_interaction_done[player_char.id] = True
+            
+            # Send the main message
+            human_msg = HumanMessage(content=message_content)
+            player.add_message(human_msg)
+            self.game_logger.info(f"GM sent chat to {player.name}:\n{message_content}")
+            player.logger.info(f"GM sent chat to {player.name}:\n{message_content}")
 
-                start_time = time.time()
-                response = await player.get_response_and_update_history(player.chat_history)
-                duration = time.time() - start_time
-                self.player_first_interaction_done[player_char.id] = True # Mark as done
-            else:
-                # Construct the GM message content for subsequent interactions, including observations
-                gm_message_content_parts = []
-                if observation_messages:
-                    gm_message_content_parts.append("\n".join(observation_messages))
-                
-                gm_message_content_parts.extend([
-                    f"{action_prompt}",
-                    f"Action Points: {player_char.action_points} AP",
-                    f"What do you do?"
-                ])
-                gm_message_content = "\n\n".join(gm_message_content_parts)
-                
-                gm_message = HumanMessage(content=gm_message_content)
-                player.add_message(gm_message)
-                player.logger.info(f"GM sent chat to {player.name}:\n{gm_message_content}")
-                self.game_logger.info(f"GM sent chat to {player.name}:\n{gm_message_content}")
-                
-                # Clear observations for this player after presenting them
-                if observation_messages:
-                    self.player_observations[player_char.id] = []
-
-                start_time = time.time()
-                response = await player.get_response_and_update_history(player.chat_history)
-                duration = time.time() - start_time
+            start_time = time.time()
+            response = await player.get_response_and_update_history(player.chat_history)
+            duration = time.time() - start_time
             
             response_len = len(response.content)
 
@@ -1137,7 +1098,7 @@ class GameMaster:
         # Send turn end confirmation message
         confirmation_message = (
             "Your turn has ended. Please confirm how you'd like to proceed:\n\n"
-            "Example actions:\n"
+            "⚔️ Example actions:\n"
             "  > continue\n"
             "  > quit (will count as failure to complete motive)\n\n"
             "What would you like to do?"
@@ -1375,7 +1336,7 @@ class GameMaster:
         example_actions = self._get_example_actions()
         
         # Create action display without AP info (AP will be shown separately)
-        action_display = "Example actions:\n"
+        action_display = "⚔️ Example actions:\n"
         for action in example_actions:
             action_display += f"  > {action}\n"
         action_display += "  > help (for more available actions)"

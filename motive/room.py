@@ -75,14 +75,14 @@ class Room:
         
         if self.objects:
             object_names = [obj.name for obj in self.objects.values()]
-            room_description_parts.append(f"\n\n**Objects in the room:**")
+            room_description_parts.append(f"\n\n**📦 Objects in the room:**")
             for obj_name in object_names:
                 room_description_parts.append(f"\n  • {obj_name}")
         
         if self.exits:
             exit_names = [exit_data['name'] for exit_data in self.exits.values() if not exit_data.get('is_hidden', False)]
             if exit_names:
-                room_description_parts.append(f"\n\n**Exits:**")
+                room_description_parts.append(f"\n\n**🚪 Exits:**")
                 for exit_name in exit_names:
                     room_description_parts.append(f"\n  • {exit_name}")
         
