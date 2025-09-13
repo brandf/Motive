@@ -791,3 +791,89 @@ def handle_drop_action(game_master: Any, player_char: Character, action_config: 
     
     return events, feedback_messages
 
+
+def handle_give_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handles the give action - transfers an object from giver's inventory to receiver's inventory."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    
+    # Check for give parsing errors first
+    if '_give_parse_error' in params:
+        feedback_messages.append(params['_give_parse_error'])
+        feedback_messages.append("Correct format: give \"player_name\" \"object_name\"")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} used invalid give format.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+    
+    target_player_name = params.get("player", "").strip()
+    object_name = params.get("object_name", "").strip()
+    
+    # Validate parameters
+    if not target_player_name:
+        feedback_messages.append("You must specify a player to give to.")
+        return events_generated, feedback_messages
+    
+    if not object_name:
+        feedback_messages.append("You must specify an object to give.")
+        return events_generated, feedback_messages
+    
+    # Check if trying to give to self
+    if target_player_name.lower() == player_char.name.lower():
+        feedback_messages.append("You cannot give items to yourself.")
+        return events_generated, feedback_messages
+    
+    # Find target player
+    target_player = None
+    for char_id, char in game_master.player_characters.items():
+        if char.name.lower() == target_player_name.lower():
+            target_player = char
+            break
+    
+    if not target_player:
+        feedback_messages.append(f"{target_player_name} is not a valid player.")
+        return events_generated, feedback_messages
+    
+    # Check if target player is in the same room
+    if target_player.current_room_id != player_char.current_room_id:
+        feedback_messages.append(f"{target_player_name} is not in the same room as you.")
+        return events_generated, feedback_messages
+    
+    # Check if giver has the object in inventory
+    target_object = player_char.get_item_in_inventory(object_name)
+    if not target_object:
+        feedback_messages.append(f"You don't have a {object_name} in your inventory.")
+        return events_generated, feedback_messages
+    
+    # Try to transfer the object
+    removed_object = player_char.remove_item_from_inventory(object_name)
+    if not removed_object:
+        feedback_messages.append(f"Failed to remove {object_name} from your inventory.")
+        return events_generated, feedback_messages
+    
+    # Try to add to target player's inventory
+    # Note: add_item_to_inventory doesn't return a success indicator
+    # For now, assume it always succeeds (no inventory limits implemented yet)
+    target_player.add_item_to_inventory(removed_object)
+    
+    # Success! Generate feedback and events
+    feedback_messages.append(f"You give the {object_name} to {target_player_name}.")
+    
+    # Generate event for room observers
+    event_message = f"{player_char.name} gives a {object_name} to {target_player_name}."
+    events_generated.append(Event(
+        message=event_message,
+        event_type="item_transfer",
+        source_room_id=player_char.current_room_id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        observers=["player", "room_players"]
+    ))
+    
+    return events_generated, feedback_messages
+

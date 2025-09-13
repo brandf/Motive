@@ -163,3 +163,25 @@ actions:
     parameters: []
     requirements: []
     effects: []
+  give:
+    id: give
+    name: give
+    cost: 10
+    description: Give an object from your inventory to another player.
+    category: inventory
+    parameters:
+      - name: player
+        type: string
+        description: The name of the player to give to.
+      - name: object_name
+        type: string
+        description: The name of the object to give.
+    requirements:
+      - type: player_in_room
+        target_player_param: player
+      - type: object_in_inventory
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: handle_give_action
+        observers: ["player", "room_players"]

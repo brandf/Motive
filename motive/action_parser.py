@@ -92,6 +92,17 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                         params['phrase'] = ""
                         # Add a special error marker that can be detected later
                         params['_whisper_parse_error'] = f"Invalid whisper format. Expected: whisper \"player_name\" \"message\". Got: {param_string}. Error: {str(e)}"
+                elif 'player' in param_names and 'object_name' in param_names:
+                    # Specialized parsing for give action: give <player> <object>
+                    try:
+                        player_name, object_name = _parse_give_parameters(param_string)
+                        params['player'] = player_name
+                        params['object_name'] = object_name
+                    except Exception as e:
+                        # If give parsing fails, provide helpful error message
+                        params['player'] = ""
+                        params['object_name'] = ""
+                        params['_give_parse_error'] = f"Invalid give format. Expected: give \"player_name\" \"object_name\". Got: {param_string}. Error: {str(e)}"
                 else:
                     # Fallback to original logic for other two-parameter actions
                     match = re.match(r'^(\S+)\s+(.+)$', param_string)
@@ -139,7 +150,14 @@ def parse_player_response(player_response: str, available_actions: Dict[str, Act
             if action_line:
                 parsed_action = _parse_single_action_line(action_line, available_actions)
                 if parsed_action:
-                    parsed_actions.append(parsed_action)
+                    action_config, params = parsed_action
+                    # Check for parse errors in the parameters
+                    if '_whisper_parse_error' in params or '_give_parse_error' in params:
+                        # Treat as invalid action with helpful error message
+                        error_msg = params.get('_whisper_parse_error') or params.get('_give_parse_error')
+                        invalid_actions.append(f"{action_line} - {error_msg}")
+                    else:
+                        parsed_actions.append(parsed_action)
                 else:
                     # Add suggestion for similar actions
                     suggestion = _suggest_similar_action(action_line, available_actions)
@@ -359,3 +377,72 @@ def _extract_quoted_content(text: str) -> str:
     
     # Not quoted, return as-is
     return text
+
+
+def _parse_give_parameters(param_string: str) -> Tuple[str, str]:
+    """
+    Parse give action parameters: give <player> <object>
+    
+    Handles CLI-compatible formats:
+    - give Player_2 torch
+    - give "Player_2" "magic sword"
+    - give Player_2 "magic sword"
+    - give "Captain Marcus" torch
+    
+    Returns:
+        Tuple of (player_name, object_name)
+    Raises:
+        ValueError: If format is invalid
+    """
+    param_string = param_string.strip()
+    
+    if not param_string:
+        raise ValueError("Give action requires both player and object parameters")
+    
+    # Split into words, but be careful with quoted strings
+    words = []
+    current_word = ""
+    in_quotes = False
+    quote_char = None
+    
+    i = 0
+    while i < len(param_string):
+        char = param_string[i]
+        
+        if not in_quotes:
+            if char in ['"', "'"]:
+                in_quotes = True
+                quote_char = char
+                current_word += char
+            elif char == ' ':
+                if current_word:
+                    words.append(current_word)
+                    current_word = ""
+            else:
+                current_word += char
+        else:
+            current_word += char
+            if char == quote_char and (i == 0 or param_string[i-1] != '\\'):
+                in_quotes = False
+                quote_char = None
+        
+        i += 1
+    
+    if current_word:
+        words.append(current_word)
+    
+    # Validate we have exactly 2 parameters
+    if len(words) != 2:
+        raise ValueError(f"Give action requires exactly 2 parameters (player and object), got {len(words)}")
+    
+    player_name = _extract_quoted_content(words[0])
+    object_name = _extract_quoted_content(words[1])
+    
+    # Validate parameters are not empty
+    if not player_name.strip():
+        raise ValueError("Player name cannot be empty")
+    
+    if not object_name.strip():
+        raise ValueError("Object name cannot be empty")
+    
+    return player_name.strip(), object_name.strip()

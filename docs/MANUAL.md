@@ -106,6 +106,10 @@ The following core actions are currently implemented and available to all player
 #### **Inventory Actions**
 - **`pickup`**: Pick up an object from the current room (subject to inventory constraints)
 - **`drop`**: Drop an object from your inventory into the current room
+- **`give`**: Give an object from your inventory to another player in the same room
+  - Format: `> give "player_name" "object_name"`
+  - Example: `> give "John" "torch"`
+  - Note: Both player name and object name must be quoted. The transfer is visible to all players in the room.
 - **`look inventory`**: View your carried items and their properties
 
 #### **Interaction Actions**
