@@ -1,5 +1,6 @@
 from typing import List, Dict, Any, Optional, Tuple
 from motive.config import ActionConfig, ParameterConfig
+import re
 
 def _parse_single_action_line(action_line: str, available_actions: Dict[str, ActionConfig]) -> Optional[Tuple[ActionConfig, Dict[str, Any]]]:
     """Parses a single action line into an ActionConfig and its parameters."""
@@ -73,28 +74,45 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
             # Handle multiple parameters - try to parse them intelligently
             if len(parameters) == 2 and all((p.get('type') if hasattr(p, 'get') else p.type) == "string" for p in parameters):
                 # Special case for two string parameters (like whisper: player + phrase)
-                # Look for quoted phrase at the end
+                # Use a more sophisticated parser for whisper actions
                 import re
-                # Pattern to match: word(s) followed by quoted string
-                match = re.match(r'^(\S+)\s+(.+)$', param_string)
-                if match:
-                    first_param = match.group(1)
-                    rest = match.group(2).strip()
-                    
-                    # Check if rest is a quoted string
-                    if ((rest.startswith('\'') and rest.endswith('\'')) or 
-                        (rest.startswith('"') and rest.endswith('"'))):
-                        quoted_content = rest[1:-1]
-                        # Assign to parameters in order
-                        params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = first_param
-                        params[parameters[1].get('name', 'param2') if hasattr(parameters[1], 'get') else parameters[1].name] = quoted_content
-                    else:
-                        # Fallback: assign first word to first param, rest to second
-                        params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = first_param
-                        params[parameters[1].get('name', 'param2') if hasattr(parameters[1], 'get') else parameters[1].name] = rest
+                
+                # Check if this is a whisper action by looking at parameter names
+                param_names = [p.get('name', '') if hasattr(p, 'get') else p.name for p in parameters]
+                if 'player' in param_names and 'phrase' in param_names:
+                    # Use specialized whisper parsing
+                    try:
+                        player_name, phrase = _parse_whisper_parameters(param_string)
+                        params['player'] = player_name
+                        params['phrase'] = phrase
+                    except Exception as e:
+                        # If whisper parsing fails, provide helpful error message
+                        # This will be caught by the action validation and provide feedback
+                        params['player'] = ""
+                        params['phrase'] = ""
+                        # Add a special error marker that can be detected later
+                        params['_whisper_parse_error'] = f"Invalid whisper format. Expected: whisper \"player_name\" \"message\". Got: {param_string}. Error: {str(e)}"
                 else:
-                    # Fallback: assign raw string to first parameter
-                    params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = param_string
+                    # Fallback to original logic for other two-parameter actions
+                    match = re.match(r'^(\S+)\s+(.+)$', param_string)
+                    if match:
+                        first_param = match.group(1)
+                        rest = match.group(2).strip()
+                        
+                        # Check if rest is a quoted string
+                        if ((rest.startswith('\'') and rest.endswith('\'')) or 
+                            (rest.startswith('"') and rest.endswith('"'))):
+                            quoted_content = rest[1:-1]
+                            # Assign to parameters in order
+                            params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = first_param
+                            params[parameters[1].get('name', 'param2') if hasattr(parameters[1], 'get') else parameters[1].name] = quoted_content
+                        else:
+                            # Fallback: assign first word to first param, rest to second
+                            params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = first_param
+                            params[parameters[1].get('name', 'param2') if hasattr(parameters[1], 'get') else parameters[1].name] = rest
+                    else:
+                        # Fallback: assign raw string to first parameter
+                        params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = param_string
             elif "target" in [(p.get('name', '') if hasattr(p, 'get') else p.name) for p in parameters]:
                 params["target"] = param_string
             elif parameters:
@@ -163,3 +181,181 @@ def _suggest_similar_action(action_line: str, available_actions: Dict[str, Actio
                 return name
     
     return None
+
+
+def _parse_whisper_parameters(param_string: str) -> Tuple[str, str]:
+    """
+    Parse whisper action parameters with strict CLI format validation.
+    
+    Only handles CLI-compatible formats:
+    - whisper hero "hello there"
+    - whisper "Captain Marcus" "any news?"
+    - whisper "Hooded Figure" 'mutual "friends" are getting restless'
+    - whisper "Guild Master" "Our mutual \"friends\" are getting restless"
+    
+    Does NOT handle natural language formats like:
+    - whisper 'phrase' to Player (rejected)
+    
+    Returns:
+        Tuple of (player_name, phrase)
+    Raises:
+        ValueError: If format doesn't match CLI pattern
+    """
+    param_string = param_string.strip()
+    
+    # First, check if this looks like natural language "to X" format
+    # This is not CLI-compatible and should be rejected
+    # Use regex to find " to " followed by words (player name)
+    import re
+    to_match = re.search(r'\s+to\s+(\w+(?:\s+\w+)*)\s*$', param_string)
+    if to_match:
+        # This looks like natural language format: 'phrase' to player
+        # Split on the last " to " pattern
+        parts = param_string.rsplit(' to ', 1)
+        if len(parts) == 2:
+            phrase_part = parts[0].strip()
+            player_part = parts[1].strip()
+            # Check if the phrase part is properly quoted (starts and ends with same quote type)
+            if (phrase_part.startswith('"') and not phrase_part.endswith('"')) or (phrase_part.startswith("'") and not phrase_part.endswith("'")):
+                raise ValueError(f"Malformed whisper format detected. Use CLI format: whisper \"player_name\" \"message\"")
+            
+            # If phrase is quoted but player is not, it's natural language format
+            if ((phrase_part.startswith('"') and phrase_part.endswith('"')) or 
+                (phrase_part.startswith("'") and phrase_part.endswith("'"))) and not ('"' in player_part or "'" in player_part):
+                raise ValueError(f"Natural language 'to X' format not supported. Use CLI format: whisper \"player_name\" \"message\"")
+    
+    # Check for missing quotes only if it looks like it should be quoted
+    # Don't reject simple unquoted formats like "hero hello there"
+    if not ('"' in param_string or "'" in param_string) and ' ' in param_string:
+        # Only reject if there are spaces but no quotes (indicating malformed quoted format)
+        # Simple unquoted formats like "hero hello" are still valid
+        pass  # Allow unquoted formats
+    
+    # Pattern 1: Handle mixed quote types - double quotes for player, single quotes for phrase
+    # Use a more sophisticated approach to handle nested quotes
+    if param_string.startswith('"') and "'" in param_string:
+        # Find the end of the first quoted player name
+        player_end = param_string.find('"', 1)
+        if player_end != -1:
+            player_name = param_string[1:player_end]
+            # The rest should be the phrase in single quotes
+            phrase_part = param_string[player_end + 1:].strip()
+            if phrase_part.startswith("'") and phrase_part.endswith("'"):
+                # Use _extract_quoted_content to properly handle escaped quotes
+                phrase = _extract_quoted_content(phrase_part)
+                return player_name, phrase
+    
+    # Pattern 1b: Handle double quotes for both player and phrase
+    # Use a more sophisticated approach to handle nested quotes
+    if param_string.startswith('"') and param_string.count('"') >= 4:  # At least 4 quotes for player + phrase
+        # Find the end of the first quoted player name
+        player_end = param_string.find('"', 1)
+        if player_end != -1:
+            player_name = param_string[1:player_end]
+            # The rest should be the phrase in double quotes
+            phrase_part = param_string[player_end + 1:].strip()
+            if phrase_part.startswith('"') and phrase_part.endswith('"'):
+                # Use _extract_quoted_content to properly handle escaped quotes
+                phrase = _extract_quoted_content(phrase_part)
+                return player_name, phrase
+    
+    # Pattern 1c: Handle mixed quote types - single quotes for player, double quotes for phrase  
+    mixed_quotes_match2 = re.match(r'^\'([^\']+)\'\s+"([^"]+)"(?:\s+to\s+(\S+(?:\s+\S+)*))?$', param_string)
+    if mixed_quotes_match2:
+        player_name = mixed_quotes_match2.group(1)
+        phrase = mixed_quotes_match2.group(2)
+        return player_name, phrase
+    
+    # Pattern 1c: Look for quoted player name at the start, then phrase, then optional "to X"
+    # Try to match: "Player Name" "phrase" to PlayerName or "Player Name" "phrase"
+    quoted_player_with_to = re.match(r'^(["\'])([^"\']+)\1\s+(["\'])([^"\']+)\3(?:\s+to\s+(\S+(?:\s+\S+)*))?$', param_string)
+    if quoted_player_with_to:
+        player_name = quoted_player_with_to.group(2)
+        phrase = quoted_player_with_to.group(4)
+        return player_name, phrase
+    
+    # Pattern 2: Look for "to X" at the end (e.g., "phrase" to PlayerName)
+    # This handles cases where the phrase comes first, then "to player"
+    to_match = re.search(r'^(.+?)\s+to\s+(\S+(?:\s+\S+)*)$', param_string)
+    if to_match:
+        phrase_part = to_match.group(1).strip()
+        player_part = to_match.group(2).strip()
+        
+        # Parse the phrase part (might be quoted)
+        phrase = _extract_quoted_content(phrase_part)
+        
+        # Parse the player part (might be quoted)
+        player_name = _extract_quoted_content(player_part)
+        
+        return player_name, phrase
+    
+    # Pattern 3: Look for single-word player followed by quoted phrase
+    # Try to match: PlayerName "phrase" or PlayerName 'phrase'
+    simple_match = re.match(r'^(\S+)\s+(.+)$', param_string)
+    if simple_match:
+        player_name = simple_match.group(1)
+        phrase_part = simple_match.group(2).strip()
+        phrase = _extract_quoted_content(phrase_part)
+        return player_name, phrase
+    
+    # Pattern 4: Single word - treat as player name with empty phrase
+    if not ' ' in param_string:
+        return param_string, ""
+    
+    # Fallback: treat entire string as phrase, no player
+    return "", param_string
+
+
+def _extract_quoted_content(text: str) -> str:
+    """
+    Extract content from quoted string, handling nested quotes and escaping.
+    
+    Handles cases like:
+    - "simple string" -> simple string
+    - 'simple string' -> simple string
+    - "string with \"nested\" quotes" -> string with "nested" quotes
+    - 'string with \'nested\' quotes' -> string with 'nested' quotes
+    - "string with 'mixed' quotes" -> string with 'mixed' quotes
+    - unquoted string -> unquoted string
+    - "quoted string" extra words -> quoted string (ignores extra words)
+    """
+    text = text.strip()
+    
+    # Check if it starts with a quote
+    if text.startswith('"'):
+        # Find the matching closing quote, handling escaped quotes
+        end_quote_pos = -1
+        i = 1
+        while i < len(text):
+            if text[i] == '"' and text[i-1] != '\\':
+                end_quote_pos = i
+                break
+            i += 1
+        
+        if end_quote_pos != -1:
+            # Extract content between quotes
+            content = text[1:end_quote_pos]
+            # Unescape \" within the content
+            content = content.replace('\\"', '"')
+            return content
+    
+    elif text.startswith("'"):
+        # Find the matching closing quote, handling escaped quotes
+        # We need to find the LAST single quote that's not escaped
+        end_quote_pos = -1
+        i = len(text) - 1
+        while i > 0:
+            if text[i] == "'" and text[i-1] != '\\':
+                end_quote_pos = i
+                break
+            i -= 1
+        
+        if end_quote_pos != -1:
+            # Extract content between quotes
+            content = text[1:end_quote_pos]
+            # Unescape \' within the content
+            content = content.replace("\\'", "'")
+            return content
+    
+    # Not quoted, return as-is
+    return text

@@ -75,6 +75,39 @@
 
 ---
 
+## Game Design Learnings (from 5-game parallel analysis)
+
+### Emergent Behaviors Observed
+- **Information-first openings**: Players consistently spend R1-R2 on look/read actions (boards, symbols, ledgers) before moving, creating slow-burn discovery phase
+- **Soft-role alignment**: Natural clustering around thematic areas (Bank: Detective+Bella, Church: Mayor+Father Marcus+Dr. Chen, Guild/Tavern: Guild Master+Tavern Keeper)
+- **Cooperative information sharing**: Players frequently share discoveries via whisper, especially about cult symbols and evidence
+- **Strategic positioning**: Players position themselves near key NPCs and objects for optimal information gathering
+
+### Technical Issues Identified
+- **Object type errors**: "Object type 'altar' not found" and "wooden_sign" errors suggest missing object definitions
+- **Action validation gaps**: Players attempt invalid actions (move to non-existent exits, whisper to non-players, pickup non-existent objects)
+- **Empty object interactions**: Players try to read objects with "no readable text" - need better object state management
+- **Inventory confusion**: "Your inventory is empty" and "You don't see any" messages indicate UI/feedback issues
+
+### Design Recommendations for H&S
+- **Enhance object system**: Fix missing object types and improve object state management
+- **Improve action validation**: Better feedback for invalid actions and clearer action constraints
+- **Strengthen information flow**: The information-sharing patterns suggest players want more structured ways to share discoveries
+- **Role-based mechanics**: The soft-role alignment suggests formalizing character roles and their unique abilities
+- **Cooperative incentives**: Players naturally want to work together - consider mechanics that reward cooperation
+
+### Critical Action Parsing Fixes (from 5-game analysis)
+- **fix_whisper_parsing** - Fix whisper action parser to handle complex sentence structures and better extract target player (highest impact - most frequent failure)
+- **improve_object_awareness** - Enhance room descriptions to clearly separate actual interactive objects from descriptive text (high impact - AI tries to interact with non-objects)
+- **enhance_action_validation_feedback** - Provide more specific feedback about why actions failed and what correct syntax should be (medium impact - helps AI learn)
+- **improve_ai_action_guidance** - Add specific guidance about action syntax, available objects, and common mistakes to AI prompts (medium impact - prevents errors)
+
+### Cross-Game Trends
+- **Consistent pacing**: All games followed similar discovery → investigation → action patterns
+- **NPC interaction patterns**: Players consistently engage with key NPCs (Detective, Father Marcus, Guild Master)
+- **Object interaction priorities**: Cult symbols, evidence, and notice boards are primary interaction targets
+- **Communication strategies**: Whisper is heavily used for coordination and information sharing
+
 ## Notes
 
 - All TODOs migrated from Cursor agent system to this durable markdown file

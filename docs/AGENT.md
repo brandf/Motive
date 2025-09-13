@@ -168,6 +168,40 @@ Each workflow has: purpose, when to use, required inputs, confidence gate, steps
 - **Ask yourself**: "What's the smallest change I can make to get this working?"
 - **When in doubt, follow the TDD workflow explicitly**
 
+### Testing Anti-Patterns to Avoid
+
+**❌ NEVER DO THESE**:
+- **Ad hoc Python scripts for testing**: Creating temporary `.py` files to test behavior instead of proper pytest tests
+- **One-off debug scripts**: Writing scripts that test specific cases but aren't durable or reusable
+- **Manual testing in REPL**: Using `python -c` or interactive sessions to test functionality
+- **Print-based debugging**: Adding print statements instead of proper assertions
+
+**✅ ALWAYS DO THESE**:
+- **Write pytest tests**: All testing must be done through pytest with proper fixtures and assertions
+- **Make tests durable**: Tests should be reusable, runnable in CI, and catch regressions
+- **Test edge cases**: Include tests for error conditions, invalid inputs, and boundary cases
+- **Use descriptive test names**: Test names should clearly describe what behavior is being tested
+
+**Why This Matters**:
+- **Ad hoc scripts are not durable**: They get deleted and don't catch regressions
+- **Manual testing is not repeatable**: Can't be automated or run in CI
+- **Proper tests document behavior**: They serve as living documentation of expected behavior
+- **Tests catch regressions**: Only durable tests prevent future bugs
+
+**Example Anti-Pattern**:
+```python
+# ❌ DON'T DO THIS
+python -c "from motive.action_parser import _parse_whisper_parameters; print(_parse_whisper_parameters('test'))"
+```
+
+**Example Correct Pattern**:
+```python
+# ✅ DO THIS INSTEAD
+def test_whisper_parsing_edge_case():
+    result = _parse_whisper_parameters('test')
+    assert result == expected_value
+```
+
 ## Real-World Issue Resolution Workflow
 
 When issues are found in `motive` that should have been caught by tests, follow this systematic approach:

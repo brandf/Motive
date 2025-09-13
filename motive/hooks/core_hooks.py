@@ -423,11 +423,27 @@ def handle_whisper_action(game_master: Any, player_char: Character, action_confi
     """Handles a player whispering privately to a specific player in the same room."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
+    
+    # Check for whisper parsing errors first
+    if '_whisper_parse_error' in params:
+        feedback_messages.append(params['_whisper_parse_error'])
+        feedback_messages.append("Correct format: whisper \"player_name\" \"message\"")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} used invalid whisper format.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+    
     target_player_name = params.get("player")
     phrase = params.get("phrase")
 
     if not target_player_name or not phrase:
         feedback_messages.append("Whisper action requires both a player name and a phrase.")
+        feedback_messages.append("Correct format: whisper \"player_name\" \"message\"")
         events_generated.append(Event(
             message=f"Player {player_char.name} attempted to whisper without proper parameters.",
             event_type="player_action_failed",
