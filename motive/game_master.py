@@ -36,7 +36,8 @@ import uuid # Added for UUID logging
 
 class GameMaster:
     # Accept a pre-validated GameConfig object directly
-    def __init__(self, game_config: GameConfig, game_id: str, deterministic: bool = False):
+    def __init__(self, game_config: GameConfig, game_id: str, deterministic: bool = False, 
+                 log_dir: str = "logs", no_file_logging: bool = False):
         self.players = []
         
         # Resolve manual path relative to the configs directory (where game.yaml is located)
@@ -55,6 +56,8 @@ class GameMaster:
             
         self.game_id = game_id
         self.deterministic = deterministic
+        self.log_dir = log_dir
+        self.no_file_logging = no_file_logging
 
         self.game_config = game_config # Assign game_config earlier
 
@@ -188,10 +191,22 @@ class GameMaster:
     def _setup_logging(self):
         """Sets up the logging directory and configures the GM logger."""
         import os
-        disable_file_logging = os.environ.get("MOTIVE_DISABLE_FILE_LOGGING") == "1"
-        base_log_dir = os.environ.get("MOTIVE_LOG_DIR", "logs")
-        # Use game_id directly for folder name (should be sortable if game_id includes timestamp)
-        game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, self.game_id)
+        disable_file_logging = self.no_file_logging
+        base_log_dir = self.log_dir
+        
+        # Determine log directory structure based on whether this is a parallel run
+        # Check if this is a parallel worker by looking for the pattern: <base>_worker_<number>
+        if self.game_id.endswith(("_worker_1", "_worker_2", "_worker_3", "_worker_4", "_worker_5")) or \
+           (self.game_id.count("_worker_") == 1 and self.game_id.split("_worker_")[1].isdigit()):
+            # This is a parallel run worker - use new structure:
+            # logs/<theme>/<edition>/<parallel_run_id>/<worker_game_id>/
+            parallel_run_id = self.game_id.split("_worker_")[0]
+            game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, parallel_run_id, self.game_id)
+        else:
+            # Single game - use existing structure:
+            # logs/<theme>/<edition>/<game_id>/
+            game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, self.game_id)
+            
         if not disable_file_logging:
             os.makedirs(game_log_dir, exist_ok=True)
 
@@ -229,7 +244,8 @@ class GameMaster:
                 name=p_config.name,
                 provider=p_config.provider,
                 model=p_config.model,
-                log_dir=self.log_dir  # Pass the log directory to the player
+                log_dir=self.log_dir,
+                no_file_logging=self.no_file_logging  # Pass the log directory to the player
             )
             self.players.append(player)
             self.player_first_interaction_done[player.name] = False # Initialize for tracking

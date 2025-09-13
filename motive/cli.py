@@ -121,6 +121,10 @@ class ParallelGameRunner:
             cmd.extend(["--manual", self.game_args['manual']])
         if self.game_args.get('no_validate'):
             cmd.append("--no-validate")
+        if self.game_args.get('log_dir'):
+            cmd.extend(["--log-dir", self.game_args['log_dir']])
+        if self.game_args.get('no_file_logging'):
+            cmd.append("--no-file-logging")
             
         try:
             # Set environment variables for unbuffered output
@@ -529,7 +533,8 @@ def load_config(config_path: str, validate: bool = True) -> GameConfig:
 
 async def run_game(config_path: str, game_id: str = None, validate: bool = True,
                    rounds: int = None, ap: int = None, manual: str = None, hint: str = None,
-                   deterministic: bool = False, players: int = None, worker: bool = False):
+                   deterministic: bool = False, players: int = None, worker: bool = False,
+                   log_dir: str = "logs", no_file_logging: bool = False):
     """Run a Motive game with the specified configuration."""
     # Load environment variables
     load_dotenv()
@@ -610,7 +615,8 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
     
     # Run the game
     try:
-        gm = GameMaster(game_config=game_config, game_id=game_id, deterministic=deterministic)
+        gm = GameMaster(game_config=game_config, game_id=game_id, deterministic=deterministic,
+                        log_dir=log_dir, no_file_logging=no_file_logging)
         if worker:
             # In worker mode, suppress most stdout output and use structured progress reporting
             await gm.run_game_worker()
@@ -716,6 +722,19 @@ Examples:
         help='Enable fancy terminal UI with live progress updates (may not work in all terminals)'
     )
     
+    # Logging configuration
+    parser.add_argument(
+        '--log-dir',
+        type=str,
+        default='logs',
+        help='Base directory for log files (default: logs)'
+    )
+    parser.add_argument(
+        '--no-file-logging',
+        action='store_true',
+        help='Disable file logging (logs only to stdout)'
+    )
+    
     args = parser.parse_args()
     
     # Validate config file exists
@@ -738,7 +757,9 @@ Examples:
             'hint': args.hint,
             'deterministic': args.deterministic,
             'manual': args.manual,
-            'no_validate': args.no_validate
+            'no_validate': args.no_validate,
+            'log_dir': args.log_dir,
+            'no_file_logging': args.no_file_logging
         }
         
         # Remove None values
@@ -752,7 +773,8 @@ Examples:
         validate = not args.no_validate
         asyncio.run(run_game(args.config, args.game_id, validate=validate, 
                             rounds=args.rounds, ap=args.ap, manual=args.manual, hint=args.hint,
-                            deterministic=args.deterministic, players=args.players, worker=args.worker))
+                            deterministic=args.deterministic, players=args.players, worker=args.worker,
+                            log_dir=args.log_dir, no_file_logging=args.no_file_logging))
 
 
 if __name__ == '__main__':
