@@ -138,6 +138,7 @@
 ### Advanced Object System
 - [ ] **declarative_object_behavior** - Design declarative system for object behavior
 - [ ] **object_state_management** - Implement object state management system
+- [ ] **container_objects_nested** - Support objects containing objects (e.g., chest). Plan/spec first; implement after sim v2 containers land.
 
 ### Community & Multimodality
 - [ ] **ugc_portal_sharing** - Add edition/scenario publishing hooks
