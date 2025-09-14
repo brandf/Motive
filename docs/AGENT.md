@@ -709,3 +709,83 @@ def test_isolation_check():
 6. **Document isolation**: Comment on why specific isolation measures are needed
 
 This comprehensive approach to test isolation ensures that tests remain reliable, fast, and cost-effective over time, preventing issues from creeping in months or years later.
+
+## Lessons Learned from Coverage Improvement Mistakes
+
+### Coverage Strategy Mistakes and Corrections
+
+**CRITICAL LESSON**: When improving test coverage, prioritize **impact over percentage points**. The initial approach of focusing on small modules (main.py: 42 lines, llm_factory.py: 26 lines) resulted in only 1% overall coverage improvement despite adding 18 new tests.
+
+#### What Went Wrong
+
+1. **Targeted Small Modules**: Focused on `main.py` (42 lines) and `llm_factory.py` (26 lines) instead of large untested areas
+2. **Avoided High-Impact Areas**: Skipped `cli.py` (441 lines, 37% coverage) and `util.py` (522 lines, 38% coverage)
+3. **Poor Strategic Planning**: Didn't analyze which modules would provide the biggest coverage gains
+
+#### What Should Have Been Done
+
+**High-Impact Coverage Targets** (in order of impact):
+- **`cli.py`**: 441 lines, 37% coverage → Potential +6.7% overall coverage
+- **`util.py`**: 522 lines, 38% coverage → Potential +7.8% overall coverage  
+- **`game_master.py`**: 963 lines, 57% coverage → Potential +4.8% overall coverage
+- **`patch_system.py`**: 189 lines, 32% coverage → Potential +2.9% overall coverage
+
+**Total Potential**: **+22.2% overall coverage** (62% → 84%)
+
+#### Coverage Improvement Strategy
+
+**Before writing any tests**:
+1. **Analyze coverage report** to identify largest untested areas
+2. **Calculate potential impact** (statements × coverage improvement)
+3. **Prioritize by real-world impact** (user-facing vs internal)
+4. **Focus on critical paths** that could break production
+
+**Coverage Quality Guidelines**:
+- **CLI bugs** = Users can't run the game (CRITICAL)
+- **Utility bugs** = Silent failures across the system (HIGH)
+- **Game Master bugs** = Core gameplay broken (HIGH)
+- **Config validation bugs** = Deployment failures (MEDIUM)
+
+#### Test Coverage Anti-Patterns
+
+**❌ DON'T DO THESE**:
+- **Chase small modules first**: Small modules may have low impact
+- **Ignore large untested areas**: Big modules often have the most bugs
+- **Focus on percentage over impact**: 1% improvement in a critical module > 5% in a utility
+- **Skip analysis**: Always analyze before implementing
+
+**✅ DO THESE INSTEAD**:
+- **Analyze coverage report first**: Identify biggest opportunities
+- **Calculate impact potential**: Statements × coverage improvement
+- **Prioritize by user impact**: User-facing > internal utilities
+- **Focus on critical paths**: Entry points, core logic, error handling
+
+#### Coverage Improvement Workflow
+
+1. **Run coverage analysis**: `pytest --cov=motive --cov-report=term-missing`
+2. **Identify high-impact targets**: Large modules with low coverage
+3. **Calculate potential gains**: Statements × coverage improvement
+4. **Prioritize by impact**: User-facing > internal > edge cases
+5. **Write targeted tests**: Focus on critical paths and error handling
+6. **Measure actual improvement**: Verify coverage gains match expectations
+
+#### Living Document Policy
+
+**AGENT.md is a living document** that must be automatically updated whenever significant mistakes are made and lessons are learned. This ensures that:
+
+- **Mistakes don't repeat**: Lessons are captured immediately
+- **Knowledge accumulates**: Each mistake improves future performance
+- **Guidelines evolve**: Best practices are refined over time
+- **New agents benefit**: Previous mistakes inform future work
+
+**When to update AGENT.md**:
+- **After making a significant mistake** that could have been prevented
+- **After discovering a new anti-pattern** or best practice
+- **After learning something important** about the codebase or workflow
+- **After identifying gaps** in existing guidance
+
+**How to update AGENT.md**:
+- **Add new sections** for new types of lessons learned
+- **Update existing sections** with additional insights
+- **Include specific examples** of what went wrong and how to prevent it
+- **Cross-reference related sections** to build comprehensive guidance
