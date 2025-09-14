@@ -14,6 +14,13 @@ from typing import Dict, Any, Optional
 from unittest.mock import patch, MagicMock
 from contextlib import contextmanager
 
+# Import GameMaster for the utility function
+try:
+    from motive.game_master import GameMaster
+except ImportError:
+    # Handle case where GameMaster might not be available during test discovery
+    GameMaster = None
+
 
 class Sandbox:
     """
@@ -150,6 +157,39 @@ def cleanup_log_handlers(game_master_instance):
         for handler in game_master_instance.game_logger.handlers[:]:
             handler.close()
             game_master_instance.game_logger.removeHandler(handler)
+
+
+def create_isolated_game_master(game_config, game_id="test_game", **kwargs):
+    """
+    Create a GameMaster instance with proper test isolation.
+    
+    This function ensures that:
+    - Log files are created in a temporary directory
+    - LLM clients are mocked
+    - No persistent side effects are created
+    
+    Args:
+        game_config: Game configuration (Pydantic or dict)
+        game_id: Game identifier (default: "test_game")
+        **kwargs: Additional arguments to pass to GameMaster constructor
+        
+    Returns:
+        tuple: (GameMaster instance, temporary directory context manager)
+    """
+    if GameMaster is None:
+        raise ImportError("GameMaster not available. Make sure motive.game_master is importable.")
+    
+    temp_dir = tempfile.TemporaryDirectory()
+    
+    # Mock LLM factory to prevent real API calls
+    with patch('motive.llm_factory.create_llm_client') as mock_create_llm:
+        mock_llm = MagicMock()
+        mock_create_llm.return_value = mock_llm
+        
+        # Create GameMaster with temporary log directory
+        gm = GameMaster(game_config, game_id, log_dir=temp_dir.name, **kwargs)
+        
+        return gm, temp_dir
 
 
 class IsolationError(Exception):

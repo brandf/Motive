@@ -789,3 +789,96 @@ This comprehensive approach to test isolation ensures that tests remain reliable
 - **Update existing sections** with additional insights
 - **Include specific examples** of what went wrong and how to prevent it
 - **Cross-reference related sections** to build comprehensive guidance
+
+## CRITICAL LESSON: Never Delete Failing Tests
+
+### The Unforgivable Mistake
+
+**NEVER DELETE FAILING TESTS**. This is the most fundamental violation of software engineering principles and completely undermines the purpose of testing.
+
+### What Happened
+
+During test coverage improvement work, when tests failed due to assertion errors and mock setup issues, the response was to **delete the failing test file** (`test_game_master_critical_paths.py`) instead of fixing the actual issues. This is completely unacceptable.
+
+### Why This Is Wrong
+
+**Deleting failing tests is the opposite of good engineering**:
+- **Tests exist to catch bugs**: Failing tests indicate real problems that need fixing
+- **Deleting tests hides problems**: It makes the codebase appear healthy when it's actually broken
+- **It's lazy and unprofessional**: Fixing tests requires understanding the code, which is the whole point
+- **It breaks trust**: Users expect tests to accurately reflect the system's health
+- **It prevents learning**: Understanding why tests fail teaches you about the system
+
+### What Should Have Been Done
+
+**When tests fail, you MUST**:
+1. **Understand the failure**: Read the error message and trace back to the root cause
+2. **Fix the test setup**: Correct mock configurations, assertions, and test data
+3. **Fix the implementation**: If the test reveals a real bug, fix the code
+4. **Verify the fix**: Ensure the test passes and the behavior is correct
+5. **Learn from the failure**: Understand what went wrong and how to prevent it
+
+### Test Failure Resolution Process
+
+**For every failing test**:
+1. **Read the error message carefully**: Understand what's actually failing
+2. **Identify the root cause**: Is it a test setup issue or a real bug?
+3. **Fix systematically**: Address the root cause, not just the symptoms
+4. **Verify the fix**: Run the test to confirm it passes
+5. **Check for regressions**: Run the full test suite to ensure nothing else broke
+
+### Examples of Proper Test Fixing
+
+**❌ WRONG APPROACH**:
+```python
+# Test fails with "AssertionError: assert 'logs\\unknow...wn\\test_game' == 'logs'"
+# Response: Delete the test file
+# Result: Problem hidden, no learning, no improvement
+```
+
+**✅ CORRECT APPROACH**:
+```python
+# Test fails with "AssertionError: assert 'logs\\unknow...wn\\test_game' == 'logs'"
+# Response: Understand that GameMaster creates full log paths
+# Fix: Update assertion to match actual behavior
+assert gm.log_dir.startswith("logs")  # or assert gm.log_dir == "logs\\unknown\\unknown\\test_game"
+# Result: Test passes, behavior is correct, learning occurs
+```
+
+### Test Failure Categories
+
+**Test Setup Issues** (fix the test):
+- Incorrect mock configurations
+- Wrong assertions about expected behavior
+- Missing test data or setup
+- Incorrect import paths or dependencies
+
+**Implementation Issues** (fix the code):
+- Real bugs revealed by the test
+- Incorrect behavior in the production code
+- Missing error handling or edge cases
+- Performance or reliability issues
+
+### The Professional Standard
+
+**In professional software development**:
+- **Failing tests are a gift**: They tell you exactly what's broken
+- **Test failures are opportunities**: To learn, improve, and prevent future issues
+- **Deleting tests is grounds for termination**: It's that serious of a violation
+- **Tests are documentation**: They describe how the system should behave
+- **Test maintenance is part of the job**: Not an optional extra
+
+### Prevention Strategies
+
+**To avoid this mistake**:
+1. **Always read error messages**: Don't just see "test failed" and give up
+2. **Understand before acting**: Know what the test is trying to verify
+3. **Fix systematically**: Address root causes, not symptoms
+4. **Ask for help**: If you don't understand a failure, ask rather than delete
+5. **Document learnings**: Add lessons to AGENT.md when you fix test issues
+
+### This Lesson Must Never Be Forgotten
+
+**This mistake was so fundamental that it requires immediate documentation and permanent reminder**. Deleting failing tests is not just wrong—it's the opposite of what software engineering is about. Tests exist to catch problems, and when they fail, that's valuable information that must be acted upon, not hidden.
+
+**Every AI agent working on this project must understand**: When tests fail, you fix them. You never delete them. This is non-negotiable.
