@@ -108,12 +108,21 @@ actions:
             config_data = load_game_config(Path(temp_path).name, Path(temp_path).parent)
             game_config = GameConfig(**config_data)
             
-            # Create GameMaster
-            game_master = GameMaster(game_config, game_id="test-ids")
-            
-            # Should have the custom theme and edition IDs
-            assert game_master.theme == "custom_theme"
-            assert game_master.edition == "custom_edition"
+            # Create GameMaster with mocked LLM client
+            with patch('motive.llm_factory.create_llm_client') as mock_create_llm:
+                mock_llm = MagicMock()
+                mock_create_llm.return_value = mock_llm
+                
+                game_master = GameMaster(game_config, game_id="test-ids")
+                
+                # Should have the custom theme and edition IDs
+                assert game_master.theme == "custom_theme"
+                assert game_master.edition == "custom_edition"
+                
+                # Clean up log handlers
+                for handler in game_master.game_logger.handlers[:]:
+                    handler.close()
+                    game_master.game_logger.removeHandler(handler)
             
         finally:
             os.unlink(temp_path)
@@ -147,8 +156,17 @@ players:
             config_data = load_game_config(Path(temp_path).name, Path(temp_path).parent)
             game_config = GameConfig(**config_data)
             
-            # Create GameMaster
-            game_master = GameMaster(game_config, game_id="test-empty")
+            # Create GameMaster with mocked LLM client
+            with patch('motive.llm_factory.create_llm_client') as mock_create_llm:
+                mock_llm = MagicMock()
+                mock_create_llm.return_value = mock_llm
+                
+                game_master = GameMaster(game_config, game_id="test-empty")
+                
+                # Clean up log handlers
+                for handler in game_master.game_logger.handlers[:]:
+                    handler.close()
+                    game_master.game_logger.removeHandler(handler)
             
             # Should handle empty config gracefully
             assert game_master.theme == "unknown"

@@ -526,3 +526,186 @@ read_file(target_file="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x/p
 - **Social dynamics** emerge naturally but need supporting mechanics
 
 This workflow ensures that large-scale testing provides actionable insights for game improvement and technical fixes.
+
+## Test Isolation and Sandboxing Guidelines
+
+### Critical Test Isolation Requirements
+
+**ALL TESTS MUST BE COMPLETELY ISOLATED** from external services and persistent side effects. This is non-negotiable for maintaining test reliability and preventing issues from creeping in over time.
+
+### Test Isolation Violations to Avoid
+
+**❌ NEVER DO THESE**:
+- **Real LLM API calls**: Tests must never make actual calls to OpenAI, Anthropic, Google, etc.
+- **Real network requests**: Tests must never make HTTP requests to external services
+- **Real API keys**: Tests must never use real API keys from environment variables
+- **Persistent file creation**: Tests must not create files outside temporary directories
+- **Database connections**: Tests must not connect to real databases
+- **Environment pollution**: Tests must not modify global environment variables
+- **File locking issues**: Tests must properly clean up log files and handlers
+
+**✅ ALWAYS DO THESE**:
+- **Mock external services**: Use `unittest.mock` to mock LLM clients, network calls, etc.
+- **Use temporary directories**: All file operations must use `tempfile.TemporaryDirectory()`
+- **Clean up resources**: Properly close file handlers, database connections, etc.
+- **Isolate environment**: Use context managers to isolate test environment
+- **Verify isolation**: Add checks to ensure tests are properly isolated
+
+### Test Sandboxing Utilities
+
+Use the `tests/test_utils.py` module for proper test isolation:
+
+```python
+from tests.test_utils import isolated_test_environment, cleanup_log_handlers
+
+def test_something():
+    with isolated_test_environment() as sandbox:
+        # Your test code here
+        temp_dir = sandbox.get_temp_dir()
+        mock_config = sandbox.create_mock_config()
+        
+        # Create GameMaster instance (LLM calls are automatically mocked)
+        gm = GameMaster(mock_config, "test_game", log_dir=temp_dir)
+        
+        # Clean up log handlers to prevent file locking
+        cleanup_log_handlers(gm)
+```
+
+### Common Test Isolation Patterns
+
+#### 1. **LLM Client Mocking**
+```python
+@patch('motive.llm_factory.create_llm_client')
+def test_with_mocked_llm(mock_create_llm):
+    mock_llm = MagicMock()
+    mock_create_llm.return_value = mock_llm
+    # Test code here
+```
+
+#### 2. **Temporary Directory Usage**
+```python
+def test_with_temp_dir():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # All file operations use temp_dir
+        # Automatic cleanup when exiting context
+```
+
+#### 3. **Log Handler Cleanup**
+```python
+def test_with_logging():
+    gm = GameMaster(config, "test", log_dir=temp_dir)
+    # Test code here
+    
+    # Clean up log handlers to prevent file locking
+    for handler in gm.game_logger.handlers[:]:
+        handler.close()
+        gm.game_logger.removeHandler(handler)
+```
+
+#### 4. **Environment Variable Isolation**
+```python
+def test_with_env_isolation():
+    original_env = os.environ.copy()
+    try:
+        os.environ['TEST_VAR'] = 'test_value'
+        # Test code here
+    finally:
+        os.environ.clear()
+        os.environ.update(original_env)
+```
+
+### Test Isolation Checklist
+
+Before committing any test, verify:
+
+- [ ] **No real LLM calls**: All LLM clients are mocked
+- [ ] **No network requests**: All network calls are mocked
+- [ ] **No real API keys**: Environment variables are isolated
+- [ ] **Temporary directories**: All file operations use temp directories
+- [ ] **Resource cleanup**: All resources (files, handlers, connections) are cleaned up
+- [ ] **Windows compatibility**: File locking issues are prevented
+- [ ] **Isolation verification**: Tests can run without external dependencies
+
+### Test Isolation Anti-Patterns
+
+**❌ These patterns violate test isolation**:
+
+```python
+# ❌ DON'T DO THIS - Real LLM calls
+def test_game_master():
+    gm = GameMaster(config, "test")  # Creates real LLM clients
+
+# ❌ DON'T DO THIS - Persistent files
+def test_logging():
+    gm = GameMaster(config, "test", log_dir="logs")  # Creates persistent files
+
+# ❌ DON'T DO THIS - Environment pollution
+def test_config():
+    os.environ['API_KEY'] = 'real_key'  # Pollutes environment
+```
+
+**✅ These patterns ensure proper isolation**:
+
+```python
+# ✅ DO THIS - Mocked LLM calls
+@patch('motive.llm_factory.create_llm_client')
+def test_game_master(mock_create_llm):
+    mock_llm = MagicMock()
+    mock_create_llm.return_value = mock_llm
+    gm = GameMaster(config, "test")
+
+# ✅ DO THIS - Temporary directories
+def test_logging():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        gm = GameMaster(config, "test", log_dir=temp_dir)
+
+# ✅ DO THIS - Environment isolation
+def test_config():
+    with isolated_test_environment() as sandbox:
+        # Environment is automatically isolated
+```
+
+### Test Isolation Enforcement
+
+**Automated Checks**: The test suite should include automated checks to ensure isolation:
+
+```python
+def test_isolation_check():
+    """Verify that tests are properly isolated from external services."""
+    from tests.test_utils import check_test_isolation
+    check_test_isolation()  # Raises TestIsolationError if violated
+```
+
+**Manual Verification**: Before committing, manually verify:
+
+1. **Run tests offline**: Disconnect from internet and run tests
+2. **Check for API keys**: Ensure no real API keys are used
+3. **Verify cleanup**: Check that temporary files are cleaned up
+4. **Test on Windows**: Ensure file locking issues are prevented
+
+### Why Test Isolation Matters
+
+**Without proper isolation**:
+- Tests become flaky and unreliable
+- External service changes break tests
+- Tests make real API calls (costs money)
+- Tests create persistent side effects
+- Tests fail on different machines/environments
+
+**With proper isolation**:
+- Tests are fast and reliable
+- Tests don't depend on external services
+- Tests don't cost money to run
+- Tests are reproducible across environments
+- Tests can run in CI/CD pipelines
+
+### Test Isolation Best Practices
+
+1. **Start with isolation**: Design tests with isolation in mind from the beginning
+2. **Use utilities**: Leverage `tests/test_utils.py` for common isolation patterns
+3. **Mock early**: Mock external services at the highest level possible
+4. **Clean up thoroughly**: Ensure all resources are properly cleaned up
+5. **Test the mocks**: Verify that mocks are working correctly
+6. **Document isolation**: Comment on why specific isolation measures are needed
+
+This comprehensive approach to test isolation ensures that tests remain reliable, fast, and cost-effective over time, preventing issues from creeping in months or years later.

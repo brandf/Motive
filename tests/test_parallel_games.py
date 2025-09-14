@@ -94,10 +94,18 @@ class TestParallelGameRunner:
         assert "Something went wrong" in runner.games[game_id].error_message
     
     @patch('subprocess.Popen')
-    def test_start_single_game(self, mock_popen):
+    @patch('threading.Thread')
+    def test_start_single_game(self, mock_thread, mock_popen):
         """Test starting a single game process."""
+        # Create a proper mock process with iterable stdout/stderr
         mock_process = Mock()
+        mock_process.stdout.readline = Mock(side_effect=['line1\n', 'line2\n', ''])
+        mock_process.stderr.readline = Mock(side_effect=['error1\n', 'error2\n', ''])
         mock_popen.return_value = mock_process
+        
+        # Mock the thread to prevent actual threading
+        mock_thread_instance = Mock()
+        mock_thread.return_value = mock_thread_instance
         
         runner = ParallelGameRunner(1, "configs/game.yaml", rounds=2)
         
@@ -120,6 +128,9 @@ class TestParallelGameRunner:
         assert "--worker" in call_args
         assert "--rounds" in call_args
         assert "2" in call_args
+        
+        # Verify thread was created but not started (mocked)
+        mock_thread.assert_called_once()
     
     def test_display_game_progress_formatting(self):
         """Test that game progress display formatting works correctly."""

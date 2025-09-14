@@ -150,12 +150,17 @@ def mock_game_master_validation():
         # No need for mock config loading with hierarchical configs
         mock_load_manual_content.return_value = "Mock manual content."
 
-        gm = GameMaster(game_config=mock_game_config, game_id="test_game_id")
-        
-        # Patch the game_logger directly after GameMaster instantiation
-        gm.game_logger = MagicMock()
-        gm.game_logger.info = MagicMock()
-        gm.game_logger.error = MagicMock()
+        # Create GameMaster with mocked LLM client
+        with patch('motive.llm_factory.create_llm_client') as mock_create_llm:
+            mock_llm = MagicMock()
+            mock_create_llm.return_value = mock_llm
+            
+            gm = GameMaster(game_config=mock_game_config, game_id="test_game_id")
+            
+            # Patch the game_logger directly after GameMaster instantiation
+            gm.game_logger = MagicMock()
+            gm.game_logger.info = MagicMock()
+            gm.game_logger.error = MagicMock()
 
         # Set up the player
         test_player = gm.players[0]

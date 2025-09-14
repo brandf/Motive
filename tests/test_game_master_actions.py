@@ -189,9 +189,13 @@ def mock_game_master():
         mock_load_yaml_config.side_effect = mock_load_yaml_config_side_effect
         mock_load_manual_content.return_value = "Mock manual content."
 
-        # Instantiate a real GameMaster, which will call the mocked loaders
-        gm = GameMaster(game_config=mock_game_config, game_id="test_game_id")
-        gm.game_logger.setLevel(logging.DEBUG) # Set logging level to DEBUG for tests
+        # Instantiate a real GameMaster with mocked LLM client
+        with patch('motive.llm_factory.create_llm_client') as mock_create_llm:
+            mock_llm = MagicMock()
+            mock_create_llm.return_value = mock_llm
+            
+            gm = GameMaster(game_config=mock_game_config, game_id="test_game_id")
+            gm.game_logger.setLevel(logging.DEBUG) # Set logging level to DEBUG for tests
 
         # Mock the player instance created by GameMaster._initialize_players
         mock_player_instance = gm.players[0]

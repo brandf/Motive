@@ -196,11 +196,16 @@ def mock_game_master_logging():
         mock_load_yaml_config.side_effect = mock_load_yaml_config_side_effect
         mock_load_manual_content.return_value = "Mock manual content."
 
-        gm = GameMaster(game_config=mock_game_config, game_id="test_game_id")
-        
-        # Patch the game_logger directly after GameMaster instantiation
-        gm.game_logger = MagicMock(spec=logging.Logger)
-        gm.game_logger.info = MagicMock()
+        # Create GameMaster with mocked LLM client
+        with patch('motive.llm_factory.create_llm_client') as mock_create_llm:
+            mock_llm = MagicMock()
+            mock_create_llm.return_value = mock_llm
+            
+            gm = GameMaster(game_config=mock_game_config, game_id="test_game_id")
+            
+            # Patch the game_logger directly after GameMaster instantiation
+            gm.game_logger = MagicMock(spec=logging.Logger)
+            gm.game_logger.info = MagicMock()
 
         # Iterate through the real player instances created by GameMaster
         for player_instance in gm.players:
