@@ -389,3 +389,140 @@ Current core actions include: `move`, `say`, `look` (including `look inventory`)
 - **Turn end confirmation handling**: During turn end confirmation, only accept "continue" or "quit" actions
 
 This workflow ensures that every real-world issue becomes a learning opportunity that strengthens the test suite and prevents future similar issues.
+
+## Parallel Log Analysis Workflow
+
+### Purpose
+Analyze large-scale parallel game runs to extract insights about player behavior, identify technical issues, and inform game design improvements.
+
+### When to Use
+- After running large parallel tests (e.g., 10+ games with multiple players)
+- When investigating player behavior patterns or technical issues
+- Before making major game design decisions
+- When validating motive system effectiveness
+
+### Required Inputs
+- Parallel run game ID or log directory path
+- Number of games and players in the run
+- Specific analysis goals (behavior patterns, technical issues, etc.)
+
+### Confidence Gate
+- 8+/10 confidence before running analysis commands
+- 9+/10 confidence before making recommendations based on findings
+
+### Steps
+
+#### 1. **Log Discovery and Organization**
+```bash
+# Find all game logs from the parallel run
+glob_file_search(target_directory="logs/fantasy/hearth_and_shadow", glob_pattern="**/game.log")
+
+# Find all player chat logs
+glob_file_search(target_directory="logs/fantasy/hearth_and_shadow", glob_pattern="**/Player_*_chat.log")
+
+# Verify the specific run exists
+grep(pattern="parallel_test_5p_30r_10x", path="logs/fantasy/hearth_and_shadow", output_mode="files_with_matches")
+```
+
+#### 2. **Outcome Analysis**
+```bash
+# Check win rates and final outcomes
+grep(pattern="WINNERS|No players achieved their motives", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", output_mode="content")
+
+# Count successful motive completions
+grep(pattern="☑️.*collection_complete|☑️.*stash_secured", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", output_mode="count")
+```
+
+#### 3. **Action Pattern Analysis**
+```bash
+# Count player actions across all games (scope to Player_*_chat.log files)
+grep(pattern="(?m)^\\s*>\\s*look\\b", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", glob="**/Player_*_chat.log", output_mode="count")
+grep(pattern="(?m)^\\s*>\\s*move\\b", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", glob="**/Player_*_chat.log", output_mode="count")
+grep(pattern="(?m)^\\s*>\\s*say\\b", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", glob="**/Player_*_chat.log", output_mode="count")
+grep(pattern="(?m)^\\s*>\\s*pickup\\b", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", glob="**/Player_*_chat.log", output_mode="count")
+grep(pattern="(?m)^\\s*>\\s*whisper\\b", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", glob="**/Player_*_chat.log", output_mode="count")
+grep(pattern="(?m)^\\s*>\\s*give\\b", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", glob="**/Player_*_chat.log", output_mode="count")
+```
+
+#### 4. **Error and Issue Detection**
+```bash
+# Count technical errors
+grep(pattern="You provided invalid actions|invalid/unexecutable|Cannot perform|Unsupported requirement type|Missing parameter|Object '.*' not", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", output_mode="count")
+
+# Count AP exhaustion events
+grep(pattern="used all AP. Turn ended|Actions skipped due to insufficient AP", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", output_mode="count")
+
+# Count help requests
+grep(pattern="(?m)^\\s*>\\s*help\\b", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", glob="**/Player_*_chat.log", output_mode="count")
+```
+
+#### 5. **Social Interaction Analysis**
+```bash
+# Find conversation patterns and themes
+grep(pattern="cult|evidence|confession|alliance|betray|cooperate|cooperation|trade|stash|thieves' den|thieves", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", glob="**/Player_*_chat.log", output_mode="content", head_limit=50)
+
+# Extract specific conversation examples
+grep(pattern="Player.*says:|Player.*whispers:", path="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x", output_mode="content", head_limit=20)
+```
+
+#### 6. **Sample Game Deep Dive**
+```bash
+# Read specific game logs for detailed analysis
+read_file(target_file="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x/parallel_test_5p_30r_10x_worker_7/game.log", offset=980, limit=30)
+
+# Analyze player chat logs for behavior patterns
+read_file(target_file="logs/fantasy/hearth_and_shadow/parallel_test_5p_30r_10x/parallel_test_5p_30r_10x_worker_7/Player_2_3_chat.log", offset=240, limit=100)
+```
+
+#### 7. **Report Generation**
+- **Create comprehensive markdown report** with findings and recommendations
+- **Include executive summary** with key metrics and insights
+- **Document emergent behaviors** observed across games
+- **Identify technical issues** and their frequency
+- **Provide design recommendations** based on player behavior patterns
+
+#### 8. **TODO.md Integration**
+- **Update TODO.md** with analysis findings
+- **Reprioritize tasks** based on data-driven insights
+- **Add new critical issues** identified from the analysis
+- **Document lessons learned** for future reference
+
+### Exit Criteria
+- Comprehensive analysis report generated
+- Key metrics and patterns documented
+- Technical issues identified and prioritized
+- Design recommendations provided
+- TODO.md updated with findings
+- Actionable next steps defined
+
+### Example Analysis Output
+```markdown
+# Parallel Playtest Report: Hearth & Shadow (5 players × 30 rounds × 10 games)
+
+## Executive Summary
+- **Win Rate**: 0% (0/10 games) - all ended with "No players achieved their motives"
+- **Action Patterns**: Heavy use of `look` (1,247), `move` (1,156), `say` (892), `read` (445), `pickup` (423)
+- **Social Behavior**: Low `whisper` (89), very low `give` (23), `throw` (15), `drop` (12)
+- **Cooperation**: Players naturally want to work together but lack mechanics to do so effectively
+
+## Key Findings
+- **Motive System Issues**: Players achieve partial success but miss completion gates
+- **Object System Problems**: Missing object types and awareness issues
+- **Social Dynamics**: Strong cooperation attempts but limited by available actions
+- **Technical Errors**: Frequent invalid actions and AP exhaustion
+
+## Recommendations
+- **Fix motive completion gates** (CRITICAL)
+- **Implement trade action** (HIGH)
+- **Enhance object system** (HIGH)
+- **Formalize character roles** (MEDIUM)
+```
+
+### Lessons Learned
+- **Data-driven prioritization** is more effective than theoretical assumptions
+- **Parallel runs reveal patterns** that single games cannot show
+- **Player behavior analysis** provides insights into game design needs
+- **Technical issues** often prevent players from achieving their goals
+- **Social dynamics** emerge naturally but need supporting mechanics
+
+This workflow ensures that large-scale testing provides actionable insights for game improvement and technical fixes.
