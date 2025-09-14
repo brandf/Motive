@@ -103,6 +103,17 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                         params['player'] = ""
                         params['object_name'] = ""
                         params['_give_parse_error'] = f"Invalid give format. Expected: give \"player_name\" \"object_name\". Got: {param_string}. Error: {str(e)}"
+                elif 'object_name' in param_names and 'exit' in param_names:
+                    # Specialized parsing for throw action: throw <object> <exit>
+                    try:
+                        object_name, exit_direction = _parse_throw_parameters(param_string)
+                        params['object_name'] = object_name
+                        params['exit'] = exit_direction
+                    except Exception as e:
+                        # If throw parsing fails, provide helpful error message
+                        params['object_name'] = ""
+                        params['exit'] = ""
+                        params['_throw_parse_error'] = f"Invalid throw format. Expected: throw \"object_name\" \"exit\". Got: {param_string}. Error: {str(e)}"
                 else:
                     # Fallback to original logic for other two-parameter actions
                     match = re.match(r'^(\S+)\s+(.+)$', param_string)
@@ -152,9 +163,9 @@ def parse_player_response(player_response: str, available_actions: Dict[str, Act
                 if parsed_action:
                     action_config, params = parsed_action
                     # Check for parse errors in the parameters
-                    if '_whisper_parse_error' in params or '_give_parse_error' in params:
+                    if '_whisper_parse_error' in params or '_give_parse_error' in params or '_throw_parse_error' in params:
                         # Treat as invalid action with helpful error message
-                        error_msg = params.get('_whisper_parse_error') or params.get('_give_parse_error')
+                        error_msg = params.get('_whisper_parse_error') or params.get('_give_parse_error') or params.get('_throw_parse_error')
                         invalid_actions.append(f"{action_line} - {error_msg}")
                     else:
                         parsed_actions.append(parsed_action)
@@ -446,3 +457,72 @@ def _parse_give_parameters(param_string: str) -> Tuple[str, str]:
         raise ValueError("Object name cannot be empty")
     
     return player_name.strip(), object_name.strip()
+
+
+def _parse_throw_parameters(param_string: str) -> Tuple[str, str]:
+    """
+    Parse throw action parameters: throw <object> <exit>
+    
+    Handles CLI-compatible formats:
+    - throw torch north
+    - throw "magic sword" "Rusty Anchor Tavern"
+    - throw torch "Rusty Anchor Tavern"
+    - throw "magic sword" north
+    
+    Returns:
+        Tuple of (object_name, exit_direction)
+    Raises:
+        ValueError: If format is invalid
+    """
+    param_string = param_string.strip()
+    
+    if not param_string:
+        raise ValueError("Throw action requires both object and exit parameters")
+    
+    # Split into words, but be careful with quoted strings
+    words = []
+    current_word = ""
+    in_quotes = False
+    quote_char = None
+    
+    i = 0
+    while i < len(param_string):
+        char = param_string[i]
+        
+        if not in_quotes:
+            if char in ['"', "'"]:
+                in_quotes = True
+                quote_char = char
+                current_word += char
+            elif char == ' ':
+                if current_word:
+                    words.append(current_word)
+                    current_word = ""
+            else:
+                current_word += char
+        else:
+            current_word += char
+            if char == quote_char and (i == 0 or param_string[i-1] != '\\'):
+                in_quotes = False
+                quote_char = None
+        
+        i += 1
+    
+    if current_word:
+        words.append(current_word)
+    
+    # Validate we have exactly 2 parameters
+    if len(words) != 2:
+        raise ValueError(f"Throw action requires exactly 2 parameters (object and exit), got {len(words)}")
+    
+    object_name = _extract_quoted_content(words[0])
+    exit_direction = _extract_quoted_content(words[1])
+    
+    # Validate parameters are not empty
+    if not object_name.strip():
+        raise ValueError("Object name cannot be empty")
+    
+    if not exit_direction.strip():
+        raise ValueError("Exit direction cannot be empty")
+    
+    return object_name.strip(), exit_direction.strip()

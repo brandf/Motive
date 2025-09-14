@@ -483,7 +483,7 @@ characters:
             tag: ritual_completed
     aliases: [lysander, wanderer, scholar, researcher, stranger, sage]
 
-  # The Information Broker
+  # The Information Broker and Hoarder
   bella_whisper_nightshade:
     id: bella_whisper_nightshade
     name: Bella "Whisper" Nightshade
@@ -494,7 +494,11 @@ characters:
       the town's defenders. Her network of contacts includes everyone from street urchins 
       to high-ranking officials, and she has dirt on nearly everyone in town. She's 
       motivated by profit and survival, but recent events have forced her to consider 
-      which side she truly wants to win.
+      which side she truly wants to win. However, beneath her professional exterior lies 
+      a compulsive hoarder who cannot resist collecting objects. Her secret stash in the 
+      Thieves' Den grows larger each day, filled with everything from stolen trinkets to 
+      valuable artifacts. She justifies this as "keeping things safe" but the truth is 
+      she simply cannot bear to part with anything she acquires.
     initial_rooms:
       - room_id: tavern
         chance: 25
@@ -551,4 +555,18 @@ characters:
             tag: caught_playing_both_sides
           - type: player_has_tag
             tag: forced_to_choose
+      - id: build_secret_stash
+        description: "Build an impressive collection of objects in the Thieves' Den by gathering items from throughout the town. Your hoarding compulsion drives you to collect at least 20 objects in your secret stash."
+        success_conditions:
+          - operator: "AND"
+          - type: player_has_tag
+            tag: collection_complete
+          - type: player_has_tag
+            tag: stash_secured
+        failure_conditions:
+          - operator: "OR"
+          - type: player_has_tag
+            tag: stash_discovered
+          - type: player_has_tag
+            tag: collection_lost
     aliases: [bella, whisper, nightshade, broker, spy, informant]

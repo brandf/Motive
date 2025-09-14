@@ -185,3 +185,25 @@ actions:
       - type: code_binding
         function_name: handle_give_action
         observers: ["player", "room_players"]
+  throw:
+    id: throw
+    name: throw
+    cost: 10
+    description: Throw an object from your inventory through an exit to an adjacent room.
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to throw.
+      - name: exit
+        type: string
+        description: The exit/direction to throw the object through.
+    requirements:
+      - type: object_in_inventory
+        object_name_param: object_name
+      - type: exit_exists
+        direction_param: exit
+    effects:
+      - type: code_binding
+        function_name: handle_throw_action
+        observers: ["player", "room_players", "adjacent_rooms"]

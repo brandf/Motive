@@ -115,6 +115,10 @@ class ParallelGameRunner:
             cmd.extend(["--players", str(self.game_args['players'])])
         if self.game_args.get('hint'):
             cmd.extend(["--hint", self.game_args['hint']])
+        if self.game_args.get('hint_character'):
+            cmd.extend(["--hint-character", self.game_args['hint_character']])
+        if self.game_args.get('character'):
+            cmd.extend(["--character", self.game_args['character']])
         if self.game_args.get('deterministic'):
             cmd.append("--deterministic")
         if self.game_args.get('manual'):
@@ -533,8 +537,9 @@ def load_config(config_path: str, validate: bool = True) -> GameConfig:
 
 async def run_game(config_path: str, game_id: str = None, validate: bool = True,
                    rounds: int = None, ap: int = None, manual: str = None, hint: str = None,
-                   deterministic: bool = False, players: int = None, worker: bool = False,
-                   log_dir: str = "logs", no_file_logging: bool = False):
+                   hint_character: str = None, deterministic: bool = False, players: int = None,
+                   character: str = None, motive: str = None, worker: bool = False, log_dir: str = "logs", 
+                   no_file_logging: bool = False):
     """Run a Motive game with the specified configuration."""
     # Load environment variables
     load_dotenv()
@@ -580,6 +585,25 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
             "when": {}  # Empty when condition means always show
         })
     
+    if hint_character is not None:
+        print(f"Adding character-specific hint for character: {hint_character}")
+        # Add character-specific hint to game settings
+        if game_config.game_settings.hints is None:
+            game_config.game_settings.hints = []
+        # Create a hint that shows only for the specified character
+        # Note: We need to parse the hint_character format "character_id:hint_text"
+        if ':' in hint_character:
+            char_id, hint_text = hint_character.split(':', 1)
+            game_config.game_settings.hints.append({
+                "hint_id": "cli_hint_character",
+                "hint_action": f"> {hint_text}",
+                "when": {
+                    "character_id": char_id
+                }
+            })
+        else:
+            print("Warning: --hint-character format should be 'character_id:hint_text'")
+    
     # Handle players count override
     if players is not None:
         print(f"Overriding player count: {len(game_config.players)} -> {players}")
@@ -616,7 +640,7 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
     # Run the game
     try:
         gm = GameMaster(game_config=game_config, game_id=game_id, deterministic=deterministic,
-                        log_dir=log_dir, no_file_logging=no_file_logging)
+                        log_dir=log_dir, no_file_logging=no_file_logging, character=character, motive=motive)
         if worker:
             # In worker mode, suppress most stdout output and use structured progress reporting
             await gm.run_game_worker()
@@ -690,6 +714,11 @@ Examples:
         help='Add a hint that will be shown to all players every round'
     )
     parser.add_argument(
+        '--hint-character',
+        type=str,
+        help='Add a hint shown only to a specific character. Format: "character_id:hint_text"'
+    )
+    parser.add_argument(
         '--deterministic',
         action='store_true',
         help='Run in deterministic mode with fixed random seed for reproducible results'
@@ -698,6 +727,16 @@ Examples:
         '--players',
         type=int,
         help='Number of players to use (overrides config). If more than config players, creates additional players by duplicating existing ones. If more than available characters, will error.'
+    )
+    parser.add_argument(
+        '--character',
+        type=str,
+        help='Force assignment of a specific character ID to the first player (for testing specific characters)'
+    )
+    parser.add_argument(
+        '--motive',
+        type=str,
+        help='Force assignment of a specific motive ID to the character (for testing specific motives)'
     )
     
     # Parallel execution
@@ -755,6 +794,9 @@ Examples:
             'ap': args.ap,
             'players': args.players,
             'hint': args.hint,
+            'hint_character': args.hint_character,
+            'character': args.character,
+            'motive': args.motive,
             'deterministic': args.deterministic,
             'manual': args.manual,
             'no_validate': args.no_validate,
@@ -773,7 +815,8 @@ Examples:
         validate = not args.no_validate
         asyncio.run(run_game(args.config, args.game_id, validate=validate, 
                             rounds=args.rounds, ap=args.ap, manual=args.manual, hint=args.hint,
-                            deterministic=args.deterministic, players=args.players, worker=args.worker,
+                            hint_character=args.hint_character, deterministic=args.deterministic, 
+                            players=args.players, character=args.character, motive=args.motive, worker=args.worker,
                             log_dir=args.log_dir, no_file_logging=args.no_file_logging))
 
 

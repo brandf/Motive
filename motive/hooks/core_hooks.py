@@ -787,6 +787,31 @@ def handle_drop_action(game_master: Any, player_char: Character, action_config: 
     )
     events.append(adjacent_drop_event)
     
+    # Special hoarding tracking for Bella "Whisper" Nightshade
+    if player_char.name == "Bella \"Whisper\" Nightshade" and player_char.current_room_id == "thieves_den":
+        # Count objects in Thieves' Den
+        thieves_den = game_master.rooms.get("thieves_den")
+        if thieves_den:
+            object_count = len(thieves_den.objects)
+            
+            # Add hoarding tag if collection is complete (20+ objects)
+            if object_count >= 20 and not player_char.has_tag("collection_complete"):
+                player_char.add_tag("collection_complete")
+                hoarding_event = Event(
+                    message=f"Your secret stash in the Thieves' Den has grown to an impressive {object_count} objects! Your hoarding compulsion is satisfied.",
+                    event_type="motive_progress",
+                    source_room_id=player_char.current_room_id,
+                    timestamp=timestamp,
+                    related_player_id=player_char.id,
+                    observers=["player"]
+                )
+                events.append(hoarding_event)
+                feedback_messages.append(f"Your collection now contains {object_count} objects! Your hoarding compulsion grows stronger.")
+            elif object_count >= 15:
+                feedback_messages.append(f"Your collection grows to {object_count} objects. You're getting close to satisfying your hoarding compulsion.")
+            elif object_count >= 10:
+                feedback_messages.append(f"Your stash now contains {object_count} objects. The collection is taking shape.")
+    
     feedback_messages.append(f"You drop the {target_object.name}.")
     
     return events, feedback_messages
@@ -874,6 +899,128 @@ def handle_give_action(game_master: Any, player_char: Character, action_config: 
         related_player_id=player_char.id,
         observers=["player", "room_players"]
     ))
+    
+    return events_generated, feedback_messages
+
+
+def handle_throw_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handles the throw action - removes object from inventory and places it in adjacent room."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    
+    # Check for throw parsing errors first
+    if '_throw_parse_error' in params:
+        feedback_messages.append(params['_throw_parse_error'])
+        feedback_messages.append("Correct format: throw \"object_name\" \"exit\"")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} used invalid throw format.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+    
+    object_name = params.get("object_name", "").strip()
+    exit_direction = params.get("exit", "").strip()
+    
+    # Validate parameters
+    if not object_name:
+        feedback_messages.append("You must specify an object to throw.")
+        return events_generated, feedback_messages
+    
+    if not exit_direction:
+        feedback_messages.append("You must specify an exit direction.")
+        return events_generated, feedback_messages
+    
+    # Get current room
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    if not current_room:
+        feedback_messages.append(f"Error: Character is in an unknown room: {player_char.current_room_id}.")
+        return events_generated, feedback_messages
+    
+    # Check if player has the object in inventory
+    target_object = player_char.get_item_in_inventory(object_name)
+    if not target_object:
+        feedback_messages.append(f"You don't have a {object_name} in your inventory.")
+        return events_generated, feedback_messages
+    
+    # Check if exit exists
+    if exit_direction not in current_room.exits:
+        feedback_messages.append(f"There is no exit '{exit_direction}' from this room.")
+        return events_generated, feedback_messages
+    
+    # Get target room
+    exit_info = current_room.exits[exit_direction]
+    target_room_id = exit_info.get("room_id")
+    if not target_room_id:
+        feedback_messages.append(f"Exit '{exit_direction}' has no target room.")
+        return events_generated, feedback_messages
+    
+    target_room = game_master.rooms.get(target_room_id)
+    if not target_room:
+        feedback_messages.append(f"Target room '{target_room_id}' not found.")
+        return events_generated, feedback_messages
+    
+    # Try to remove object from inventory
+    removed_object = player_char.remove_item_from_inventory(object_name)
+    if not removed_object:
+        feedback_messages.append(f"Failed to remove {object_name} from your inventory.")
+        return events_generated, feedback_messages
+    
+    # Place object in target room
+    target_room.add_object(removed_object)
+    
+    # Success! Generate feedback and events
+    feedback_messages.append(f"You throw the {object_name} {exit_direction}.")
+    
+    # Generate event for current room observers
+    current_room_event = Event(
+        message=f"{player_char.name} throws a {object_name} {exit_direction}.",
+        event_type="item_transfer",
+        source_room_id=player_char.current_room_id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        observers=["player", "room_players"]
+    )
+    events_generated.append(current_room_event)
+    
+    # Generate event for target room observers
+    target_room_event = Event(
+        message=f"A {object_name} is thrown into the {target_room.name} from the {current_room.name}.",
+        event_type="item_transfer",
+        source_room_id=target_room_id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        observers=["room_players"]
+    )
+    events_generated.append(target_room_event)
+    
+    # Special hoarding tracking for Bella "Whisper" Nightshade when throwing to Thieves' Den
+    if player_char.name == "Bella \"Whisper\" Nightshade" and target_room_id == "thieves_den":
+        # Count objects in Thieves' Den
+        thieves_den = game_master.rooms.get("thieves_den")
+        if thieves_den:
+            object_count = len(thieves_den.objects)
+            
+            # Add hoarding tag if collection is complete (20+ objects)
+            if object_count >= 20 and not player_char.has_tag("collection_complete"):
+                player_char.add_tag("collection_complete")
+                hoarding_event = Event(
+                    message=f"Your secret stash in the Thieves' Den has grown to an impressive {object_count} objects! Your hoarding compulsion is satisfied.",
+                    event_type="motive_progress",
+                    source_room_id=target_room_id,
+                    timestamp=datetime.now().isoformat(),
+                    related_player_id=player_char.id,
+                    observers=["player"]
+                )
+                events_generated.append(hoarding_event)
+                feedback_messages.append(f"Your collection now contains {object_count} objects! Your hoarding compulsion grows stronger.")
+            elif object_count >= 15:
+                feedback_messages.append(f"Your collection grows to {object_count} objects. You're getting close to satisfying your hoarding compulsion.")
+            elif object_count >= 10:
+                feedback_messages.append(f"Your stash now contains {object_count} objects. The collection is taking shape.")
     
     return events_generated, feedback_messages
 

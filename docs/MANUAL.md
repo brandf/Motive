@@ -110,6 +110,10 @@ The following core actions are currently implemented and available to all player
   - Format: `> give "player_name" "object_name"`
   - Example: `> give "John" "torch"`
   - Note: Both player name and object name must be quoted. The transfer is visible to all players in the room.
+- **`throw`**: Throw an object from your inventory through an exit to an adjacent room
+  - Format: `> throw "object_name" "exit"`
+  - Example: `> throw "torch" "north"`
+  - Note: Both object name and exit must be quoted. The action is visible to players in both rooms.
 - **`look inventory`**: View your carried items and their properties
 
 #### **Interaction Actions**

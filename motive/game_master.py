@@ -37,8 +37,10 @@ import uuid # Added for UUID logging
 class GameMaster:
     # Accept a pre-validated GameConfig object directly
     def __init__(self, game_config: GameConfig, game_id: str, deterministic: bool = False, 
-                 log_dir: str = "logs", no_file_logging: bool = False):
+                 log_dir: str = "logs", no_file_logging: bool = False, character: str = None, motive: str = None):
         self.players = []
+        self.character_override = character  # Store character override for GameInitializer
+        self.motive_override = motive  # Store motive override for GameInitializer
         
         # Resolve manual path relative to the configs directory (where game.yaml is located)
         import os
@@ -85,7 +87,7 @@ class GameMaster:
             initial_ap = game_config.game_settings.initial_ap_per_turn
         else:
             initial_ap = game_config['game_settings']['initial_ap_per_turn']
-        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger, initial_ap, self.deterministic)
+        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger, initial_ap, self.deterministic, self.character_override, self.motive_override)
 
         # Load configurations from merged config
         self.game_initializer._load_configurations()

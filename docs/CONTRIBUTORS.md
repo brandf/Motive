@@ -189,6 +189,9 @@ motive --rounds 5                        # Override number of rounds
 motive --ap 30                           # Override action points per turn
 motive --players 4                       # Override number of players (creates duplicates if needed)
 motive --hint "Work together to solve the mystery"  # Add persistent hint for all players
+motive --hint-character "bella_whisper_nightshade:Your hoarding compulsion drives you to collect objects!"  # Add hint for specific character
+            motive --character bella_whisper_nightshade  # Force assignment of specific character to first player
+            motive --motive build_secret_stash  # Force assignment of specific motive to character
 motive --deterministic                   # Run with fixed random seed for reproducible results
 motive --manual docs/custom_manual.md    # Override manual file path
 ```
@@ -485,6 +488,29 @@ Characters now start in contextually appropriate locations with narrative reason
 - **Narrative Integration**: Each starting location includes a story reason that appears in the initial turn message
 - **Deterministic Mode**: In deterministic mode, characters always start in their first configured room
 - **Weight Normalization**: If character room chances exceed 100%, they are automatically normalized proportionally
+
+### Character Selection and Testing
+
+For testing specific characters or scenarios, Motive provides character selection controls:
+
+- **`--character <character_id>`**: Forces assignment of a specific character to the first player
+  - Useful for testing character-specific mechanics (e.g., hoarding behavior)
+  - Example: `motive --character bella_whisper_nightshade`
+  - Validates character ID exists in available characters
+  - Other players get randomly assigned remaining characters
+
+            - **`--hint-character <character_id:hint_text>`**: Shows hints only to specific characters
+              - Format: `"character_id:hint_text"`
+              - Useful for character-specific guidance or testing
+              - Example: `motive --hint-character "bella_whisper_nightshade:Your hoarding compulsion drives you to collect objects!"`
+              - Can be combined with `--character` for targeted testing
+
+            - **`--motive <motive_id>`**: Forces assignment of a specific motive to the character
+              - Useful for testing specific motives or scenarios
+              - Example: `motive --motive build_secret_stash`
+              - Validates motive ID exists in character's available motives
+              - Falls back to random selection if motive not found (with warning)
+              - Can be combined with `--character` for precise testing
 
 ### Observability System
 

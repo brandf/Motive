@@ -10,8 +10,8 @@
 
 ### Core Actions Implementation
 - [x] **implement_give** - ✅ COMPLETED: Implemented give action with character-to-character inventory transfer, comprehensive error handling, and room-scoped observability
+- [x] **implement_throw** - ✅ COMPLETED: Implemented throw action with object transfer through exits, comprehensive error handling, and cross-room observability
 - [ ] **implement_trade** - Implement trade action with queued observation system for item exchange  
-- [ ] **implement_throw** - Implement throw action: remove object from inventory and place in adjacent room via exit
 - [ ] **implement_use** - Implement generic use action with declarative object state manipulation (e.g., use torch to light/extinguish)
 - [ ] **implement_look_object** - Implement look <object> with declarative object-specific descriptions and state-dependent behavior
 
@@ -105,6 +105,11 @@
 - **NPC interaction patterns**: Players consistently engage with key NPCs (Detective, Father Marcus, Guild Master)
 - **Object interaction priorities**: Cult symbols, evidence, and notice boards are primary interaction targets
 - **Communication strategies**: Whisper is heavily used for coordination and information sharing
+
+## Backlog (Future Improvements)
+
+### Give Action Enhancements
+- [ ] **improve_give_system** - Enhance give action with queued acceptance system: receiving player should control their inventory via `> accept <give_id>` or `> reject <give_id>` on their next turn (medium impact - better player agency)
 
 ## Notes
 

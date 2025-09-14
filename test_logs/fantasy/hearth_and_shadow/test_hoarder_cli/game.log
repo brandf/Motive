@@ -1,0 +1,633 @@
+2025-09-13 09:08:58,383 - Game narrative logging to test_logs\fantasy\hearth_and_shadow\test_hoarder_cli\game.log and stdout.
+2025-09-13 09:08:58,384 - Loaded game manual from C:\Users\brand\Documents\GitHub\Motive\configs\../docs/MANUAL.md
+2025-09-13 09:08:58,447 - 🏗️ Game Initialization Report:
+  📊 Configuration: 82 object types, 13 actions, 1 character types, 8 characters, 11 rooms
+  🏠 Rooms: Created 11 rooms and placed 55 objects
+  🎭 Characters: Assigned 2 characters
+    • Father Marcus to Player_1
+    • Dr. Sarah Chen to Player_2
+  ⚠️ Warnings: 2 issues
+    • Object type 'altar' not found for object 'altar' in room 'church'. Skipping.
+    • Object type 'wooden_sign' not found for object 'wooden_sign' in room 'old_forest_path'. Skipping.
+2025-09-13 09:08:58,448 - 🚀 ==================== GAME STARTING ====================
+2025-09-13 09:08:58,448 - ⚙️ Game Settings: 2 rounds, 30 AP/turn
+2025-09-13 09:08:58,449 - 🎯 Round 1 of 2
+2025-09-13 09:08:58,449 - 📊 Character Snapshot Report:
+  👤 Player_1 (Father Marcus)
+    • Location: Sacred Heart Church
+    • Inventory: (empty)
+  👤 Player_2 (Dr. Sarah Chen)
+    • Location: Town Square
+    • Inventory: (empty)
+2025-09-13 09:08:58,449 - 🎮 >>> It is Player_1's turn. (Round 1) - AP: 30
+2025-09-13 09:08:58,450 - Motive condition tree for Player_1 (Father Marcus):
+🎯 Motive: protect_flock
+  Protect your congregation from the growing darkness and keep them safe from the cult's influence.
+
+👍 SUCCESS CONDITIONS:
+  ☐ AND (all must pass)
+    ☐ Player has tag 'congregation_safe'
+    ☐ Player has tag 'church_protected'
+
+👎 FAILURE CONDITIONS:
+  ☐ OR (any must pass)
+    ☐ Player has tag 'congregation_corrupted'
+    ☐ Player has tag 'church_desecrated'
+
+⏳ FINAL STATUS: NOT ACHIEVED (Neither success nor failure)
+2025-09-13 09:08:58,450 - GM ➡️ Player_1 (SYSTEM, with manual: C:\Users\brand\Documents\GitHub\Motive\configs\../docs/MANUAL.md):
+You are a player in a text-based adventure game. B...
+2025-09-13 09:08:58,451 - GM ➡️ Player_1:
+**👤 Character:**
+You are Father Marcus, The priest of Sacred Heart Church, Father Marcus has served the community for over 
+twenty years. Recently, he has become increasingly troubled and distracted, often 
+found in the confession booth or staring at the crypt entrance. His once-strong 
+faith has been shaken by the evil he has witnessed, and he carries a terrible 
+secret that weighs heavily on his soul. The cult forced him to perform a dark 
+ritual three months ago, threatening to kill his congregation if he refused. 
+Now he knows their plans but revealing them would endanger everyone he loves. 
+His internal struggle between duty and fear, truth and protection, drives his 
+every action. He prays for divine guidance but fears he has already damned himself.
+
+
+**🎯 Motive:**
+Protect your congregation from the growing darkness and keep them safe from the cult's influence.
+
+**🏠 Initial location:**
+A beautiful stone church with tall stained glass windows that cast colorful light across the 
+pews. The air is filled with the scent of incense and the sound of soft chanting. The priest, 
+Father Marcus, seems troubled and distracted, often looking toward the crypt entrance. The 
+altar is adorned with fresh flowers, but there's an underlying sense of unease. The church 
+serves as both a place of worship and a refuge for those seeking sanctuary from the town's 
+troubles.
+
+
+**📦 Objects in the room:**
+  • Confession Booth
+  • Crypt Entrance
+  • Cult Member's Confession
+  • Holy Water
+  • Hearth Stone
+
+**🚪 Exits:**
+  • Town Square
+  • Blackwater Cemetery
+
+Your spiritual home. You've been spending more time here lately, seeking divine guidance for the terrible secret you carry. The crypt entrance seems to call to you, a reminder of the dark ritual you were forced to perform.
+
+⚔️ Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+Hint(s), try these actions please, we're testing game mechanics:
+> Your hoarding compulsion drives you to collect objects in the Thieves' Den! Try using pickup, drop, and throw actions to build your secret stash!
+
+**⚡ Action Points:**
+30 AP
+
+🤔 What do you do?
+2025-09-13 09:09:05,366 - GM ⬅️ Player_1:
+my heart is heavy, and my mind races with the cult's dark plans. i must understand what they intend to do, and find a way to protect my flock. the confession holds the key, i pray.
+
+> look
+> read "cult member's confession"
+> pickup "holy water"
+> look "confession booth"
+> look "crypt entrance"
+2025-09-13 09:09:05,399 - 🎬 Action Execution Report for Father Marcus:
+  • look (Cost: 10 AP, Remaining: 20 AP)
+  • read (Cost: 5 AP, Remaining: 15 AP)
+  • pickup (Cost: 10 AP, Remaining: 5 AP)
+2025-09-13 09:09:05,400 - 👁️ Observation Report for Father Marcus:
+  • Father Marcus looks around the room. (Type: player_action)
+    ☐ Player_1 (Father Marcus) - Event originator (gets direct feedback instead)
+    ☐ Player_2 (Dr. Sarah Chen) - Not in event room
+  • Father Marcus reads the Cult Member's Confession. (Type: player_action)
+    ☐ Player_1 (Father Marcus) - Event originator (gets direct feedback instead)
+    ☐ Player_2 (Dr. Sarah Chen) - Not in event room
+  • You pick up the Holy Water. (Type: item_pickup)
+    ☐ Player_1 (Father Marcus) - Event originator (gets direct feedback instead)
+    ☐ Player_2 (Dr. Sarah Chen) - Not in event room
+  • Father Marcus picks up the Holy Water. (Type: player_action)
+    ☐ Player_1 (Father Marcus) - Event originator (gets direct feedback instead)
+    ☐ Player_2 (Dr. Sarah Chen) - Not in event room
+  • Father Marcus picks up something. (Type: player_action)
+    ☐ Player_1 (Father Marcus) - Event originator (gets direct feedback instead)
+    ☐ Player_2 (Dr. Sarah Chen) - Not in event room
+2025-09-13 09:09:05,401 - GM ➡️ Player_1 (Feedback):
+📋 **Your Actions for this turn:**
+- ⚔️ **Look Action:** (Cost: 10 AP, Remaining: 20 AP)
+  - A beautiful stone church with tall stained glass windows that cast colorful light across the 
+pews. The air is filled with the scent of incense and the sound of soft chanting. The priest, 
+Father Marcus, seems troubled and distracted, often looking toward the crypt entrance. The 
+altar is adorned with fresh flowers, but there's an underlying sense of unease. The church 
+serves as both a place of worship and a refuge for those seeking sanctuary from the town's 
+troubles.
+
+
+**📦 Objects in the room:**
+  • Confession Booth
+  • Crypt Entrance
+  • Cult Member's Confession
+  • Holy Water
+  • Hearth Stone
+
+**🚪 Exits:**
+  • Town Square
+  • Blackwater Cemetery
+- ⚔️ **Read Action:** (Cost: 5 AP, Remaining: 15 AP)
+  - You read the Cult Member's Confession: "I was forced to join the Shadowed Hand. They threatened my family. The cult is planning something big - a ritual that will change everything. They have people in high places. I can't say more, but the mayor knows too much. They're coming for him next."
+- ⚔️ **Pickup Action:** (Cost: 10 AP, Remaining: 5 AP)
+  - You pick up the Holy Water.
+- ⚔️ **Look Action:** (Cost: 10 AP, Remaining: 5 AP)
+  - Action 'look' costs 10 AP, but you only have 5 AP. Skipping this action.
+- ⚔️ **Look Action:** (Cost: 10 AP, Remaining: 5 AP)
+  - Action 'look' costs 10 AP, but you only have 5 AP. Skipping this action.
+
+⚠️ **Actions skipped due to insufficient AP:**
+- look {'target': 'Confession Booth'}
+- look {'target': 'Crypt Entrance'}
+2025-09-13 09:09:05,402 - Motive condition tree for Player_1 (Father Marcus):
+🎯 Motive: protect_flock
+  Protect your congregation from the growing darkness and keep them safe from the cult's influence.
+
+👍 SUCCESS CONDITIONS:
+  ☐ AND (all must pass)
+    ☐ Player has tag 'congregation_safe'
+    ☐ Player has tag 'church_protected'
+
+👎 FAILURE CONDITIONS:
+  ☐ OR (any must pass)
+    ☐ Player has tag 'congregation_corrupted'
+    ☐ Player has tag 'church_desecrated'
+
+⏳ FINAL STATUS: NOT ACHIEVED (Neither success nor failure)
+2025-09-13 09:09:05,403 - GM ➡️ Player_1:
+⚔️ Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+Hint(s), try these actions please, we're testing game mechanics:
+> Your hoarding compulsion drives you to collect objects in the Thieves' Den! Try using pickup, drop, and throw actions to build your secret stash!
+
+**⚡ Action Points:**
+5 AP
+
+🤔 What do you do?
+2025-09-13 09:09:08,932 - GM ⬅️ Player_1:
+the confession reveals a grave danger to the mayor and hints at a larger plot. i must act quickly, but with only 5 ap, my options are limited. i will gather my thoughts and prepare for the next turn.
+
+> pass
+2025-09-13 09:09:08,948 - 🎬 Action Execution Report for Father Marcus:
+  • pass (Cost: 5 AP, Remaining: 0 AP)
+2025-09-13 09:09:08,951 - GM ➡️ Player_1 (Feedback):
+ℹ️ No specific feedback for actions performed this turn.
+2025-09-13 09:09:08,951 - ⚡ Player_1 used all AP. Turn ended.
+2025-09-13 09:09:08,952 - ⏰ === TURN END CONFIRMATION START for Player_1 ===
+2025-09-13 09:09:08,952 - GM ➡️ Player_1 (Turn End Confirmation):
+Your turn has ended. Please confirm how you'd like to proceed:
+
+⚔️ Example actions:
+  > continue
+  > quit (will count as failure to complete motive)
+
+What would you like to do?
+2025-09-13 09:09:09,854 - GM ⬅️ Player_1 (Turn End Response):
+> continue
+2025-09-13 09:09:09,855 - ✅ Player Player_1 chose to continue.
+2025-09-13 09:09:09,857 - End of action processing for Player_1. Remaining AP: 0
+2025-09-13 09:09:09,857 - 🎮 >>> It is Player_2's turn. (Round 1) - AP: 30
+2025-09-13 09:09:09,858 - Motive condition tree for Player_2 (Dr. Sarah Chen):
+🎯 Motive: redeem_past_sins
+  Make amends for her past cult involvement by saving innocent lives and protecting the town.
+
+👍 SUCCESS CONDITIONS:
+  ☐ AND (all must pass)
+    ☐ Player has tag 'lives_saved'
+    ☐ Player has tag 'atonement_achieved'
+
+👎 FAILURE CONDITIONS:
+  ☐ OR (any must pass)
+    ☐ Player has tag 'past_revealed'
+    ☐ Player has tag 'cult_recruits_her'
+
+⏳ FINAL STATUS: NOT ACHIEVED (Neither success nor failure)
+2025-09-13 09:09:09,858 - GM ➡️ Player_2 (SYSTEM, with manual: C:\Users\brand\Documents\GitHub\Motive\configs\../docs/MANUAL.md):
+You are a player in a text-based adventure game. B...
+2025-09-13 09:09:09,859 - GM ➡️ Player_2:
+**👤 Character:**
+You are Dr. Sarah Chen, A skilled physician who arrived in Blackwater six months ago, ostensibly to help 
+with the town's medical needs. She's actually a former cult member who defected 
+and is now trying to atone by healing the sick and injured. She knows more about 
+the cult's methods than she's willing to admit, including their use of dark magic 
+to create the mysterious illnesses affecting townspeople. Her medical knowledge 
+combined with her cult background makes her both valuable and dangerous to both sides.
+
+
+**🎯 Motive:**
+Make amends for her past cult involvement by saving innocent lives and protecting the town.
+
+**🏠 Initial location:**
+The heart of Blackwater, once bustling with merchants and travelers, now feels empty and foreboding. 
+A broken fountain sits in the center, its water murky and still. Notice boards line the walls, 
+covered with posters of missing persons. The cobblestones are cracked and worn, and the air carries 
+an unsettling chill. Shadows seem to move at the edges of your vision, and the few remaining 
+townsfolk hurry past with worried expressions. Yet in the center of the square, a small hearth 
+still burns - a symbol of the town's stubborn hope that refuses to be extinguished by the growing darkness.
+
+
+**📦 Objects in the room:**
+  • Notice Board
+  • Broken Fountain
+  • Town Statue
+  • Cult Symbols
+  • Fresh Evidence
+  • Eternal Flame
+  • Flame of Hope
+  • Message Board
+  • Town Crier
+
+**🚪 Exits:**
+  • Rusty Anchor Tavern
+  • Adventurer's Guild Hall
+  • Sacred Heart Church
+  • Blackwater Bank
+  • Market District
+  • Old Forest Path
+
+Making your rounds to check on the health of the townspeople. You're particularly concerned about the mysterious illnesses that seem to be spreading, knowing they bear the hallmarks of cult magic.
+
+**📰 Recent Events:**
+• Father Marcus picks up something.
+
+⚔️ Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+Hint(s), try these actions please, we're testing game mechanics:
+> Your hoarding compulsion drives you to collect objects in the Thieves' Den! Try using pickup, drop, and throw actions to build your secret stash!
+
+**⚡ Action Points:**
+30 AP
+
+🤔 What do you do?
+2025-09-13 09:09:18,137 - GM ⬅️ Player_2:
+as a physician and former cult member, my priority is to understand the immediate threats to blackwater and its inhabitants. the "cult symbols" and "fresh evidence" are of particular concern, given my past and the spreading illnesses. i need to gather information quickly to fulfill my motive of saving innocent lives and protecting the town.
+
+> look "cult symbols"
+> look "fresh evidence"
+> pickup "fresh evidence"
+> look "notice board"
+2025-09-13 09:09:18,138 - 🎬 Action Execution Report for Dr. Sarah Chen:
+  • look (Cost: 10 AP, Remaining: 20 AP)
+  • look (Cost: 10 AP, Remaining: 10 AP)
+  • pickup (Cost: 10 AP, Remaining: 0 AP)
+2025-09-13 09:09:18,139 - 👁️ Observation Report for Dr. Sarah Chen:
+  • Player Dr. Sarah Chen looked at Cult Symbols. (Type: player_action)
+    ☐ Player_2 (Dr. Sarah Chen) - Event originator (gets direct feedback instead)
+    ☐ Player_1 (Father Marcus) - Not in event room
+  • Player Dr. Sarah Chen looked at Fresh Evidence. (Type: player_action)
+    ☐ Player_2 (Dr. Sarah Chen) - Event originator (gets direct feedback instead)
+    ☐ Player_1 (Father Marcus) - Not in event room
+  • You pick up the Fresh Evidence. (Type: item_pickup)
+    ☐ Player_2 (Dr. Sarah Chen) - Event originator (gets direct feedback instead)
+    ☐ Player_1 (Father Marcus) - Not in event room
+  • Dr. Sarah Chen picks up the Fresh Evidence. (Type: player_action)
+    ☐ Player_2 (Dr. Sarah Chen) - Event originator (gets direct feedback instead)
+    ☐ Player_1 (Father Marcus) - Not in event room
+  • Dr. Sarah Chen picks up something. (Type: player_action)
+    ☐ Player_2 (Dr. Sarah Chen) - Event originator (gets direct feedback instead)
+    ☐ Player_1 (Father Marcus) - Not in event room
+2025-09-13 09:09:18,139 - GM ➡️ Player_2 (Feedback):
+📋 **Your Actions for this turn:**
+- ⚔️ **Look Action:** (Cost: 10 AP, Remaining: 20 AP)
+  - You look at the Cult Symbols. Dark
+- ⚔️ **Look Action:** (Cost: 10 AP, Remaining: 10 AP)
+  - You look at the Fresh Evidence. Recently disturbed earth and strange markings near the fountain.
+- ⚔️ **Pickup Action:** (Cost: 10 AP, Remaining: 0 AP)
+  - You pick up the Fresh Evidence.
+
+⚠️ **Actions skipped due to insufficient AP:**
+- look {'target': 'Notice Board'}
+2025-09-13 09:09:18,140 - ⚡ Player_2 used all AP. Turn ended.
+2025-09-13 09:09:18,140 - ⏰ === TURN END CONFIRMATION START for Player_2 ===
+2025-09-13 09:09:18,141 - GM ➡️ Player_2 (Turn End Confirmation):
+Your turn has ended. Please confirm how you'd like to proceed:
+
+⚔️ Example actions:
+  > continue
+  > quit (will count as failure to complete motive)
+
+What would you like to do?
+2025-09-13 09:09:19,697 - GM ⬅️ Player_2 (Turn End Response):
+> continue
+2025-09-13 09:09:19,698 - ✅ Player Player_2 chose to continue.
+2025-09-13 09:09:19,699 - End of action processing for Player_2. Remaining AP: 0
+2025-09-13 09:09:19,699 - ✅ Round 1 complete
+2025-09-13 09:09:19,700 - 🎯 Round 2 of 2
+2025-09-13 09:09:19,700 - 📊 Character Snapshot Report:
+  👤 Player_1 (Father Marcus)
+    • Location: Sacred Heart Church
+    • Inventory: Holy Water
+  👤 Player_2 (Dr. Sarah Chen)
+    • Location: Town Square
+    • Inventory: Fresh Evidence
+2025-09-13 09:09:19,701 - 🎮 >>> It is Player_1's turn. (Round 2) - AP: 30
+2025-09-13 09:09:19,701 - Motive condition tree for Player_1 (Father Marcus):
+🎯 Motive: protect_flock
+  Protect your congregation from the growing darkness and keep them safe from the cult's influence.
+
+👍 SUCCESS CONDITIONS:
+  ☐ AND (all must pass)
+    ☐ Player has tag 'congregation_safe'
+    ☐ Player has tag 'church_protected'
+
+👎 FAILURE CONDITIONS:
+  ☐ OR (any must pass)
+    ☐ Player has tag 'congregation_corrupted'
+    ☐ Player has tag 'church_desecrated'
+
+⏳ FINAL STATUS: NOT ACHIEVED (Neither success nor failure)
+2025-09-13 09:09:19,702 - GM ➡️ Player_1:
+**📰 Recent Events:**
+• Dr. Sarah Chen picks up something.
+
+⚔️ Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+Hint(s), try these actions please, we're testing game mechanics:
+> Your hoarding compulsion drives you to collect objects in the Thieves' Den! Try using pickup, drop, and throw actions to build your secret stash!
+
+**⚡ Action Points:**
+30 AP
+
+🤔 What do you do?
+2025-09-13 09:09:28,115 - GM ⬅️ Player_1:
+the cult's threat to the mayor weighs heavily on my soul, but i must first secure my spiritual home and understand the full extent of the darkness i face. the confession booth and the crypt entrance hold secrets i can no longer ignore.
+
+> look "confession booth"
+> look "crypt entrance"
+> pickup "hearth stone"
+2025-09-13 09:09:28,117 - 🎬 Action Execution Report for Father Marcus:
+  • look (Cost: 10 AP, Remaining: 20 AP)
+  • look (Cost: 10 AP, Remaining: 10 AP)
+  • pickup (Cost: 10 AP, Remaining: 0 AP)
+2025-09-13 09:09:28,117 - 👁️ Observation Report for Father Marcus:
+  • Player Father Marcus looked at Confession Booth. (Type: player_action)
+    ☐ Player_1 (Father Marcus) - Event originator (gets direct feedback instead)
+    ☐ Player_2 (Dr. Sarah Chen) - Not in event room
+  • Player Father Marcus looked at Crypt Entrance. (Type: player_action)
+    ☐ Player_1 (Father Marcus) - Event originator (gets direct feedback instead)
+    ☐ Player_2 (Dr. Sarah Chen) - Not in event room
+  • You pick up the Hearth Stone. (Type: item_pickup)
+    ☐ Player_1 (Father Marcus) - Event originator (gets direct feedback instead)
+    ☐ Player_2 (Dr. Sarah Chen) - Not in event room
+  • Father Marcus picks up the Hearth Stone. (Type: player_action)
+    ☐ Player_1 (Father Marcus) - Event originator (gets direct feedback instead)
+    ☐ Player_2 (Dr. Sarah Chen) - Not in event room
+  • Father Marcus picks up something. (Type: player_action)
+    ☐ Player_1 (Father Marcus) - Event originator (gets direct feedback instead)
+    ☐ Player_2 (Dr. Sarah Chen) - Not in event room
+2025-09-13 09:09:28,118 - GM ➡️ Player_1 (Feedback):
+📋 **Your Actions for this turn:**
+- ⚔️ **Look Action:** (Cost: 10 AP, Remaining: 20 AP)
+  - You look at the Confession Booth. A wooden booth where the faithful come to confess their sins. The priest seems to be spending a lot of time here recently.
+- ⚔️ **Look Action:** (Cost: 10 AP, Remaining: 10 AP)
+  - You look at the Crypt Entrance. A hidden entrance to the underground crypt. The door seems to have been recently used.
+- ⚔️ **Pickup Action:** (Cost: 10 AP, Remaining: 0 AP)
+  - You pick up the Hearth Stone.
+2025-09-13 09:09:28,118 - ⚡ Player_1 used all AP. Turn ended.
+2025-09-13 09:09:28,119 - ⏰ === TURN END CONFIRMATION START for Player_1 ===
+2025-09-13 09:09:28,119 - GM ➡️ Player_1 (Turn End Confirmation):
+Your turn has ended. Please confirm how you'd like to proceed:
+
+⚔️ Example actions:
+  > continue
+  > quit (will count as failure to complete motive)
+
+What would you like to do?
+2025-09-13 09:09:29,100 - GM ⬅️ Player_1 (Turn End Response):
+> continue
+2025-09-13 09:09:29,100 - ✅ Player Player_1 chose to continue.
+2025-09-13 09:09:29,100 - End of action processing for Player_1. Remaining AP: 0
+2025-09-13 09:09:29,101 - 🎮 >>> It is Player_2's turn. (Round 2) - AP: 30
+2025-09-13 09:09:29,101 - Motive condition tree for Player_2 (Dr. Sarah Chen):
+🎯 Motive: redeem_past_sins
+  Make amends for her past cult involvement by saving innocent lives and protecting the town.
+
+👍 SUCCESS CONDITIONS:
+  ☐ AND (all must pass)
+    ☐ Player has tag 'lives_saved'
+    ☐ Player has tag 'atonement_achieved'
+
+👎 FAILURE CONDITIONS:
+  ☐ OR (any must pass)
+    ☐ Player has tag 'past_revealed'
+    ☐ Player has tag 'cult_recruits_her'
+
+⏳ FINAL STATUS: NOT ACHIEVED (Neither success nor failure)
+2025-09-13 09:09:29,102 - GM ➡️ Player_2:
+**📰 Recent Events:**
+• Father Marcus picks up something.
+
+⚔️ Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+Hint(s), try these actions please, we're testing game mechanics:
+> Your hoarding compulsion drives you to collect objects in the Thieves' Den! Try using pickup, drop, and throw actions to build your secret stash!
+
+**⚡ Action Points:**
+30 AP
+
+🤔 What do you do?
+2025-09-13 09:09:34,588 - GM ⬅️ Player_2:
+my priority is to understand the extent of the cult's influence and the impact on the townspeople. i need to examine the evidence i've gathered and check for any public information regarding the mysterious illnesses or missing persons.
+
+> look inventory
+> read "notice board"
+> read "message board"
+2025-09-13 09:09:34,589 - 🎬 Action Execution Report for Dr. Sarah Chen:
+  • look (Cost: 10 AP, Remaining: 20 AP)
+  • read (Cost: 5 AP, Remaining: 15 AP)
+  • read (Cost: 5 AP, Remaining: 10 AP)
+2025-09-13 09:09:34,589 - 👁️ Observation Report for Dr. Sarah Chen:
+  • Dr. Sarah Chen looks at their inventory. (Type: player_action)
+    ☐ Player_2 (Dr. Sarah Chen) - Event originator (gets direct feedback instead)
+    ☐ Player_1 (Father Marcus) - Not in event room
+  • Dr. Sarah Chen reads the Notice Board. (Type: player_action)
+    ☐ Player_2 (Dr. Sarah Chen) - Event originator (gets direct feedback instead)
+    ☐ Player_1 (Father Marcus) - Not in event room
+  • Dr. Sarah Chen attempts to read the Message Board, but it has no text. (Type: player_action)
+    ☐ Player_2 (Dr. Sarah Chen) - Event originator (gets direct feedback instead)
+    ☐ Player_1 (Father Marcus) - Not in event room
+2025-09-13 09:09:34,590 - GM ➡️ Player_2 (Feedback):
+📋 **Your Actions for this turn:**
+- ⚔️ **Look Action:** (Cost: 10 AP, Remaining: 20 AP)
+  - You are carrying:
+- Fresh Evidence: Recently disturbed earth and strange markings near the fountain. (Properties: readable: True, immovable: True, size: medium, text: The earth has been recently disturbed. Strange symbols are carved into the ground, still wet with what appears to be blood. Footprints lead away from the site - someone was here recently.)
+- ⚔️ **Read Action:** (Cost: 5 AP, Remaining: 15 AP)
+  - You read the Notice Board: "Various town announcements and missing person posters are posted here."
+- ⚔️ **Read Action:** (Cost: 5 AP, Remaining: 10 AP)
+  - The Message Board has no readable text.
+2025-09-13 09:09:34,590 - Motive condition tree for Player_2 (Dr. Sarah Chen):
+🎯 Motive: redeem_past_sins
+  Make amends for her past cult involvement by saving innocent lives and protecting the town.
+
+👍 SUCCESS CONDITIONS:
+  ☐ AND (all must pass)
+    ☐ Player has tag 'lives_saved'
+    ☐ Player has tag 'atonement_achieved'
+
+👎 FAILURE CONDITIONS:
+  ☐ OR (any must pass)
+    ☐ Player has tag 'past_revealed'
+    ☐ Player has tag 'cult_recruits_her'
+
+⏳ FINAL STATUS: NOT ACHIEVED (Neither success nor failure)
+2025-09-13 09:09:34,591 - GM ➡️ Player_2:
+⚔️ Example actions:
+  > look
+  > move
+  > say
+  > pickup
+  > read
+  > help (for more available actions)
+
+Hint(s), try these actions please, we're testing game mechanics:
+> Your hoarding compulsion drives you to collect objects in the Thieves' Den! Try using pickup, drop, and throw actions to build your secret stash!
+
+**⚡ Action Points:**
+10 AP
+
+🤔 What do you do?
+2025-09-13 09:09:40,357 - GM ⬅️ Player_2:
+i've processed the "fresh evidence" and the "notice board". the mention of "blood" and "footprints leading away" from the cult symbols is highly alarming and directly related to my motive to protect the town. i need to investigate where those footprints lead to assess the immediate danger.
+
+> look
+2025-09-13 09:09:40,359 - 🎬 Action Execution Report for Dr. Sarah Chen:
+  • look (Cost: 10 AP, Remaining: 0 AP)
+2025-09-13 09:09:40,359 - 👁️ Observation Report for Dr. Sarah Chen:
+  • Dr. Sarah Chen looks around the room. (Type: player_action)
+    ☐ Player_2 (Dr. Sarah Chen) - Event originator (gets direct feedback instead)
+    ☐ Player_1 (Father Marcus) - Not in event room
+2025-09-13 09:09:40,360 - GM ➡️ Player_2 (Feedback):
+📋 **Your Actions for this turn:**
+- ⚔️ **Look Action:** (Cost: 10 AP, Remaining: 0 AP)
+  - The heart of Blackwater, once bustling with merchants and travelers, now feels empty and foreboding. 
+A broken fountain sits in the center, its water murky and still. Notice boards line the walls, 
+covered with posters of missing persons. The cobblestones are cracked and worn, and the air carries 
+an unsettling chill. Shadows seem to move at the edges of your vision, and the few remaining 
+townsfolk hurry past with worried expressions. Yet in the center of the square, a small hearth 
+still burns - a symbol of the town's stubborn hope that refuses to be extinguished by the growing darkness.
+
+
+**📦 Objects in the room:**
+  • Notice Board
+  • Broken Fountain
+  • Town Statue
+  • Cult Symbols
+  • Eternal Flame
+  • Flame of Hope
+  • Message Board
+  • Town Crier
+
+**🚪 Exits:**
+  • Rusty Anchor Tavern
+  • Adventurer's Guild Hall
+  • Sacred Heart Church
+  • Blackwater Bank
+  • Market District
+  • Old Forest Path
+2025-09-13 09:09:40,360 - ⚡ Player_2 used all AP. Turn ended.
+2025-09-13 09:09:40,361 - ⏰ === TURN END CONFIRMATION START for Player_2 ===
+2025-09-13 09:09:40,361 - GM ➡️ Player_2 (Turn End Confirmation):
+Your turn has ended. Please confirm how you'd like to proceed:
+
+⚔️ Example actions:
+  > continue
+  > quit (will count as failure to complete motive)
+
+What would you like to do?
+2025-09-13 09:09:41,090 - GM ⬅️ Player_2 (Turn End Response):
+> continue
+2025-09-13 09:09:41,092 - ✅ Player Player_2 chose to continue.
+2025-09-13 09:09:41,092 - End of action processing for Player_2. Remaining AP: 0
+2025-09-13 09:09:41,093 - ✅ Round 2 complete
+2025-09-13 09:09:41,093 - 🏁 ===================== GAME OVER ======================
+2025-09-13 09:09:41,093 - ============================================================
+2025-09-13 09:09:41,093 - 🏆 GAME RESULTS
+2025-09-13 09:09:41,094 - ============================================================
+2025-09-13 09:09:41,094 - ❌ No players achieved their motives.
+2025-09-13 09:09:41,094 - 
+❌ LOSERS:
+2025-09-13 09:09:41,095 -    💔 Player_1 (Father Marcus) - Motive 'protect_flock' NOT ACHIEVED: Protect your congregation from the growing darkness and keep them safe from the cult's influence.
+2025-09-13 09:09:41,095 -    💔 Player_2 (Dr. Sarah Chen) - Motive 'redeem_past_sins' NOT ACHIEVED: Make amends for her past cult involvement by saving innocent lives and protecting the town.
+2025-09-13 09:09:41,096 - 
+============================================================
+2025-09-13 09:09:41,096 - 📊 GAME SUMMARY
+2025-09-13 09:09:41,097 - ============================================================
+2025-09-13 09:09:41,098 - 👥 Total Players: 2
+2025-09-13 09:09:41,098 - 🏆 Winners: 0
+2025-09-13 09:09:41,101 - 💔 Losers: 2
+2025-09-13 09:09:41,101 - ============================================================
+2025-09-13 09:09:41,101 - 
+============================================================
+2025-09-13 09:09:41,102 - 🌳 DETAILED MOTIVE CONDITION TREES
+2025-09-13 09:09:41,102 - ============================================================
+2025-09-13 09:09:41,103 - 
+👤 Player_1 (Father Marcus):
+2025-09-13 09:09:41,104 - 🎯 Motive: protect_flock
+  Protect your congregation from the growing darkness and keep them safe from the cult's influence.
+
+👍 SUCCESS CONDITIONS:
+  ☐ AND (all must pass)
+    ☐ Player has tag 'congregation_safe'
+    ☐ Player has tag 'church_protected'
+
+👎 FAILURE CONDITIONS:
+  ☐ OR (any must pass)
+    ☐ Player has tag 'congregation_corrupted'
+    ☐ Player has tag 'church_desecrated'
+
+⏳ FINAL STATUS: NOT ACHIEVED (Neither success nor failure)
+2025-09-13 09:09:41,105 - ----------------------------------------
+2025-09-13 09:09:41,106 - 
+👤 Player_2 (Dr. Sarah Chen):
+2025-09-13 09:09:41,106 - 🎯 Motive: redeem_past_sins
+  Make amends for her past cult involvement by saving innocent lives and protecting the town.
+
+👍 SUCCESS CONDITIONS:
+  ☐ AND (all must pass)
+    ☐ Player has tag 'lives_saved'
+    ☐ Player has tag 'atonement_achieved'
+
+👎 FAILURE CONDITIONS:
+  ☐ OR (any must pass)
+    ☐ Player has tag 'past_revealed'
+    ☐ Player has tag 'cult_recruits_her'
+
+⏳ FINAL STATUS: NOT ACHIEVED (Neither success nor failure)
+2025-09-13 09:09:41,107 - ----------------------------------------
+2025-09-13 09:09:41,107 - ============================================================

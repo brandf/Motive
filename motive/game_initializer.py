@@ -23,12 +23,14 @@ from motive.character import Character
 from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError
 
 class GameInitializer:
-    def __init__(self, game_config: GameConfig, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20, deterministic: bool = False):
+    def __init__(self, game_config: GameConfig, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20, deterministic: bool = False, character_override: str = None, motive_override: str = None):
         self.game_config = game_config # This is the overall GameConfig loaded from config.yaml
         self.game_id = game_id
         self.game_logger = game_logger
         self.initial_ap_per_turn = initial_ap_per_turn # Store initial AP per turn
         self.deterministic = deterministic # Store deterministic flag
+        self.character_override = character_override # Store character override for first player
+        self.motive_override = motive_override # Store motive override for character assignment
 
         self.rooms: Dict[str, Room] = {}
         self.game_objects: Dict[str, GameObject] = {}
@@ -193,7 +195,7 @@ class GameInitializer:
             available_character_ids = list(self.game_characters.keys())
         elif self.game_character_types:
             available_character_ids = list(self.game_character_types.keys())
-        
+
         if not available_character_ids:
             init_data['warnings'].append("No characters defined in merged configuration. Cannot assign characters to players.")
             return
@@ -214,12 +216,21 @@ class GameInitializer:
             char_assignments = available_character_ids[:len(players)]
 
         for i, player in enumerate(players):
-            char_id_to_assign = char_assignments[i]
+            # Apply character override for first player if specified
+            if i == 0 and self.character_override:
+                if self.character_override in available_character_ids:
+                    char_id_to_assign = self.character_override
+                    self.game_logger.info(f"Assigned override character '{self.character_override}' to Player_1")
+                else:
+                    self.game_logger.warning(f"Character override '{self.character_override}' not found in available characters. Available: {available_character_ids}")
+                    char_id_to_assign = char_assignments[i]
+            else:
+                char_id_to_assign = char_assignments[i]
             # Use characters if available, otherwise fall back to character_types
             if hasattr(self, 'game_characters') and self.game_characters:
                 char_cfg = self.game_characters[char_id_to_assign]
             else:
-                char_cfg = self.game_character_types[char_id_to_assign]                                              
+                char_cfg = self.game_character_types[char_id_to_assign]
 
             # Handle both Pydantic objects and dictionaries from merged config
             if hasattr(char_cfg, 'id'):
@@ -240,17 +251,18 @@ class GameInitializer:
 
             # Convert motives dictionaries to MotiveConfig objects if needed
             converted_motives = None
-            if char_motives:
+            selected_motive = None
+            if char_motives and len(char_motives) > 0:
                 from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
                 converted_motives = []
                 for motive_dict in char_motives:
                     if isinstance(motive_dict, dict):
                         # Convert success_conditions
                         success_conditions = self._convert_conditions(motive_dict.get('success_conditions', []))
-                        
-                        # Convert failure_conditions  
+
+                        # Convert failure_conditions
                         failure_conditions = self._convert_conditions(motive_dict.get('failure_conditions', []))
-                        
+
                         # Create MotiveConfig object
                         converted_motives.append(MotiveConfig(
                             id=motive_dict['id'],
@@ -261,6 +273,25 @@ class GameInitializer:
                     else:
                         # Already a MotiveConfig object
                         converted_motives.append(motive_dict)
+                
+                # Handle motive override
+                if self.motive_override:
+                    # Find the specified motive
+                    selected_motive = None
+                    for motive in converted_motives:
+                        if motive.id == self.motive_override:
+                            selected_motive = motive
+                            break
+                    
+                    if selected_motive:
+                        self.game_logger.info(f"Assigned override motive '{self.motive_override}' to character '{char_name}'")
+                    else:
+                        self.game_logger.warning(f"Motive override '{self.motive_override}' not found in available motives for character '{char_name}'. Available: {[m.id for m in converted_motives]}")
+                        self.motive_override = None
+            elif self.motive_override:
+                # Character has no motives but motive override was requested
+                self.game_logger.warning(f"Motive override '{self.motive_override}' requested but character '{char_name}' has no motives defined")
+                self.motive_override = None
 
             # Select initial room based on character configuration
             selected_room_id = self._select_initial_room(char_cfg, start_room_id)
@@ -285,6 +316,7 @@ class GameInitializer:
                 backstory=char_backstory,
                 motive=char_motive,  # Legacy single motive
                 motives=converted_motives,  # New multiple motives (converted)
+                selected_motive=selected_motive,  # Override motive if specified
                 current_room_id=selected_room_id,
                 action_points=self.initial_ap_per_turn, # Use configurable initial AP
                 aliases=char_aliases,
@@ -523,14 +555,34 @@ class GameInitializer:
             self.game_logger.error("No rooms defined in merged configuration. Cannot assign starting room for players.")
             return
 
-        # Randomly assign characters to players (no duplicates)
+        # Handle character assignment with override support
         import random
-        if not self.deterministic:
-            # Random assignment in normal mode
-            char_assignments = random.sample(available_character_ids, len(players))
-        else:
-            # Deterministic assignment (first N characters in order)
-            char_assignments = available_character_ids[:len(players)]
+        
+        # Check if character override is valid
+        if self.character_override and self.character_override not in available_character_ids:
+            self.game_logger.warning(f"Character override '{self.character_override}' not found in available characters. Available: {available_character_ids}")
+            self.character_override = None
+        
+        # Assign characters to players
+        char_assignments = []
+        remaining_characters = available_character_ids.copy()
+        
+        # First player gets the override character if specified
+        if self.character_override and len(players) > 0:
+            char_assignments.append(self.character_override)
+            remaining_characters.remove(self.character_override)
+            self.game_logger.info(f"Assigned override character '{self.character_override}' to first player")
+        
+        # Assign remaining characters to remaining players
+        remaining_players = len(players) - len(char_assignments)
+        if remaining_players > 0:
+            if not self.deterministic:
+                # Random assignment for remaining characters
+                remaining_assignments = random.sample(remaining_characters, remaining_players)
+            else:
+                # Deterministic assignment (first N characters in order)
+                remaining_assignments = remaining_characters[:remaining_players]
+            char_assignments.extend(remaining_assignments)
 
         for i, player in enumerate(players):
             char_id_to_assign = char_assignments[i]
@@ -559,17 +611,18 @@ class GameInitializer:
 
             # Convert motives dictionaries to MotiveConfig objects if needed
             converted_motives = None
-            if char_motives:
+            selected_motive = None
+            if char_motives and len(char_motives) > 0:
                 from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
                 converted_motives = []
                 for motive_dict in char_motives:
                     if isinstance(motive_dict, dict):
                         # Convert success_conditions
                         success_conditions = self._convert_conditions(motive_dict.get('success_conditions', []))
-                        
-                        # Convert failure_conditions  
+
+                        # Convert failure_conditions
                         failure_conditions = self._convert_conditions(motive_dict.get('failure_conditions', []))
-                        
+
                         # Create MotiveConfig object
                         converted_motives.append(MotiveConfig(
                             id=motive_dict['id'],
@@ -580,9 +633,28 @@ class GameInitializer:
                     else:
                         # Already a MotiveConfig object
                         converted_motives.append(motive_dict)
+                
+                # Handle motive override
+                if self.motive_override:
+                    # Find the specified motive
+                    selected_motive = None
+                    for motive in converted_motives:
+                        if motive.id == self.motive_override:
+                            selected_motive = motive
+                            break
+                    
+                    if selected_motive:
+                        self.game_logger.info(f"Assigned override motive '{self.motive_override}' to character '{char_name}'")
+                    else:
+                        self.game_logger.warning(f"Motive override '{self.motive_override}' not found in available motives for character '{char_name}'. Available: {[m.id for m in converted_motives]}")
+                        self.motive_override = None
+            elif self.motive_override:
+                # Character has no motives but motive override was requested
+                self.game_logger.warning(f"Motive override '{self.motive_override}' requested but character '{char_name}' has no motives defined")
+                self.motive_override = None
 
             # Select initial room based on character configuration
-            selected_room_id = self._select_initial_room(char_cfg, start_room_id)
+            selected_room_id = self._select_initial_room(char_cfg, default_start_room_id)
             
             # Find the reason for the selected room
             initial_room_reason = None
@@ -604,6 +676,7 @@ class GameInitializer:
                 backstory=char_backstory,
                 motive=char_motive,  # Legacy single motive
                 motives=converted_motives,  # New multiple motives (converted)
+                selected_motive=selected_motive,  # Override motive if specified
                 current_room_id=selected_room_id,
                 action_points=self.initial_ap_per_turn, # Use configurable initial AP
                 aliases=char_aliases,
