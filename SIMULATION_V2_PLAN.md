@@ -614,6 +614,28 @@ effects:
 - ✅ **Interior State Persistence**: Objects and interior state persist when players exit/re-enter containers
 - ✅ **Multiple Container Isolation**: Different containers have separate, isolated interior spaces
 - ✅ All 130 sim_v2 tests passing with complete portals and containers integration
+- ✅ Implemented actions pipeline: actions_pipeline.py with TDD tests (9 tests passing)
+- ✅ ActionPipeline manages action definitions with parameters, requirements, and effects
+- ✅ Support for parameter validation, requirement evaluation, and effect execution
+- ✅ Integration with sim_v2 Effects, Conditions, and Relations systems
+- ✅ Parameter substitution in effects and condition evaluation with entity property paths
+- ✅ All 139 sim_v2 tests passing with actions pipeline integration
+- ✅ Implemented comprehensive v1→v2 migration system: config_loader.py with V2ConfigLoader
+- ✅ V2ConfigLoader supports hierarchical config loading, v1 migration, and v2 native configs
+- ✅ Migration preserves all content: rooms, objects, characters, actions with error handling
+- ✅ Created comprehensive migration tests: test_sim_v2_config_migration.py (12 tests passing)
+- ✅ Created full migration integration tests: test_sim_v2_full_migration_integration.py (7 tests passing)
+- ✅ Migration works with v2 systems: RelationsGraph, EffectEngine, PropertyStore integration
+- ✅ Enhanced MotiveEntity with set_property() method for property modification
+- ✅ Fixed EffectEngine to handle PropertyStore objects correctly
+- ✅ All 158 sim_v2 tests passing with complete migration system
+- ✅ **ACTUAL CONFIG MIGRATION COMPLETE**: Migrated all hearth_and_shadow v1 configs to v2 format
+- ✅ Created migrated configs: hearth_and_shadow_*_migrated.yaml files preserving all original content
+- ✅ Migration statistics: 11 rooms, 65 objects, 8 characters migrated successfully
+- ✅ Created migration script: migrate_configs.py for automated v1→v2 conversion
+- ✅ Created migrated config tests: test_sim_v2_migrated_configs.py (7 tests passing)
+- ✅ Migrated configs work with all v2 systems: RelationsGraph, EffectEngine, PropertyStore
+- ✅ All 165 sim_v2 tests passing with complete migration and migrated configs
 
 #### New Findings / Backlog
 - ☐ Expression safety fuzz tests and resource/time limits

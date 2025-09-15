@@ -882,3 +882,213 @@ assert gm.log_dir.startswith("logs")  # or assert gm.log_dir == "logs\\unknown\\
 **This mistake was so fundamental that it requires immediate documentation and permanent reminder**. Deleting failing tests is not just wrong—it's the opposite of what software engineering is about. Tests exist to catch problems, and when they fail, that's valuable information that must be acted upon, not hidden.
 
 **Every AI agent working on this project must understand**: When tests fail, you fix them. You never delete them. This is non-negotiable.
+
+## CRITICAL LESSON: Integration Tests Must Be Completely Isolated
+
+### The Fundamental Principle
+
+**INTEGRATION TESTS MUST BE COMPLETELY ISOLATED AND SELF-CONTAINED**. They should never depend on real game configs, external files, or any content outside the `/tests` directory.
+
+### What Happened
+
+During v2 migration testing, I created integration tests that tried to load real game configs like `hearth_and_shadow_migrated.yaml`. This was fundamentally wrong because:
+
+1. **Integration tests should test the system, not the content**: They should verify config loading, merging, validation logic, not actual game content
+2. **Tests should be isolated**: They shouldn't depend on external files that might change or be missing
+3. **Tests should be self-contained**: All test data should be within `/tests/configs/`
+4. **Tests should be deterministic**: They shouldn't fail because of changes to real game content
+
+### The Correct Approach
+
+**Integration tests should**:
+- **Use only configs in `/tests/configs/`**: Never reference `configs/themes/`, `configs/core/`, etc.
+- **Be completely self-contained**: All dependencies should be within the test directory
+- **Test the system, not the content**: Focus on config loading, validation, merging logic
+- **Use minimal test data**: Simple, focused test cases that verify specific functionality
+- **Be isolated from real game content**: No dependencies on actual game configs
+
+### What Went Wrong
+
+1. **Referenced real game configs**: Tests tried to load `hearth_and_shadow_migrated.yaml`
+2. **Mixed concerns**: Testing both the system AND the content
+3. **External dependencies**: Tests depended on files outside `/tests/`
+4. **Non-deterministic**: Tests could fail due to changes in real game content
+
+### The Professional Standard
+
+**In professional software development**:
+- **Integration tests test integration logic**: Config loading, merging, validation
+- **Unit tests test individual components**: Specific functions and classes
+- **End-to-end tests test complete workflows**: But with controlled test data
+- **Tests are isolated**: No external dependencies or side effects
+- **Tests are deterministic**: Same input always produces same output
+
+### Prevention Strategies
+
+**To avoid this mistake**:
+1. **Always ask**: "Is this test completely isolated?"
+2. **Check dependencies**: Does the test reference files outside `/tests/`?
+3. **Use test data**: Create minimal test configs within `/tests/configs/`
+4. **Focus on the system**: Test the logic, not the content
+5. **Verify isolation**: Can the test run without any external files?
+
+### This Lesson Must Never Be Forgotten
+
+**Integration tests that depend on real game content are not integration tests—they're end-to-end tests with external dependencies**. This violates the fundamental principle of test isolation and makes tests fragile, non-deterministic, and difficult to maintain.
+
+**Every AI agent working on this project must understand**: Integration tests must be completely isolated and self-contained. They test the system, not the content. This is non-negotiable.
+
+## CRITICAL LESSON: Config Migration Must Produce Valid Files (and Prove It)
+
+### What Went Wrong
+
+- A migration script emitted invalid YAML (comment-keys and empty `": null"` entries) into migrated files like `configs/core_objects_migrated.yaml`.
+- No test validated real migrated files. Unit tests passed while real game configs were broken.
+- We did not inspect or parse the generated YAML artefacts; we trusted code rather than verifying outputs.
+
+### Non-Negotiable Requirements for Any Migration
+
+- Always parse the generated YAML with `yaml.safe_load` for every migrated file.
+- Validate hierarchical includes with a loader (e.g., `V2ConfigLoader.load_hierarchical_config`) and assert merged structures are present and non-empty where expected.
+- Zero “formatting sugar” in YAML (no comment-keys, no empty-key placeholders). If metadata is desired, use proper YAML comments in the file, not map keys.
+- Handle empty inputs gracefully (empty v1 sections must map to either an empty object `{}` or omit the section; never emit broken stubs).
+
+### Required Tests (Add These Before Declaring Migration Complete)
+
+- YAML syntax validation: iterate over all `configs/**/*_migrated.yaml` and `yaml.safe_load` them. Fail on any exception.
+- Structural sanity checks: at minimum assert presence of `entity_definitions` (or `action_definitions`) for migrated content files that should contain them (e.g., hearth_and_shadow objects/rooms/characters/actions).
+- Hierarchical load test: load `fantasy_migrated.yaml` and `hearth_and_shadow_migrated.yaml` via `V2ConfigLoader.load_hierarchical_config`, then `load_v2_config`, and assert that `definitions` count > 0 for contentful editions.
+- Path correctness: assert that includes resolve without `FileNotFoundError`.
+
+### Minimal Change Discipline (Don’t Invent New Orchestrators)
+
+- The `GameMaster` must remain a thin orchestrator. Avoid creating alternative orchestrators (e.g., a separate v2 GameMaster) unless strictly necessary.
+- Prefer adapting initialization/loading layers (e.g., a v2-aware initializer) over forking the game loop.
+- Keep CLI logic simple: detect config format, load through the appropriate loader, and return a consistent structure to `GameMaster`.
+
+### Pre-Commit Gate for Migrations
+
+Before claiming any migration “done”:
+
+- [ ] All migrated YAML files load via `yaml.safe_load`
+- [ ] Hierarchical includes load via `V2ConfigLoader` without errors
+- [ ] New tests verifying the above are green in CI
+- [ ] A real game run succeeds with v2 configs (smoke scenario)
+
+## CRITICAL LESSON: End-to-End Backstops Over Unit Green
+
+### Problem
+
+Unit and narrow integration tests can be green while end-to-end flows fail (e.g., CLI + config + initialization + run). This happened because we tested migration logic but not the artefacts and workflow that consume them.
+
+### Policy
+
+- For any change affecting user entry points (CLI, configs, loaders), add at least one end-to-end backstop test or scripted check that exercises the real path, using isolated test configs.
+- Treat “tests green” as necessary but not sufficient. Add a final smoke run (mocked LLMs) before merging.
+
+### Execution Checklist
+
+- [ ] Artefact validation (parse all generated files)
+- [ ] Loader sanity (hierarchical merge works)
+- [ ] Real run smoke (mocked LLMs; short scenario)
+- [ ] Logs verify initialization report is sane (non-zero rooms/characters when expected)
+
+## CRITICAL LESSON: Never Declare Partial Victory - Achieve 10/10 Confidence
+
+### The Mistake
+
+Declaring success at 7/10 confidence and asking user to spot-check for remaining issues instead of achieving complete validation.
+
+### Why It's Wrong
+
+- **User's time is valuable**: They shouldn't have to debug agent's incomplete work
+- **Partial confidence means incomplete validation**: 7/10 confidence indicates systematic gaps
+- **Agent should achieve 10/10 confidence**: Before declaring any success
+- **Asking user to "skim through" configs**: Is passing responsibility back to user
+- **Wasting user's valuable time**: By not doing thorough validation
+
+### What Should Have Been Done
+
+- **Systematically validate ALL migrated content types**: Every field, every data structure
+- **Create comprehensive tests for every migration scenario**: Edge cases, error conditions, complex nesting
+- **Verify edge cases**: Empty values, special characters, complex data structures
+- **Only declare success when 10/10 confidence is achieved**: Never settle for partial validation
+- **Never ask user to do manual verification**: That agent should do automatically
+
+### Prevention Strategies
+
+- **Always achieve 10/10 confidence before declaring success**: No exceptions
+- **Create automated validation for all migration scenarios**: Don't rely on manual spot checks
+- **Test edge cases systematically**: Empty values, special characters, complex nesting, type mismatches
+- **If confidence is not 10/10, continue working until it is**: Never declare partial victory
+- **Never pass incomplete work back to user**: For manual verification
+- **Validate every aspect of migration**: Content preservation, syntax, structure, references
+
+### This Lesson Must Never Be Forgotten
+
+**Declaring partial victory wastes the user's valuable time and demonstrates incomplete work**. Every AI agent must achieve 10/10 confidence through systematic validation before declaring any task complete. This is non-negotiable.
+
+## CRITICAL LESSON: Test-Driven Development Must Include End-to-End Action Workflows
+
+### The Mistake
+
+Creating comprehensive unit tests and migration tests, but never testing actual action execution with v2 configs. Discovered via expensive real game runs that basic actions (look, read, move, say) don't work, wasting user's money on LLM players.
+
+### Why It's Wrong
+
+- **Unit tests ≠ functional tests**: Testing system components in isolation doesn't test user workflows
+- **Config loading tests ≠ action execution tests**: Configs can load but actions can still fail
+- **Architectural tests ≠ user workflow tests**: System architecture working doesn't mean user actions work
+- **Real game runs cost money**: Using expensive LLM players to discover basic functionality issues
+- **False confidence from green tests**: 165 passing tests created illusion of completeness
+
+### What Should Have Been Done
+
+1. **Write failing action execution tests FIRST**:
+   ```python
+   def test_look_action_with_v2_config():
+       """Test that look action works with v2 room configs."""
+       config = load_v2_test_config()
+       game_master = GameMaster(config, "test_game")
+       result = game_master.handle_action("Player_1", "look", {})
+       assert result.success
+       assert "room description" in result.feedback
+   
+   def test_read_action_with_v2_objects():
+       """Test that read action works with v2 object configs."""
+       # Test complete read workflow
+   
+   def test_move_action_with_v2_exits():
+       """Test that move action works with v2 exit configs."""
+       # Test complete move workflow
+   ```
+
+2. **Test complete user workflows**:
+   - Look → see objects → read objects → get feedback
+   - Look → see exits → move through exits → arrive in new room
+   - Say → get response from NPCs or other players
+
+3. **Use minimal isolated test configs**:
+   - Single room with one object
+   - Two rooms connected by one exit
+   - One NPC with one response
+
+### Prevention Strategies
+
+- **NEVER run real games until action execution tests pass**: Real games are for final validation only
+- **ALWAYS test user workflows, not just system components**: User actions are the real functionality
+- **CREATE action integration tests before claiming v2 works**: Every action must have execution tests
+- **USE TDD: Red → Green → Refactor for every user action**: Write failing tests first
+- **TEST the happy path AND error cases for each action**: Both success and failure scenarios
+
+### Testing Hierarchy (All Must Pass Before Real Games)
+
+1. ✅ Unit tests (system components)
+2. ✅ Integration tests (config loading)
+3. ❌ **MISSING**: Action execution tests (user workflows)
+4. ❌ **MISSING**: End-to-end workflow tests (complete user journeys)
+5. ✅ Real game runs (final validation only)
+
+### This Lesson Must Never Be Forgotten
+
+**Testing system architecture without testing user workflows is incomplete testing**. Every AI agent must test actual user actions with real configs before claiming functionality works. Real game runs are expensive validation tools, not debugging tools.

@@ -9,18 +9,18 @@ from motive.hooks.core_hooks import calculate_help_cost
 def test_help_action_cost_calculation_real_config():
     """Test help action cost calculation with real CostConfig objects from config."""
     # Load merged configuration to get actions
-    from motive.config_loader import load_and_validate_game_config
-    config = load_and_validate_game_config("game.yaml", base_path="configs", validate=False)
+    from motive.cli import load_config
+    config = load_config("configs/game.yaml")
     
     # Find the help action
-    help_action = config.get("actions", {}).get("help")
+    help_action = config.actions.get("help")
     
     assert help_action is not None, "Help action not found in configuration"
-    assert isinstance(help_action.get("cost"), dict), "Help action cost should be dictionary"
-    cost = help_action.get("cost", {})
-    assert cost.get("type") == "code_binding", "Help action should use code_binding cost type"
-    assert cost.get("function_name") == "calculate_help_cost", "Should use calculate_help_cost function"
-    assert cost.get("value") == 1, "Base cost should be 1 (matches manual)"
+    assert hasattr(help_action.cost, 'type'), "Help action cost should be CostConfig object"
+    cost = help_action.cost
+    assert cost.type == "code_binding", "Help action should use code_binding cost type"
+    assert cost.function_name == "calculate_help_cost", "Should use calculate_help_cost function"
+    assert cost.value == 1, "Base cost should be 1 (matches manual)"
     
     # Test cost calculation with mock objects
     class MockGameMaster:
@@ -35,7 +35,7 @@ def test_help_action_cost_calculation_real_config():
             self.cost = cost
     
     # Test general help (no category)
-    general_help_config = MockActionConfig(help_action.get("cost"))
+    general_help_config = MockActionConfig(help_action.cost)
     general_cost = calculate_help_cost(MockGameMaster(), MockCharacter(), general_help_config, {})
     assert general_cost == 1, f"General help should cost 1, got {general_cost}"
     
@@ -97,8 +97,8 @@ def test_help_action_integration_with_real_objects():
     from motive.character import Character
 
     # Load merged configuration to get actions
-    from motive.config_loader import load_and_validate_game_config
-    config = load_and_validate_game_config("game.yaml", base_path="configs", validate=False)
+    from motive.cli import load_config
+    config = load_config("configs/game.yaml")
     
     # Create a minimal GameMaster for testing
     class MockGameMaster:
@@ -115,7 +115,7 @@ def test_help_action_integration_with_real_objects():
     )
     
     # Find help action
-    help_action = config.get("actions", {}).get("help")
+    help_action = config.actions.get("help")
     
     assert help_action is not None
     

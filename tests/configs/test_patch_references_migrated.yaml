@@ -1,0 +1,20 @@
+entity_definitions:
+  patched_object:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: ''
+      description:
+        type: string
+        default: ''
+action_definitions:
+  move_action_patched:
+    name: move_action_patched
+    description: 'Action: move_action_patched'
+    cost: 10
+    category: general
+    parameters: []
+    requirements: []
+    effects: []

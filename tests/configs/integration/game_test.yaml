@@ -2,7 +2,7 @@
 # This demonstrates how test configs can extend base configs
 
 includes:
-  - "../../../configs/game.yaml"  # Include the main game config
+  - "../test_standalone_migrated.yaml"  # Use migrated v2 test config
   - "test_hints.yaml"  # Add test-specific hints
 
 # Override game settings for testing

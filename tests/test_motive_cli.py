@@ -67,14 +67,14 @@ class TestMotiveCLI:
     def test_available_motives_for_character(self):
         """Test that the expected motives are available for Bella."""
         config = load_config('configs/game.yaml')
-        bella_config = config.characters['bella_whisper_nightshade']
+        bella_config = config.character_types['bella_whisper_nightshade']
         
-        # Verify that Bella has multiple motives (config is a dictionary)
-        assert 'motives' in bella_config
-        assert len(bella_config['motives']) >= 3
+        # Verify that Bella has multiple motives (config is a CharacterConfig object)
+        assert hasattr(bella_config, 'motives')
+        assert len(bella_config.motives) >= 3
         
         # Verify specific motives exist
-        motive_ids = [motive['id'] for motive in bella_config['motives']]
+        motive_ids = [motive.id for motive in bella_config.motives]
         assert 'profit_from_chaos' in motive_ids
         assert 'protect_her_network' in motive_ids
         assert 'build_secret_stash' in motive_ids
@@ -92,7 +92,7 @@ class TestMotiveCLI:
         
         # Mock character configurations
         initializer.game_characters = {
-            'bella_whisper_nightshade': config.characters['bella_whisper_nightshade']
+            'bella_whisper_nightshade': config.character_types['bella_whisper_nightshade']
         }
         initializer.game_rooms = {'town_square': MagicMock()}
         
@@ -173,7 +173,7 @@ class TestMotiveCLI:
         
         # Mock character configurations and required attributes
         initializer.game_characters = {
-            'bella_whisper_nightshade': config.characters['bella_whisper_nightshade']
+            'bella_whisper_nightshade': config.character_types['bella_whisper_nightshade']
         }
         initializer.game_rooms = {'town_square': MagicMock()}
         
@@ -196,7 +196,7 @@ class TestMotiveCLI:
         
         # Mock character configurations again
         initializer.game_characters = {
-            'bella_whisper_nightshade': config.characters['bella_whisper_nightshade']
+            'bella_whisper_nightshade': config.character_types['bella_whisper_nightshade']
         }
         initializer.game_rooms = {'town_square': MagicMock()}
         
@@ -353,7 +353,7 @@ class TestMotiveCLI:
         
         # Mock character configurations and required attributes
         initializer.game_characters = {
-            'bella_whisper_nightshade': config.characters['bella_whisper_nightshade']
+            'bella_whisper_nightshade': config.character_types['bella_whisper_nightshade']
         }
         initializer.game_rooms = {'town_square': MagicMock()}
         
@@ -387,7 +387,7 @@ class TestMotiveCLI:
         
         # Mock character configurations and required attributes
         initializer.game_characters = {
-            'bella_whisper_nightshade': config.characters['bella_whisper_nightshade']
+            'bella_whisper_nightshade': config.character_types['bella_whisper_nightshade']
         }
         initializer.game_rooms = {'town_square': MagicMock()}
         

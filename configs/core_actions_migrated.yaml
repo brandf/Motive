@@ -1,0 +1,250 @@
+action_definitions:
+  look:
+    name: look
+    description: Look around.
+    cost: 10
+    category: observation
+    parameters:
+    - name: target
+      type: string
+      description: The name of the object or character to look at.
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: look_at_target
+      observers:
+      - player
+  help:
+    name: help
+    description: Get help with available actions.
+    cost:
+      type: code_binding
+      function_name: calculate_help_cost
+      value: 1
+    category: system
+    parameters:
+    - name: category
+      type: string
+      description: Optional category to filter actions (e.g., 'movement', 'communication').
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: generate_help_message
+      observers:
+      - player
+  move:
+    name: move
+    description: Move in a specified direction.
+    cost: 10
+    category: movement
+    parameters:
+    - name: direction
+      type: string
+      description: The direction to move (e.g., 'north', 'south', 'east', 'west').
+      required: true
+      default_value: null
+    requirements:
+    - type: exit_exists
+      description: ''
+      direction_param: direction
+    effects:
+    - type: code_binding
+      function_name: handle_move_action
+      observers:
+      - player
+      - room_players
+  say:
+    name: say
+    description: Say something to other players in the room.
+    cost: 10
+    category: communication
+    parameters:
+    - name: phrase
+      type: string
+      description: The message to say to other players.
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: generate_event
+      message: 'Player {player_name} says: "{phrase}"'
+      observers:
+      - room_players
+  whisper:
+    name: whisper
+    description: Whisper privately to a specific player in the same room.
+    cost: 10
+    category: communication
+    parameters:
+    - name: player
+      type: string
+      description: The name of the player to whisper to.
+      required: true
+      default_value: null
+    - name: phrase
+      type: string
+      description: The private message to whisper.
+      required: true
+      default_value: null
+    requirements:
+    - type: player_in_room
+      description: ''
+      target_player_param: player
+    effects:
+    - type: generate_event
+      message: 'Player {player_name} whispers to {player}: "{phrase}"'
+      observers:
+      - player
+  shout:
+    name: shout
+    description: Shout loudly, potentially heard in adjacent rooms.
+    cost: 10
+    category: communication
+    parameters:
+    - name: phrase
+      type: string
+      description: The message to shout.
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: generate_event
+      message: 'Player {player_name} shouts: "{phrase}"'
+      observers:
+      - adjacent_rooms
+  pickup:
+    name: pickup
+    description: Pick up an object from the current room.
+    cost: 10
+    category: inventory
+    parameters:
+    - name: object_name
+      type: string
+      description: The name of the object to pick up.
+      required: true
+      default_value: null
+    requirements:
+    - type: object_in_room
+      description: ''
+      object_name_param: object_name
+    - type: object_possession_allowed
+      description: ''
+      object_name_param: object_name
+    effects:
+    - type: code_binding
+      function_name: handle_pickup_action
+      observers:
+      - player
+  drop:
+    name: drop
+    description: Drop an object from your inventory into the current room.
+    cost: 10
+    category: inventory
+    parameters:
+    - name: object_name
+      type: string
+      description: The name of the object to drop.
+      required: true
+      default_value: null
+    requirements:
+    - type: object_in_inventory
+      description: ''
+      object_name_param: object_name
+    effects:
+    - type: code_binding
+      function_name: handle_drop_action
+      observers:
+      - player
+      - room_players
+  read:
+    name: read
+    description: Read text from an object (like signs, books, etc.).
+    cost: 5
+    category: interaction
+    parameters:
+    - name: object_name
+      type: string
+      description: The name of the object to read.
+      required: true
+      default_value: null
+    requirements:
+    - type: object_in_room
+      description: ''
+      object_name_param: object_name
+    effects:
+    - type: code_binding
+      function_name: handle_read_action
+      observers:
+      - player
+  pass:
+    name: pass
+    description: End your turn without taking any action.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+  give:
+    name: give
+    description: Give an object from your inventory to another player.
+    cost: 10
+    category: inventory
+    parameters:
+    - name: player
+      type: string
+      description: The name of the player to give to.
+      required: true
+      default_value: null
+    - name: object_name
+      type: string
+      description: The name of the object to give.
+      required: true
+      default_value: null
+    requirements:
+    - type: player_in_room
+      description: ''
+      target_player_param: player
+    - type: object_in_inventory
+      description: ''
+      object_name_param: object_name
+    effects:
+    - type: code_binding
+      function_name: handle_give_action
+      observers:
+      - player
+      - room_players
+  throw:
+    name: throw
+    description: Throw an object from your inventory through an exit to an adjacent
+      room.
+    cost: 10
+    category: inventory
+    parameters:
+    - name: object_name
+      type: string
+      description: The name of the object to throw.
+      required: true
+      default_value: null
+    - name: exit
+      type: string
+      description: The exit/direction to throw the object through.
+      required: true
+      default_value: null
+    requirements:
+    - type: object_in_inventory
+      description: ''
+      object_name_param: object_name
+    - type: exit_exists
+      description: ''
+      direction_param: exit
+    effects:
+    - type: code_binding
+      function_name: handle_throw_action
+      observers:
+      - player
+      - room_players
+      - adjacent_rooms

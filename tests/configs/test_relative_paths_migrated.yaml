@@ -1,0 +1,9 @@
+action_definitions:
+  test_relative_action:
+    name: Test Relative Action
+    description: This action tests relative path resolution
+    cost: 5
+    category: general
+    parameters: []
+    requirements: []
+    effects: []

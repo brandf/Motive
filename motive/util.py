@@ -19,7 +19,7 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 
 try:
-    from motive.config_loader import load_game_config
+    from motive.cli import load_config as cli_load_config
     HIERARCHICAL_SUPPORT = True
 except ImportError:
     HIERARCHICAL_SUPPORT = False
@@ -35,10 +35,10 @@ def load_config(config_path: str) -> Dict[str, Any]:
         # If it has includes and we have hierarchical support, use the new loader
         if 'includes' in raw_config and HIERARCHICAL_SUPPORT:
             print(f"Detected hierarchical config with includes, using config loader...")
-            # Extract base path from config_path
-            base_path = str(Path(config_path).parent)
-            config_file = Path(config_path).name
-            return load_game_config(config_file, base_path)
+            # Use the new CLI loader that handles v2 configs
+            game_config = cli_load_config(config_path)
+            # Return the GameConfig object directly - the util functions will handle it
+            return game_config
         else:
             # Traditional config loading
             return raw_config
@@ -60,20 +60,29 @@ def show_raw_config(config: Dict[str, Any], format_type: str = 'yaml') -> None:
     print()
 
 
-def show_summary(config: Dict[str, Any]) -> None:
+def show_summary(config) -> None:
     """Display a summary of the configuration."""
     print("Configuration Summary:")
     print("=====================")
     
-    action_count = len(config.get('actions', {}))
-    object_count = len(config.get('object_types', {}))
-    room_count = len(config.get('rooms', {}))
-    
-    # Use characters if available, otherwise fall back to character_types
-    characters = config.get('characters', {})
-    if not characters:
-        characters = config.get('character_types', {})
-    character_count = len(characters)
+    # Handle both dict configs (v1) and GameConfig objects (v2)
+    if hasattr(config, 'actions'):
+        # GameConfig object (v2)
+        action_count = len(config.actions)
+        object_count = len(config.object_types)
+        room_count = len(config.rooms)
+        character_count = len(config.character_types)
+    else:
+        # Dictionary config (v1)
+        action_count = len(config.get('actions', {}))
+        object_count = len(config.get('object_types', {}))
+        room_count = len(config.get('rooms', {}))
+        
+        # Use characters if available, otherwise fall back to character_types
+        characters = config.get('characters', {})
+        if not characters:
+            characters = config.get('character_types', {})
+        character_count = len(characters)
     
     print(f"Actions: {action_count}")
     print(f"Objects: {object_count}")
@@ -82,12 +91,19 @@ def show_summary(config: Dict[str, Any]) -> None:
     print()
 
 
-def show_actions(config: Dict[str, Any]) -> None:
+def show_actions(config) -> None:
     """Display available actions."""
     print("Available Actions:")
     print("=================")
     
-    actions = config.get('actions', {})
+    # Handle both dict configs (v1) and GameConfig objects (v2)
+    if hasattr(config, 'actions'):
+        # GameConfig object (v2)
+        actions = config.actions
+    else:
+        # Dictionary config (v1)
+        actions = config.get('actions', {})
+    
     if not actions:
         print("No actions found in this configuration.")
         return
@@ -95,52 +111,102 @@ def show_actions(config: Dict[str, Any]) -> None:
     for action_name in sorted(actions.keys()):
         action = actions[action_name]
         
+        # Handle both dict and Pydantic objects
+        if hasattr(action, 'cost'):
+            # Pydantic object (v2)
+            cost = action.cost
+            name = action.name
+            description = action.description
+            category = action.category
+            parameters = action.parameters
+            requirements = action.requirements
+        else:
+            # Dictionary object (v1)
+            cost = action.get('cost', 0)
+            name = action.get('name', action_name)
+            description = action.get('description', 'No description')
+            category = action.get('category')
+            parameters = action.get('parameters', [])
+            requirements = action.get('requirements', [])
+        
         # Handle cost (can be int or dict with value)
-        cost = action.get('cost', 0)
         if isinstance(cost, dict):
             cost = cost.get('value', cost.get('cost', 0))
         
-        category = f" ({action.get('category', 'uncategorized')})" if action.get('category') else ""
+        category_str = f" ({category})" if category else ""
         
-        print(f"- {action.get('name', action_name)}: {action.get('description', 'No description')}")
-        print(f"  Cost: {cost} AP{category}")
+        print(f"- {name}: {description}")
+        print(f"  Cost: {cost} AP{category_str}")
         
         # Show parameters
-        params = action.get('parameters', [])
-        if params:
-            param_list = [p.get('name', 'unnamed') for p in params]
+        if parameters:
+            if hasattr(parameters[0], 'name'):
+                # Pydantic objects
+                param_list = [p.name for p in parameters]
+            else:
+                # Dictionary objects
+                param_list = [p.get('name', 'unnamed') for p in parameters]
             print(f"  Parameters: {', '.join(param_list)}")
         
         # Show requirements
-        requirements = action.get('requirements', [])
         if requirements:
-            req_list = [r.get('type', 'unknown') for r in requirements]
+            if hasattr(requirements[0], 'type'):
+                # Pydantic objects
+                req_list = [r.type for r in requirements]
+            else:
+                # Dictionary objects
+                req_list = [r.get('type', 'unknown') for r in requirements]
             print(f"  Requirements: {', '.join(req_list)}")
         
         print()
 
 
-def show_objects(config: Dict[str, Any]) -> None:
+def show_objects(config) -> None:
     """Display available objects."""
     print("Available Objects:")
     print("=================")
     
-    objects = config.get('object_types', {})
+    # Handle both dict configs (v1) and GameConfig objects (v2)
+    if hasattr(config, 'object_types'):
+        # GameConfig object (v2)
+        objects = config.object_types
+    else:
+        # Dictionary config (v1)
+        objects = config.get('object_types', {})
+    
     if not objects:
         print("No objects found in this configuration.")
         return
     
     for object_name in sorted(objects.keys()):
         obj = objects[object_name]
-        print(f"- {obj.get('name', object_name)}: {obj.get('description', 'No description')}")
+        
+        # Handle both dict and Pydantic objects
+        if hasattr(obj, 'name'):
+            # Pydantic object (v2)
+            name = obj.name
+            description = obj.description
+            tags = getattr(obj, 'tags', [])
+        else:
+            # Dictionary object (v1)
+            name = obj.get('name', object_name)
+            description = obj.get('description', 'No description')
+            tags = obj.get('tags', [])
+        
+        print(f"- {name}: {description}")
         
         # Show tags
-        tags = obj.get('tags', [])
         if tags:
             print(f"  Tags: {', '.join(tags)}")
         
         # Show properties
-        properties = obj.get('properties', {})
+        if hasattr(obj, 'properties'):
+            # Pydantic object (v2)
+            properties = obj.properties
+        else:
+            # Dictionary object (v1)
+            properties = obj.get('properties', {})
+        
         if properties:
             prop_list = [f"{k}: {v}" for k, v in properties.items()]
             print(f"  Properties: {', '.join(prop_list)}")
@@ -148,29 +214,59 @@ def show_objects(config: Dict[str, Any]) -> None:
         print()
 
 
-def show_rooms(config: Dict[str, Any]) -> None:
+def show_rooms(config) -> None:
     """Display available rooms."""
     print("Available Rooms:")
     print("===============")
     
-    rooms = config.get('rooms', {})
+    # Handle both dict configs (v1) and GameConfig objects (v2)
+    if hasattr(config, 'rooms'):
+        # GameConfig object (v2)
+        rooms = config.rooms
+    else:
+        # Dictionary config (v1)
+        rooms = config.get('rooms', {})
+    
     if not rooms:
         print("No rooms found in this configuration.")
         return
     
     for room_name in sorted(rooms.keys()):
         room = rooms[room_name]
-        print(f"- {room.get('name', room_name)}: {room.get('description', 'No description')}")
+        
+        # Handle both dict and Pydantic objects
+        if hasattr(room, 'name'):
+            # Pydantic object (v2)
+            name = room.name
+            description = room.description
+        else:
+            # Dictionary object (v1)
+            name = room.get('name', room_name)
+            description = room.get('description', 'No description')
+        
+        print(f"- {name}: {description}")
         
         # Show exits
-        exits = room.get('exits', {})
+        if hasattr(room, 'exits'):
+            # Pydantic object (v2)
+            exits = room.exits
+        else:
+            # Dictionary object (v1)
+            exits = room.get('exits', {})
+        
         if exits:
             exit_list = [f"{name} -> {exit_info.get('destination_room_id', 'unknown')}" 
                         for name, exit_info in exits.items()]
             print(f"  Exits: {', '.join(exit_list)}")
         
         # Show objects
-        objects = room.get('objects', {})
+        if hasattr(room, 'objects'):
+            # Pydantic object (v2)
+            objects = room.objects
+        else:
+            # Dictionary object (v1)
+            objects = room.get('objects', {})
+        
         if objects:
             obj_list = [obj.get('name', name) for name, obj in objects.items()]
             print(f"  Objects: {', '.join(obj_list)}")
@@ -178,15 +274,20 @@ def show_rooms(config: Dict[str, Any]) -> None:
         print()
 
 
-def show_characters(config: Dict[str, Any]) -> None:
+def show_characters(config) -> None:
     """Display available characters."""
     print("Available Characters:")
     print("===================")
     
-    # Use characters if available, otherwise fall back to character_types
-    characters = config.get('characters', {})
-    if not characters:
-        characters = config.get('character_types', {})
+    # Handle both dict configs (v1) and GameConfig objects (v2)
+    if hasattr(config, 'characters'):
+        # GameConfig object (v2) - use character_types
+        characters = config.character_types
+    else:
+        # Dictionary config (v1) - use characters if available, otherwise fall back to character_types
+        characters = config.get('characters', {})
+        if not characters:
+            characters = config.get('character_types', {})
     
     if not characters:
         print("No characters found in this configuration.")
@@ -194,10 +295,32 @@ def show_characters(config: Dict[str, Any]) -> None:
     
     for char_name in sorted(characters.keys()):
         char = characters[char_name]
-        print(f"- {char.get('name', char_name)}: {char.get('backstory', 'No backstory')}")
+        
+        # Handle both dict and Pydantic objects
+        if hasattr(char, 'name'):
+            # Pydantic object (v2)
+            name = char.name
+            backstory = char.backstory
+        else:
+            # Dictionary object (v1)
+            name = char.get('name', char_name)
+            backstory = char.get('backstory', 'No backstory')
+        
+        print(f"- {name}: {backstory}")
         
         # Handle both legacy single motive and new multiple motives
-        if 'motives' in char and char['motives']:
+        if hasattr(char, 'motives') and char.motives:
+            motives = char.motives
+            if isinstance(motives, list) and len(motives) > 0:
+                print(f"  Motives: {len(motives)} available")
+                for i, motive in enumerate(motives, 1):
+                    motive_desc = motive.get('description', 'No description') if isinstance(motive, dict) else str(motive)
+                    print(f"    {i}. {motive_desc}")
+            else:
+                print(f"  Motive: No motive")
+        elif hasattr(char, 'motive') and char.motive:
+            print(f"  Motive: {char.motive}")
+        elif 'motives' in char and char['motives']:
             motives = char['motives']
             if isinstance(motives, list) and len(motives) > 0:
                 print(f"  Motives: {len(motives)} available")

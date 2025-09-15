@@ -1,0 +1,9 @@
+action_definitions:
+  hierarchical_test_action:
+    name: Hierarchical Test Action
+    description: This action tests hierarchical config loading
+    cost: 5
+    category: test
+    parameters: []
+    requirements: []
+    effects: []

@@ -133,19 +133,17 @@ def mock_game_master_validation():
         )
 
         # Create a proper hierarchical config for testing
-        from motive.config_loader import ConfigLoader
-        import os
-        loader = ConfigLoader(base_path=os.path.join(os.path.dirname(__file__), '..'))
-        config_data = loader.load_config('configs/game.yaml')
+        from motive.cli import load_config
+        game_config = load_config('configs/game.yaml')
         
         # Override with test-specific settings
-        config_data['game_settings']['num_rounds'] = 1
-        config_data['game_settings']['initial_ap_per_turn'] = 20
-        config_data['players'] = [
-            {"name": "TestPlayer", "provider": "mock", "model": "mock-model"}
+        game_config.game_settings.num_rounds = 1
+        game_config.game_settings.initial_ap_per_turn = 20
+        game_config.players = [
+            PlayerConfig(name="TestPlayer", provider="mock", model="mock-model")
         ]
         
-        mock_game_config = GameConfig(**config_data)
+        mock_game_config = game_config
 
         # No need for mock config loading with hierarchical configs
         mock_load_manual_content.return_value = "Mock manual content."
@@ -176,6 +174,19 @@ def mock_game_master_validation():
             exits={},
             objects={}
         )
+        
+        # Ensure player has a character assigned (simulate game initialization)
+        if test_player.character is None:
+            # Create a mock character for testing
+            from motive.character import Character
+            test_character = Character(
+                char_id="test_char",
+                name="Test Character",
+                backstory="A test character for validation tests",
+                current_room_id="start_room",
+                action_points=30
+            )
+            test_player.character = test_character
         
         # Add player character to room
         gm.rooms["start_room"].add_player(test_player.character)

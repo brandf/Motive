@@ -110,7 +110,7 @@ actions:
             # Should show include chain
             assert "Include Information:" in output
             assert "Configuration includes" in output
-            assert "hearth_and_shadow.yaml" in output
+            assert "hearth_and_shadow_migrated.yaml" in output
             
         finally:
             sys.stdout = old_stdout

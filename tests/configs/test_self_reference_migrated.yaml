@@ -1,0 +1,9 @@
+action_definitions:
+  test_self_action:
+    name: Test Self Action
+    description: This action tests self-reference detection
+    cost: 5
+    category: general
+    parameters: []
+    requirements: []
+    effects: []

@@ -1,0 +1,73 @@
+entity_definitions:
+  new_room:
+    types:
+    - room
+    properties:
+      name:
+        type: string
+        default: New Room
+      description:
+        type: string
+        default: A new room added by simple merging
+      exits:
+        type: string
+        default: '{}'
+      objects:
+        type: string
+        default: '{}'
+      temperature:
+        type: string
+        default: warm
+      new:
+        type: boolean
+        default: true
+  base_room:
+    types:
+    - room
+    properties:
+      name:
+        type: string
+        default: Base Room
+      description:
+        type: string
+        default: A room from the base config
+      exits:
+        type: string
+        default: '{}'
+      objects:
+        type: string
+        default: '{}'
+      temperature:
+        type: string
+        default: cool
+      base:
+        type: boolean
+        default: true
+  new_object:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: New Object
+      description:
+        type: string
+        default: This is a new object added by simple merging
+      value:
+        type: number
+        default: 42
+      new:
+        type: boolean
+        default: true
+      test:
+        type: boolean
+        default: true
+action_definitions:
+  new_action:
+    name: New Action
+    description: This is a new action added by simple merging
+    cost: 15
+    category: test
+    parameters: []
+    requirements: []
+    effects: []

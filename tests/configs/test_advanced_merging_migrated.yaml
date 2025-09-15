@@ -1,0 +1,17 @@
+action_definitions:
+  base_action:
+    name: Base Action Override
+    description: This overrides the base action completely
+    cost: 999
+    category: general
+    parameters: []
+    requirements: []
+    effects: []
+  new_advanced_action:
+    name: New Advanced Action
+    description: This is a new action added via advanced merging
+    cost: 50
+    category: general
+    parameters: []
+    requirements: []
+    effects: []

@@ -1,0 +1,295 @@
+entity_definitions:
+  torch:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Torch
+      description:
+        type: string
+        default: A simple wooden torch, useful for illumination.
+      is_lit:
+        type: boolean
+        default: false
+      light_source:
+        type: boolean
+        default: true
+  generic_fountain:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Fountain
+      description:
+        type: string
+        default: A basic fountain.
+      immovable:
+        type: boolean
+        default: true
+  generic_sign:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Sign
+      description:
+        type: string
+        default: A generic sign.
+  tiny_gem:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Tiny Gem
+      description:
+        type: string
+        default: A small, precious gem that sparkles in the light.
+      required_size:
+        type: string
+        default: tiny
+      requires_size:
+        type: boolean
+        default: true
+  small_potion:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Small Potion
+      description:
+        type: string
+        default: A small vial of healing potion.
+      required_size:
+        type: string
+        default: small
+      requires_size:
+        type: boolean
+        default: true
+  large_sword:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Large Sword
+      description:
+        type: string
+        default: A massive two-handed sword that requires great strength to wield.
+      required_size:
+        type: string
+        default: large
+      requires_size:
+        type: boolean
+        default: true
+  huge_boulder:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Huge Boulder
+      description:
+        type: string
+        default: An enormous boulder that only the strongest can move.
+      required_size:
+        type: string
+        default: huge
+      requires_size:
+        type: boolean
+        default: true
+  warrior_armor:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Warrior's Armor
+      description:
+        type: string
+        default: Heavy plate armor that only warriors can wear.
+      required_class:
+        type: string
+        default: warrior
+      requires_class:
+        type: boolean
+        default: true
+  mage_staff:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Mage's Staff
+      description:
+        type: string
+        default: A magical staff that only mages can channel power through.
+      required_class:
+        type: string
+        default: mage
+      requires_class:
+        type: boolean
+        default: true
+  rogue_dagger:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Rogue's Dagger
+      description:
+        type: string
+        default: A finely crafted dagger that only rogues can wield effectively.
+      required_class:
+        type: string
+        default: rogue
+      requires_class:
+        type: boolean
+        default: true
+  legendary_sword:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Legendary Sword
+      description:
+        type: string
+        default: A sword of immense power that only high-level heroes can wield.
+      required_level:
+        type: number
+        default: 15
+      requires_level:
+        type: boolean
+        default: true
+  epic_armor:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Epic Armor
+      description:
+        type: string
+        default: Legendary armor that requires great experience to wear.
+      required_level:
+        type: number
+        default: 20
+      requires_level:
+        type: boolean
+        default: true
+  paladin_sword:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Paladin's Sword
+      description:
+        type: string
+        default: A holy sword that requires both warrior class and high level.
+      required_class:
+        type: string
+        default: warrior
+      required_level:
+        type: number
+        default: 10
+      requires_class:
+        type: boolean
+        default: true
+      requires_level:
+        type: boolean
+        default: true
+  giant_warhammer:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Giant Warhammer
+      description:
+        type: string
+        default: A massive warhammer that requires both large size and warrior class.
+      required_size:
+        type: string
+        default: large
+      required_class:
+        type: string
+        default: warrior
+      requires_size:
+        type: boolean
+        default: true
+      requires_class:
+        type: boolean
+        default: true
+  elven_artifact:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Elven Artifact
+      description:
+        type: string
+        default: An ancient elven artifact that only elves of good alignment can use.
+      custom_constraints:
+        type: string
+        default:
+        - type: race
+          value: elf
+        - type: alignment
+          value: good
+  dragon_scale:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Dragon Scale
+      description:
+        type: string
+        default: A scale from an ancient dragon, only usable by those with dragon
+          blood.
+      custom_constraints:
+        type: string
+        default:
+        - type: heritage
+          value: dragon
+        - type: level
+          value: 25
+  ancient_altar:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Ancient Altar
+      description:
+        type: string
+        default: A sacred altar that has been in this place for centuries.
+      immovable:
+        type: boolean
+        default: true
+      magically_bound:
+        type: boolean
+        default: true
+  town_statue:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Town Statue
+      description:
+        type: string
+        default: A large statue of the town's founder, too heavy to move.
+      immovable:
+        type: boolean
+        default: true
+      too_heavy:
+        type: boolean
+        default: true

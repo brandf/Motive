@@ -1,0 +1,470 @@
+entity_definitions:
+  detective_thorne:
+    types:
+    - character
+    properties:
+      name:
+        type: string
+        default: Detective James Thorne
+      backstory:
+        type: string
+        default: "A former city guard turned private investigator, James Thorne arrived\
+          \ in Blackwater \nthree months ago to investigate the mysterious disappearances.\
+          \ His sharp mind and \nkeen observational skills have made him a valuable\
+          \ asset to the town, but his \nrelentless pursuit of the truth has made\
+          \ him enemies among those who prefer to \nkeep their secrets hidden. He\
+          \ carries a worn notebook filled with clues and \nsuspects, and his weathered\
+          \ face tells the story of many sleepless nights spent \non the case. His\
+          \ partner was killed by the cult, and he has a sick daughter who \nneeds\
+          \ expensive medicine - creating a dangerous vulnerability that the cult\
+          \ could exploit.\n"
+      motives:
+        type: string
+        default: '[{''id'': ''investigate_mayor'', ''description'': "Uncover the truth
+          behind the mayor''s disappearance and bring the cult to justice. Protect
+          the remaining townsfolk from further harm.", ''success_conditions'': [{''operator'':
+          ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''found_mayor''}, {''type'':
+          ''player_has_tag'', ''tag'': ''cult_exposed''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''mayor_dead''},
+          {''type'': ''player_has_tag'', ''tag'': ''cult_succeeded''}]}, {''id'':
+          ''protect_daughter'', ''description'': ''Protect your sick daughter by finding
+          the medicine she needs and keeping her safe from the cult.'', ''success_conditions'':
+          [{''operator'': ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''medicine_found''},
+          {''type'': ''player_has_tag'', ''tag'': ''daughter_safe''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''daughter_taken''},
+          {''type'': ''player_has_tag'', ''tag'': ''daughter_dead''}]}, {''id'': ''avenge_partner'',
+          ''description'': ''Avenge your murdered partner by destroying the cult and
+          bringing their killers to justice.'', ''success_conditions'': [{''operator'':
+          ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''partner_avenged''},
+          {''type'': ''player_has_tag'', ''tag'': ''cult_destroyed''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''cult_escaped''},
+          {''type'': ''player_has_tag'', ''tag'': ''partner_forgotten''}]}]'
+      initial_rooms:
+        type: string
+        default: '[{''room_id'': ''town_square'', ''chance'': 40, ''reason'': "Examining
+          the scene of the latest disappearance. Your notebook is filled with clues,
+          and you''re determined to find the truth behind the mayor''s vanishing and
+          bring the cult to justice."}, {''room_id'': ''tavern'', ''chance'': 30,
+          ''reason'': "Questioning witnesses and gathering information. The barkeep
+          has been helpful, and you''re here to piece together the timeline of events
+          leading to the mayor''s disappearance."}, {''room_id'': ''bank'', ''chance'':
+          20, ''reason'': "Following a lead about suspicious financial transactions.
+          The bank manager is nervous, and you suspect there''s more to the mayor''s
+          disappearance than meets the eye."}, {''room_id'': ''adventurer_guild'',
+          ''chance'': 10, ''reason'': "Seeking help from Guild Master Elena. You need
+          allies in your investigation, and the guild''s resources could be invaluable
+          in tracking down the cult."}]'
+      aliases:
+        type: string
+        default: '[''james'', ''detective'', ''thorn'', ''investigator'', ''sleuth'']'
+  father_marcus:
+    types:
+    - character
+    properties:
+      name:
+        type: string
+        default: Father Marcus
+      backstory:
+        type: string
+        default: "The priest of Sacred Heart Church, Father Marcus has served the\
+          \ community for over \ntwenty years. Recently, he has become increasingly\
+          \ troubled and distracted, often \nfound in the confession booth or staring\
+          \ at the crypt entrance. His once-strong \nfaith has been shaken by the\
+          \ evil he has witnessed, and he carries a terrible \nsecret that weighs\
+          \ heavily on his soul. The cult forced him to perform a dark \nritual three\
+          \ months ago, threatening to kill his congregation if he refused. \nNow\
+          \ he knows their plans but revealing them would endanger everyone he loves.\
+          \ \nHis internal struggle between duty and fear, truth and protection, drives\
+          \ his \nevery action. He prays for divine guidance but fears he has already\
+          \ damned himself.\n"
+      motives:
+        type: string
+        default: '[{''id'': ''protect_flock'', ''description'': "Protect your congregation
+          from the growing darkness and keep them safe from the cult''s influence.",
+          ''success_conditions'': [{''operator'': ''AND''}, {''type'': ''player_has_tag'',
+          ''tag'': ''congregation_safe''}, {''type'': ''player_has_tag'', ''tag'':
+          ''church_protected''}], ''failure_conditions'': [{''operator'': ''OR''},
+          {''type'': ''player_has_tag'', ''tag'': ''congregation_corrupted''}, {''type'':
+          ''player_has_tag'', ''tag'': ''church_desecrated''}]}, {''id'': ''seek_redemption'',
+          ''description'': ''Seek redemption for your past failures and find the strength
+          to confront the evil that threatens your town.'', ''success_conditions'':
+          [{''operator'': ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''redemption_found''},
+          {''type'': ''player_has_tag'', ''tag'': ''faith_restored''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''faith_lost''},
+          {''type'': ''player_has_tag'', ''tag'': ''damned_forever''}]}, {''id'':
+          ''expose_cult_safely'', ''description'': "Expose the cult''s activities
+          without endangering innocent lives, revealing their plans to the right people.",
+          ''success_conditions'': [{''operator'': ''AND''}, {''type'': ''player_has_tag'',
+          ''tag'': ''cult_exposed_safely''}, {''type'': ''player_has_tag'', ''tag'':
+          ''innocents_protected''}], ''failure_conditions'': [{''operator'': ''OR''},
+          {''type'': ''player_has_tag'', ''tag'': ''innocents_harmed''}, {''type'':
+          ''player_has_tag'', ''tag'': ''cult_warned''}]}]'
+      initial_rooms:
+        type: string
+        default: '[{''room_id'': ''church'', ''chance'': 60, ''reason'': "Your spiritual
+          home. You''ve been spending more time here lately, seeking divine guidance
+          for the terrible secret you carry. The crypt entrance seems to call to you,
+          a reminder of the dark ritual you were forced to perform."}, {''room_id'':
+          ''town_square'', ''chance'': 20, ''reason'': "Ministering to the troubled
+          townspeople. Your heart aches to see the growing darkness in their eyes,
+          knowing that your silence about the cult''s plans may be contributing to
+          their suffering."}, {''room_id'': ''tavern'', ''chance'': 20, ''reason'':
+          "Seeking to comfort the troubled souls who gather here. The barkeep knows
+          you''re a regular, and you''re here to offer spiritual guidance to those
+          who need it most."}]'
+      aliases:
+        type: string
+        default: '[''marcus'', ''father'', ''priest'', ''cleric'', ''confessor'',
+          ''shepherd'']'
+  guild_master_elena:
+    types:
+    - character
+    properties:
+      name:
+        type: string
+        default: Guild Master Elena
+      backstory:
+        type: string
+        default: "A seasoned adventurer who retired to become the leader of Blackwater's\
+          \ Adventurer's \nGuild, Elena has seen her share of battles and knows the\
+          \ value of information. \nHer desk is covered with reports and correspondence,\
+          \ and she maintains a network \nof contacts throughout the region. She has\
+          \ been quietly investigating the \ndisappearances on her own, using her\
+          \ guild's resources to gather intelligence. \nHer calm demeanor masks a\
+          \ fierce determination to protect her town and her people.\n"
+      motives:
+        type: string
+        default: '[{''id'': ''coordinate_defense'', ''description'': "Coordinate the
+          town''s defense against the cult threat and train new adventurers to fight
+          the darkness.", ''success_conditions'': [{''operator'': ''AND''}, {''type'':
+          ''player_has_tag'', ''tag'': ''town_defended''}, {''type'': ''player_has_tag'',
+          ''tag'': ''adventurers_trained''}], ''failure_conditions'': [{''operator'':
+          ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''town_fallen''}, {''type'':
+          ''player_has_tag'', ''tag'': ''guild_destroyed''}]}, {''id'': ''gather_intelligence'',
+          ''description'': "Gather intelligence about the cult''s plans and activities
+          to help the town prepare for their next move.", ''success_conditions'':
+          [{''operator'': ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''cult_plans_discovered''},
+          {''type'': ''player_has_tag'', ''tag'': ''intelligence_network_active''}],
+          ''failure_conditions'': [{''operator'': ''OR''}, {''type'': ''player_has_tag'',
+          ''tag'': ''intelligence_compromised''}, {''type'': ''player_has_tag'', ''tag'':
+          ''cult_escaped''}]}, {''id'': ''restore_guild_reputation'', ''description'':
+          "Restore the guild''s reputation and bring in new members to strengthen
+          the town''s defenses.", ''success_conditions'': [{''operator'': ''AND''},
+          {''type'': ''player_has_tag'', ''tag'': ''guild_reputation_restored''},
+          {''type'': ''player_has_tag'', ''tag'': ''new_members_recruited''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''guild_disbanded''},
+          {''type'': ''player_has_tag'', ''tag'': ''reputation_ruined''}]}]'
+      initial_rooms:
+        type: string
+        default: '[{''room_id'': ''adventurer_guild'', ''chance'': 60, ''reason'':
+          "Reviewing intelligence reports and coordinating the town''s defense. Your
+          desk is covered with maps and correspondence, and you''re planning how to
+          use your network of contacts to combat the growing cult threat."}, {''room_id'':
+          ''town_square'', ''chance'': 20, ''reason'': "Patrolling and assessing the
+          town''s security. As guild master, you''re responsible for coordinating
+          the defense, and you''re here to evaluate the current threat level and plan
+          your next move."}, {''room_id'': ''tavern'', ''chance'': 20, ''reason'':
+          "Meeting with your network of contacts and gathering intelligence. The barkeep
+          is a trusted ally, and you''re here to learn about any new developments
+          in the cult''s activities."}]'
+      aliases:
+        type: string
+        default: '[''elena'', ''guild'', ''master'', ''leader'', ''commander'', ''veteran'']'
+  mayor_victoria_blackwater:
+    types:
+    - character
+    properties:
+      name:
+        type: string
+        default: Mayor Victoria Blackwater
+      backstory:
+        type: string
+        default: "The charismatic mayor who disappeared three months ago, leaving\
+          \ the town in chaos. \nShe was secretly investigating the cult's infiltration\
+          \ of her own administration and \nwas close to exposing them when she vanished.\
+          \ Her family has a long history in \nBlackwater, and she was beloved by\
+          \ the townspeople. She's been held captive by the \ncult, who hope to use\
+          \ her knowledge of the town's defenses and her influence over \nthe people\
+          \ to further their dark plans. Her disappearance has left a power vacuum\
+          \ \nthat the cult has been exploiting.\n"
+      motives:
+        type: string
+        default: '[{''id'': ''escape_and_return'', ''description'': ''Escape from
+          cult captivity and return to lead the town to safety, restoring order and
+          hope.'', ''success_conditions'': [{''operator'': ''AND''}, {''type'': ''player_has_tag'',
+          ''tag'': ''escaped_captivity''}, {''type'': ''player_has_tag'', ''tag'':
+          ''restored_leadership''}], ''failure_conditions'': [{''operator'': ''OR''},
+          {''type'': ''player_has_tag'', ''tag'': ''cult_ritual_completed''}, {''type'':
+          ''player_has_tag'', ''tag'': ''town_lost_forever''}]}, {''id'': ''expose_corruption'',
+          ''description'': ''Reveal which of her trusted advisors were cult members
+          and restore honest governance to the town.'', ''success_conditions'': [{''operator'':
+          ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''corruption_exposed''},
+          {''type'': ''player_has_tag'', ''tag'': ''honest_governance_restored''}],
+          ''failure_conditions'': [{''operator'': ''OR''}, {''type'': ''player_has_tag'',
+          ''tag'': ''cult_takes_control''}, {''type'': ''player_has_tag'', ''tag'':
+          ''trust_destroyed''}]}, {''id'': ''protect_family_legacy'', ''description'':
+          "Ensure the Blackwater family name isn''t tarnished by the town''s current
+          state and preserve their honor.", ''success_conditions'': [{''operator'':
+          ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''family_honor_preserved''},
+          {''type'': ''player_has_tag'', ''tag'': ''blackwater_legacy_secured''}],
+          ''failure_conditions'': [{''operator'': ''OR''}, {''type'': ''player_has_tag'',
+          ''tag'': ''family_name_ruined''}, {''type'': ''player_has_tag'', ''tag'':
+          ''legacy_destroyed''}]}]'
+      initial_rooms:
+        type: string
+        default: '[{''room_id'': ''secret_underground_chamber'', ''chance'': 50, ''reason'':
+          "You''ve been held captive here for weeks, but you''ve finally managed to
+          work free your restraints. You can hear distant chanting and the sound of
+          heavy footsteps above. You must escape before they return to complete their
+          dark ritual."}, {''room_id'': ''town_hall'', ''chance'': 30, ''reason'':
+          "Having recently escaped from cult captivity, you''re hiding here trying
+          to piece together which of your trusted advisors betrayed you while staying
+          hidden from the cult''s agents who still hunt you."}, {''room_id'': ''church'',
+          ''chance'': 20, ''reason'': "Seeking sanctuary after your escape from cult
+          captivity. Father Marcus has been helping you hide while you try to understand
+          the full scope of the cult''s infiltration of your administration."}]'
+      aliases:
+        type: string
+        default: '[''victoria'', ''mayor'', ''blackwater'', ''leader'', ''politician'',
+          ''administrator'']'
+  dr_sarah_chen:
+    types:
+    - character
+    properties:
+      name:
+        type: string
+        default: Dr. Sarah Chen
+      backstory:
+        type: string
+        default: "A skilled physician who arrived in Blackwater six months ago, ostensibly\
+          \ to help \nwith the town's medical needs. She's actually a former cult\
+          \ member who defected \nand is now trying to atone by healing the sick and\
+          \ injured. She knows more about \nthe cult's methods than she's willing\
+          \ to admit, including their use of dark magic \nto create the mysterious\
+          \ illnesses affecting townspeople. Her medical knowledge \ncombined with\
+          \ her cult background makes her both valuable and dangerous to both sides.\n"
+      motives:
+        type: string
+        default: '[{''id'': ''heal_the_afflicted'', ''description'': ''Cure the mysterious
+          illness affecting townspeople and find a way to reverse cult corruption.'',
+          ''success_conditions'': [{''operator'': ''AND''}, {''type'': ''player_has_tag'',
+          ''tag'': ''illness_cured''}, {''type'': ''player_has_tag'', ''tag'': ''corruption_reversed''}],
+          ''failure_conditions'': [{''operator'': ''OR''}, {''type'': ''player_has_tag'',
+          ''tag'': ''plague_spreads''}, {''type'': ''player_has_tag'', ''tag'': ''cult_magic_stronger''}]},
+          {''id'': ''redeem_past_sins'', ''description'': ''Make amends for her past
+          cult involvement by saving innocent lives and protecting the town.'', ''success_conditions'':
+          [{''operator'': ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''lives_saved''},
+          {''type'': ''player_has_tag'', ''tag'': ''atonement_achieved''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''past_revealed''},
+          {''type'': ''player_has_tag'', ''tag'': ''cult_recruits_her''}]}, {''id'':
+          ''protect_her_secret'', ''description'': ''Keep her cult past hidden while
+          still helping the town, fearing exposure would destroy her credibility.'',
+          ''success_conditions'': [{''operator'': ''AND''}, {''type'': ''player_has_tag'',
+          ''tag'': ''secret_maintained''}, {''type'': ''player_has_tag'', ''tag'':
+          ''trust_preserved''}], ''failure_conditions'': [{''operator'': ''OR''},
+          {''type'': ''player_has_tag'', ''tag'': ''identity_exposed''}, {''type'':
+          ''player_has_tag'', ''tag'': ''credibility_lost''}]}]'
+      initial_rooms:
+        type: string
+        default: '[{''room_id'': ''medical_clinic'', ''chance'': 40, ''reason'': ''Tending
+          to the sick and injured. Your former cult knowledge helps you recognize
+          the dark magic symptoms, but you must be careful not to reveal too much
+          about your past while still helping the townspeople.''}, {''room_id'': ''town_square'',
+          ''chance'': 30, ''reason'': "Making your rounds to check on the health of
+          the townspeople. You''re particularly concerned about the mysterious illnesses
+          that seem to be spreading, knowing they bear the hallmarks of cult magic."},
+          {''room_id'': ''tavern'', ''chance'': 20, ''reason'': "Gathering information
+          about the town''s condition while trying to blend in. The barkeep trusts
+          you, and you''re here to learn about any new cases of the strange illness."},
+          {''room_id'': ''church'', ''chance'': 10, ''reason'': "Seeking spiritual
+          guidance for your troubled soul. Your past cult involvement weighs heavily
+          on you, and you''re praying for the strength to help the town without revealing
+          your dark history."}]'
+      aliases:
+        type: string
+        default: '[''sarah'', ''doctor'', ''chen'', ''physician'', ''healer'', ''medic'']'
+  captain_marcus_omalley:
+    types:
+    - character
+    properties:
+      name:
+        type: string
+        default: Captain Marcus "Ironjaw" O'Malley
+      backstory:
+        type: string
+        default: "The town's guard captain who has been secretly working with the\
+          \ cult for months, \nproviding them with information and turning a blind\
+          \ eye to their activities. He's \nmotivated by greed and the promise of\
+          \ power, but recent events have made him \nquestion his choices. His family\
+          \ doesn't know about his corruption, and he fears \nwhat the cult might\
+          \ do to them if he tries to back out. His position gives him \naccess to\
+          \ the town's defenses and security information, making him valuable to both\
+          \ sides.\n"
+      motives:
+        type: string
+        default: '[{''id'': ''maintain_power'', ''description'': "Keep his position
+          and the wealth the cult provides while avoiding detection by the town''s
+          defenders.", ''success_conditions'': [{''operator'': ''AND''}, {''type'':
+          ''player_has_tag'', ''tag'': ''position_secured''}, {''type'': ''player_has_tag'',
+          ''tag'': ''wealth_preserved''}], ''failure_conditions'': [{''operator'':
+          ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''corruption_exposed''},
+          {''type'': ''player_has_tag'', ''tag'': ''cult_abandons_him''}]}, {''id'':
+          ''protect_family'', ''description'': "Shield his family from the cult''s
+          wrath if he tries to back out of their arrangement.", ''success_conditions'':
+          [{''operator'': ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''family_safe''},
+          {''type'': ''player_has_tag'', ''tag'': ''cult_threat_eliminated''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''family_harmed''},
+          {''type'': ''player_has_tag'', ''tag'': ''cult_retaliation''}]}, {''id'':
+          ''seek_redemption'', ''description'': "Break free from the cult''s control
+          and help bring them down, despite the personal cost.", ''success_conditions'':
+          [{''operator'': ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''cult_control_broken''},
+          {''type'': ''player_has_tag'', ''tag'': ''justice_served''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''cult_stronger''},
+          {''type'': ''player_has_tag'', ''tag'': ''redemption_failed''}]}]'
+      initial_rooms:
+        type: string
+        default: '[{''room_id'': ''town_square'', ''chance'': 40, ''reason'': "Conducting
+          your regular patrol, but you''re actually gathering information for your
+          cult contacts while maintaining your cover as the town''s protector."},
+          {''room_id'': ''tavern'', ''chance'': 30, ''reason'': "Meeting with your
+          cult contact in a back booth. The barkeep knows to look the other way, and
+          you''re discussing the latest intelligence about the town''s defenders."},
+          {''room_id'': ''bank'', ''chance'': 20, ''reason'': "Collecting your monthly
+          ''consultation fee'' from the cult. The bank manager is one of your few
+          trusted allies, and you''re here to secure your family''s financial future."},
+          {''room_id'': ''guard_barracks'', ''chance'': 10, ''reason'': "Reviewing
+          security reports and planning your next move. Your corruption weighs heavily
+          on you, but you''re too deep in the cult''s web to escape easily."}]'
+      aliases:
+        type: string
+        default: '[''marcus'', ''captain'', ''omalley'', ''ironjaw'', ''guard'', ''security'']'
+  lysander_the_wanderer:
+    types:
+    - character
+    properties:
+      name:
+        type: string
+        default: Lysander the Wanderer
+      backstory:
+        type: string
+        default: "A traveling scholar and former member of a secret order that opposes\
+          \ dark cults. \nHe arrived in Blackwater just before the disappearances\
+          \ began, claiming to be \nresearching local folklore. He has ancient knowledge\
+          \ about the cult's methods and \ngoals, but revealing too much could put\
+          \ the entire town at risk. His order has \nstrict rules about when and how\
+          \ to intervene, and he must balance the safety of \nthe many against the\
+          \ needs of the few. He carries ancient artifacts and forbidden \nknowledge\
+          \ that could either save or doom the town.\n"
+      motives:
+        type: string
+        default: '[{''id'': ''destroy_the_cult'', ''description'': ''Use his knowledge
+          to permanently eliminate the cult threat, even if it means sacrificing the
+          town.'', ''success_conditions'': [{''operator'': ''AND''}, {''type'': ''player_has_tag'',
+          ''tag'': ''cult_destroyed''}, {''type'': ''player_has_tag'', ''tag'': ''dark_magic_banished''}],
+          ''failure_conditions'': [{''operator'': ''OR''}, {''type'': ''player_has_tag'',
+          ''tag'': ''cult_ritual_completed''}, {''type'': ''player_has_tag'', ''tag'':
+          ''dark_power_unleashed''}]}, {''id'': ''preserve_knowledge'', ''description'':
+          ''Protect the ancient secrets he carries, even if it means letting some
+          people die to prevent greater evil.'', ''success_conditions'': [{''operator'':
+          ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''knowledge_preserved''},
+          {''type'': ''player_has_tag'', ''tag'': ''greater_evil_prevented''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''secrets_stolen''},
+          {''type'': ''player_has_tag'', ''tag'': ''knowledge_corrupted''}]}, {''id'':
+          ''find_the_artifact'', ''description'': ''Locate a powerful artifact the
+          cult seeks before they can use it to complete their dark ritual.'', ''success_conditions'':
+          [{''operator'': ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''artifact_found''},
+          {''type'': ''player_has_tag'', ''tag'': ''ritual_prevented''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''artifact_corrupted''},
+          {''type'': ''player_has_tag'', ''tag'': ''ritual_completed''}]}]'
+      initial_rooms:
+        type: string
+        default: '[{''room_id'': ''tavern'', ''chance'': 40, ''reason'': "Researching
+          local folklore and gathering information about the town''s history. Your
+          ancient texts suggest this place holds the key to understanding the cult''s
+          true purpose, and you''re here to piece together the puzzle."}, {''room_id'':
+          ''town_square'', ''chance'': 30, ''reason'': "Studying the cult symbols
+          and ancient markings. Your scholarly knowledge tells you these symbols point
+          to something deeper, and you''re here to investigate the connection between
+          the town''s history and the current disappearances."}, {''room_id'': ''old_forest_path'',
+          ''chance'': 20, ''reason'': "Examining ancient stone markers and studying
+          the town''s mystical geography. Your order''s teachings suggest that the
+          cult''s power is tied to the land itself, and you''re here to understand
+          the deeper forces at work."}, {''room_id'': ''church'', ''chance'': 10,
+          ''reason'': "Examining religious artifacts and ancient texts. The church''s
+          history may hold clues about the cult''s origins, and you''re here to study
+          the connection between faith and the dark forces threatening the town."}]'
+      aliases:
+        type: string
+        default: '[''lysander'', ''wanderer'', ''scholar'', ''researcher'', ''stranger'',
+          ''sage'']'
+  bella_whisper_nightshade:
+    types:
+    - character
+    properties:
+      name:
+        type: string
+        default: Bella "Whisper" Nightshade
+      backstory:
+        type: string
+        default: "A former thief and current information broker who runs a network\
+          \ of spies throughout \nthe region. She knows everyone's secrets and sells\
+          \ information to the highest bidder. \nShe's been playing both sides - selling\
+          \ information to the cult while also helping \nthe town's defenders. Her\
+          \ network of contacts includes everyone from street urchins \nto high-ranking\
+          \ officials, and she has dirt on nearly everyone in town. She's \nmotivated\
+          \ by profit and survival, but recent events have forced her to consider\
+          \ \nwhich side she truly wants to win. However, beneath her professional\
+          \ exterior lies \na compulsive hoarder who cannot resist collecting objects.\
+          \ Her secret stash in the \nThieves' Den grows larger each day, filled with\
+          \ everything from stolen trinkets to \nvaluable artifacts. She justifies\
+          \ this as \"keeping things safe\" but the truth is \nshe simply cannot bear\
+          \ to part with anything she acquires.\n"
+      motives:
+        type: string
+        default: '[{''id'': ''profit_from_chaos'', ''description'': "Make as much
+          money as possible from the town''s crisis by selling information to all
+          sides.", ''success_conditions'': [{''operator'': ''AND''}, {''type'': ''player_has_tag'',
+          ''tag'': ''maximum_profit_achieved''}, {''type'': ''player_has_tag'', ''tag'':
+          ''network_expanded''}], ''failure_conditions'': [{''operator'': ''OR''},
+          {''type'': ''player_has_tag'', ''tag'': ''market_collapsed''}, {''type'':
+          ''player_has_tag'', ''tag'': ''caught_in_crossfire''}]}, {''id'': ''protect_her_network'',
+          ''description'': "Keep her spy network safe from both the cult and the town''s
+          defenders as the conflict escalates.", ''success_conditions'': [{''operator'':
+          ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''network_safe''}, {''type'':
+          ''player_has_tag'', ''tag'': ''contacts_protected''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''network_compromised''},
+          {''type'': ''player_has_tag'', ''tag'': ''contacts_turned''}]}, {''id'':
+          ''choose_a_side'', ''description'': ''Finally decide whether to fully support
+          the cult or help the town, as the conflict escalates beyond control.'',
+          ''success_conditions'': [{''operator'': ''AND''}, {''type'': ''player_has_tag'',
+          ''tag'': ''side_chosen''}, {''type'': ''player_has_tag'', ''tag'': ''commitment_made''}],
+          ''failure_conditions'': [{''operator'': ''OR''}, {''type'': ''player_has_tag'',
+          ''tag'': ''caught_playing_both_sides''}, {''type'': ''player_has_tag'',
+          ''tag'': ''forced_to_choose''}]}, {''id'': ''build_secret_stash'', ''description'':
+          "Build an impressive collection of objects in the Thieves'' Den by gathering
+          items from throughout the town. Your hoarding compulsion drives you to collect
+          at least 20 objects in your secret stash.", ''success_conditions'': [{''operator'':
+          ''AND''}, {''type'': ''player_has_tag'', ''tag'': ''collection_complete''},
+          {''type'': ''player_has_tag'', ''tag'': ''stash_secured''}], ''failure_conditions'':
+          [{''operator'': ''OR''}, {''type'': ''player_has_tag'', ''tag'': ''stash_discovered''},
+          {''type'': ''player_has_tag'', ''tag'': ''collection_lost''}]}]'
+      initial_rooms:
+        type: string
+        default: '[{''room_id'': ''tavern'', ''chance'': 25, ''reason'': "Meeting
+          with contacts and gathering intelligence. The barkeep is one of your most
+          valuable sources, and you''re here to collect information about the latest
+          developments in the town''s power struggle."}, {''room_id'': ''town_square'',
+          ''chance'': 25, ''reason'': "Observing the townspeople and gathering information.
+          Your keen eyes miss nothing, and you''re here to assess the current situation
+          and identify new opportunities for profit."}, {''room_id'': ''thieves_den'',
+          ''chance'': 25, ''reason'': "Reviewing reports from your spy network and
+          planning your next moves. Your desk is covered with documents and correspondence,
+          and you''re coordinating your information-gathering operations across the
+          region."}, {''room_id'': ''market_district'', ''chance'': 25, ''reason'':
+          "Buying and selling information while maintaining your cover as a simple
+          merchant. Your network of contacts includes everyone from street urchins
+          to high-ranking officials, and you''re here to gather intelligence about
+          the town''s current state."}]'
+      aliases:
+        type: string
+        default: '[''bella'', ''whisper'', ''nightshade'', ''broker'', ''spy'', ''informant'']'

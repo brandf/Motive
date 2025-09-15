@@ -104,7 +104,7 @@ class TestHintCharacter:
     def test_hint_character_character_id_validation(self):
         """Test that character ID in hint-character is validated against available characters."""
         config = load_config('configs/game.yaml')
-        available_characters = list(config.characters.keys())
+        available_characters = list(config.character_types.keys())
         
         # Test valid character ID
         char_id = 'bella_whisper_nightshade'
@@ -117,7 +117,7 @@ class TestHintCharacter:
     def test_hint_character_multiple_characters(self):
         """Test hint-character with multiple different characters."""
         config = load_config('configs/game.yaml')
-        available_characters = list(config.characters.keys())
+        available_characters = list(config.character_types.keys())
         
         # Test multiple valid character IDs
         test_characters = ['bella_whisper_nightshade', 'father_marcus', 'dr_sarah_chen']

@@ -1,0 +1,7 @@
+includes:
+- core_rooms_migrated.yaml
+- core_objects_migrated.yaml
+- core_characters_migrated.yaml
+- core_actions_migrated.yaml
+testid: core_migrated
+name: Core (Migrated)

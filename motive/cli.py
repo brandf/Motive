@@ -16,14 +16,15 @@ import time
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
 
 from dotenv import load_dotenv
 from motive.game_master import GameMaster
-from motive.config import GameConfig
+from motive.config import GameConfig, PlayerConfig
 from motive.config_loader import load_game_config, load_and_validate_game_config
+from motive.sim_v2.config_loader import V2ConfigLoader
 
 
 class GameStatus(Enum):
@@ -503,18 +504,260 @@ def setup_logging():
     )
 
 
+def _convert_v2_to_v1_config(v2_config_data: Dict[str, Any]) -> GameConfig:
+    """Convert v2 config data to v1 GameConfig format."""
+    # Extract basic game settings with defaults
+    game_settings_data = v2_config_data.get('game_settings', {})
+    if not game_settings_data:
+        # Provide defaults for entity definition configs
+        game_settings_data = {
+            'num_rounds': 10,
+            'initial_ap_per_turn': 30,
+            'manual': 'docs/MANUAL.md'
+        }
+    
+    players_data = v2_config_data.get('players', [])
+    if not players_data:
+        # Provide default players for entity definition configs
+        players_data = [
+            {'name': 'Player_1', 'provider': 'google', 'model': 'gemini-2.5-flash'},
+            {'name': 'Player_2', 'provider': 'google', 'model': 'gemini-2.5-flash'}
+        ]
+    
+    # Convert players
+    players = [PlayerConfig(**player_data) for player_data in players_data]
+    
+    # Convert entity definitions to v1 format
+    entity_definitions = v2_config_data.get('entity_definitions', {})
+    
+    # Separate entities by type
+    rooms = {}
+    object_types = {}
+    character_types = {}
+    characters = {}
+    
+    for entity_id, entity_def in entity_definitions.items():
+        entity_types = entity_def.get('types', [])
+        
+        if 'room' in entity_types:
+            rooms[entity_id] = _convert_room_definition(entity_id, entity_def)
+        elif 'object' in entity_types:
+            object_types[entity_id] = _convert_object_definition(entity_id, entity_def)
+        elif 'character' in entity_types:
+            character_types[entity_id] = _convert_character_definition(entity_id, entity_def)
+    
+    # Convert action definitions
+    action_definitions = v2_config_data.get('action_definitions', {})
+    actions = {}
+    for action_id, action_def in action_definitions.items():
+        actions[action_id] = _convert_action_definition(action_id, action_def)
+    
+    # Create GameConfig
+    from motive.config import GameSettings
+    game_settings = GameSettings(**game_settings_data)
+    
+    return GameConfig(
+        game_settings=game_settings,
+        players=players,
+        rooms=rooms,
+        object_types=object_types,
+        character_types=character_types,
+        characters=characters,
+        actions=actions,
+        theme_id=v2_config_data.get('theme_id'),
+        theme_name=v2_config_data.get('theme_name'),
+        edition_id=v2_config_data.get('edition_id'),
+        edition_name=v2_config_data.get('edition_name')
+    )
+
+
+def _convert_room_definition(room_id: str, entity_def: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert v2 room definition to v1 format."""
+    from motive.config import RoomConfig
+    properties = entity_def.get('properties', {})
+    
+    return RoomConfig(
+        id=room_id,
+        name=properties.get('name', {}).get('default', room_id),
+        description=properties.get('description', {}).get('default', ''),
+        exits={},  # TODO: Convert exits from v2 format
+        objects={},  # TODO: Convert objects from v2 format
+        tags=[],  # TODO: Convert tags from v2 format
+        properties=_extract_property_values(properties)
+    )
+
+
+def _convert_object_definition(object_id: str, entity_def: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert v2 object definition to v1 format."""
+    from motive.config import ObjectTypeConfig
+    properties = entity_def.get('properties', {})
+    
+    return ObjectTypeConfig(
+        id=object_id,
+        name=properties.get('name', {}).get('default', object_id),
+        description=properties.get('description', {}).get('default', ''),
+        properties=_extract_property_values(properties)
+    )
+
+
+def _convert_character_definition(character_id: str, entity_def: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert v2 character definition to v1 format."""
+    from motive.config import CharacterConfig
+    properties = entity_def.get('properties', {})
+    
+    # Convert complex fields from string representations back to objects
+    motives = None
+    if 'motives' in properties:
+        motives_str = properties['motives'].get('default', '')
+        if motives_str:
+            try:
+                import ast
+                motives = ast.literal_eval(motives_str)
+            except (ValueError, SyntaxError):
+                # If parsing fails, keep as None
+                motives = None
+    
+    aliases = []
+    if 'aliases' in properties:
+        aliases_str = properties['aliases'].get('default', '')
+        if aliases_str:
+            try:
+                import ast
+                aliases = ast.literal_eval(aliases_str)
+            except (ValueError, SyntaxError):
+                # If parsing fails, keep as empty list
+                aliases = []
+    
+    initial_rooms = []
+    if 'initial_rooms' in properties:
+        initial_rooms_str = properties['initial_rooms'].get('default', '')
+        if initial_rooms_str:
+            try:
+                import ast
+                initial_rooms = ast.literal_eval(initial_rooms_str)
+            except (ValueError, SyntaxError):
+                # If parsing fails, keep as empty list
+                initial_rooms = []
+    
+    return CharacterConfig(
+        id=character_id,
+        name=properties.get('name', {}).get('default', character_id),
+        backstory=properties.get('backstory', {}).get('default', ''),
+        motive=properties.get('motive', {}).get('default', ''),
+        motives=motives,
+        aliases=aliases,
+        initial_rooms=initial_rooms
+    )
+
+
+def _convert_action_definition(action_id: str, action_def: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert v2 action definition to v1 format."""
+    from motive.config import CostConfig, ParameterConfig, ActionRequirementConfig, ActionEffectConfig
+    
+    # Handle cost - can be a number or a complex object
+    cost = action_def.get('cost', 10)
+    if isinstance(cost, dict):
+        # Complex cost object (e.g., code_binding) - convert to CostConfig
+        converted_cost = CostConfig(**cost)
+    else:
+        # Simple numeric cost
+        converted_cost = cost
+    
+    # Convert parameters to ParameterConfig objects
+    parameters = []
+    for param_data in action_def.get('parameters', []):
+        parameters.append(ParameterConfig(**param_data))
+    
+    # Convert requirements to ActionRequirementConfig objects
+    requirements = []
+    for req_data in action_def.get('requirements', []):
+        requirements.append(ActionRequirementConfig(**req_data))
+    
+    # Convert effects to ActionEffectConfig objects
+    effects = []
+    for effect_data in action_def.get('effects', []):
+        effects.append(ActionEffectConfig(**effect_data))
+    
+    # Create ActionConfig object
+    from motive.config import ActionConfig
+    return ActionConfig(
+        id=action_id,
+        name=action_def.get('name', action_id),
+        description=action_def.get('description', ''),
+        cost=converted_cost,
+        category=action_def.get('category', 'general'),
+        parameters=parameters,
+        requirements=requirements,
+        effects=effects
+    )
+
+
+def _extract_property_values(properties: Dict[str, Any]) -> Dict[str, Any]:
+    """Extract default values from v2 property schemas."""
+    result = {}
+    for prop_name, prop_schema in properties.items():
+        if isinstance(prop_schema, dict) and 'default' in prop_schema:
+            result[prop_name] = prop_schema['default']
+        else:
+            result[prop_name] = prop_schema
+    return result
+
+
+def _is_hierarchical_v2_config(config_data: Dict[str, Any], base_path: str) -> bool:
+    """Check if a hierarchical config is v2 by examining included files."""
+    includes = config_data.get('includes', [])
+    for include_path in includes:
+        full_path = Path(base_path) / include_path
+        try:
+            with open(full_path, 'r', encoding='utf-8') as f:
+                included_data = yaml.safe_load(f)
+            if 'entity_definitions' in included_data or 'action_definitions' in included_data:
+                return True
+            # Recursively check nested includes
+            if 'includes' in included_data:
+                if _is_hierarchical_v2_config(included_data, str(full_path.parent)):
+                    return True
+        except (FileNotFoundError, yaml.YAMLError):
+            continue
+    return False
+
+
 def load_config(config_path: str, validate: bool = True) -> GameConfig:
-    """Load game configuration from file with optional validation."""
+    """Load game configuration from file with optional validation.
+    Returns a GameConfig constructed from either v1 or v2 inputs.
+    """
     try:
-        # Check if it's a hierarchical config
+        # Check if it's a v2 config or hierarchical config
         with open(config_path, 'r', encoding='utf-8') as f:
             raw_config = yaml.safe_load(f)
         
         if 'includes' in raw_config:
-            # Use hierarchical config loader with validation
+            # Check if this is a hierarchical v2 config by looking at included files
             base_path = str(Path(config_path).parent)
-            config_file = Path(config_path).name
-            return load_and_validate_game_config(config_file, base_path, validate=validate)
+            is_v2_hierarchical = _is_hierarchical_v2_config(raw_config, base_path)
+            
+            if is_v2_hierarchical:
+                # This is a hierarchical v2 config - load merged and convert to v1 GameConfig
+                v2_loader = V2ConfigLoader()
+                merged_v2_data = v2_loader.load_hierarchical_config(config_path)
+                v2_loader.load_v2_config(merged_v2_data)
+                
+                # Convert v2 config to v1 format
+                game_config = _convert_v2_to_v1_config(merged_v2_data)
+                return game_config
+            else:
+                # Use hierarchical config loader with validation
+                config_file = Path(config_path).name
+                return load_and_validate_game_config(config_file, base_path, validate=validate)
+        elif 'entity_definitions' in raw_config or 'action_definitions' in raw_config:
+            # This is a standalone v2 config - convert to v1 GameConfig
+            v2_loader = V2ConfigLoader()
+            v2_config_data = v2_loader.load_config_from_file(config_path)
+            v2_loader.load_v2_config(v2_config_data)
+            
+            # Convert v2 config to v1 format
+            game_config = _convert_v2_to_v1_config(v2_config_data)
+            return game_config
         else:
             # Traditional config loading
             with open(config_path, 'r', encoding='utf-8') as f:
@@ -639,6 +882,7 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
     
     # Run the game
     try:
+        # Use the same GameMaster for both v1 and v2 configs
         gm = GameMaster(game_config=game_config, game_id=game_id, deterministic=deterministic,
                         log_dir=log_dir, no_file_logging=no_file_logging, character=character, motive=motive)
         if worker:

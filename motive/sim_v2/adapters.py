@@ -30,12 +30,18 @@ class V1ToV2Adapter:
             default=v1_room.get("description", "")
         )
         
-        # Convert v1 tags to properties (simplified - just store as strings for now)
-        tags = v1_room.get("tags", [])
-        if tags:
-            properties["tags"] = PropertySchema(
-                type=PropertyType.STRING,
-                default=",".join(tags)  # Simple comma-separated for MVP
+        # CRITICAL: Preserve exits
+        if "exits" in v1_room:
+            properties["exits"] = PropertySchema(
+                type=PropertyType.STRING,  # Store as JSON string for now
+                default=str(v1_room["exits"])
+            )
+        
+        # CRITICAL: Preserve objects
+        if "objects" in v1_room:
+            properties["objects"] = PropertySchema(
+                type=PropertyType.STRING,  # Store as JSON string for now
+                default=str(v1_room["objects"])
             )
         
         # Convert v1 properties to typed properties
@@ -43,6 +49,14 @@ class V1ToV2Adapter:
         for key, value in v1_props.items():
             prop_type = self._infer_property_type(value)
             properties[key] = PropertySchema(type=prop_type, default=value)
+        
+        # CRITICAL: Convert v1 tags to boolean properties (tags are deprecated in v2)
+        tags = v1_room.get("tags", [])
+        for tag in tags:
+            properties[tag] = PropertySchema(
+                type=PropertyType.BOOLEAN,
+                default=True
+            )
         
         return EntityDefinition(
             definition_id=v1_room["id"],
@@ -70,6 +84,14 @@ class V1ToV2Adapter:
             prop_type = self._infer_property_type(value)
             properties[key] = PropertySchema(type=prop_type, default=value)
         
+        # CRITICAL: Convert v1 tags to boolean properties (tags are deprecated in v2)
+        tags = v1_object_type.get("tags", [])
+        for tag in tags:
+            properties[tag] = PropertySchema(
+                type=PropertyType.BOOLEAN,
+                default=True
+            )
+        
         return EntityDefinition(
             definition_id=v1_object_type["id"],
             types=["object"],
@@ -89,16 +111,48 @@ class V1ToV2Adapter:
             type=PropertyType.STRING,
             default=v1_character.get("backstory", "")
         )
-        properties["motive"] = PropertySchema(
-            type=PropertyType.STRING,
-            default=v1_character.get("motive", "")
-        )
+        
+        # Preserve the single motive field if it exists
+        if "motive" in v1_character:
+            properties["motive"] = PropertySchema(
+                type=PropertyType.STRING,
+                default=v1_character.get("motive", "")
+            )
+        
+        # CRITICAL: Preserve the complex motives array
+        if "motives" in v1_character:
+            properties["motives"] = PropertySchema(
+                type=PropertyType.STRING,  # Store as JSON string for now
+                default=str(v1_character["motives"])  # Convert to string representation
+            )
+        
+        # CRITICAL: Preserve initial_rooms
+        if "initial_rooms" in v1_character:
+            properties["initial_rooms"] = PropertySchema(
+                type=PropertyType.STRING,  # Store as JSON string for now
+                default=str(v1_character["initial_rooms"])
+            )
+        
+        # CRITICAL: Preserve aliases
+        if "aliases" in v1_character:
+            properties["aliases"] = PropertySchema(
+                type=PropertyType.STRING,  # Store as JSON string for now
+                default=str(v1_character["aliases"])
+            )
         
         # Convert v1 character properties to typed properties
         v1_props = v1_character.get("properties", {})
         for key, value in v1_props.items():
             prop_type = self._infer_property_type(value)
             properties[key] = PropertySchema(type=prop_type, default=value)
+        
+        # CRITICAL: Convert v1 tags to boolean properties (tags are deprecated in v2)
+        tags = v1_character.get("tags", [])
+        for tag in tags:
+            properties[tag] = PropertySchema(
+                type=PropertyType.BOOLEAN,
+                default=True
+            )
         
         return EntityDefinition(
             definition_id=v1_character["id"],

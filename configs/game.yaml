@@ -1,6 +1,6 @@
-# Include the edition (which will include theme, which will include core)
+# Include the edition (which will include theme, which will include core) - V2 MIGRATED
 includes:
-  - "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow.yaml"
+  - "themes/fantasy/editions/hearth_and_shadow/hearth_and_shadow_migrated.yaml"
 
 # Game settings
 game_settings:

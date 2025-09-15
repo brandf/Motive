@@ -1,0 +1,159 @@
+entity_definitions:
+  test_room:
+    types:
+    - room
+    properties:
+      name:
+        type: string
+        default: Test Room
+      description:
+        type: string
+        default: A simple test room for action validation
+      exits:
+        type: string
+        default: '{''north'': ''test_room_2''}'
+      objects:
+        type: string
+        default: '{''test_object'': {''object_type_id'': ''test_object'', ''name'':
+          ''Test Object'', ''description'': ''A simple test object'', ''current_room_id'':
+          ''test_room''}}'
+      test:
+        type: boolean
+        default: true
+  test_room_2:
+    types:
+    - room
+    properties:
+      name:
+        type: string
+        default: Test Room 2
+      description:
+        type: string
+        default: Another test room
+      exits:
+        type: string
+        default: '{''south'': ''test_room''}'
+      objects:
+        type: string
+        default: '{}'
+      test:
+        type: boolean
+        default: true
+  test_object:
+    types:
+    - object
+    properties:
+      name:
+        type: string
+        default: Test Object
+      description:
+        type: string
+        default: A simple test object
+      value:
+        type: number
+        default: 42
+      portable:
+        type: boolean
+        default: true
+      test:
+        type: boolean
+        default: true
+action_definitions:
+  look:
+    name: look
+    description: Look around.
+    cost: 10
+    category: observation
+    parameters:
+    - name: target
+      type: string
+      description: What to look at
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: look_at_target
+      observers:
+      - player
+  say:
+    name: say
+    description: Say something.
+    cost: 10
+    category: communication
+    parameters:
+    - name: phrase
+      type: string
+      description: What to say
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: handle_say_action
+      observers:
+      - player
+      - room_players
+  help:
+    name: help
+    description: Get help.
+    cost: 1
+    category: system
+    parameters:
+    - name: category
+      type: string
+      description: Category to get help for
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: generate_help_message
+      observers:
+      - player
+  move:
+    name: move
+    description: Move in a direction.
+    cost: 10
+    category: movement
+    parameters:
+    - name: direction
+      type: string
+      description: Direction to move
+      required: true
+      default_value: null
+    requirements:
+    - type: exit_exists
+      description: ''
+      value: true
+    effects:
+    - type: code_binding
+      function_name: handle_move_action
+      observers:
+      - player
+      - room_players
+      - adjacent_rooms
+  pickup:
+    name: pickup
+    description: Pick up an object.
+    cost: 10
+    category: inventory
+    parameters:
+    - name: object_name
+      type: string
+      description: Name of object to pick up
+      required: true
+      default_value: null
+    requirements:
+    - type: object_in_room
+      description: ''
+      value: true
+    - type: object_possession_allowed
+      description: ''
+      value: true
+    effects:
+    - type: code_binding
+      function_name: handle_pickup_action
+      observers:
+      - player
+      - room_players

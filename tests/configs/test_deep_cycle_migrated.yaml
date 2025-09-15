@@ -1,0 +1,9 @@
+action_definitions:
+  test_deep_cycle_action:
+    name: Test Deep Cycle Action
+    description: This action tests deep cycle detection
+    cost: 5
+    category: general
+    parameters: []
+    requirements: []
+    effects: []

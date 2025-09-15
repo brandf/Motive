@@ -4,7 +4,7 @@ Test action parser with real action configurations.
 import pytest
 from unittest.mock import Mock, patch
 from motive.action_parser import parse_player_response
-from motive.config_loader import load_and_validate_game_config
+from motive.cli import load_config
 
 
 class TestActionParserWithRealConfigs:
@@ -13,10 +13,10 @@ class TestActionParserWithRealConfigs:
     def test_pickup_with_real_configs(self):
         """Test pickup action parsing with real action configurations."""
         # Load real config to get actual action definitions
-        config = load_and_validate_game_config("game.yaml", base_path="configs", validate=False)
+        config = load_config("configs/game.yaml")
         
         # Get the actions from the config
-        actions = config.get('actions', {})
+        actions = config.actions
         print(f"Available actions: {list(actions.keys())}")
         
         # Test pickup action parsing

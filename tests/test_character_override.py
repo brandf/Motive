@@ -99,7 +99,7 @@ class TestCharacterOverride:
     def test_available_characters_in_config(self):
         """Test that the expected characters are available in the config."""
         config = load_config('configs/game.yaml')
-        available_characters = list(config.characters.keys())
+        available_characters = list(config.character_types.keys())
         
         # Verify that bella_whisper_nightshade exists
         assert 'bella_whisper_nightshade' in available_characters

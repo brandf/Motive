@@ -1,0 +1,9 @@
+includes:
+- ../../core_migrated.yaml
+- fantasy_rooms_migrated.yaml
+- fantasy_objects_migrated.yaml
+- fantasy_characters_migrated.yaml
+- fantasy_actions_migrated.yaml
+testid: fantasy_migrated
+name: Fantasy Theme (Migrated)
+theme_id: fantasy

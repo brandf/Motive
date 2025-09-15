@@ -30,6 +30,25 @@ class MoveEntityEffect(Effect):
     new_container: str
 
 
+@dataclass
+class CodeBindingEffect(Effect):
+    """Effect that calls a code function."""
+    function_name: str
+    observers: Optional[List[str]] = None
+
+
+@dataclass
+class GenerateEventEffect(Effect):
+    """Effect that represents an event emission (message + observers).
+
+    Note: The v2 EffectEngine is entity/relations focused and does not handle
+    event distribution. This class exists to faithfully round-trip v1 effects
+    during migration and for potential future v2 event handling.
+    """
+    message: str
+    observers: Optional[List[str]] = None
+
+
 class EffectEngine:
     """Executes effects against entities and relations."""
     
@@ -44,6 +63,9 @@ class EffectEngine:
             self._execute_set_property(effect, entities or {})
         elif isinstance(effect, MoveEntityEffect):
             self._execute_move_entity(effect, relations or RelationsGraph())
+        elif isinstance(effect, GenerateEventEffect):
+            # No-op in v2 engine (events are handled by the GM pipeline in v1 path)
+            return
         else:
             raise ValueError(f"Unknown effect type: {type(effect)}")
     
@@ -65,10 +87,15 @@ class EffectEngine:
             if isinstance(entity, dict):
                 entity[effect.property_name] = effect.value
             else:
-                # Handle object entities with properties attribute
-                if not hasattr(entity, 'properties'):
-                    entity.properties = {}
-                entity.properties[effect.property_name] = effect.value
+                # Handle MotiveEntity with PropertyStore
+                if hasattr(entity, 'properties') and hasattr(entity.properties, 'set'):
+                    entity.properties.set(effect.property_name, effect.value)
+                # Handle object entities with properties attribute (dict)
+                elif hasattr(entity, 'properties'):
+                    entity.properties[effect.property_name] = effect.value
+                else:
+                    # Fallback: create properties dict
+                    entity.properties = {effect.property_name: effect.value}
     
     def _execute_move_entity(self, effect: MoveEntityEffect, relations: RelationsGraph) -> None:
         """Execute a move entity effect."""

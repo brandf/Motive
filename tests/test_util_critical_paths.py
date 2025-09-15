@@ -60,8 +60,11 @@ actions:
     
     def test_load_config_hierarchical_with_includes(self):
         """Test loading a hierarchical config with includes."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
-            f.write("""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create the main config file
+            config_path = os.path.join(temp_dir, "test_config.yaml")
+            with open(config_path, 'w') as f:
+                f.write("""
 theme: fantasy
 edition: hearth_and_shadow
 includes:
@@ -76,25 +79,50 @@ players:
     provider: google
     model: gemini-2.5-flash
 """)
-            config_path = f.name
-        
-        try:
-            with patch('motive.util.load_game_config') as mock_load_game_config:
-                mock_config = {
-                    'theme': 'fantasy',
-                    'edition': 'hearth_and_shadow',
-                    'game_settings': {'num_rounds': 10},
-                    'players': [{'name': 'Player_1', 'provider': 'google', 'model': 'gemini-2.5-flash'}]
-                }
-                mock_load_game_config.return_value = mock_config
-                
-                config = load_config(config_path)
-                
-                # Verify hierarchical loader was called
-                mock_load_game_config.assert_called_once()
-                assert config == mock_config
-        finally:
-            os.unlink(config_path)
+            
+            # Create the included files
+            core_path = os.path.join(temp_dir, "core.yaml")
+            with open(core_path, 'w') as f:
+                f.write("""
+actions:
+  look:
+    id: look
+    name: look
+    description: Look around
+    cost: 1
+    effects: []
+    requirements: []
+""")
+            
+            fantasy_path = os.path.join(temp_dir, "fantasy.yaml")
+            with open(fantasy_path, 'w') as f:
+                f.write("""
+rooms:
+  start_room:
+    id: start_room
+    name: Starting Room
+    description: A simple starting room
+    exits: {}
+    objects: {}
+""")
+            
+            # Test loading the config
+            config = load_config(config_path)
+            
+            # Verify the config was loaded successfully
+            assert config is not None
+            assert config.game_settings.num_rounds == 10
+            assert len(config.players) == 1
+            assert config.players[0].name == 'Player_1'
+            
+            # Verify that includes were merged correctly
+            assert config.actions is not None
+            assert 'look' in config.actions
+            assert config.actions['look']['name'] == 'look'
+            
+            assert config.rooms is not None
+            assert 'start_room' in config.rooms
+            assert config.rooms['start_room']['name'] == 'Starting Room'
     
     def test_load_config_invalid_file(self):
         """Test loading an invalid config file."""

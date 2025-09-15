@@ -11,6 +11,12 @@ game_settings:
   num_rounds: 1
   initial_ap_per_turn: 100
 
+# Required players field
+players:
+  - name: TestPlayer
+    provider: mock
+    model: mock-model
+
 # Add test-specific data
 actions:
   test_relative_action:

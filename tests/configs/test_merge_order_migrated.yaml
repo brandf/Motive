@@ -1,0 +1,9 @@
+action_definitions:
+  test_merge_action:
+    name: Test Merge Action
+    description: This action tests merge order
+    cost: 5
+    category: general
+    parameters: []
+    requirements: []
+    effects: []

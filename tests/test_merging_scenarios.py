@@ -312,14 +312,15 @@ class TestRealWorldScenarios:
         assert config is not None
         assert 'game_settings' in config
         assert 'players' in config
-        assert 'actions' in config
-        assert 'object_types' in config
-        assert 'rooms' in config
+        assert 'action_definitions' in config
+        assert 'entity_definitions' in config
+        # V2 configs have entity_definitions instead of separate rooms/objects
+        assert 'entity_definitions' in config
         
         # Should have merged data from all includes
-        assert len(config.get('actions', {})) > 0
-        assert len(config.get('object_types', {})) > 0
-        assert len(config.get('rooms', {})) > 0
+        assert len(config.get('action_definitions', {})) > 0
+        assert len(config.get('entity_definitions', {})) > 0
+        # V2 configs don't have separate rooms field
     
     def test_theme_edition_merging(self):
         """Test merging theme and edition configurations."""
