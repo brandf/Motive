@@ -1,0 +1,328 @@
+# Hearth and Shadow Edition - Blackwater Town (Sim V2 Enhanced)
+# This file showcases the new sim_v2 features: unified exits, visibility, triggers, and computed properties
+
+rooms:
+  town_square:
+    id: town_square
+    name: Town Square
+    description: |
+      The heart of Blackwater, once bustling with merchants and travelers, now feels empty and foreboding. 
+      A broken fountain sits in the center, its water murky and still. Notice boards line the walls, 
+      covered with posters of missing persons. The cobblestones are cracked and worn, and the air carries 
+      an unsettling chill. Shadows seem to move at the edges of your vision, and the few remaining 
+      townsfolk hurry past with worried expressions. Yet in the center of the square, a small hearth 
+      still burns - a symbol of the town's stubborn hope that refuses to be extinguished by the growing darkness.
+    # Sim V2: Enhanced exits with state properties
+    exits:
+      tavern: 
+        id: tavern_exit
+        name: Rusty Anchor Tavern
+        destination_room_id: tavern
+        aliases: [tavern, bar, inn]
+        # Sim V2: Exit state properties
+        visible: true
+        traversable: true
+        is_locked: false
+        # Sim V2: Computed properties based on conditions
+        computed_properties:
+          description: "condition: 'tavern_open == true' ? 'The tavern door is open, warm light spilling out.' : 'The tavern door is closed, but you can hear voices inside.'"
+      guild: 
+        id: guild_exit
+        name: Adventurer's Guild Hall
+        destination_room_id: adventurer_guild
+        aliases: [guild, hall, adventurers]
+        visible: true
+        traversable: true
+        is_locked: false
+      church: 
+        id: church_exit
+        name: Sacred Heart Church
+        destination_room_id: church
+        aliases: [church, temple, sanctuary]
+        visible: true
+        traversable: true
+        is_locked: false
+      bank: 
+        id: bank_exit
+        name: Blackwater Bank
+        destination_room_id: bank
+        aliases: [bank, vault, treasury]
+        visible: true
+        traversable: true
+        is_locked: false
+      market: 
+        id: market_exit
+        name: Market District
+        destination_room_id: market_district
+        aliases: [market, bazaar, shops]
+        visible: true
+        traversable: true
+        is_locked: false
+      forest: 
+        id: forest_exit
+        name: Old Forest Path
+        destination_room_id: old_forest_path
+        aliases: [forest, woods, path]
+        visible: true
+        traversable: true
+        is_locked: false
+        # Sim V2: Exit with conditional visibility
+        computed_properties:
+          visible: "condition: 'forest_safe == true' ? true : false"
+          description: "condition: 'forest_safe == true' ? 'A well-worn path leading into the forest.' : 'The forest path is overgrown and dangerous-looking.'"
+    # Sim V2: Enhanced objects with new features
+    objects:
+      notice_board: 
+        id: notice_board_square
+        name: Notice Board
+        object_type_id: notice_board
+        current_room_id: town_square
+        description: A weathered wooden board covered with missing person posters and town announcements.
+        # Sim V2: Enhanced properties
+        properties:
+          visible: true
+          searchable: false
+          last_updated: "recent"
+          cult_mentions: true
+      broken_fountain: 
+        id: broken_fountain_square
+        name: Broken Fountain
+        object_type_id: broken_fountain
+        current_room_id: town_square
+        description: A once-beautiful stone fountain, now cracked and dry. The water that remains is murky and still.
+        # Sim V2: Hidden compartment
+        properties:
+          visible: true
+          searchable: true
+          hidden_compartment: false
+          compartment_contents: "cult_symbol"
+      town_statue: 
+        id: town_statue_square
+        name: Town Statue
+        object_type_id: town_statue
+        current_room_id: town_square
+        description: A large statue of the town's founder, too heavy to move. It seems to be watching over the square with a troubled expression.
+        # Sim V2: Statue can be examined for clues
+        properties:
+          visible: true
+          searchable: true
+          examination_reward: "town_history"
+      cult_symbols: 
+        id: cult_symbols_square
+        name: Cult Symbols
+        object_type_id: cult_symbol
+        current_room_id: town_square
+        description: Dark, unsettling symbols painted on the walls. They seem to pulse with dark energy.
+        # Sim V2: Hidden until discovered
+        properties:
+          visible: false
+          searchable: true
+          evil_energy: true
+          corrupting: true
+      fresh_evidence: 
+        id: fresh_evidence_square
+        name: Fresh Evidence
+        object_type_id: fresh_evidence
+        current_room_id: town_square
+        description: Recently disturbed earth and strange markings near the fountain.
+        # Sim V2: Evidence can be analyzed
+        properties:
+          visible: true
+          searchable: true
+          analysis_reward: "cult_activity"
+          freshness: "recent"
+      eternal_flame: 
+        id: eternal_flame_square
+        name: Eternal Flame
+        object_type_id: eternal_flame
+        current_room_id: town_square
+        description: A small, magical flame that never goes out, symbolizing the town's unbreakable spirit.
+        # Sim V2: Flame reacts to hope/despair
+        properties:
+          visible: true
+          searchable: false
+          magical: true
+          hope_level: 5
+          # Sim V2: Triggers - flame reacts to town's state
+          triggers:
+            - trigger_id: "flame_hope"
+              condition: "hope_level > 7"
+              effects:
+                - set_property: {target: "self", property: "description", value: "The eternal flame burns brightly, filling the square with warm, hopeful light."}
+            - trigger_id: "flame_despair"
+              condition: "hope_level < 3"
+              effects:
+                - set_property: {target: "self", property: "description", value: "The eternal flame flickers weakly, struggling against the growing darkness."}
+    # Sim V2: Room-level triggers and computed properties
+    triggers:
+      - trigger_id: "square_atmosphere"
+        condition: "missing_persons > 5 AND cult_activity > 3"
+        effects:
+          - set_property: {target: "self", property: "description", value: "The town square feels oppressive and foreboding. The shadows seem to move with malicious intent."}
+          - set_property: {target: "self", property: "atmosphere", value: "ominous"}
+      - trigger_id: "square_hope"
+        condition: "cult_threat_reduced == true"
+        effects:
+          - set_property: {target: "self", property: "description", value: "The town square feels lighter and more hopeful. The eternal flame burns brighter, and people seem less afraid."}
+          - set_property: {target: "self", property: "atmosphere", value: "hopeful"}
+    # Sim V2: Computed room properties
+    computed_properties:
+      atmosphere: "condition: 'cult_threat_reduced == true' ? 'hopeful' : 'ominous'"
+      safety_level: "condition: 'cult_activity < 2' ? 'safe' : 'dangerous'"
+      population: "condition: 'time_of_day == night' ? 'sparse' : 'moderate'"
+
+  tavern:
+    id: tavern
+    name: The Rusty Anchor Tavern
+    description: |
+      A cozy tavern with warm lighting and the smell of ale and roasted meat. The wooden beams overhead 
+      creak gently, and a large fireplace crackles with a welcoming fire. Tables are scattered throughout 
+      the room, some occupied by locals sharing hushed conversations. The bartender, a gruff but friendly 
+      man, tends to his duties behind a long wooden bar. Despite the warm atmosphere, there's an underlying 
+      tension in the air - people speak in whispers and cast nervous glances toward the door.
+    # Sim V2: Enhanced exits
+    exits:
+      town_square: 
+        id: tavern_to_square_exit
+        name: Town Square
+        destination_room_id: town_square
+        visible: true
+        traversable: true
+        is_locked: false
+      back_room: 
+        id: tavern_back_room_exit
+        name: Back Room
+        destination_room_id: tavern_back_room
+        visible: true
+        traversable: true
+        is_locked: false
+        # Sim V2: Conditional access
+        computed_properties:
+          traversable: "condition: 'bartender_trust == true' ? true : false"
+          description: "condition: 'bartender_trust == true' ? 'A door leading to the back room.' : 'A locked door to the back room.'"
+    # Sim V2: Enhanced objects
+    objects:
+      bar: 
+        id: bar_tavern
+        name: Bar
+        object_type_id: bar
+        current_room_id: tavern
+        description: A long wooden bar where drinks are served.
+        properties:
+          visible: true
+          searchable: true
+          bartender_present: true
+      suspicious_character: 
+        id: suspicious_character_tavern
+        name: Suspicious Character
+        object_type_id: suspicious_character
+        current_room_id: tavern
+        description: A figure who seems to be watching everything carefully.
+        properties:
+          visible: true
+          searchable: false
+          suspicious_level: 5
+          # Sim V2: Character reacts to investigation
+          triggers:
+            - trigger_id: "character_alert"
+              condition: "player_investigating == true AND suspicious_level > 3"
+              effects:
+                - set_property: {target: "self", property: "visible", value: false}
+                - emit_event: {event: "suspicious_character_fled", data: {location: "tavern"}}
+      hidden_note: 
+        id: hidden_note_tavern
+        name: Hidden Note
+        object_type_id: hidden_note
+        current_room_id: tavern
+        description: A crumpled piece of paper with cryptic writing.
+        properties:
+          visible: false
+          searchable: false
+          readable: true
+          text: "The cult meets at the old mill. Look for the symbol of the twisted tree."
+    # Sim V2: Room-level triggers
+    triggers:
+      - trigger_id: "tavern_atmosphere"
+        condition: "cult_threat > 5"
+        effects:
+          - set_property: {target: "self", property: "description", value: "The tavern feels tense and uneasy. Patrons speak in hushed tones and cast nervous glances."}
+          - set_property: {target: "self", property: "atmosphere", value: "tense"}
+      - trigger_id: "tavern_safe"
+        condition: "cult_threat < 2"
+        effects:
+          - set_property: {target: "self", property: "description", value: "The tavern feels warm and welcoming again. People laugh and talk freely."}
+          - set_property: {target: "self", property: "atmosphere", value: "welcoming"}
+
+  church:
+    id: church
+    name: Sacred Heart Church
+    description: |
+      A beautiful stone church with tall stained glass windows that cast colorful light across the pews. 
+      The air is filled with the scent of incense and the sound of quiet prayers. Father Marcus, the 
+      town's priest, can be seen tending to the altar. Despite the peaceful atmosphere, there's a 
+      sense that the church serves as a sanctuary against the growing darkness in the town.
+    # Sim V2: Enhanced exits
+    exits:
+      town_square: 
+        id: church_to_square_exit
+        name: Town Square
+        destination_room_id: town_square
+        visible: true
+        traversable: true
+        is_locked: false
+      crypt: 
+        id: church_crypt_exit
+        name: Crypt Entrance
+        destination_room_id: church_crypt
+        visible: true
+        traversable: true
+        is_locked: true
+        # Sim V2: Crypt requires holy symbol to unlock
+        computed_properties:
+          is_locked: "condition: 'has_holy_symbol == true' ? false : true"
+          description: "condition: 'has_holy_symbol == true' ? 'A stone staircase leading down to the crypt.' : 'A locked door leading to the crypt.'"
+    # Sim V2: Enhanced objects
+    objects:
+      altar: 
+        id: altar_church
+        name: Altar
+        object_type_id: altar
+        current_room_id: church
+        description: A beautiful stone altar adorned with candles and religious symbols.
+        properties:
+          visible: true
+          searchable: false
+          holy_power: 10
+          # Sim V2: Altar can bless items
+          affordances:
+            - action: "bless_item"
+              condition: "holy_power > 0"
+              effects:
+                - set_property: {target: "item", property: "blessed", value: true}
+                - set_property: {target: "item", property: "holy_power", value: 5}
+              description: "Bless an item at the altar"
+      holy_symbol: 
+        id: holy_symbol_church
+        name: Holy Symbol
+        object_type_id: holy_symbol
+        current_room_id: church
+        description: A small silver symbol of the church's faith.
+        properties:
+          visible: true
+          searchable: false
+          holy_power: 5
+          # Sim V2: Symbol can be used to unlock crypt
+          affordances:
+            - action: "use_symbol"
+              condition: "visible == true"
+              effects:
+                - set_property: {target: "crypt_exit", property: "is_locked", value: false}
+                - emit_event: {event: "crypt_unlocked", data: {method: "holy_symbol"}}
+              description: "Use the holy symbol to unlock the crypt"
+    # Sim V2: Room-level triggers
+    triggers:
+      - trigger_id: "church_sanctuary"
+        condition: "cult_threat > 5"
+        effects:
+          - set_property: {target: "self", property: "description", value: "The church feels like a true sanctuary against the growing darkness. The holy symbols seem to glow with protective power."}
+          - set_property: {target: "self", property: "holy_protection", value: true}

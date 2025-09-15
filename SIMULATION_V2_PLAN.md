@@ -514,6 +514,79 @@ effects:
   - remove_status: { target: ${actor}, name: stunned }
 ```
 
+---
+
+### Plan Maintenance and Status
+- This document is a living plan. Update after every meaningful change.
+- Keep priorities current and reflect completed/in-progress work.
+
+#### Current Work Queue (Prioritized)
+1. ✅ Scaffold core modules: `entity`, `properties`, `relations`, `definitions`
+2. ✅ Minimal TDD tests for entity/properties/relations
+3. ✅ v1→v2 adapters for rooms/objects/characters (no behavior change)
+4. ✅ Replace tags with typed properties at wrapper layer
+5. ✅ Query + Condition DSL (with string→AST parser)
+6. ✅ Effects primitives (set/move/link/emit)
+7. ✅ Unified exits (visible/traversable/locked) + computed gating
+8. ✅ VisibilityAspect + search/discover mechanics
+9. ✅ Triggers (edge detection + undo)
+10. ✅ Affordances (object-contributed actions)
+11. ☐ Status effects (apply/remove/duration/overlays)
+12. ☐ Entity lifecycle (spawn/destroy/clone)
+13. ☐ Portals (future extension of exits)
+
+#### Recently Completed
+- ✅ Drafted SIMULATION_V2_PLAN.md and got approval
+- ✅ Created package stub `motive/sim_v2/__init__.py`
+- ✅ Scaffolded core modules: `entity.py`, `properties.py`, `definitions.py`, `relations.py`
+- ✅ Added minimal TDD tests: `tests/test_sim_v2_minimal.py` (3 tests passing)
+- ✅ Implemented typed property system with validation (string/number/boolean/enum)
+- ✅ Implemented entity definitions and instantiation with overrides
+- ✅ Implemented relations graph for container/location management
+- ✅ Implemented v1→v2 adapters: `adapters.py` with comprehensive TDD tests (5 tests passing)
+- ✅ Adapter converts v1 rooms/objects/characters to v2 definitions with type inference
+- ✅ Adapter handles object instances with property overrides and graceful error handling
+- ✅ Implemented wrapper layer: `wrapper.py` with TDD tests (3 tests passing)
+- ✅ V1EntityWrapper converts tags to typed properties while maintaining v1 compatibility
+- ✅ Wrapper handles missing tags gracefully and preserves v1 interface access
+- ✅ Implemented condition DSL: `conditions.py` with TDD tests (7 tests passing)
+- ✅ ConditionParser converts string expressions to AST (==, >, < operators)
+- ✅ ConditionEvaluator evaluates conditions against entity properties with type inference
+- ✅ Implemented query system: `query.py` with TDD tests (5 tests passing)
+- ✅ QueryEngine parses "entity.relation.target where condition" syntax
+- ✅ Query execution integrates with RelationsGraph and supports condition filtering
+- ✅ Implemented effects primitives: `effects.py` with TDD tests (5 tests passing)
+- ✅ SetPropertyEffect and MoveEntityEffect for declarative state changes
+- ✅ EffectEngine executes multiple effects in sequence with graceful error handling
+- ✅ Implemented unified exits: `exits.py` with TDD tests (5 tests passing)
+- ✅ ExitManager handles exit creation, state management (visible/traversable/locked)
+- ✅ Direction mapping and traversal validation with RelationsGraph integration
+- ✅ **CRITICAL**: Added real YAML integration tests: `test_sim_v2_integration.py` (8 tests passing)
+- ✅ Integration tests validate v1→v2 conversion against real `hearth_and_shadow_*` configs
+- ✅ Fixed missing methods: `DefinitionRegistry.create_entity()`, `MotiveEntity.get_property()`
+- ✅ Enhanced condition system with `contains` operator for string matching
+- ✅ Verified end-to-end migration works with real room/object/character data
+- ✅ Implemented visibility system: `visibility.py` with TDD tests (6 tests passing)
+- ✅ VisibilityEngine handles computed visibility, search mechanics, and discovery
+- ✅ Search actions can reveal hidden entities with `searchable` property
+- ✅ Cross-room visibility validation and entity filtering
+- ✅ Implemented triggers system: `triggers.py` with TDD tests (6 tests passing)
+- ✅ TriggerEngine provides reactive behavior with edge detection (false→true, true→false)
+- ✅ Effects execution on activation and undo effects on deactivation
+- ✅ Enhanced EffectEngine to handle both dict and object entities
+- ✅ Implemented affordances system: `affordances.py` with TDD tests (5 tests passing)
+- ✅ AffordanceEngine manages object-contributed actions with condition-based availability
+- ✅ Action execution through affordances with effect application
+- ✅ Created enhanced YAML configs showcasing sim_v2 features: `*_v2.yaml` files
+- ✅ Enhanced configs demonstrate triggers, affordances, visibility, and computed properties
+- ✅ Fixed YAML syntax errors and AND operator parsing/evaluation in condition system
+- ✅ Created comprehensive integration tests: `test_sim_v2_enhanced_configs.py` (9 tests passing)
+- ✅ All enhanced config tests validate real-world sim_v2 feature usage
+
+#### New Findings / Backlog
+- ☐ Container objects (objects can contain objects) — planned post ContainerAspect
+- ☐ Expression safety fuzz tests and resource/time limits
+
 
 This plan enables incremental delivery while steering toward a composable, powerful simulation engine that cleanly separates definitions from instances and centralizes state change via a unified effects system.
 
