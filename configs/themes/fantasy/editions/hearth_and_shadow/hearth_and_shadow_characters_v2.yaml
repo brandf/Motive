@@ -76,6 +76,30 @@ characters:
           investigation_skill: 2
           strength: 1
         description: "Motivation from memories of your fallen partner"
+    # Sim V2: Entity Lifecycle - detective can spawn/clone/destroy entities
+    entity_lifecycle:
+      spawn_definitions:
+        - definition_id: "evidence_bag"
+          spawn_location: "current"
+          custom_properties:
+            evidence_type: "physical"
+            integrity: 100
+            description: "A sturdy bag for collecting evidence"
+        - definition_id: "investigation_note"
+          spawn_location: "current"
+          custom_properties:
+            content: "Investigation findings"
+            confidentiality: "high"
+            description: "Detailed notes from your investigation"
+      clone_capabilities:
+        - source_entity_types: ["evidence_bag", "investigation_note"]
+          clone_location: "current"
+          clone_modifications:
+            evidence_type: "copy"
+            integrity: 50
+      destroy_capabilities:
+        - entity_types: ["evidence_bag", "investigation_note"]
+          destroy_reasons: ["compromised", "outdated", "false_lead"]
 
   bella_hoarder:
     id: bella_hoarder

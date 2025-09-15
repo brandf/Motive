@@ -532,7 +532,7 @@ effects:
 9. ✅ Triggers (edge detection + undo)
 10. ✅ Affordances (object-contributed actions)
 11. ✅ Status effects (apply/remove/duration/overlays)
-12. ☐ Entity lifecycle (spawn/destroy/clone)
+12. ✅ Entity lifecycle (spawn/destroy/clone)
 13. ☐ Portals (future extension of exits)
 
 #### Recently Completed
@@ -588,10 +588,37 @@ effects:
 - ✅ Enhanced character config showcases status effects: investigation_fatigue, cult_corruption, partner_memory
 - ✅ Created comprehensive status effects config tests: `test_sim_v2_status_effects_config.py` (4 tests passing)
 - ✅ All 79 sim_v2 tests passing with status effects integration
+- ✅ Implemented entity lifecycle system: `entity_lifecycle.py` with TDD tests (7 tests passing)
+- ✅ EntityLifecycleManager handles spawn/destroy/clone operations with unique ID generation
+- ✅ Support for entity states (ACTIVE, DESTROYED, CLONED) and lifecycle event tracking
+- ✅ Enhanced character config showcases entity lifecycle: evidence_bag and investigation_note spawning
+- ✅ Created comprehensive entity lifecycle config tests: `test_sim_v2_entity_lifecycle_config.py` (5 tests passing)
+- ✅ All 91 sim_v2 tests passing with entity lifecycle integration
+- ✅ Implemented portals system: portals.py with TDD tests (7 tests passing)
+- ✅ PortalManager handles static and dynamic portals with destination management
+- ✅ Support for portal traversal conditions and property management
+- ✅ Created comprehensive portal integration tests: test_sim_v2_portals_containers_integration.py (9 tests passing)
+- ✅ Created enhanced action integration tests: test_sim_v2_enhanced_action_integration.py (8 tests passing)
+- ✅ **Corrected Shout Observability**: Sound now propagates through portals to destination rooms
+- ✅ **Unified Move Action**: Single `move` command works with normal exits, portals, and containers
+- ✅ **Enhanced Throw Action**: Objects can be thrown through portals, into containers, and portals/containers themselves can be thrown
+- ✅ **Mixed Exit Types**: Rooms can have normal exits, portals, and container entrances simultaneously
+- ✅ Implemented containers system: containers.py with TDD tests (8 tests passing)
+- ✅ ContainerManager handles bag of holding, portable hole, and magic tent types
+- ✅ Support for owned interior spaces with unique room generation and capacity management
+- ✅ Container enter/exit mechanics with location tracking for proper observability
+- ✅ All container tests validate integration with core actions and observability system
+- ✅ Created container interior interaction tests: test_sim_v2_container_interior_interactions.py (7 tests passing)
+- ✅ **Container Interior Spaces**: Both objects and characters can exist and interact normally inside containers
+- ✅ **Interior Observability**: Actions inside containers are only visible to players in the same interior
+- ✅ **Interior State Persistence**: Objects and interior state persist when players exit/re-enter containers
+- ✅ **Multiple Container Isolation**: Different containers have separate, isolated interior spaces
+- ✅ All 130 sim_v2 tests passing with complete portals and containers integration
 
 #### New Findings / Backlog
-- ☐ Container objects (objects can contain objects) — planned post ContainerAspect
 - ☐ Expression safety fuzz tests and resource/time limits
+- ☐ **Documentation Updates Required**: Update MANUAL.md and other docs when v2 implementation/migration is complete
+- ☐ **Enhanced Hearth & Shadow Configs**: Add magic mirrors, bags of holding, portable holes, and other sim_v2 objects to showcase new features
 
 
 This plan enables incremental delivery while steering toward a composable, powerful simulation engine that cleanly separates definitions from instances and centralizes state change via a unified effects system.
