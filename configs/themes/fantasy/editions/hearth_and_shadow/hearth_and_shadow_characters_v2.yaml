@@ -18,14 +18,12 @@ characters:
       reputation: "good"
       corruption_level: 0
       evil_alignment: false
-      # Sim V2: Status effects - detective can gain corruption
-      status_effects:
-        - effect_id: "investigation_fatigue"
-          condition: "investigation_skill > 5"
-          duration: 3
-          effects:
-            - set_property: {target: "self", property: "investigation_skill", value: "investigation_skill - 1"}
-            - set_property: {target: "self", property: "description", value: "You feel mentally exhausted from your investigations."}
+      # Sim V2: Base stats that can be modified by status effects
+      strength: 6
+      intelligence: 9
+      constitution: 7
+      wisdom: 8
+      charisma: 5
       # Sim V2: Triggers - detective reacts to discoveries
       triggers:
         - trigger_id: "partner_memory"
@@ -51,6 +49,33 @@ characters:
           effects:
             - emit_event: {event: "witness_questioned", data: {skill_level: "investigation_skill", reliability: "high"}}
           description: "Question a witness about recent events"
+    # Sim V2: Status Effects - detective can gain various temporary effects
+    status_effects:
+      - name: "investigation_fatigue"
+        duration_turns: 3
+        stacking_policy: "refresh"
+        source: "action"
+        overlays:
+          intelligence: -1
+          investigation_skill: -1
+        description: "Mental exhaustion from intense investigation"
+      - name: "cult_corruption"
+        duration_turns: 5
+        stacking_policy: "no_stack"
+        source: "action"
+        overlays:
+          corruption_level: 1
+          evil_alignment: true
+          wisdom: -2
+        description: "Dark influence from exposure to cult artifacts"
+      - name: "partner_memory"
+        duration_turns: null  # Permanent until manually removed
+        stacking_policy: "no_stack"
+        source: "inherent"
+        overlays:
+          investigation_skill: 2
+          strength: 1
+        description: "Motivation from memories of your fallen partner"
 
   bella_hoarder:
     id: bella_hoarder

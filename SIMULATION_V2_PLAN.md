@@ -531,7 +531,7 @@ effects:
 8. ✅ VisibilityAspect + search/discover mechanics
 9. ✅ Triggers (edge detection + undo)
 10. ✅ Affordances (object-contributed actions)
-11. ☐ Status effects (apply/remove/duration/overlays)
+11. ✅ Status effects (apply/remove/duration/overlays)
 12. ☐ Entity lifecycle (spawn/destroy/clone)
 13. ☐ Portals (future extension of exits)
 
@@ -582,6 +582,12 @@ effects:
 - ✅ Fixed YAML syntax errors and AND operator parsing/evaluation in condition system
 - ✅ Created comprehensive integration tests: `test_sim_v2_enhanced_configs.py` (9 tests passing)
 - ✅ All enhanced config tests validate real-world sim_v2 feature usage
+- ✅ Implemented status effects system: `status_effects.py` with TDD tests (6 tests passing)
+- ✅ StatusEffectManager handles duration-based property overlays with stacking policies
+- ✅ Support for temporary effects (duration_turns), permanent effects (duration_turns: null), and multiple sources
+- ✅ Enhanced character config showcases status effects: investigation_fatigue, cult_corruption, partner_memory
+- ✅ Created comprehensive status effects config tests: `test_sim_v2_status_effects_config.py` (4 tests passing)
+- ✅ All 79 sim_v2 tests passing with status effects integration
 
 #### New Findings / Backlog
 - ☐ Container objects (objects can contain objects) — planned post ContainerAspect
