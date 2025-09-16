@@ -15,7 +15,7 @@ import sys
 import shutil
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 from datetime import datetime
 
 try:
@@ -25,7 +25,7 @@ except ImportError:
     HIERARCHICAL_SUPPORT = False
 
 
-def load_config(config_path: str) -> Dict[str, Any]:
+def load_config(config_path: str) -> Union[Dict[str, Any], 'GameConfig', 'V2GameConfig']:
     """Load and parse a YAML configuration file, supporting both traditional and hierarchical configs."""
     try:
         # Check if this is a hierarchical config (has includes)
@@ -37,7 +37,7 @@ def load_config(config_path: str) -> Dict[str, Any]:
             print(f"Detected hierarchical config with includes, using config loader...")
             # Use the new CLI loader that handles v2 configs
             game_config = cli_load_config(config_path)
-            # Return the GameConfig object directly - the util functions will handle it
+            # Return the GameConfig/V2GameConfig object directly - the util functions will handle it
             return game_config
         else:
             # Traditional config loading
@@ -47,15 +47,26 @@ def load_config(config_path: str) -> Dict[str, Any]:
         sys.exit(1)
 
 
-def show_raw_config(config: Dict[str, Any], format_type: str = 'yaml') -> None:
+def show_raw_config(config: Union[Dict[str, Any], 'GameConfig', 'V2GameConfig'], format_type: str = 'yaml') -> None:
     """Output the raw merged configuration."""
     print(f"Merged Configuration ({format_type.upper()}):")
     print("=" * 50)
     
+    # Convert config object to dict for output
+    if hasattr(config, 'dict'):
+        # Pydantic model (v2)
+        config_dict = config.dict()
+    elif hasattr(config, '__dict__'):
+        # Object with __dict__ (v1 GameConfig)
+        config_dict = config.__dict__
+    else:
+        # Already a dict
+        config_dict = config
+    
     if format_type == 'json':
-        print(json.dumps(config, indent=2, default=str))
+        print(json.dumps(config_dict, indent=2, default=str))
     else:  # yaml
-        print(yaml.dump(config, default_flow_style=False, sort_keys=False))
+        print(yaml.dump(config_dict, default_flow_style=False, sort_keys=False))
     
     print()
 
@@ -65,13 +76,37 @@ def show_summary(config) -> None:
     print("Configuration Summary:")
     print("=====================")
     
-    # Handle both dict configs (v1) and GameConfig objects (v2)
-    if hasattr(config, 'actions'):
-        # GameConfig object (v2)
+    # Handle v2 configs (V2GameConfig)
+    if hasattr(config, 'action_definitions'):
+        # V2GameConfig object
+        action_count = len(config.action_definitions)
+        entity_count = len(config.entity_definitions)
+        
+        # Count entities by type
+        room_count = sum(1 for entity in config.entity_definitions.values() 
+                        if hasattr(entity, 'behaviors') and 'room' in entity.behaviors)
+        object_count = sum(1 for entity in config.entity_definitions.values() 
+                         if hasattr(entity, 'behaviors') and 'object' in entity.behaviors)
+        character_count = sum(1 for entity in config.entity_definitions.values() 
+                             if hasattr(entity, 'behaviors') and 'character' in entity.behaviors)
+        
+        print(f"Actions: {action_count}")
+        print(f"Entities: {entity_count}")
+        print(f"  - Rooms: {room_count}")
+        print(f"  - Objects: {object_count}")
+        print(f"  - Characters: {character_count}")
+    # Handle v1 configs (GameConfig or dict)
+    elif hasattr(config, 'actions'):
+        # GameConfig object (v1)
         action_count = len(config.actions)
         object_count = len(config.object_types)
         room_count = len(config.rooms)
         character_count = len(config.character_types)
+        
+        print(f"Actions: {action_count}")
+        print(f"Objects: {object_count}")
+        print(f"Rooms: {room_count}")
+        print(f"Characters: {character_count}")
     else:
         # Dictionary config (v1)
         action_count = len(config.get('actions', {}))
@@ -83,11 +118,12 @@ def show_summary(config) -> None:
         if not characters:
             characters = config.get('character_types', {})
         character_count = len(characters)
+        
+        print(f"Actions: {action_count}")
+        print(f"Objects: {object_count}")
+        print(f"Rooms: {room_count}")
+        print(f"Characters: {character_count}")
     
-    print(f"Actions: {action_count}")
-    print(f"Objects: {object_count}")
-    print(f"Rooms: {room_count}")
-    print(f"Characters: {character_count}")
     print()
 
 

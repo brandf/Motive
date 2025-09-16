@@ -92,20 +92,8 @@ class GameMaster:
         # Load configurations from merged config
         self.game_initializer._load_configurations()
         
-        # Extract theme and edition IDs from merged config
-        if hasattr(game_config, 'theme_id') and game_config.theme_id:
-            self.theme = game_config.theme_id
-        elif 'theme_id' in game_config and game_config['theme_id']:
-            self.theme = game_config['theme_id']
-        else:
-            self.theme = "unknown"
-            
-        if hasattr(game_config, 'edition_id') and game_config.edition_id:
-            self.edition = game_config.edition_id
-        elif 'edition_id' in game_config and game_config['edition_id']:
-            self.edition = game_config['edition_id']
-        else:
-            self.edition = "unknown"
+        # Extract log path from config (v2) or fall back to theme/edition (v1)
+        self.log_path = self._extract_log_path(game_config)
 
         # Now that theme and edition are known, set up the full logging
         self.log_dir = self._setup_logging()
@@ -190,24 +178,39 @@ class GameMaster:
             self.game_logger.error(f"Error loading game manual from {self.manual_path}: {e}")
             return ""
 
+    def _extract_log_path(self, game_config) -> str:
+        """Extract log path from v2 config."""
+        # v2 configs have log_path in game_settings
+        if hasattr(game_config, 'game_settings') and hasattr(game_config.game_settings, 'log_path') and game_config.game_settings.log_path:
+            return game_config.game_settings.log_path
+        elif 'game_settings' in game_config and 'log_path' in game_config['game_settings'] and game_config['game_settings']['log_path']:
+            return game_config['game_settings']['log_path']
+        
+        # Default fallback
+        return "unknown/unknown"
+
     def _setup_logging(self):
         """Sets up the logging directory and configures the GM logger."""
         import os
         disable_file_logging = self.no_file_logging
         base_log_dir = self.log_dir
         
-        # Determine log directory structure based on whether this is a parallel run
+        # Determine log directory structure using the log_path template
         # Check if this is a parallel worker by looking for the pattern: <base>_worker_<number>
         if self.game_id.endswith(("_worker_1", "_worker_2", "_worker_3", "_worker_4", "_worker_5")) or \
            (self.game_id.count("_worker_") == 1 and self.game_id.split("_worker_")[1].isdigit()):
             # This is a parallel run worker - use new structure:
-            # logs/<theme>/<edition>/<parallel_run_id>/<worker_game_id>/
+            # logs/<log_path>/<parallel_run_id>/<worker_game_id>/
             parallel_run_id = self.game_id.split("_worker_")[0]
-            game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, parallel_run_id, self.game_id)
+            # Replace {game_id} with parallel_run_id in the log path
+            log_path_template = self.log_path.replace("{game_id}", parallel_run_id)
+            game_log_dir = os.path.join(base_log_dir, log_path_template, self.game_id)
         else:
             # Single game - use existing structure:
-            # logs/<theme>/<edition>/<game_id>/
-            game_log_dir = os.path.join(base_log_dir, self.theme, self.edition, self.game_id)
+            # logs/<log_path>/<game_id>/
+            # Replace {game_id} with actual game_id in the log path
+            log_path_template = self.log_path.replace("{game_id}", self.game_id)
+            game_log_dir = os.path.join(base_log_dir, log_path_template)
             
         if not disable_file_logging:
             os.makedirs(game_log_dir, exist_ok=True)

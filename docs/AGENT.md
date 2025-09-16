@@ -1092,3 +1092,82 @@ Creating comprehensive unit tests and migration tests, but never testing actual 
 ### This Lesson Must Never Be Forgotten
 
 **Testing system architecture without testing user workflows is incomplete testing**. Every AI agent must test actual user actions with real configs before claiming functionality works. Real game runs are expensive validation tools, not debugging tools.
+
+## CRITICAL LESSON: Never Encode Complex Structures as Strings in YAML
+
+### The Mistake
+
+During v2 migration, complex data structures (motives, aliases, initial_rooms) were encoded as string representations in YAML properties, requiring `ast.literal_eval()` to parse them back into Python objects. This created fragile, error-prone parsing logic.
+
+### Why It's Wrong
+
+**String encoding of complex structures violates YAML principles**:
+- **YAML is designed for structured data**: Use YAML's native list/dict syntax, not string representations
+- **String encoding is fragile**: Single quotes, double quotes, escaping issues break parsing
+- **String encoding is unreadable**: Humans can't easily read/edit string-encoded structures
+- **String encoding requires eval**: Using `ast.literal_eval()` or similar creates security and reliability risks
+- **String encoding breaks tooling**: YAML validators, editors, and formatters can't understand string-encoded structures
+
+### What Should Have Been Done
+
+**Use YAML's native structure syntax**:
+```yaml
+# ✅ CORRECT - Native YAML structure
+motives:
+  - id: investigate_mayor
+    description: Uncover the truth behind the mayor's disappearance
+    success_conditions:
+      - type: character_has_property
+        property: found_mayor
+        value: true
+  - id: protect_daughter
+    description: Protect your sick daughter
+    success_conditions:
+      - type: character_has_property
+        property: daughter_safe
+        value: true
+
+aliases: ["detective", "thorne", "investigator"]
+initial_rooms: ["town_square", "tavern"]
+```
+
+**NOT string encoding**:
+```yaml
+# ❌ WRONG - String encoding
+properties:
+  motives:
+    default: "[{'id': 'investigate_mayor', 'description': 'Uncover...', 'success_conditions': [{'type': 'character_has_property', 'property': 'found_mayor', 'value': True}]}]"
+  aliases:
+    default: "['detective', 'thorne', 'investigator']"
+  initial_rooms:
+    default: "['town_square', 'tavern']"
+```
+
+### Prevention Strategies
+
+**To avoid this mistake**:
+1. **Always use YAML's native syntax**: Lists as `- item`, dictionaries as `key: value`
+2. **Never encode structures as strings**: If you find yourself using `ast.literal_eval()`, you're doing it wrong
+3. **Design configs for human readability**: YAML should be easy to read and edit
+4. **Use proper YAML types**: `string`, `number`, `boolean`, `list`, `dict` - not string representations
+5. **Test config readability**: Can a human easily understand and modify the config?
+
+### YAML Best Practices
+
+**✅ DO THESE**:
+- Use native YAML list syntax: `- item1`, `- item2`
+- Use native YAML dict syntax: `key: value`
+- Use proper YAML types: `string`, `number`, `boolean`
+- Keep structures flat and readable
+- Use YAML comments for documentation
+
+**❌ DON'T DO THESE**:
+- Encode lists as strings: `"[1, 2, 3]"`
+- Encode dicts as strings: `"{'key': 'value'}"`
+- Use `ast.literal_eval()` or similar parsing
+- Create complex string representations
+- Make configs unreadable to humans
+
+### This Lesson Must Never Be Forgotten
+
+**YAML is designed for structured data - use it as intended**. Every AI agent must use YAML's native syntax for complex structures, never string encoding. This ensures configs are readable, maintainable, and tool-friendly.

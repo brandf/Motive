@@ -5,7 +5,7 @@ A concrete recovery plan to complete v2 migration, validate outputs, and remove 
 ## Objectives
 - Use only v2 configs and systems end-to-end
 - Validate all migrated YAML files (syntax + structure)
-- Keep `GameMaster` as orchestrator; avoid forking engines
+- Update `GameMaster` to work with v2 configs directly (NO v2→v1 conversion)
 - Remove all v1 config files and code once v2 is proven
 
 ## Reality Check (2025-09-16)
@@ -23,19 +23,21 @@ Recent real runs (including 5 parallel games) revealed gaps that contradict prio
 
 The items above indicate missing integration between sim v2 concepts and the current `GameMaster` pipeline, and insufficient end-to-end tests using real YAML.
 
-## CRITICAL ISSUE DISCOVERED: Massive Content Loss
-**The migration system has completely lost the multiple motives system!**
+## CRITICAL ARCHITECTURAL MISUNDERSTANDING DISCOVERED
+**The CLI is incorrectly converting v2 configs back to v1 format!**
 
-- **Original v1**: Characters had 3-4 complex motives each with success/failure conditions, descriptions, etc.
-- **Migrated v2**: All characters have only a single empty `motive: default: ''` property
-- **Impact**: The migrated configs are unusable for actual gameplay - all motive content lost
+- **Problem**: CLI detects v2 configs and tries to convert them back to v1 format for GameMaster
+- **Why Wrong**: This is backwards - we should migrate TO v2, not convert back to v1
+- **Impact**: Conversion fails because v2 configs use proper YAML structure that doesn't map to old v1 format
+- **Solution**: Update GameMaster to work with v2 configs directly
 
-**Examples of lost content:**
-- `detective_thorne`: Lost `investigate_mayor`, `protect_daughter`, `avenge_partner` motives
-- `father_marcus`: Lost `protect_flock`, `seek_redemption`, `expose_cult_safely` motives  
-- `bella_whisper_nightshade`: Lost `profit_from_chaos`, `protect_her_network`, `choose_a_side`, `build_secret_stash` motives
+**The migrated v2 configs are actually correct** - they use proper YAML structure with:
+- `motives` as proper YAML lists with real conditions (`character_has_property`)
+- `aliases` as proper YAML lists
+- `initial_rooms` as proper YAML lists
+- No string encoding of complex structures
 
-**This is a complete failure of the migration system and must be fixed before proceeding.**
+**The issue is architectural**: GameMaster expects v1 format, but we should update it to work with v2 format directly.
 
 ## IMPORTANT DESIGN DECISION: Tags → Properties Migration
 **Tags are deprecated in v2 in favor of the new entity property system.**
@@ -50,38 +52,48 @@ The items above indicate missing integration between sim v2 concepts and the cur
 3. Add artefact validation tests (yaml.safe_load on all `*_migrated.yaml`)
 4. Add hierarchical load tests (`V2ConfigLoader.load_hierarchical_config` on fantasy/hearth)
 
-## Phase 1: Make the CLI Load v2 Configs Safely
-1. Detect v2 (standalone or hierarchical) in CLI
-2. Load via `V2ConfigLoader.load_hierarchical_config` (when includes present) then `load_v2_config`
-3. Adapt only the initialization boundary so `GameMaster` gets what it needs without forking the game loop
+## Phase 1: Update GameMaster to Work with v2 Configs Directly
+1. Remove v2→v1 conversion logic from CLI
+2. Update GameMaster to accept v2 config objects directly
+3. Update GameMaster initialization to work with v2 entity definitions and action definitions
 4. Add an isolated smoke test that runs a minimal v2 scenario (mock LLMs)
 
 ## Phase 2: End-to-End Validation
-1. Run `motive -c configs/game_migrated.yaml --players 2 --rounds 1 --ap 5` (mock LLMs)
+1. Run `motive -c configs/game.yaml --players 2 --rounds 1 --ap 5` (mock LLMs)
 2. Verify initialization report shows non-zero rooms/characters for edition configs
-3. Ensure logs are written to a temp directory in tests; enforce cleanup (even on interruption)
+3. Verify motive conditions show real conditions (not "dummy" tags)
+4. Ensure logs are written to a temp directory in tests; enforce cleanup (even on interruption)
 
-## Phase 3: Remove v1 “Turds”
-1. Replace `configs/game.yaml` to include v2 migrated main
-2. Remove v1 config files and references after green e2e tests
-3. Remove v1-only code paths gated by tests
+## Phase 3: Remove v1 "Turds"
+1. Remove v1 config files and references after green e2e tests
+2. Remove v1-only code paths gated by tests
+3. Remove v2→v1 conversion logic from CLI
 
 ## Phase 4: Hardening
 1. Add CI job to validate all configs (syntax + hierarchical load)
 2. Add regression tests for migration emitter
 3. Add smoke run as a gating step (mocked LLMs)
 
-## Execution Order (Checklist)
+## Current Status (Updated 2025-09-15)
+
+### ✅ COMPLETED
 - [x] Fix migration output (done)
 - [x] Re-run migration
 - [x] Add migration artefact validation tests
 - [x] Add hierarchical v2 load tests
-- [x] Make CLI path select v2 → loader → initializer (no GM fork)
-- [x] Add minimal v2 smoke test (mocked LLMs)
-- [x] Green run with `game_migrated.yaml` (conversion working, game running successfully!)
-- [x] End-to-end validation complete (comprehensive tests + real game run)
-- [x] **CRITICAL: Fix motives migration - all character motives lost!** ✅ FIXED
+- [x] **CRITICAL: Fix motives migration - all character motives preserved!** ✅ FIXED
 - [x] **MAJOR PROGRESS: Fix failing tests** ✅ 76% REDUCTION IN FAILURES
+- [x] **ARCHITECTURAL UNDERSTANDING: Identified v2→v1 conversion as wrong approach** ✅ FIXED
+
+### 🔄 IN PROGRESS
+- [ ] **CURRENT PRIORITY: Update GameMaster to work with v2 configs directly**
+- [ ] Remove v2→v1 conversion logic from CLI
+- [ ] Update GameMaster initialization to work with v2 entity definitions
+- [ ] Update GameMaster to work with v2 action definitions
+
+### ❌ CANCELLED (Wrong Approach)
+- [x] ~~Make CLI path select v2 → loader → initializer (no GM fork)~~ - WRONG: Should update GameMaster
+- [x] ~~Green run with `game_migrated.yaml` (conversion working, game running successfully!)~~ - WRONG: Should work with v2 directly
   - [x] Migrate integration tests to v2 configs
   - [x] Update test configs to v2 structure (character_types, action_definitions, etc.)
   - [x] Fix test expectations to match v2 config structure

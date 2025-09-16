@@ -16,7 +16,7 @@ import time
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any, Union
 from dataclasses import dataclass
 from enum import Enum
 
@@ -564,10 +564,7 @@ def _convert_v2_to_v1_config(v2_config_data: Dict[str, Any]) -> GameConfig:
         character_types=character_types,
         characters=characters,
         actions=actions,
-        theme_id=v2_config_data.get('theme_id'),
-        theme_name=v2_config_data.get('theme_name'),
-        edition_id=v2_config_data.get('edition_id'),
-        edition_name=v2_config_data.get('edition_name')
+        # No theme/edition metadata needed - config includes handle organization
     )
 
 
@@ -635,13 +632,29 @@ def _convert_character_definition(character_id: str, entity_def: Dict[str, Any])
 
     # Convert complex fields from string representations back to typed objects
     motive_objs = None
-    if 'motives' in properties:
-        motives_str = properties['motives'].get('default', '')
-        if motives_str:
+    if 'motives' in entity_def:
+        motives_data = entity_def['motives']
+        if isinstance(motives_data, list):
+            # Direct list of motive objects (v2 format)
+            motive_objs = []
+            for m in motives_data:
+                if isinstance(m, dict) and 'id' in m and 'description' in m:
+                    sc = _build_condition(m.get('success_conditions', []))
+                    fc = _build_condition(m.get('failure_conditions', []))
+                    motive_objs.append(
+                        MotiveConfig(
+                            id=m['id'],
+                            description=m['description'],
+                            success_conditions=sc,
+                            failure_conditions=fc,
+                        )
+                    )
+        elif isinstance(motives_data, str):
+            # String representation (legacy format)
             try:
                 import ast
                 # Fix single quotes to double quotes for valid Python syntax
-                motives_str_fixed = motives_str.replace("''", '"')
+                motives_str_fixed = motives_data.replace("''", '"')
                 motives_list = ast.literal_eval(motives_str_fixed)
                 if isinstance(motives_list, list):
                     motive_objs = []
@@ -661,26 +674,34 @@ def _convert_character_definition(character_id: str, entity_def: Dict[str, Any])
                 motive_objs = None
     
     aliases = []
-    if 'aliases' in properties:
-        aliases_str = properties['aliases'].get('default', '')
-        if aliases_str:
+    if 'aliases' in entity_def:
+        aliases_data = entity_def['aliases']
+        if isinstance(aliases_data, list):
+            # Direct list (v2 format)
+            aliases = aliases_data
+        elif isinstance(aliases_data, str):
+            # String representation (legacy format)
             try:
                 import ast
                 # Fix single quotes to double quotes for valid Python syntax
-                aliases_str_fixed = aliases_str.replace("''", '"')
+                aliases_str_fixed = aliases_data.replace("''", '"')
                 aliases = ast.literal_eval(aliases_str_fixed)
             except (ValueError, SyntaxError):
                 # If parsing fails, keep as empty list
                 aliases = []
     
     initial_rooms = []
-    if 'initial_rooms' in properties:
-        initial_rooms_str = properties['initial_rooms'].get('default', '')
-        if initial_rooms_str:
+    if 'initial_rooms' in entity_def:
+        initial_rooms_data = entity_def['initial_rooms']
+        if isinstance(initial_rooms_data, list):
+            # Direct list (v2 format)
+            initial_rooms = initial_rooms_data
+        elif isinstance(initial_rooms_data, str):
+            # String representation (legacy format)
             try:
                 import ast
                 # Fix single quotes to double quotes for valid Python syntax
-                initial_rooms_str_fixed = initial_rooms_str.replace("''", '"')
+                initial_rooms_str_fixed = initial_rooms_data.replace("''", '"')
                 initial_rooms = ast.literal_eval(initial_rooms_str_fixed)
             except (ValueError, SyntaxError):
                 # If parsing fails, keep as empty list
@@ -688,9 +709,9 @@ def _convert_character_definition(character_id: str, entity_def: Dict[str, Any])
     
     return CharacterConfig(
         id=character_id,
-        name=properties.get('name', {}).get('default', character_id),
-        backstory=properties.get('backstory', {}).get('default', ''),
-        motive=properties.get('motive', {}).get('default', ''),
+        name=entity_def.get('name', character_id),
+        backstory=entity_def.get('backstory', ''),
+        motive=entity_def.get('motive', ''),
         motives=motive_objs,
         aliases=aliases,
         initial_rooms=initial_rooms
@@ -769,9 +790,9 @@ def _is_hierarchical_v2_config(config_data: Dict[str, Any], base_path: str) -> b
     return False
 
 
-def load_config(config_path: str, validate: bool = True) -> GameConfig:
+def load_config(config_path: str, validate: bool = True) -> Union[GameConfig, 'V2GameConfig']:
     """Load game configuration from file with optional validation.
-    Returns a GameConfig constructed from either v1 or v2 inputs.
+    Returns a GameConfig (v1) or V2GameConfig (v2) object.
     """
     try:
         # Check if it's a v2 config or hierarchical config
@@ -784,29 +805,22 @@ def load_config(config_path: str, validate: bool = True) -> GameConfig:
             is_v2_hierarchical = _is_hierarchical_v2_config(raw_config, base_path)
             
             if is_v2_hierarchical:
-                # This is a hierarchical v2 config - load merged and convert to v1 GameConfig
-                v2_loader = V2ConfigLoader()
-                merged_v2_data = v2_loader.load_hierarchical_config(config_path)
-                v2_loader.load_v2_config(merged_v2_data)
-                
-                # Convert v2 config to v1 format
-                game_config = _convert_v2_to_v1_config(merged_v2_data)
-                return game_config
+                # This is a hierarchical v2 config - use v2 pre-processor + Pydantic validation
+                from motive.sim_v2.v2_config_preprocessor import load_and_validate_v2_config
+                config_file = Path(config_path).name
+                return load_and_validate_v2_config(config_file, base_path, validate=validate)
             else:
-                # Use hierarchical config loader with validation
+                # Use hierarchical config loader with validation (v1)
                 config_file = Path(config_path).name
                 return load_and_validate_game_config(config_file, base_path, validate=validate)
         elif 'entity_definitions' in raw_config or 'action_definitions' in raw_config:
-            # This is a standalone v2 config - convert to v1 GameConfig
-            v2_loader = V2ConfigLoader()
-            v2_config_data = v2_loader.load_config_from_file(config_path)
-            v2_loader.load_v2_config(v2_config_data)
-            
-            # Convert v2 config to v1 format
-            game_config = _convert_v2_to_v1_config(v2_config_data)
-            return game_config
+            # This is a standalone v2 config - use v2 pre-processor + Pydantic validation
+            from motive.sim_v2.v2_config_preprocessor import load_and_validate_v2_config
+            base_path = str(Path(config_path).parent)
+            config_file = Path(config_path).name
+            return load_and_validate_v2_config(config_file, base_path, validate=validate)
         else:
-            # Traditional config loading
+            # Traditional config loading (v1)
             with open(config_path, 'r', encoding='utf-8') as f:
                 config_data = yaml.safe_load(f)
             return GameConfig(**config_data)
