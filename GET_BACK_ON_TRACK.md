@@ -74,7 +74,69 @@ The items above indicate missing integration between sim v2 concepts and the cur
 2. Add regression tests for migration emitter
 3. Add smoke run as a gating step (mocked LLMs)
 
-## Current Status (Updated 2025-09-15)
+## Current Status (Updated 2025-09-16)
+
+### 🎉 MAJOR BREAKTHROUGH ACHIEVED! (2025-09-16)
+**V2 configs now work directly with GameMaster without any v2→v1 conversion!**
+
+**Key Achievements:**
+- ✅ **CLI updated** - No longer converts v2 configs back to v1 format
+- ✅ **GameMaster updated** - Now accepts v2 `V2GameConfig` objects directly
+- ✅ **Entity conversion** - V2 entity definitions converted to `CharacterConfig` objects for GameInitializer compatibility
+- ✅ **Motive assignment working** - Characters now get real motives with proper success/failure conditions
+- ✅ **Real game test passed** - Game ran successfully with v2 configs, showing real motive conditions like `position_secured`, `wealth_preserved`, `corruption_exposed`
+
+**Technical Implementation:**
+- Added `_convert_v2_entities_to_character_configs()` method to GameMaster
+- Added `_convert_conditions()` method to handle v2 condition format conversion
+- Updated GameMaster constructor to detect and handle v2 configs
+- Removed v2→v1 conversion logic from CLI `load_config()` function
+
+**Test Results:**
+- Game ran successfully with v2 configs
+- Character assigned: Captain Marcus O'Malley
+- Motive displayed: "maintain_power" with real conditions
+- No dummy placeholders in motive conditions
+- Game loop executed without errors
+
+### 🚨 CRITICAL ARCHITECTURAL MISTAKE DISCOVERED (2025-09-16)
+**The `_convert_v2_entities_to_character_configs` method was doing v2→v1 conversion!**
+
+**Issue**: GameMaster was converting v2 `EntityDefinition` objects back to v1 `CharacterConfig` objects, which defeats the purpose of v2 migration.
+
+**Resolution**: 
+- ✅ Removed `_convert_v2_entities_to_character_configs()` and `_convert_conditions()` methods from GameMaster
+- ✅ Updated GameInitializer to store v2 `EntityDefinition` objects directly
+- ✅ Updated character assignment code to handle v2 entity structure
+- ✅ Updated action processing to store v2 `ActionDefinition` objects directly
+
+**Result**: Pure v2 architecture achieved with zero v2→v1 conversion.
+
+### 🎉 ARCHITECTURAL SUCCESS ACHIEVED! (2025-09-16)
+**V2 configs now work directly with GameMaster and GameInitializer without ANY v2→v1 conversion!**
+
+**Key Achievements:**
+- ✅ **Removed all v2→v1 conversion** - No more conversion methods in GameMaster or GameInitializer
+- ✅ **GameInitializer updated** - Now works with v2 `EntityDefinition` and `ActionDefinition` objects directly
+- ✅ **Character assignment working** - Characters properly assigned with real motives from v2 configs
+- ✅ **Motive conditions working** - Real properties like `cult_plans_discovered`, `intelligence_network_active` displayed
+- ✅ **Game runs successfully** - Complete game loop executed without errors
+
+**Technical Changes Made:**
+- GameMaster: Removed v2→v1 conversion methods
+- GameInitializer: Updated to work with v2 structures directly
+- Character assignment: Updated to handle v2 entity structure
+- Action processing: Updated to store v2 objects directly
+
+**Test Results:**
+- Game ran successfully with v2 configs
+- Character assigned: Guild Master Elena
+- Motive displayed: "gather_intelligence" with real conditions
+- No dummy placeholders in motive conditions
+- Game loop executed without errors
+- **ZERO v2→v1 conversion** - Pure v2 architecture achieved!
+
+## Previous Status (Updated 2025-09-15)
 
 ### ✅ COMPLETED
 - [x] Fix migration output (done)
@@ -85,11 +147,16 @@ The items above indicate missing integration between sim v2 concepts and the cur
 - [x] **MAJOR PROGRESS: Fix failing tests** ✅ 76% REDUCTION IN FAILURES
 - [x] **ARCHITECTURAL UNDERSTANDING: Identified v2→v1 conversion as wrong approach** ✅ FIXED
 
+### ✅ COMPLETED (MAJOR MILESTONE!)
+- [x] **MAJOR BREAKTHROUGH: Update GameMaster to work with v2 configs directly** ✅ COMPLETED
+- [x] Remove v2→v1 conversion logic from CLI ✅ COMPLETED
+- [x] Update GameMaster initialization to work with v2 entity definitions ✅ COMPLETED
+- [x] Update GameMaster to work with v2 action definitions ✅ COMPLETED
+- [x] **CRITICAL SUCCESS: Motive assignment working with real conditions** ✅ COMPLETED
+- [x] **ARCHITECTURAL SUCCESS: V2 configs work directly without conversion** ✅ COMPLETED
+
 ### 🔄 IN PROGRESS
-- [ ] **CURRENT PRIORITY: Update GameMaster to work with v2 configs directly**
-- [ ] Remove v2→v1 conversion logic from CLI
-- [ ] Update GameMaster initialization to work with v2 entity definitions
-- [ ] Update GameMaster to work with v2 action definitions
+- [ ] **CURRENT PRIORITY: Add isolated smoke test for v2 scenarios**
 
 ### ❌ CANCELLED (Wrong Approach)
 - [x] ~~Make CLI path select v2 → loader → initializer (no GM fork)~~ - WRONG: Should update GameMaster

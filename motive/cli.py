@@ -506,6 +506,9 @@ def setup_logging():
 
 def _convert_v2_to_v1_config(v2_config_data: Dict[str, Any]) -> GameConfig:
     """Convert v2 config data to v1 GameConfig format."""
+    print(f"DEBUG: _convert_v2_to_v1_config called with type: {type(v2_config_data)}")
+    print(f"DEBUG: v2_config_data keys: {list(v2_config_data.keys()) if isinstance(v2_config_data, dict) else 'Not a dict'}")
+    
     # Extract basic game settings with defaults
     game_settings_data = v2_config_data.get('game_settings', {})
     if not game_settings_data:
@@ -529,6 +532,8 @@ def _convert_v2_to_v1_config(v2_config_data: Dict[str, Any]) -> GameConfig:
     
     # Convert entity definitions to v1 format
     entity_definitions = v2_config_data.get('entity_definitions', {})
+    print(f"DEBUG: entity_definitions type: {type(entity_definitions)}")
+    print(f"DEBUG: entity_definitions keys: {list(entity_definitions.keys()) if isinstance(entity_definitions, dict) else 'Not a dict'}")
     
     # Separate entities by type
     rooms = {}
@@ -537,6 +542,8 @@ def _convert_v2_to_v1_config(v2_config_data: Dict[str, Any]) -> GameConfig:
     characters = {}
     
     for entity_id, entity_def in entity_definitions.items():
+        print(f"DEBUG: Processing entity {entity_id}, type: {type(entity_def)}")
+        print(f"DEBUG: entity_def content: {entity_def}")
         entity_types = entity_def.get('types', [])
         
         if 'room' in entity_types:
@@ -544,6 +551,7 @@ def _convert_v2_to_v1_config(v2_config_data: Dict[str, Any]) -> GameConfig:
         elif 'object' in entity_types:
             object_types[entity_id] = _convert_object_definition(entity_id, entity_def)
         elif 'character' in entity_types:
+            print(f"DEBUG: Converting character {entity_id}")
             character_types[entity_id] = _convert_character_definition(entity_id, entity_def)
     
     # Convert action definitions
@@ -575,8 +583,8 @@ def _convert_room_definition(room_id: str, entity_def: Dict[str, Any]) -> Dict[s
     
     return RoomConfig(
         id=room_id,
-        name=properties.get('name', {}).get('default', room_id),
-        description=properties.get('description', {}).get('default', ''),
+        name=properties.get('name', room_id),
+        description=properties.get('description', ''),
         exits={},  # TODO: Convert exits from v2 format
         objects={},  # TODO: Convert objects from v2 format
         tags=[],  # TODO: Convert tags from v2 format
@@ -587,12 +595,14 @@ def _convert_room_definition(room_id: str, entity_def: Dict[str, Any]) -> Dict[s
 def _convert_object_definition(object_id: str, entity_def: Dict[str, Any]) -> Dict[str, Any]:
     """Convert v2 object definition to v1 format."""
     from motive.config import ObjectTypeConfig
+    print(f"DEBUG: _convert_object_definition called with object_id={object_id}, entity_def type={type(entity_def)}")
+    print(f"DEBUG: entity_def keys: {list(entity_def.keys()) if isinstance(entity_def, dict) else 'Not a dict'}")
     properties = entity_def.get('properties', {})
     
     return ObjectTypeConfig(
         id=object_id,
-        name=properties.get('name', {}).get('default', object_id),
-        description=properties.get('description', {}).get('default', ''),
+        name=properties.get('name', object_id),
+        description=properties.get('description', ''),
         properties=_extract_property_values(properties)
     )
 
@@ -616,10 +626,18 @@ def _convert_character_definition(character_id: str, entity_def: Dict[str, Any])
         # Single dict condition
         if isinstance(cond_data, dict) and 'type' in cond_data:
             return ActionRequirementConfig(**cond_data)
-        # List form: [ {operator: AND|OR}, {cond1}, {cond2}, ... ] or [ {cond} ]
+        # List form: [ {operator: AND|OR}, {cond1}, {cond2}, ... ] or [ {cond} ] or [ {operator: AND, conditions: [...]} ]
         if isinstance(cond_data, list):
             if len(cond_data) == 1 and isinstance(cond_data[0], dict) and 'type' in cond_data[0]:
                 return ActionRequirementConfig(**cond_data[0])
+            if len(cond_data) == 1 and isinstance(cond_data[0], dict) and 'operator' in cond_data[0] and 'conditions' in cond_data[0]:
+                # Handle nested structure in list: [{operator: AND, conditions: [...]}]
+                operator = cond_data[0]['operator']
+                conditions = []
+                for item in cond_data[0]['conditions']:
+                    if isinstance(item, dict) and 'type' in item:
+                        conditions.append(ActionRequirementConfig(**item))
+                return MotiveConditionGroup(operator=operator, conditions=conditions)
             if len(cond_data) >= 2 and isinstance(cond_data[0], dict) and 'operator' in cond_data[0]:
                 operator = cond_data[0]['operator']
                 conditions = []
@@ -627,13 +645,33 @@ def _convert_character_definition(character_id: str, entity_def: Dict[str, Any])
                     if isinstance(item, dict):
                         conditions.append(ActionRequirementConfig(**item))
                 return MotiveConditionGroup(operator=operator, conditions=conditions)
+        # Handle nested structure: {operator: AND, conditions: [{cond1}, {cond2}]}
+        if isinstance(cond_data, dict) and 'operator' in cond_data and 'conditions' in cond_data:
+            operator = cond_data['operator']
+            conditions = []
+            for item in cond_data['conditions']:
+                if isinstance(item, dict) and 'type' in item:
+                    conditions.append(ActionRequirementConfig(**item))
+            return MotiveConditionGroup(operator=operator, conditions=conditions)
         # Unknown/empty
         return None
 
     # Convert complex fields from string representations back to typed objects
     motive_objs = None
-    if 'motives' in entity_def:
+    
+    # Check for motives in config field (v2 format)
+    config_data = entity_def.get('config', {})
+    if 'motives' in config_data:
+        motives_data = config_data['motives']
+    elif 'config' in config_data and 'motives' in config_data['config']:
+        # Handle nested config structure
+        motives_data = config_data['config']['motives']
+    elif 'motives' in entity_def:
         motives_data = entity_def['motives']
+    else:
+        motives_data = None
+    
+    if motives_data is not None:
         if isinstance(motives_data, list):
             # Direct list of motive objects (v2 format)
             motive_objs = []
@@ -674,8 +712,17 @@ def _convert_character_definition(character_id: str, entity_def: Dict[str, Any])
                 motive_objs = None
     
     aliases = []
-    if 'aliases' in entity_def:
+    if 'aliases' in config_data:
+        aliases_data = config_data['aliases']
+    elif 'config' in config_data and 'aliases' in config_data['config']:
+        # Handle nested config structure
+        aliases_data = config_data['config']['aliases']
+    elif 'aliases' in entity_def:
         aliases_data = entity_def['aliases']
+    else:
+        aliases_data = None
+    
+    if aliases_data is not None:
         if isinstance(aliases_data, list):
             # Direct list (v2 format)
             aliases = aliases_data
@@ -691,31 +738,93 @@ def _convert_character_definition(character_id: str, entity_def: Dict[str, Any])
                 aliases = []
     
     initial_rooms = []
-    if 'initial_rooms' in entity_def:
+    if 'initial_rooms' in config_data:
+        initial_rooms_data = config_data['initial_rooms']
+    elif 'config' in config_data and 'initial_rooms' in config_data['config']:
+        # Handle nested config structure
+        initial_rooms_data = config_data['config']['initial_rooms']
+    elif 'initial_rooms' in entity_def:
         initial_rooms_data = entity_def['initial_rooms']
+    else:
+        initial_rooms_data = None
+    
+    if initial_rooms_data is not None:
         if isinstance(initial_rooms_data, list):
-            # Direct list (v2 format)
-            initial_rooms = initial_rooms_data
+            # Direct list (v2 format) - convert strings to InitialRoomConfig objects
+            initial_rooms = []
+            for room_data in initial_rooms_data:
+                if isinstance(room_data, str):
+                    # Simple string format - create InitialRoomConfig with defaults
+                    from motive.config import InitialRoomConfig
+                    initial_rooms.append(InitialRoomConfig(
+                        room_id=room_data,
+                        chance=100,
+                        reason="Default starting location"
+                    ))
+                elif isinstance(room_data, dict):
+                    # Already in InitialRoomConfig format
+                    from motive.config import InitialRoomConfig
+                    initial_rooms.append(InitialRoomConfig(**room_data))
         elif isinstance(initial_rooms_data, str):
             # String representation (legacy format)
             try:
                 import ast
                 # Fix single quotes to double quotes for valid Python syntax
                 initial_rooms_str_fixed = initial_rooms_data.replace("''", '"')
-                initial_rooms = ast.literal_eval(initial_rooms_str_fixed)
+                initial_rooms_list = ast.literal_eval(initial_rooms_str_fixed)
+                if isinstance(initial_rooms_list, list):
+                    initial_rooms = []
+                    for room_data in initial_rooms_list:
+                        if isinstance(room_data, str):
+                            from motive.config import InitialRoomConfig
+                            initial_rooms.append(InitialRoomConfig(
+                                room_id=room_data,
+                                chance=100,
+                                reason="Default starting location"
+                            ))
+                        elif isinstance(room_data, dict):
+                            from motive.config import InitialRoomConfig
+                            initial_rooms.append(InitialRoomConfig(**room_data))
             except (ValueError, SyntaxError):
                 # If parsing fails, keep as empty list
                 initial_rooms = []
     
-    return CharacterConfig(
+    # Extract name and backstory from nested config structure
+    name = character_id  # default
+    backstory = ''
+    motive = ''
+    
+    if 'name' in config_data:
+        name = config_data['name']
+    elif 'config' in config_data and 'name' in config_data['config']:
+        name = config_data['config']['name']
+    elif 'name' in entity_def:
+        name = entity_def['name']
+    
+    if 'backstory' in config_data:
+        backstory = config_data['backstory']
+    elif 'config' in config_data and 'backstory' in config_data['config']:
+        backstory = config_data['config']['backstory']
+    elif 'backstory' in entity_def:
+        backstory = entity_def['backstory']
+    
+    if 'motive' in config_data:
+        motive = config_data['motive']
+    elif 'config' in config_data and 'motive' in config_data['config']:
+        motive = config_data['config']['motive']
+    elif 'motive' in entity_def:
+        motive = entity_def['motive']
+    
+    char_config = CharacterConfig(
         id=character_id,
-        name=entity_def.get('name', character_id),
-        backstory=entity_def.get('backstory', ''),
-        motive=entity_def.get('motive', ''),
+        name=name,
+        backstory=backstory,
+        motive=motive,
         motives=motive_objs,
         aliases=aliases,
         initial_rooms=initial_rooms
     )
+    return char_config
 
 
 def _convert_action_definition(action_id: str, action_def: Dict[str, Any]) -> Dict[str, Any]:
@@ -808,7 +917,10 @@ def load_config(config_path: str, validate: bool = True) -> Union[GameConfig, 'V
                 # This is a hierarchical v2 config - use v2 pre-processor + Pydantic validation
                 from motive.sim_v2.v2_config_preprocessor import load_and_validate_v2_config
                 config_file = Path(config_path).name
-                return load_and_validate_v2_config(config_file, base_path, validate=validate)
+                v2_config = load_and_validate_v2_config(config_file, base_path, validate=validate)
+                print(f"DEBUG: v2_config type: {type(v2_config)}")
+                # Return v2 config directly - GameMaster will be updated to work with v2
+                return v2_config
             else:
                 # Use hierarchical config loader with validation (v1)
                 config_file = Path(config_path).name
@@ -818,7 +930,10 @@ def load_config(config_path: str, validate: bool = True) -> Union[GameConfig, 'V
             from motive.sim_v2.v2_config_preprocessor import load_and_validate_v2_config
             base_path = str(Path(config_path).parent)
             config_file = Path(config_path).name
-            return load_and_validate_v2_config(config_file, base_path, validate=validate)
+            v2_config = load_and_validate_v2_config(config_file, base_path, validate=validate)
+            print(f"DEBUG: v2_config type: {type(v2_config)}")
+            # Return v2 config directly - GameMaster will be updated to work with v2
+            return v2_config
         else:
             # Traditional config loading (v1)
             with open(config_path, 'r', encoding='utf-8') as f:

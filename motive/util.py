@@ -315,10 +315,19 @@ def show_characters(config) -> None:
     print("Available Characters:")
     print("===================")
     
-    # Handle both dict configs (v1) and GameConfig objects (v2)
-    if hasattr(config, 'characters'):
-        # GameConfig object (v2) - use character_types
+    # Handle both dict configs (v1) and GameConfig/V2GameConfig objects (v2)
+    if hasattr(config, 'entity_definitions'):
+        # V2GameConfig object (v2) - extract characters from entity_definitions
+        characters = {}
+        for entity_id, entity_def in config.entity_definitions.items():
+            if hasattr(entity_def, 'types') and 'character' in entity_def.types:
+                characters[entity_id] = entity_def
+    elif hasattr(config, 'character_types'):
+        # GameConfig object (v1) - use character_types
         characters = config.character_types
+    elif hasattr(config, 'characters'):
+        # GameConfig object (v1) - use characters
+        characters = config.characters
     else:
         # Dictionary config (v1) - use characters if available, otherwise fall back to character_types
         characters = config.get('characters', {})
@@ -332,9 +341,13 @@ def show_characters(config) -> None:
     for char_name in sorted(characters.keys()):
         char = characters[char_name]
         
-        # Handle both dict and Pydantic objects
-        if hasattr(char, 'name'):
-            # Pydantic object (v2)
+        # Handle v2 entity definitions, v1 Pydantic objects, and dictionaries
+        if hasattr(char, 'config') and char.config:
+            # V2 entity definition
+            name = char.config.get('name', char_name)
+            backstory = char.config.get('backstory', 'No backstory')
+        elif hasattr(char, 'name'):
+            # V1 Pydantic object
             name = char.name
             backstory = char.backstory
         else:
@@ -344,32 +357,212 @@ def show_characters(config) -> None:
         
         print(f"- {name}: {backstory}")
         
-        # Handle both legacy single motive and new multiple motives
-        if hasattr(char, 'motives') and char.motives:
+        # Handle motives for different config types
+        motives_found = False
+        if hasattr(char, 'config') and char.config and 'motives' in char.config:
+            # V2 entity definition - motives in config
+            motives = char.config['motives']
+            if isinstance(motives, list) and len(motives) > 0:
+                print(f"  Motives: {len(motives)} available")
+                for i, motive in enumerate(motives, 1):
+                    if isinstance(motive, dict):
+                        motive_desc = motive.get('description', 'No description')
+                        print(f"    {i}. {motive_desc}")
+                    else:
+                        print(f"    {i}. {motive}")
+                motives_found = True
+        elif hasattr(char, 'motives') and char.motives:
+            # V1 Pydantic object
             motives = char.motives
             if isinstance(motives, list) and len(motives) > 0:
                 print(f"  Motives: {len(motives)} available")
                 for i, motive in enumerate(motives, 1):
                     motive_desc = motive.get('description', 'No description') if isinstance(motive, dict) else str(motive)
                     print(f"    {i}. {motive_desc}")
-            else:
-                print(f"  Motive: No motive")
+                motives_found = True
         elif hasattr(char, 'motive') and char.motive:
+            # Single motive
             print(f"  Motive: {char.motive}")
+            motives_found = True
         elif 'motives' in char and char['motives']:
+            # Dictionary with motives
             motives = char['motives']
             if isinstance(motives, list) and len(motives) > 0:
                 print(f"  Motives: {len(motives)} available")
                 for i, motive in enumerate(motives, 1):
                     motive_desc = motive.get('description', 'No description') if isinstance(motive, dict) else str(motive)
                     print(f"    {i}. {motive_desc}")
-            else:
-                print(f"  Motive: No motive")
+                motives_found = True
         elif 'motive' in char:
+            # Dictionary with single motive
             print(f"  Motive: {char.get('motive', 'No motive')}")
-        else:
+            motives_found = True
+        
+        if not motives_found:
             print(f"  Motive: No motive")
         print()
+
+
+def show_entities(config, entity_type: str = None) -> None:
+    """Display v2 entity definitions with detailed information."""
+    print("V2 Entity Definitions:")
+    print("=====================")
+    
+    # Check if this is a v2 config with entity_definitions
+    if not hasattr(config, 'entity_definitions'):
+        print("This is not a v2 config with entity_definitions.")
+        return
+    
+    entities = config.entity_definitions
+    if not entities:
+        print("No entity definitions found in this configuration.")
+        return
+    
+    # Filter by entity type if specified
+    filtered_entities = {}
+    if entity_type:
+        for entity_id, entity_def in entities.items():
+            if hasattr(entity_def, 'types') and entity_type in entity_def.types:
+                filtered_entities[entity_id] = entity_def
+    else:
+        filtered_entities = entities
+    
+    if not filtered_entities:
+        print(f"No entities of type '{entity_type}' found.")
+        return
+    
+    print(f"Found {len(filtered_entities)} entities" + (f" of type '{entity_type}'" if entity_type else ""))
+    print()
+    
+    for entity_id, entity_def in sorted(filtered_entities.items()):
+        print(f"Entity: {entity_id}")
+        print(f"  Type: {type(entity_def)}")
+        print(f"  Types/Behaviors: {entity_def.types}")
+        
+        # Show properties
+        if hasattr(entity_def, 'properties') and entity_def.properties:
+            print(f"  Properties:")
+            for prop_name, prop_value in entity_def.properties.items():
+                print(f"    {prop_name}: {prop_value}")
+        
+        # Show config (for characters, this includes motives)
+        if hasattr(entity_def, 'config') and entity_def.config:
+            print(f"  Config:")
+            for config_key, config_value in entity_def.config.items():
+                if config_key == 'motives' and isinstance(config_value, list):
+                    print(f"    {config_key}: {len(config_value)} motives")
+                    for i, motive in enumerate(config_value, 1):
+                        if isinstance(motive, dict):
+                            motive_id = motive.get('id', f'motive_{i}')
+                            motive_desc = motive.get('description', 'No description')
+                            print(f"      {i}. {motive_id}: {motive_desc}")
+                        else:
+                            print(f"      {i}. {motive}")
+                else:
+                    print(f"    {config_key}: {config_value}")
+        
+        print()
+
+def debug_config_loading(config_path: str) -> None:
+    """Debug config loading process with detailed information."""
+    print("Config Loading Debug:")
+    print("===================")
+    print(f"Loading config from: {config_path}")
+    
+    try:
+        config = load_config(config_path)
+        print(f"✅ Config loaded successfully")
+        print(f"Config type: {type(config)}")
+        print(f"Config attributes: {[attr for attr in dir(config) if not attr.startswith('_')]}")
+        
+        # Check if it's a v2 config
+        if hasattr(config, 'entity_definitions'):
+            print(f"\nV2 Config detected:")
+            print(f"  Entity definitions: {len(config.entity_definitions)}")
+            print(f"  Action definitions: {len(config.action_definitions)}")
+            
+            # Count by type
+            type_counts = {}
+            for entity_id, entity_def in config.entity_definitions.items():
+                for entity_type in entity_def.types:
+                    type_counts[entity_type] = type_counts.get(entity_type, 0) + 1
+            
+            print(f"  Entity types: {type_counts}")
+            
+            # Check character motives
+            characters_with_motives = 0
+            characters_without_motives = 0
+            for entity_id, entity_def in config.entity_definitions.items():
+                if 'character' in entity_def.types:
+                    if hasattr(entity_def, 'config') and entity_def.config and 'motives' in entity_def.config:
+                        characters_with_motives += 1
+                    else:
+                        characters_without_motives += 1
+            
+            print(f"  Characters with motives: {characters_with_motives}")
+            print(f"  Characters without motives: {characters_without_motives}")
+            
+        else:
+            print(f"\nV1 Config detected:")
+            if hasattr(config, 'character_types'):
+                print(f"  Character types: {len(config.character_types)}")
+            if hasattr(config, 'object_types'):
+                print(f"  Object types: {len(config.object_types)}")
+            if hasattr(config, 'actions'):
+                print(f"  Actions: {len(config.actions)}")
+                
+    except Exception as e:
+        print(f"❌ Config loading failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+def debug_character_motives(config_path: str, character_id: str = None) -> None:
+    """Debug character motives specifically."""
+    print("Character Motives Debug:")
+    print("=======================")
+    
+    try:
+        config = load_config(config_path)
+        
+        if hasattr(config, 'entity_definitions'):
+            # V2 config
+            characters = {}
+            for entity_id, entity_def in config.entity_definitions.items():
+                if 'character' in entity_def.types:
+                    characters[entity_id] = entity_def
+            
+            if character_id:
+                if character_id in characters:
+                    char_def = characters[character_id]
+                    print(f"Character: {character_id}")
+                    print(f"  Type: {type(char_def)}")
+                    print(f"  Types: {char_def.types}")
+                    print(f"  Properties: {char_def.properties}")
+                    print(f"  Config: {char_def.config}")
+                    
+                    if hasattr(char_def, 'config') and char_def.config and 'motives' in char_def.config:
+                        motives = char_def.config['motives']
+                        print(f"  Motives ({len(motives)}):")
+                        for i, motive in enumerate(motives, 1):
+                            print(f"    {i}. {motive}")
+                    else:
+                        print(f"  Motives: None found")
+                else:
+                    print(f"Character '{character_id}' not found")
+                    print(f"Available characters: {list(characters.keys())}")
+            else:
+                print(f"All characters ({len(characters)}):")
+                for char_id, char_def in characters.items():
+                    has_motives = hasattr(char_def, 'config') and char_def.config and 'motives' in char_def.config
+                    motive_count = len(char_def.config['motives']) if has_motives else 0
+                    print(f"  {char_id}: {motive_count} motives")
+        else:
+            print("This is not a v2 config with entity_definitions")
+            
+    except Exception as e:
+        print(f"❌ Debug failed: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 def show_includes(config: Dict[str, Any], config_path: str) -> None:
@@ -921,6 +1114,13 @@ Training Data Examples:
         help='Show available characters'
     )
     config_parser.add_argument(
+        '-E', '--entities',
+        nargs='?',
+        const='all',
+        metavar='TYPE',
+        help='Show v2 entity definitions (optionally filtered by type: character, object, room)'
+    )
+    config_parser.add_argument(
         '-a', '--all',
         action='store_true',
         help='Show all available information'
@@ -944,6 +1144,18 @@ Training Data Examples:
         '--validate',
         action='store_true',
         help='Validate the merged configuration through Pydantic models before output'
+    )
+    config_parser.add_argument(
+        '--debug-loading',
+        action='store_true',
+        help='Debug config loading process with detailed information'
+    )
+    config_parser.add_argument(
+        '--debug-motives',
+        nargs='?',
+        const='all',
+        metavar='CHARACTER_ID',
+        help='Debug character motives (optionally for specific character)'
     )
     
     # Training data subcommand
@@ -1049,11 +1261,22 @@ def handle_config_command(args):
     if args.all or args.characters:
         show_characters(config)
     
+    if args.entities:
+        entity_type = None if args.entities == 'all' else args.entities
+        show_entities(config, entity_type)
+    
+    if args.debug_loading:
+        debug_config_loading(args.config)
+    
+    if args.debug_motives:
+        character_id = None if args.debug_motives == 'all' else args.debug_motives
+        debug_character_motives(args.config, character_id)
+    
     if args.all or args.includes:
         show_includes(config, args.config)
     
     # If no specific options were provided, show actions by default
-    if not any([args.all, args.actions, args.objects, args.rooms, args.characters, args.includes]):
+    if not any([args.all, args.actions, args.objects, args.rooms, args.characters, args.entities, args.debug_loading, args.debug_motives, args.includes]):
         show_actions(config)
 
 

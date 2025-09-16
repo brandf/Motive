@@ -1,3 +1,4 @@
+import ast
 import logging
 import yaml
 from typing import Dict, List, Optional
@@ -23,7 +24,7 @@ from motive.character import Character
 from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError
 
 class GameInitializer:
-    def __init__(self, game_config: GameConfig, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20, deterministic: bool = False, character_override: str = None, motive_override: str = None):
+    def __init__(self, game_config, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20, deterministic: bool = False, character_override: str = None, motive_override: str = None):
         self.game_config = game_config # This is the overall GameConfig loaded from config.yaml
         self.game_id = game_id
         self.game_logger = game_logger
@@ -31,6 +32,7 @@ class GameInitializer:
         self.deterministic = deterministic # Store deterministic flag
         self.character_override = character_override # Store character override for first player
         self.motive_override = motive_override # Store motive override for character assignment
+        # GameInitializer now works with v2 configs directly - no conversion needed
 
         self.rooms: Dict[str, Room] = {}
         self.game_objects: Dict[str, GameObject] = {}
@@ -41,6 +43,7 @@ class GameInitializer:
         self.game_actions: Dict[str, ActionConfig] = {}
         self.game_character_types: Dict[str, CharacterConfig] = {}
         self.game_characters: Dict[str, CharacterConfig] = {}
+        self.game_rooms: Dict[str, Any] = {}
 
         # Store loaded configs for later merging
         self.core_cfg: Optional[CoreConfig] = None
@@ -85,27 +88,177 @@ class GameInitializer:
             # If it's already a dictionary, use it directly
             raw_config = self.game_config
         
-        # Extract actions from merged config
-        if 'actions' in raw_config and raw_config['actions']:
+        # Handle v2 configs (action_definitions, entity_definitions)
+        if 'action_definitions' in raw_config and raw_config['action_definitions']:
+            # Store v2 ActionDefinition objects directly - no conversion needed
+            self.game_actions = raw_config['action_definitions']
+        
+        # Handle v1 configs (actions) - legacy support
+        elif 'actions' in raw_config and raw_config['actions']:
             self.game_actions.update(raw_config['actions'])
         
-        # Extract object types from merged config
-        if 'object_types' in raw_config and raw_config['object_types']:
-            self.game_object_types.update(raw_config['object_types'])
+        # Handle v2 configs (entity_definitions)
+        if 'entity_definitions' in raw_config and raw_config['entity_definitions']:
+            self.game_logger.info(f"Processing v2 entity_definitions with {len(raw_config['entity_definitions'])} entities")
+            # Convert v2 entity definitions to v1 format for compatibility
+            for entity_id, entity_def in raw_config['entity_definitions'].items():
+                if hasattr(entity_def, 'dict'):
+                    # Pydantic object
+                    entity_data = entity_def.dict()
+                else:
+                    # Dictionary
+                    entity_data = entity_def
+                
+                # Check entity types/behaviors (v2 uses 'behaviors', v1 uses 'types')
+                # The v2 pre-processor may convert 'behaviors' to 'types' during merge
+                entity_types = entity_data.get('behaviors', entity_data.get('types', []))
+                self.game_logger.info(f"Processing entity {entity_id} with types {entity_types}")
+                if 'object' in entity_types:
+                    # Convert to ObjectTypeConfig - map entity_id to id field and extract name/description from properties
+                    config_data = {}
+                    config_data['id'] = entity_id
+                    
+                    # Extract name and description from properties
+                    properties = entity_data.get('properties', {})
+                    config_data['name'] = properties.get('name', entity_id)
+                    config_data['description'] = properties.get('description', f"A {entity_id} object")
+                    
+                    # Copy other properties that might be relevant
+                    for key, value in entity_data.items():
+                        if key not in ['behaviors', 'types', 'properties']:
+                            config_data[key] = value
+                    
+                    self.game_object_types[entity_id] = ObjectTypeConfig(**config_data)
+                elif 'character' in entity_types:
+                    # Convert to CharacterConfig - map entity_id to id field and extract name from properties
+                    self.game_logger.info(f"Processing character entity {entity_id}, checking for converted character type")
+                    config_data = {}
+                    config_data['id'] = entity_id
+                    
+                    # Extract name from properties
+                    properties = entity_data.get('properties', {})
+                    config_data['name'] = properties.get('name', entity_id)
+                    
+                    # Add required backstory field
+                    config_data['backstory'] = properties.get('backstory', f"A character with the role of {config_data['name']}")
+                    
+                    # Copy motives if present (v2 stores motives in config field)
+                    if hasattr(entity_def, 'config') and entity_def.config and 'motives' in entity_def.config:
+                        # Convert motives from dict format to MotiveConfig objects
+                        motives_data = entity_def.config['motives']
+                        self.game_logger.info(f"Converting motives for {entity_id}: {len(motives_data)} motives found")
+                        if motives_data:
+                            from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
+                            converted_motives = []
+                            for motive_item in motives_data:
+                                if isinstance(motive_item, dict):
+                                    # Convert success_conditions
+                                    success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
+                                    # Convert failure_conditions
+                                    failure_conditions = self._convert_conditions(motive_item.get('failure_conditions', []))
+                                    # Create MotiveConfig object
+                                    converted_motives.append(MotiveConfig(
+                                        id=motive_item['id'],
+                                        description=motive_item['description'],
+                                        success_conditions=success_conditions,
+                                        failure_conditions=failure_conditions
+                                    ))
+                                else:
+                                    # Already a MotiveConfig object
+                                    converted_motives.append(motive_item)
+                            config_data['motives'] = converted_motives
+                    elif 'motives' in entity_data:
+                        # Handle string-encoded motives from v2 config
+                        motives_data = entity_data['motives']
+                        if isinstance(motives_data, str):
+                            # Parse string representation of motives list
+                            import ast
+                            try:
+                                # Replace single quotes with double quotes for proper JSON parsing
+                                motives_str = motives_data.replace("'", '"')
+                                motives_list = ast.literal_eval(motives_str)
+                                self.game_logger.info(f"Parsed string motives for {entity_id}: {len(motives_list)} motives")
+                                
+                                # Convert to MotiveConfig objects
+                                from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
+                                converted_motives = []
+                                for motive_item in motives_list:
+                                    if isinstance(motive_item, dict):
+                                        # Convert success_conditions
+                                        success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
+                                        # Convert failure_conditions
+                                        failure_conditions = self._convert_conditions(motive_item.get('failure_conditions', []))
+                                        # Create MotiveConfig object
+                                        converted_motives.append(MotiveConfig(
+                                            id=motive_item['id'],
+                                            description=motive_item['description'],
+                                            success_conditions=success_conditions,
+                                            failure_conditions=failure_conditions
+                                        ))
+                                    else:
+                                        # Already a MotiveConfig object
+                                        converted_motives.append(motive_item)
+                                config_data['motives'] = converted_motives
+                            except Exception as e:
+                                self.game_logger.error(f"Failed to parse motives for {entity_id}: {e}")
+                                config_data['motives'] = []
+                        else:
+                            config_data['motives'] = motives_data
+                    
+                    # Copy other properties that might be relevant
+                    for key, value in entity_data.items():
+                        if key not in ['behaviors', 'types', 'properties', 'motives']:
+                            config_data[key] = value
+                    
+                    # Store v2 EntityDefinition directly - no conversion needed
+                    self.game_character_types[entity_id] = entity_def
+                    self.game_logger.info(f"Stored v2 character entity {entity_id} directly")
+                elif 'room' in entity_types:
+                    # Convert to room data - extract properties and store in game_rooms
+                    properties = entity_data.get('properties', {})
+                    
+                    # Parse exits and objects from string representations if needed
+                    exits = properties.get('exits', {})
+                    if isinstance(exits, str):
+                        try:
+                            exits = ast.literal_eval(exits.replace("'", '"'))
+                        except:
+                            exits = {}
+                    
+                    objects = properties.get('objects', {})
+                    if isinstance(objects, str):
+                        try:
+                            objects = ast.literal_eval(objects.replace("'", '"'))
+                        except:
+                            objects = {}
+                    
+                    room_data = {
+                        'id': entity_id,  # Add required id field
+                        'name': properties.get('name', entity_id),
+                        'description': properties.get('description', f"A room called {entity_id}"),
+                        'exits': exits,
+                        'objects': objects
+                    }
+                    self.game_rooms[entity_id] = room_data
         
-        # Extract character types from merged config
-        if 'character_types' in raw_config and raw_config['character_types']:
-            self.game_character_types.update(raw_config['character_types'])
+        # Handle v1 configs (object_types, character_types)
+        else:
+            if 'object_types' in raw_config and raw_config['object_types']:
+                self.game_object_types.update(raw_config['object_types'])
         
-        # Extract characters from merged config
-        if 'characters' in raw_config and raw_config['characters']:
-            self.game_characters.update(raw_config['characters'])
+            if 'character_types' in raw_config and raw_config['character_types']:
+                # Handle v1 character_types - legacy support
+                self.game_character_types.update(raw_config['character_types'])
         
-        # Extract rooms from merged config
+            # Extract characters from merged config
+            if 'characters' in raw_config and raw_config['characters']:
+                self.game_characters.update(raw_config['characters'])
+        
+        # Extract rooms from merged config (only if not already populated from v2 entity_definitions)
         if 'rooms' in raw_config and raw_config['rooms']:
             self.game_rooms = raw_config['rooms']
-        else:
-            # Initialize empty rooms if none defined
+        elif not self.game_rooms:
+            # Initialize empty rooms if none defined and none loaded from entity_definitions
             self.game_rooms = {}
             self.game_logger.warning("No rooms defined in config.")
         
@@ -125,27 +278,189 @@ class GameInitializer:
             # If it's already a dictionary, use it directly
             raw_config = self.game_config
         
-        # Extract actions from merged config
-        if 'actions' in raw_config and raw_config['actions']:
+        # Handle v2 configs (action_definitions, entity_definitions)
+        if 'action_definitions' in raw_config and raw_config['action_definitions']:
+            # Convert v2 action definitions to v1 format for compatibility
+            for action_id, action_def in raw_config['action_definitions'].items():
+                if hasattr(action_def, 'dict'):
+                    # Pydantic object
+                    action_data = action_def.dict()
+                else:
+                    # Dictionary
+                    action_data = action_def
+                
+                # Map v2 action_id to v1 id field
+                if 'action_id' in action_data and 'id' not in action_data:
+                    action_data = action_data.copy()
+                    action_data['id'] = action_data.pop('action_id')
+                
+                self.game_actions[action_id] = ActionConfig(**action_data)
+
+        # Handle v1 configs (actions)
+        elif 'actions' in raw_config and raw_config['actions']:
             self.game_actions.update(raw_config['actions'])
+
+        # Handle v2 configs (entity_definitions)
+        self.game_logger.info(f"Raw config keys: {list(raw_config.keys())}")
+        if 'entity_definitions' in raw_config and raw_config['entity_definitions']:
+            self.game_logger.info(f"Found {len(raw_config['entity_definitions'])} entity definitions")
+            for entity_id, entity_def in raw_config['entity_definitions'].items():
+                if hasattr(entity_def, 'dict'):
+                    # Pydantic object
+                    entity_data = entity_def.dict()
+                else:
+                    # Dictionary
+                    entity_data = entity_def
+                
+                # Check entity types/behaviors (v2 uses 'behaviors', v1 uses 'types')
+                entity_types = entity_data.get('behaviors', entity_data.get('types', []))
+                self.game_logger.info(f"Processing entity {entity_id}: types = {entity_types}")
+                if 'object' in entity_types:
+                    # Convert to ObjectTypeConfig - map entity_id to id field and extract name/description from properties
+                    config_data = {}
+                    config_data['id'] = entity_id
+                    
+                    # Extract name and description from properties
+                    properties = entity_data.get('properties', {})
+                    config_data['name'] = properties.get('name', entity_id)
+                    config_data['description'] = properties.get('description', f"A {entity_id} object")
+                    
+                    # Copy other properties that might be relevant
+                    for key, value in entity_data.items():
+                        if key not in ['behaviors', 'types', 'properties']:
+                            config_data[key] = value
+                    
+                    self.game_object_types[entity_id] = ObjectTypeConfig(**config_data)
+                elif 'character' in entity_types:
+                    # Convert to CharacterConfig - map entity_id to id field and extract name from properties
+                    self.game_logger.info(f"Processing character entity {entity_id}, checking for converted character type")
+                    config_data = {}
+                    config_data['id'] = entity_id
+                    
+                    # Extract name from properties
+                    properties = entity_data.get('properties', {})
+                    config_data['name'] = properties.get('name', entity_id)
+                    
+                    # Add required backstory field
+                    config_data['backstory'] = properties.get('backstory', f"A character with the role of {config_data['name']}")
+                    
+                    # Copy motives if present (v2 stores motives in config field)
+                    if hasattr(entity_def, 'config') and entity_def.config and 'motives' in entity_def.config:
+                        # Convert motives from dict format to MotiveConfig objects
+                        motives_data = entity_def.config['motives']
+                        self.game_logger.info(f"Converting motives for {entity_id}: {len(motives_data)} motives found")
+                        if motives_data:
+                            from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
+                            converted_motives = []
+                            for motive_item in motives_data:
+                                if isinstance(motive_item, dict):
+                                    # Convert success_conditions
+                                    success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
+                                    # Convert failure_conditions
+                                    failure_conditions = self._convert_conditions(motive_item.get('failure_conditions', []))
+                                    # Create MotiveConfig object
+                                    converted_motives.append(MotiveConfig(
+                                        id=motive_item['id'],
+                                        description=motive_item['description'],
+                                        success_conditions=success_conditions,
+                                        failure_conditions=failure_conditions
+                                    ))
+                                else:
+                                    # Already a MotiveConfig object
+                                    converted_motives.append(motive_item)
+                            config_data['motives'] = converted_motives
+                    elif 'motives' in entity_data:
+                        # Handle string-encoded motives from v2 config
+                        motives_data = entity_data['motives']
+                        if isinstance(motives_data, str):
+                            # Parse string representation of motives list
+                            import ast
+                            try:
+                                # Replace single quotes with double quotes for proper JSON parsing
+                                motives_str = motives_data.replace("'", '"')
+                                motives_list = ast.literal_eval(motives_str)
+                                self.game_logger.info(f"Parsed string motives for {entity_id}: {len(motives_list)} motives")
+                                
+                                # Convert to MotiveConfig objects
+                                from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
+                                converted_motives = []
+                                for motive_item in motives_list:
+                                    if isinstance(motive_item, dict):
+                                        # Convert success_conditions
+                                        success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
+                                        # Convert failure_conditions
+                                        failure_conditions = self._convert_conditions(motive_item.get('failure_conditions', []))
+                                        # Create MotiveConfig object
+                                        converted_motives.append(MotiveConfig(
+                                            id=motive_item['id'],
+                                            description=motive_item['description'],
+                                            success_conditions=success_conditions,
+                                            failure_conditions=failure_conditions
+                                        ))
+                                    else:
+                                        # Already a MotiveConfig object
+                                        converted_motives.append(motive_item)
+                                config_data['motives'] = converted_motives
+                            except Exception as e:
+                                self.game_logger.error(f"Failed to parse motives for {entity_id}: {e}")
+                                config_data['motives'] = []
+                        else:
+                            config_data['motives'] = motives_data
+                    
+                    # Copy other properties that might be relevant
+                    for key, value in entity_data.items():
+                        if key not in ['behaviors', 'types', 'properties', 'motives']:
+                            config_data[key] = value
+                    
+                    # Store v2 EntityDefinition directly - no conversion needed
+                    self.game_character_types[entity_id] = entity_def
+                    self.game_logger.info(f"Stored v2 character entity {entity_id} directly")
+                elif 'room' in entity_types:
+                    # Convert to room data - extract properties and store in game_rooms
+                    properties = entity_data.get('properties', {})
+                    
+                    # Parse exits and objects from string representations if needed
+                    exits = properties.get('exits', {})
+                    if isinstance(exits, str):
+                        try:
+                            exits = ast.literal_eval(exits.replace("'", '"'))
+                        except:
+                            exits = {}
+                    
+                    objects = properties.get('objects', {})
+                    if isinstance(objects, str):
+                        try:
+                            objects = ast.literal_eval(objects.replace("'", '"'))
+                        except:
+                            objects = {}
+                    
+                    room_data = {
+                        'id': entity_id,  # Add required id field
+                        'name': properties.get('name', entity_id),
+                        'description': properties.get('description', f"A room called {entity_id}"),
+                        'exits': exits,
+                        'objects': objects
+                    }
+                    self.game_rooms[entity_id] = room_data
         
-        # Extract object types from merged config
-        if 'object_types' in raw_config and raw_config['object_types']:
-            self.game_object_types.update(raw_config['object_types'])
+        # Handle v1 configs (object_types, character_types)
+        else:
+            if 'object_types' in raw_config and raw_config['object_types']:
+                self.game_object_types.update(raw_config['object_types'])
         
-        # Extract character types from merged config
-        if 'character_types' in raw_config and raw_config['character_types']:
-            self.game_character_types.update(raw_config['character_types'])
+            if 'character_types' in raw_config and raw_config['character_types']:
+                # Handle v1 character_types - legacy support
+                self.game_character_types.update(raw_config['character_types'])
         
-        # Extract characters from merged config
-        if 'characters' in raw_config and raw_config['characters']:
-            self.game_characters.update(raw_config['characters'])
+            # Extract characters from merged config
+            if 'characters' in raw_config and raw_config['characters']:
+                self.game_characters.update(raw_config['characters'])
         
-        # Extract rooms from merged config
+        # Extract rooms from merged config (only if not already populated from v2 entity_definitions)
         if 'rooms' in raw_config and raw_config['rooms']:
             self.game_rooms = raw_config['rooms']
-        else:
-            # Initialize empty rooms if none defined
+        elif not self.game_rooms:
+            # Initialize empty rooms if none defined and none loaded from entity_definitions
             self.game_rooms = {}
             init_data['warnings'].append("No rooms defined in config.")
         
@@ -154,8 +469,10 @@ class GameInitializer:
     def _instantiate_rooms_and_objects_silent(self, init_data):
         """Instantiates rooms and objects silently, collecting data for consolidated reporting."""
         for room_id, room_cfg in self.game_rooms.items():
+            # Handle both v1 (room_cfg['id']) and v2 (room_id as key) formats
+            actual_room_id = room_cfg.get('id', room_id)
             room = Room(
-                room_id=room_cfg['id'],
+                room_id=actual_room_id,
                 name=room_cfg['name'],
                 description=room_cfg['description'],
                 exits=room_cfg.get('exits', {}),
@@ -170,13 +487,34 @@ class GameInitializer:
                 for obj_id, obj_instance_cfg in room_cfg['objects'].items():
                     obj_type = self.game_object_types.get(obj_instance_cfg['object_type_id'])
                     if obj_type:
-                        final_tags = set(obj_type.get('tags', [])).union(obj_instance_cfg.get('tags', []))
-                        final_properties = {**obj_type.get('properties', {}), **obj_instance_cfg.get('properties', {})}
+                        # Handle both ObjectTypeConfig objects and dictionaries
+                        if hasattr(obj_type, 'tags'):
+                            obj_type_tags = obj_type.tags if obj_type.tags else []
+                        else:
+                            obj_type_tags = obj_type.get('tags', [])
+                        
+                        if hasattr(obj_type, 'properties'):
+                            obj_type_properties = obj_type.properties if obj_type.properties else {}
+                        else:
+                            obj_type_properties = obj_type.get('properties', {})
+                        
+                        if hasattr(obj_type, 'name'):
+                            obj_type_name = obj_type.name
+                        else:
+                            obj_type_name = obj_type.get('name')
+                        
+                        if hasattr(obj_type, 'description'):
+                            obj_type_description = obj_type.description
+                        else:
+                            obj_type_description = obj_type.get('description')
+                        
+                        final_tags = set(obj_type_tags).union(obj_instance_cfg.get('tags', []))
+                        final_properties = {**obj_type_properties, **obj_instance_cfg.get('properties', {})}
 
                         game_obj = GameObject(
                             obj_id=obj_instance_cfg['id'],
-                            name=obj_instance_cfg.get('name') or obj_type.get('name'),
-                            description=obj_instance_cfg.get('description') or obj_type.get('description'),
+                            name=obj_instance_cfg.get('name') or obj_type_name,
+                            description=obj_instance_cfg.get('description') or obj_type_description,
                             current_location_id=room.id,
                             tags=list(final_tags),
                             properties=final_properties
@@ -232,22 +570,41 @@ class GameInitializer:
             else:
                 char_cfg = self.game_character_types[char_id_to_assign]
 
+            # Debug: Log character config
+            self.game_logger.info(f"Character config for {char_id_to_assign}: {type(char_cfg)}")
+            if hasattr(char_cfg, 'motives'):
+                self.game_logger.info(f"  Has motives attribute: {char_cfg.motives}")
+            elif isinstance(char_cfg, dict) and 'motives' in char_cfg:
+                self.game_logger.info(f"  Has motives in dict: {char_cfg['motives']}")
+            else:
+                self.game_logger.info(f"  No motives found")
+
             # Handle both Pydantic objects and dictionaries from merged config
             if hasattr(char_cfg, 'id'):
+                # v1 CharacterConfig object
                 char_id = char_cfg.id
                 char_name = char_cfg.name
                 char_backstory = char_cfg.backstory
                 char_motive = getattr(char_cfg, 'motive', None)  # Legacy single motive
                 char_motives = getattr(char_cfg, 'motives', None)  # New multiple motives
                 char_aliases = getattr(char_cfg, 'aliases', [])
-            else:
-                # Handle dictionary from merged config
+            elif 'id' in char_cfg:
+                # v1 dictionary format
                 char_id = char_cfg['id']
                 char_name = char_cfg['name']
                 char_backstory = char_cfg['backstory']
                 char_motive = char_cfg.get('motive', None)  # Legacy single motive
                 char_motives = char_cfg.get('motives', None)  # New multiple motives
                 char_aliases = char_cfg.get('aliases', [])
+            else:
+                # v2 EntityDefinition format - entity_id is the key, character data is in config
+                char_id = char_id_to_assign  # Use the entity_id as the character id
+                config_data = char_cfg.get('config', {})
+                char_name = config_data.get('name', char_id)
+                char_backstory = config_data.get('backstory', '')
+                char_motive = config_data.get('motive', None)  # Legacy single motive
+                char_motives = config_data.get('motives', None)  # New multiple motives
+                char_aliases = config_data.get('aliases', [])
 
             # Convert motives dictionaries to MotiveConfig objects if needed
             converted_motives = None
@@ -360,7 +717,7 @@ class GameInitializer:
         from motive.config import ActionRequirementConfig, MotiveConditionGroup
         
         if not conditions_data:
-            return ActionRequirementConfig(type="player_has_tag", tag="dummy")  # Default empty condition
+            return ActionRequirementConfig(type="character_has_property", property="dummy", value=True)  # Default empty condition
         
         # If it's a single condition (dict with 'type')
         if isinstance(conditions_data, dict) and 'type' in conditions_data:
@@ -383,7 +740,7 @@ class GameInitializer:
                 
                 return MotiveConditionGroup(operator=operator, conditions=conditions)
         
-        return ActionRequirementConfig(type="player_has_tag", tag="dummy")  # Default fallback
+        return ActionRequirementConfig(type="character_has_property", property="dummy", value=True)  # Default fallback
 
     def _load_yaml_config(self, file_path: str, config_model: BaseModel) -> BaseModel:
         """Loads and validates a YAML configuration file against a Pydantic model."""
@@ -457,13 +814,34 @@ class GameInitializer:
                 for obj_id, obj_instance_cfg in room_cfg['objects'].items():
                     obj_type = self.game_object_types.get(obj_instance_cfg['object_type_id'])
                     if obj_type:
-                        final_tags = set(obj_type.get('tags', [])).union(obj_instance_cfg.get('tags', []))
-                        final_properties = {**obj_type.get('properties', {}), **obj_instance_cfg.get('properties', {})}
+                        # Handle both ObjectTypeConfig objects and dictionaries
+                        if hasattr(obj_type, 'tags'):
+                            obj_type_tags = obj_type.tags if obj_type.tags else []
+                        else:
+                            obj_type_tags = obj_type.get('tags', [])
+                        
+                        if hasattr(obj_type, 'properties'):
+                            obj_type_properties = obj_type.properties if obj_type.properties else {}
+                        else:
+                            obj_type_properties = obj_type.get('properties', {})
+                        
+                        if hasattr(obj_type, 'name'):
+                            obj_type_name = obj_type.name
+                        else:
+                            obj_type_name = obj_type.get('name')
+                        
+                        if hasattr(obj_type, 'description'):
+                            obj_type_description = obj_type.description
+                        else:
+                            obj_type_description = obj_type.get('description')
+                        
+                        final_tags = set(obj_type_tags).union(obj_instance_cfg.get('tags', []))
+                        final_properties = {**obj_type_properties, **obj_instance_cfg.get('properties', {})}
 
                         game_obj = GameObject(
                             obj_id=obj_instance_cfg['id'],
-                            name=obj_instance_cfg.get('name') or obj_type.get('name'),
-                            description=obj_instance_cfg.get('description') or obj_type.get('description'),
+                            name=obj_instance_cfg.get('name') or obj_type_name,
+                            description=obj_instance_cfg.get('description') or obj_type_description,
                             current_location_id=room.id,
                             tags=list(final_tags),
                             properties=final_properties
@@ -597,20 +975,30 @@ class GameInitializer:
 
             # Handle both Pydantic objects and dictionaries from merged config
             if hasattr(char_cfg, 'id'):
+                # v1 CharacterConfig object
                 char_id = char_cfg.id
                 char_name = char_cfg.name
                 char_backstory = char_cfg.backstory
                 char_motive = getattr(char_cfg, 'motive', None)  # Legacy single motive
                 char_motives = getattr(char_cfg, 'motives', None)  # New multiple motives
                 char_aliases = getattr(char_cfg, 'aliases', [])
-            else:
-                # Handle dictionary from merged config
+            elif 'id' in char_cfg:
+                # v1 dictionary format
                 char_id = char_cfg['id']
                 char_name = char_cfg['name']
                 char_backstory = char_cfg['backstory']
                 char_motive = char_cfg.get('motive', None)  # Legacy single motive
                 char_motives = char_cfg.get('motives', None)  # New multiple motives
                 char_aliases = char_cfg.get('aliases', [])
+            else:
+                # v2 EntityDefinition format - entity_id is the key, character data is in config
+                char_id = char_id_to_assign  # Use the entity_id as the character id
+                config_data = char_cfg.get('config', {})
+                char_name = config_data.get('name', char_id)
+                char_backstory = config_data.get('backstory', '')
+                char_motive = config_data.get('motive', None)  # Legacy single motive
+                char_motives = config_data.get('motives', None)  # New multiple motives
+                char_aliases = config_data.get('aliases', [])
 
             # Convert motives dictionaries to MotiveConfig objects if needed
             converted_motives = None

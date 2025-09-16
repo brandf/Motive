@@ -35,8 +35,8 @@ import uuid # Added for UUID logging
 
 
 class GameMaster:
-    # Accept a pre-validated GameConfig object directly
-    def __init__(self, game_config: GameConfig, game_id: str, deterministic: bool = False, 
+    # Accept a pre-validated GameConfig or V2GameConfig object directly
+    def __init__(self, game_config, game_id: str, deterministic: bool = False, 
                  log_dir: str = "logs", no_file_logging: bool = False, character: str = None, motive: str = None):
         self.players = []
         self.character_override = character  # Store character override for GameInitializer
@@ -87,6 +87,9 @@ class GameMaster:
             initial_ap = game_config.game_settings.initial_ap_per_turn
         else:
             initial_ap = game_config['game_settings']['initial_ap_per_turn']
+        # Pass v2 config directly to GameInitializer - no conversion needed
+        # GameInitializer will be updated to work with v2 structures directly
+        
         self.game_initializer = GameInitializer(game_config, game_id, self.game_logger, initial_ap, self.deterministic, self.character_override, self.motive_override)
 
         # Load configurations from merged config
@@ -188,6 +191,7 @@ class GameMaster:
         
         # Default fallback
         return "unknown/unknown"
+
 
     def _setup_logging(self):
         """Sets up the logging directory and configures the GM logger."""
