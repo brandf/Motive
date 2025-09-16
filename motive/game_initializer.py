@@ -255,24 +255,27 @@ class GameInitializer:
             if char_motives and len(char_motives) > 0:
                 from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
                 converted_motives = []
-                for motive_dict in char_motives:
-                    if isinstance(motive_dict, dict):
+                for motive_item in char_motives:
+                    if isinstance(motive_item, MotiveConfig):
+                        # Already a MotiveConfig object (from v2→v1 conversion)
+                        converted_motives.append(motive_item)
+                    elif isinstance(motive_item, dict):
                         # Convert success_conditions
-                        success_conditions = self._convert_conditions(motive_dict.get('success_conditions', []))
+                        success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
 
                         # Convert failure_conditions
-                        failure_conditions = self._convert_conditions(motive_dict.get('failure_conditions', []))
+                        failure_conditions = self._convert_conditions(motive_item.get('failure_conditions', []))
 
                         # Create MotiveConfig object
                         converted_motives.append(MotiveConfig(
-                            id=motive_dict['id'],
-                            description=motive_dict['description'],
+                            id=motive_item['id'],
+                            description=motive_item['description'],
                             success_conditions=success_conditions,
                             failure_conditions=failure_conditions
                         ))
                     else:
                         # Already a MotiveConfig object
-                        converted_motives.append(motive_dict)
+                        converted_motives.append(motive_item)
                 
                 # Handle motive override
                 if self.motive_override:
@@ -615,24 +618,27 @@ class GameInitializer:
             if char_motives and len(char_motives) > 0:
                 from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
                 converted_motives = []
-                for motive_dict in char_motives:
-                    if isinstance(motive_dict, dict):
+                for motive_item in char_motives:
+                    if isinstance(motive_item, MotiveConfig):
+                        # Already a MotiveConfig object (from v2→v1 conversion)
+                        converted_motives.append(motive_item)
+                    elif isinstance(motive_item, dict):
                         # Convert success_conditions
-                        success_conditions = self._convert_conditions(motive_dict.get('success_conditions', []))
+                        success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
 
                         # Convert failure_conditions
-                        failure_conditions = self._convert_conditions(motive_dict.get('failure_conditions', []))
+                        failure_conditions = self._convert_conditions(motive_item.get('failure_conditions', []))
 
                         # Create MotiveConfig object
                         converted_motives.append(MotiveConfig(
-                            id=motive_dict['id'],
-                            description=motive_dict['description'],
+                            id=motive_item['id'],
+                            description=motive_item['description'],
                             success_conditions=success_conditions,
                             failure_conditions=failure_conditions
                         ))
                     else:
                         # Already a MotiveConfig object
-                        converted_motives.append(motive_dict)
+                        converted_motives.append(motive_item)
                 
                 # Handle motive override
                 if self.motive_override:

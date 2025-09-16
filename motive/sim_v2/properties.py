@@ -10,6 +10,7 @@ class PropertyType(str, Enum):
     NUMBER = "number"
     BOOLEAN = "boolean"
     ENUM = "enum"
+    OBJECT = "object"  # For complex nested data (lists, dicts, etc.)
 
 
 @dataclass(frozen=True)
@@ -68,6 +69,9 @@ class PropertyStore:
         if schema.type is PropertyType.ENUM:
             # Enum values are represented by their literal value (often str)
             return isinstance(value, (str, int)) or value is None
+        if schema.type is PropertyType.OBJECT:
+            # OBJECT type accepts any complex data (dict, list, etc.)
+            return isinstance(value, (dict, list)) or value is None
         return True
 
 

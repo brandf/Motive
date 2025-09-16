@@ -1,1342 +1,651 @@
 entity_definitions:
   notice_board:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Notice Board
-      description:
-        type: string
-        default: A wooden board covered with various notices, posters, and announcements.
-      readable:
-        type: boolean
-        default: true
-      text:
-        type: string
-        default: Various town announcements and missing person posters are posted
-          here.
+      name: Notice Board
+      description: A wooden board covered with various notices, posters, and announcements.
+      readable: true
+      text: Various town announcements and missing person posters are posted here.
   broken_fountain:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Broken Fountain
-      description:
-        type: string
-        default: A once-beautiful stone fountain, now cracked and dry.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
+      name: Broken Fountain
+      description: A once-beautiful stone fountain, now cracked and dry.
+      immovable: true
+      size: large
   bar:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Bar
-      description:
-        type: string
-        default: A long wooden bar where drinks are served.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
+      name: Bar
+      description: A long wooden bar where drinks are served.
+      immovable: true
+      size: large
   suspicious_character:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Suspicious Character
-      description:
-        type: string
-        default: A figure who seems to be watching everything carefully.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
+      name: Suspicious Character
+      description: A figure who seems to be watching everything carefully.
+      immovable: true
+      size: medium
   quest_board:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Quest Board
-      description:
-        type: string
-        default: A board covered with various quests and missions.
-      readable:
-        type: boolean
-        default: true
-      text:
-        type: string
-        default: Various quests and bounties are posted here, including some related
-          to recent disappearances.
+      name: Quest Board
+      description: A board covered with various quests and missions.
+      readable: true
+      text: Various quests and bounties are posted here, including some related to
+        recent disappearances.
   guild_master_desk:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Guild Master's Desk
-      description:
-        type: string
-        default: A massive oak desk covered with reports and correspondence.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
-      readable:
-        type: boolean
-        default: true
-      text:
-        type: string
-        default: The desk contains various reports and maps that might contain valuable
-          information.
+      name: Guild Master's Desk
+      description: A massive oak desk covered with reports and correspondence.
+      immovable: true
+      size: large
+      readable: true
+      text: The desk contains various reports and maps that might contain valuable
+        information.
   weapon_rack:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Weapon Rack
-      description:
-        type: string
-        default: A rack displaying various weapons and armor.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
+      name: Weapon Rack
+      description: A rack displaying various weapons and armor.
+      immovable: true
+      size: large
   stolen_goods:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Stolen Goods
-      description:
-        type: string
-        default: Various stolen items and contraband.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
+      name: Stolen Goods
+      description: Various stolen items and contraband.
+      immovable: true
+      size: medium
   secret_documents:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Secret Documents
-      description:
-        type: string
-        default: A collection of documents that might contain valuable information.
-      readable:
-        type: boolean
-        default: true
-      text:
-        type: string
-        default: These documents contain information about the town's troubles and
-          recent activities.
+      name: Secret Documents
+      description: A collection of documents that might contain valuable information.
+      readable: true
+      text: These documents contain information about the town's troubles and recent
+        activities.
   raven_chair:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: The Raven's Chair
-      description:
-        type: string
-        default: A high-backed chair where the leader of the thieves' guild sits.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
+      name: The Raven's Chair
+      description: A high-backed chair where the leader of the thieves' guild sits.
+      immovable: true
+      size: large
   confession_booth:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Confession Booth
-      description:
-        type: string
-        default: A wooden booth where the faithful come to confess their sins.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
+      name: Confession Booth
+      description: A wooden booth where the faithful come to confess their sins.
+      immovable: true
+      size: medium
   crypt_entrance:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Crypt Entrance
-      description:
-        type: string
-        default: A hidden entrance to the underground crypt.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
+      name: Crypt Entrance
+      description: A hidden entrance to the underground crypt.
+      immovable: true
+      size: medium
   mausoleum:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Mausoleum
-      description:
-        type: string
-        default: A large stone mausoleum with doors that seem to be slightly ajar.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: huge
+      name: Mausoleum
+      description: A large stone mausoleum with doors that seem to be slightly ajar.
+      immovable: true
+      size: huge
   fresh_graves:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Fresh Graves
-      description:
-        type: string
-        default: Several graves that appear to have been recently dug.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
+      name: Fresh Graves
+      description: Several graves that appear to have been recently dug.
+      immovable: true
+      size: large
   suspicious_footprints:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Suspicious Footprints
-      description:
-        type: string
-        default: Footprints in the soft earth that don't seem to belong to any normal
-          visitor.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
+      name: Suspicious Footprints
+      description: Footprints in the soft earth that don't seem to belong to any normal
+        visitor.
+      immovable: true
+      size: small
   vault:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Vault
-      description:
-        type: string
-        default: A massive steel vault that seems to be open more often than it should
-          be.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: huge
+      name: Vault
+      description: A massive steel vault that seems to be open more often than it
+        should be.
+      immovable: true
+      size: huge
   ledgers:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Bank Ledgers
-      description:
-        type: string
-        default: Financial records that might contain clues about mysterious transactions.
-      readable:
-        type: boolean
-        default: true
-      text:
-        type: string
-        default: These ledgers contain financial records that might reveal clues about
-          the mysterious withdrawals.
+      name: Bank Ledgers
+      description: Financial records that might contain clues about mysterious transactions.
+      readable: true
+      text: These ledgers contain financial records that might reveal clues about
+        the mysterious withdrawals.
   guard_post:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Guard Post
-      description:
-        type: string
-        default: A security station that seems to be unmanned more often than not.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
+      name: Guard Post
+      description: A security station that seems to be unmanned more often than not.
+      immovable: true
+      size: medium
   merchant_stalls:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Merchant Stalls
-      description:
-        type: string
-        default: Various stalls where merchants sell their wares.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
+      name: Merchant Stalls
+      description: Various stalls where merchants sell their wares.
+      immovable: true
+      size: large
   suspicious_merchants:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Suspicious Merchants
-      description:
-        type: string
-        default: Merchants who seem to be involved in more than just legitimate trade.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
+      name: Suspicious Merchants
+      description: Merchants who seem to be involved in more than just legitimate
+        trade.
+      immovable: true
+      size: medium
   hidden_alleyways:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Hidden Alleyways
-      description:
-        type: string
-        default: Narrow passages between buildings that lead to secret meeting places.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
+      name: Hidden Alleyways
+      description: Narrow passages between buildings that lead to secret meeting places.
+      immovable: true
+      size: medium
   cult_symbols:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Cult Symbols
-      description:
-        type: string
-        default: Dark, unsettling symbols painted on walls and carved into surfaces.
-      readable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      text:
-        type: string
-        default: The symbols seem to pulse with dark energy. They appear to be some
-          form of ancient writing, but the meaning is unclear. However, they all seem
-          to point toward the same direction - deeper into the underground.
+      name: Cult Symbols
+      description: Dark, unsettling symbols painted on walls and carved into surfaces.
+      readable: true
+      immovable: true
+      size: small
+      text: The symbols seem to pulse with dark energy. They appear to be some form
+        of ancient writing, but the meaning is unclear. However, they all seem to
+        point toward the same direction - deeper into the underground.
   evidence_activity:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Evidence of Recent Activity
-      description:
-        type: string
-        default: Signs that someone has been using these tunnels recently.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
+      name: Evidence of Recent Activity
+      description: Signs that someone has been using these tunnels recently.
+      immovable: true
+      size: small
   secret_doors:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Secret Doors
-      description:
-        type: string
-        default: Hidden entrances and exits that lead to various parts of the town.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
+      name: Secret Doors
+      description: Hidden entrances and exits that lead to various parts of the town.
+      immovable: true
+      size: medium
   cult_altar:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Cult Altar
-      description:
-        type: string
-        default: A dark altar covered with cult artifacts and evidence of recent rituals.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
+      name: Cult Altar
+      description: A dark altar covered with cult artifacts and evidence of recent
+        rituals.
+      immovable: true
+      size: large
   prisoner_cells:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Prisoner Cells
-      description:
-        type: string
-        default: Cells where the cult keeps their prisoners.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
+      name: Prisoner Cells
+      description: Cells where the cult keeps their prisoners.
+      immovable: true
+      size: large
   cult_artifacts:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Cult Artifacts
-      description:
-        type: string
-        default: Various dark objects and artifacts used in the cult's rituals.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
+      name: Cult Artifacts
+      description: Various dark objects and artifacts used in the cult's rituals.
+      immovable: true
+      size: medium
   forest_watchers:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Forest Watchers
-      description:
-        type: string
-        default: The forest itself seems to be watching and waiting.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
+      name: Forest Watchers
+      description: The forest itself seems to be watching and waiting.
+      immovable: true
+      size: medium
   mayors_journal:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Mayor's Journal
-      description:
-        type: string
-        default: A leather-bound journal belonging to the missing mayor, filled with
-          his private thoughts and observations.
-      readable:
-        type: boolean
-        default: true
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      text:
-        type: string
-        default: The cult's influence grows stronger each day. I fear they have infiltrated
-          the town guard. Father Marcus seems troubled - I must speak with him. The
-          disappearances are not random - they're targeting specific people. I've
-          hidden evidence in the bank vault. If something happens to me, find Detective
-          Thorne.
+      name: Mayor's Journal
+      description: A leather-bound journal belonging to the missing mayor, filled
+        with his private thoughts and observations.
+      readable: true
+      pickupable: true
+      size: small
+      text: The cult's influence grows stronger each day. I fear they have infiltrated
+        the town guard. Father Marcus seems troubled - I must speak with him. The
+        disappearances are not random - they're targeting specific people. I've hidden
+        evidence in the bank vault. If something happens to me, find Detective Thorne.
   cult_ritual_book:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Cult Ritual Book
-      description:
-        type: string
-        default: A dark, leather-bound tome filled with ancient symbols and blood-stained
-          pages.
-      readable:
-        type: boolean
-        default: true
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      text:
-        type: string
-        default: 'The Shadowed Hand seeks to summon the Dark Lord through blood sacrifice.
-          The ritual requires seven pure souls, taken during the new moon. The mayor
-          was the first - his blood opened the gateway. The next six must be taken
-          in sequence: the priest, the warrior, the merchant, the child, the innocent,
-          and the betrayer.'
+      name: Cult Ritual Book
+      description: A dark, leather-bound tome filled with ancient symbols and blood-stained
+        pages.
+      readable: true
+      pickupable: true
+      size: medium
+      text: 'The Shadowed Hand seeks to summon the Dark Lord through blood sacrifice.
+        The ritual requires seven pure souls, taken during the new moon. The mayor
+        was the first - his blood opened the gateway. The next six must be taken in
+        sequence: the priest, the warrior, the merchant, the child, the innocent,
+        and the betrayer.'
   missing_persons_effects:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Personal Effects
-      description:
-        type: string
-        default: A collection of personal items belonging to the missing townsfolk.
-      readable:
-        type: boolean
-        default: true
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      text:
-        type: string
-        default: Letters, jewelry, and small trinkets. Each item tells a story of
-          a life interrupted. A child's doll, a wedding ring, a merchant's ledger.
-          All taken from their owners before they disappeared.
+      name: Personal Effects
+      description: A collection of personal items belonging to the missing townsfolk.
+      readable: true
+      pickupable: true
+      size: small
+      text: Letters, jewelry, and small trinkets. Each item tells a story of a life
+        interrupted. A child's doll, a wedding ring, a merchant's ledger. All taken
+        from their owners before they disappeared.
   cult_members_confession:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Cult Member's Confession
-      description:
-        type: string
-        default: A handwritten confession found in the church records.
-      readable:
-        type: boolean
-        default: true
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      text:
-        type: string
-        default: I was forced to join the Shadowed Hand. They threatened my family.
-          The cult is planning something big - a ritual that will change everything.
-          They have people in high places. I can't say more, but the mayor knows too
-          much. They're coming for him next.
+      name: Cult Member's Confession
+      description: A handwritten confession found in the church records.
+      readable: true
+      pickupable: true
+      size: small
+      text: I was forced to join the Shadowed Hand. They threatened my family. The
+        cult is planning something big - a ritual that will change everything. They
+        have people in high places. I can't say more, but the mayor knows too much.
+        They're coming for him next.
   fresh_evidence:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Fresh Evidence
-      description:
-        type: string
-        default: Recently disturbed earth and strange markings.
-      readable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      text:
-        type: string
-        default: The earth has been recently disturbed. Strange symbols are carved
-          into the ground, still wet with what appears to be blood. Footprints lead
-          away from the site - someone was here recently.
+      name: Fresh Evidence
+      description: Recently disturbed earth and strange markings.
+      readable: true
+      immovable: true
+      size: medium
+      text: The earth has been recently disturbed. Strange symbols are carved into
+        the ground, still wet with what appears to be blood. Footprints lead away
+        from the site - someone was here recently.
   suspicious_sounds:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Suspicious Sounds
-      description:
-        type: string
-        default: Strange noises coming from underground.
-      readable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      text:
-        type: string
-        default: Low, chanting voices echo from below. The sound is muffled but unmistakable
-          - someone is performing a ritual. The voices seem to be getting louder,
-          more urgent.
+      name: Suspicious Sounds
+      description: Strange noises coming from underground.
+      readable: true
+      immovable: true
+      size: small
+      text: Low, chanting voices echo from below. The sound is muffled but unmistakable
+        - someone is performing a ritual. The voices seem to be getting louder, more
+        urgent.
   missing_items:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Missing Items
-      description:
-        type: string
-        default: Items that were clearly taken, not lost.
-      readable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      text:
-        type: string
-        default: Empty spaces where items once sat. Dust outlines show where objects
-          were recently removed. The pattern suggests a systematic search - someone
-          was looking for something specific.
+      name: Missing Items
+      description: Items that were clearly taken, not lost.
+      readable: true
+      immovable: true
+      size: small
+      text: Empty spaces where items once sat. Dust outlines show where objects were
+        recently removed. The pattern suggests a systematic search - someone was looking
+        for something specific.
   witnessed_abduction:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Witnessed Abduction
-      description:
-        type: string
-        default: Evidence of a recent abduction.
-      readable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      text:
-        type: string
-        default: Struggle marks on the ground, a torn piece of clothing, and a single
-          drop of blood. Someone was taken by force, and recently. The trail leads
-          toward the underground tunnels.
+      name: Witnessed Abduction
+      description: Evidence of a recent abduction.
+      readable: true
+      immovable: true
+      size: medium
+      text: Struggle marks on the ground, a torn piece of clothing, and a single drop
+        of blood. Someone was taken by force, and recently. The trail leads toward
+        the underground tunnels.
   lockpicks:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Lockpicks
-      description:
-        type: string
-        default: A set of fine metal tools for opening locks.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      tool_type:
-        type: string
-        default: lockpicking
+      name: Lockpicks
+      description: A set of fine metal tools for opening locks.
+      pickupable: true
+      size: small
+      tool_type: lockpicking
   torch:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Torch
-      description:
-        type: string
-        default: A wooden torch that can be lit to provide light in dark areas.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      tool_type:
-        type: string
-        default: lighting
-      fuel:
-        type: number
-        default: 100
+      name: Torch
+      description: A wooden torch that can be lit to provide light in dark areas.
+      pickupable: true
+      size: medium
+      tool_type: lighting
+      fuel: 100
   rope:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Rope
-      description:
-        type: string
-        default: A sturdy length of rope, useful for climbing or binding.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      tool_type:
-        type: string
-        default: climbing
+      name: Rope
+      description: A sturdy length of rope, useful for climbing or binding.
+      pickupable: true
+      size: medium
+      tool_type: climbing
   investigation_kit:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Investigation Kit
-      description:
-        type: string
-        default: A small kit containing magnifying glass, tweezers, and evidence bags.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      tool_type:
-        type: string
-        default: investigation
+      name: Investigation Kit
+      description: A small kit containing magnifying glass, tweezers, and evidence
+        bags.
+      pickupable: true
+      size: small
+      tool_type: investigation
   crowbar:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Crowbar
-      description:
-        type: string
-        default: A heavy metal bar useful for prying open doors and crates.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      tool_type:
-        type: string
-        default: prying
+      name: Crowbar
+      description: A heavy metal bar useful for prying open doors and crates.
+      pickupable: true
+      size: medium
+      tool_type: prying
   holy_water:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Holy Water
-      description:
-        type: string
-        default: A small vial of blessed water from the church.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      tool_type:
-        type: string
-        default: spiritual
-      blessed:
-        type: boolean
-        default: true
+      name: Holy Water
+      description: A small vial of blessed water from the church.
+      pickupable: true
+      size: small
+      tool_type: spiritual
+      blessed: true
   eternal_flame:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Eternal Flame
-      description:
-        type: string
-        default: A small, magical flame that never goes out, symbolizing the town's
-          unbreakable spirit.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      magical:
-        type: boolean
-        default: true
-      hearth_symbol:
-        type: boolean
-        default: true
+      name: Eternal Flame
+      description: A small, magical flame that never goes out, symbolizing the town's
+        unbreakable spirit.
+      immovable: true
+      size: small
+      magical: true
+      hearth_symbol: true
   shadow_crystal:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Shadow Crystal
-      description:
-        type: string
-        default: A dark crystal that seems to absorb light and warmth, pulsing with
-          malevolent energy.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      magical:
-        type: boolean
-        default: true
-      shadow_symbol:
-        type: boolean
-        default: true
+      name: Shadow Crystal
+      description: A dark crystal that seems to absorb light and warmth, pulsing with
+        malevolent energy.
+      pickupable: true
+      size: small
+      magical: true
+      shadow_symbol: true
   hearth_stone:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Hearth Stone
-      description:
-        type: string
-        default: A warm stone that radiates comfort and hope, said to protect against
-          dark magic.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      magical:
-        type: boolean
-        default: true
-      hearth_symbol:
-        type: boolean
-        default: true
+      name: Hearth Stone
+      description: A warm stone that radiates comfort and hope, said to protect against
+        dark magic.
+      pickupable: true
+      size: small
+      magical: true
+      hearth_symbol: true
   shadow_mirror:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Shadow Mirror
-      description:
-        type: string
-        default: A dark mirror that shows not your reflection, but the shadows of
-          your fears and doubts.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      magical:
-        type: boolean
-        default: true
-      shadow_symbol:
-        type: boolean
-        default: true
+      name: Shadow Mirror
+      description: A dark mirror that shows not your reflection, but the shadows of
+        your fears and doubts.
+      immovable: true
+      size: medium
+      magical: true
+      shadow_symbol: true
   flame_of_hope:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Flame of Hope
-      description:
-        type: string
-        default: A small, flickering flame that grows brighter when hope is strong
-          and dims when despair takes hold.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      magical:
-        type: boolean
-        default: true
-      hearth_symbol:
-        type: boolean
-        default: true
-      responsive:
-        type: boolean
-        default: true
+      name: Flame of Hope
+      description: A small, flickering flame that grows brighter when hope is strong
+        and dims when despair takes hold.
+      immovable: true
+      size: small
+      magical: true
+      hearth_symbol: true
+      responsive: true
   message_board:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Message Board
-      description:
-        type: string
-        default: A wooden board where characters can leave messages for each other.
-      readable:
-        type: boolean
-        default: true
-      writable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      communication:
-        type: boolean
-        default: true
+      name: Message Board
+      description: A wooden board where characters can leave messages for each other.
+      readable: true
+      writable: true
+      immovable: true
+      size: medium
+      communication: true
   secret_drop_point:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Secret Drop Point
-      description:
-        type: string
-        default: A hidden location where anonymous messages can be left and retrieved.
-      readable:
-        type: boolean
-        default: true
-      writable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      hidden:
-        type: boolean
-        default: true
-      communication:
-        type: boolean
-        default: true
+      name: Secret Drop Point
+      description: A hidden location where anonymous messages can be left and retrieved.
+      readable: true
+      writable: true
+      immovable: true
+      size: small
+      hidden: true
+      communication: true
   pigeon_coop:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Pigeon Coop
-      description:
-        type: string
-        default: A small coop where carrier pigeons can be used to send private messages.
-      readable:
-        type: boolean
-        default: true
-      writable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      communication:
-        type: boolean
-        default: true
-      private:
-        type: boolean
-        default: true
+      name: Pigeon Coop
+      description: A small coop where carrier pigeons can be used to send private
+        messages.
+      readable: true
+      writable: true
+      immovable: true
+      size: medium
+      communication: true
+      private: true
   town_crier:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Town Crier
-      description:
-        type: string
-        default: A person who makes public announcements throughout the town.
-      readable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      communication:
-        type: boolean
-        default: true
-      public:
-        type: boolean
-        default: true
+      name: Town Crier
+      description: A person who makes public announcements throughout the town.
+      readable: true
+      immovable: true
+      size: medium
+      communication: true
+      public: true
   burning_candle:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Burning Candle
-      description:
-        type: string
-        default: A candle that burns down over time, creating urgency.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      time_sensitive:
-        type: boolean
-        default: true
-      fuel:
-        type: number
-        default: 100
+      name: Burning Candle
+      description: A candle that burns down over time, creating urgency.
+      immovable: true
+      size: small
+      time_sensitive: true
+      fuel: 100
   fresh_footprints:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Fresh Footprints
-      description:
-        type: string
-        default: Footprints that will disappear as time passes.
-      readable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      time_sensitive:
-        type: boolean
-        default: true
-      text:
-        type: string
-        default: Fresh footprints in the dust. They appear to be recent and will fade
-          soon.
+      name: Fresh Footprints
+      description: Footprints that will disappear as time passes.
+      readable: true
+      immovable: true
+      size: small
+      time_sensitive: true
+      text: Fresh footprints in the dust. They appear to be recent and will fade soon.
   disturbed_earth:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Disturbed Earth
-      description:
-        type: string
-        default: Recently disturbed earth that will settle over time.
-      readable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      time_sensitive:
-        type: boolean
-        default: true
-      text:
-        type: string
-        default: The earth has been recently disturbed. It will settle and become
-          less obvious over time.
+      name: Disturbed Earth
+      description: Recently disturbed earth that will settle over time.
+      readable: true
+      immovable: true
+      size: medium
+      time_sensitive: true
+      text: The earth has been recently disturbed. It will settle and become less
+        obvious over time.
   ritual_preparations:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Ritual Preparations
-      description:
-        type: string
-        default: Evidence of ongoing ritual preparations that will be completed soon.
-      readable:
-        type: boolean
-        default: true
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      time_sensitive:
-        type: boolean
-        default: true
-      text:
-        type: string
-        default: The cult is preparing for a major ritual. The preparations will be
-          complete soon.
+      name: Ritual Preparations
+      description: Evidence of ongoing ritual preparations that will be completed
+        soon.
+      readable: true
+      immovable: true
+      size: medium
+      time_sensitive: true
+      text: The cult is preparing for a major ritual. The preparations will be complete
+        soon.
   detectives_notebook:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Detective's Notebook
-      description:
-        type: string
-        default: A worn leather notebook filled with clues, suspects, and case notes.
-      readable:
-        type: boolean
-        default: true
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      character_specific:
-        type: string
-        default: detective_james
-      text:
-        type: string
-        default: Case notes on the Blackwater disappearances. Contains sketches of
-          suspects and evidence.
+      name: Detective's Notebook
+      description: A worn leather notebook filled with clues, suspects, and case notes.
+      readable: true
+      pickupable: true
+      size: small
+      character_specific: detective_james
+      text: Case notes on the Blackwater disappearances. Contains sketches of suspects
+        and evidence.
   daughters_medicine:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Daughter's Medicine
-      description:
-        type: string
-        default: Expensive medicine needed for Detective James's sick daughter.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      character_specific:
-        type: string
-        default: detective_james
-      valuable:
-        type: boolean
-        default: true
+      name: Daughter's Medicine
+      description: Expensive medicine needed for Detective James's sick daughter.
+      pickupable: true
+      size: small
+      character_specific: detective_james
+      valuable: true
   confession_notes:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Confession Notes
-      description:
-        type: string
-        default: Secret notes about the cult's activities that Father Marcus has been
-          keeping.
-      readable:
-        type: boolean
-        default: true
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      character_specific:
-        type: string
-        default: father_marcus
-      text:
-        type: string
-        default: Detailed notes about the cult's rituals and plans. Very dangerous
-          if discovered.
+      name: Confession Notes
+      description: Secret notes about the cult's activities that Father Marcus has
+        been keeping.
+      readable: true
+      pickupable: true
+      size: small
+      character_specific: father_marcus
+      text: Detailed notes about the cult's rituals and plans. Very dangerous if discovered.
   protection_money:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Protection Money
-      description:
-        type: string
-        default: Gold coins that Gareth has been paying to The Raven for protection.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      character_specific:
-        type: string
-        default: gareth
-      valuable:
-        type: boolean
-        default: true
+      name: Protection Money
+      description: Gold coins that Gareth has been paying to The Raven for protection.
+      pickupable: true
+      size: small
+      character_specific: gareth
+      valuable: true
   cult_escape_kit:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Cult Escape Kit
-      description:
-        type: string
-        default: A small kit with tools for escaping the cult's clutches.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      character_specific:
-        type: string
-        default: sarah
-      survival:
-        type: boolean
-        default: true
+      name: Cult Escape Kit
+      description: A small kit with tools for escaping the cult's clutches.
+      pickupable: true
+      size: small
+      character_specific: sarah
+      survival: true
   ancient_artifacts:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Ancient Artifacts
-      description:
-        type: string
-        default: Mysterious artifacts that Valdris carries with him.
-      pickupable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: small
-      character_specific:
-        type: string
-        default: valdris
-      magical:
-        type: boolean
-        default: true
+      name: Ancient Artifacts
+      description: Mysterious artifacts that Valdris carries with him.
+      pickupable: true
+      size: small
+      character_specific: valdris
+      magical: true
   town_treasury:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Town Treasury
-      description:
-        type: string
-        default: The town's financial resources, controlled by the bank manager.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
-      resource:
-        type: string
-        default: money
-      amount:
-        type: number
-        default: 1000
+      name: Town Treasury
+      description: The town's financial resources, controlled by the bank manager.
+      immovable: true
+      size: large
+      resource: money
+      amount: 1000
   guild_resources:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Guild Resources
-      description:
-        type: string
-        default: Weapons, armor, and supplies controlled by the guild master.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: large
-      resource:
-        type: string
-        default: equipment
-      amount:
-        type: number
-        default: 50
+      name: Guild Resources
+      description: Weapons, armor, and supplies controlled by the guild master.
+      immovable: true
+      size: large
+      resource: equipment
+      amount: 50
   information_network:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Information Network
-      description:
-        type: string
-        default: The barkeep's network of informants and contacts.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      resource:
-        type: string
-        default: information
-      reach:
-        type: string
-        default: town_wide
+      name: Information Network
+      description: The barkeep's network of informants and contacts.
+      immovable: true
+      size: medium
+      resource: information
+      reach: town_wide
   underground_network:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Underground Network
-      description:
-        type: string
-        default: The Raven's criminal network and safe houses.
-      immovable:
-        type: boolean
-        default: true
-      size:
-        type: string
-        default: medium
-      resource:
-        type: string
-        default: security
-      reach:
-        type: string
-        default: regional
+      name: Underground Network
+      description: The Raven's criminal network and safe houses.
+      immovable: true
+      size: medium
+      resource: security
+      reach: regional

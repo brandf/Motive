@@ -482,6 +482,12 @@ class GameMaster:
                 tag = req.tag if hasattr(req, 'tag') else req.get('tag', '')
                 if not player_char.has_tag(tag):
                     return False, f"Player does not have tag '{tag}'.", None
+            elif req_type == "character_has_property":
+                property_name = req.property if hasattr(req, 'property') else req.get('property', '')
+                expected_value = req.value if hasattr(req, 'value') else req.get('value', True)
+                actual_value = player_char.get_property(property_name, False)
+                if actual_value != expected_value:
+                    return False, f"Character property '{property_name}' is {actual_value}, expected {expected_value}.", None
             elif req_type == "object_in_room":
                 object_name_param = req.object_name_param if hasattr(req, 'object_name_param') else req.get('object_name_param', 'object_name')
                 object_name = params.get(object_name_param)

@@ -8,6 +8,21 @@ A concrete recovery plan to complete v2 migration, validate outputs, and remove 
 - Keep `GameMaster` as orchestrator; avoid forking engines
 - Remove all v1 config files and code once v2 is proven
 
+## Reality Check (2025-09-16)
+Recent real runs (including 5 parallel games) revealed gaps that contradict prior status. The following issues must be addressed before proceeding to Phase 3:
+
+- CRITICAL: Motive success/failure conditions render as a single placeholder: `Player has tag 'dummy'` for all characters.
+  - Impact: No motives can be won or failed; games always end with "NOT ACHIEVED" for all players.
+- HIGH: LLM responses are narrative but often rejected as actions; turns end with "did not provide any actions".
+  - Impact: Players fail to progress; poor gameplay loop.
+- HIGH: Object/NPC interaction pathways are not wired (e.g., `look <object>`, `say to <npc>`, `pickup <object>`).
+  - Impact: Exploration and interaction are effectively disabled.
+- MEDIUM: Movement validation is too strict without helpful guidance; `move` often fails to resolve exits/aliases.
+- MEDIUM: Observability/event scoping appears incomplete (adjacent rooms/NPC visibility uncertain).
+- GOOD: Performance optimization (smart context/caching/retry) is stable; keep enabled.
+
+The items above indicate missing integration between sim v2 concepts and the current `GameMaster` pipeline, and insufficient end-to-end tests using real YAML.
+
 ## CRITICAL ISSUE DISCOVERED: Massive Content Loss
 **The migration system has completely lost the multiple motives system!**
 
@@ -88,6 +103,53 @@ A concrete recovery plan to complete v2 migration, validate outputs, and remove 
 - [ ] Remove v1 configs
 - [ ] Remove v1-only code paths
 - [ ] Add CI guardrails
+
+## New Critical Work Items (from real runs)
+
+1) Fix motive condition parsing (v2→v1 conversion and runtime)
+- Problem: `success_conditions`/`failure_conditions` end up as placeholder `player_has_tag: dummy`.
+- Hypothesis: Coercion of list-based condition groups to Pydantic falls back to default.
+- Plan:
+  - In CLI conversion (`motive/cli.py::_convert_character_definition`) build `MotiveConfig` with parsed condition groups (done).
+  - Add integration test: `tests/v2_e2e/test_motives_conditions_integration.py` with minimal v2 config and tag toggles to assert WIN/FAIL/NOT_ACHIEVED.
+  - Verify in a deterministic run that condition trees show real tags (e.g., `found_mayor`).
+
+2) Action parsing and acceptance of LLM outputs
+- Problem: Turns end with "did not provide any actions" despite sensible LLM text.
+- Plan:
+  - Improve `action_parser` to extract `> verb ...` from mixed prose; accept fenced or inline `>` commands.
+  - Tests: `tests/v2_e2e/test_action_parsing_from_llm_text.py` with representative LLM outputs.
+
+3) Wire basic object/NPC interactions (look/say/pickup/read)
+- Problem: Requirement params not bound; objects/NPCs not resolved by name/alias.
+- Plan:
+  - Align parser param names with requirements (`object_name`, `direction`, `player`).
+  - Extend `_check_requirements` to resolve by aliases/case-insensitive.
+  - Tests: `tests/v2_e2e/test_object_npc_interactions.py` minimal v2 room with one object and one NPC.
+
+4) Movement via exits with aliases
+- Problem: `move` fails to resolve exits/aliases.
+- Plan:
+  - Normalize exit aliases during v2→v1 conversion; ensure exits carry `name` and `aliases`.
+  - Tests: `tests/v2_e2e/test_movement_exits.py` with multiple exits and alias forms.
+
+5) Observability scope checks (room/adjacent)
+- Problem: Event scoping breadth unclear.
+- Plan:
+  - Add tests for scopes: originator, room, adjacent.
+  - Tests: `tests/v2_e2e/test_event_scopes.py` asserting recipients.
+
+## Immediate Priority (order)
+1. Motive condition parsing (fix + tests)
+2. Action parsing robustness (tests)
+3. Object/NPC interaction requirements binding (tests)
+4. Movement/exit alias normalization (tests)
+5. Event scope validation (tests)
+
+## Definition of Done (updated)
+- All new v2 e2e tests green with minimal, isolated v2 configs.
+- Real motive run (2 players, 2 rounds) shows non-dummy motive conditions and at least one validated action per player.
+- Parallel games run completes without systemic invalid-action patterns.
 
 ## Risks & Mitigations
 - Risk: Broken includes paths → Add path validation tests and fail fast

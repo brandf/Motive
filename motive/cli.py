@@ -601,21 +601,64 @@ def _convert_object_definition(object_id: str, entity_def: Dict[str, Any]) -> Di
 
 
 def _convert_character_definition(character_id: str, entity_def: Dict[str, Any]) -> Dict[str, Any]:
-    """Convert v2 character definition to v1 format."""
-    from motive.config import CharacterConfig
+    """Convert v2 character definition to v1 format.
+
+    Ensures motives are converted into proper MotiveConfig objects with parsed
+    success/failure conditions (no placeholder 'dummy' fallbacks).
+    """
+    from motive.config import (
+        CharacterConfig,
+        MotiveConfig,
+        ActionRequirementConfig,
+        MotiveConditionGroup,
+    )
     properties = entity_def.get('properties', {})
     
-    # Convert complex fields from string representations back to objects
-    motives = None
+    # Helpers to build typed condition objects
+    def _build_condition(cond_data: Any):
+        # Single dict condition
+        if isinstance(cond_data, dict) and 'type' in cond_data:
+            return ActionRequirementConfig(**cond_data)
+        # List form: [ {operator: AND|OR}, {cond1}, {cond2}, ... ] or [ {cond} ]
+        if isinstance(cond_data, list):
+            if len(cond_data) == 1 and isinstance(cond_data[0], dict) and 'type' in cond_data[0]:
+                return ActionRequirementConfig(**cond_data[0])
+            if len(cond_data) >= 2 and isinstance(cond_data[0], dict) and 'operator' in cond_data[0]:
+                operator = cond_data[0]['operator']
+                conditions = []
+                for item in cond_data[1:]:
+                    if isinstance(item, dict):
+                        conditions.append(ActionRequirementConfig(**item))
+                return MotiveConditionGroup(operator=operator, conditions=conditions)
+        # Unknown/empty
+        return None
+
+    # Convert complex fields from string representations back to typed objects
+    motive_objs = None
     if 'motives' in properties:
         motives_str = properties['motives'].get('default', '')
         if motives_str:
             try:
                 import ast
-                motives = ast.literal_eval(motives_str)
+                # Fix single quotes to double quotes for valid Python syntax
+                motives_str_fixed = motives_str.replace("''", '"')
+                motives_list = ast.literal_eval(motives_str_fixed)
+                if isinstance(motives_list, list):
+                    motive_objs = []
+                    for m in motives_list:
+                        if isinstance(m, dict) and 'id' in m and 'description' in m:
+                            sc = _build_condition(m.get('success_conditions', []))
+                            fc = _build_condition(m.get('failure_conditions', []))
+                            motive_objs.append(
+                                MotiveConfig(
+                                    id=m['id'],
+                                    description=m['description'],
+                                    success_conditions=sc,
+                                    failure_conditions=fc,
+                                )
+                            )
             except (ValueError, SyntaxError):
-                # If parsing fails, keep as None
-                motives = None
+                motive_objs = None
     
     aliases = []
     if 'aliases' in properties:
@@ -623,7 +666,9 @@ def _convert_character_definition(character_id: str, entity_def: Dict[str, Any])
         if aliases_str:
             try:
                 import ast
-                aliases = ast.literal_eval(aliases_str)
+                # Fix single quotes to double quotes for valid Python syntax
+                aliases_str_fixed = aliases_str.replace("''", '"')
+                aliases = ast.literal_eval(aliases_str_fixed)
             except (ValueError, SyntaxError):
                 # If parsing fails, keep as empty list
                 aliases = []
@@ -634,7 +679,9 @@ def _convert_character_definition(character_id: str, entity_def: Dict[str, Any])
         if initial_rooms_str:
             try:
                 import ast
-                initial_rooms = ast.literal_eval(initial_rooms_str)
+                # Fix single quotes to double quotes for valid Python syntax
+                initial_rooms_str_fixed = initial_rooms_str.replace("''", '"')
+                initial_rooms = ast.literal_eval(initial_rooms_str_fixed)
             except (ValueError, SyntaxError):
                 # If parsing fails, keep as empty list
                 initial_rooms = []
@@ -644,7 +691,7 @@ def _convert_character_definition(character_id: str, entity_def: Dict[str, Any])
         name=properties.get('name', {}).get('default', character_id),
         backstory=properties.get('backstory', {}).get('default', ''),
         motive=properties.get('motive', {}).get('default', ''),
-        motives=motives,
+        motives=motive_objs,
         aliases=aliases,
         initial_rooms=initial_rooms
     )

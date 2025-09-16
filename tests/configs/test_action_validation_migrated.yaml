@@ -1,63 +1,33 @@
 entity_definitions:
   test_room:
-    types:
+    behaviors:
     - room
     properties:
-      name:
-        type: string
-        default: Test Room
-      description:
-        type: string
-        default: A simple test room for action validation
-      exits:
-        type: string
-        default: '{''north'': ''test_room_2''}'
-      objects:
-        type: string
-        default: '{''test_object'': {''object_type_id'': ''test_object'', ''name'':
-          ''Test Object'', ''description'': ''A simple test object'', ''current_room_id'':
-          ''test_room''}}'
-      test:
-        type: boolean
-        default: true
+      name: Test Room
+      description: A simple test room for action validation
+      exits: '{''north'': ''test_room_2''}'
+      objects: '{''test_object'': {''object_type_id'': ''test_object'', ''name'':
+        ''Test Object'', ''description'': ''A simple test object'', ''current_room_id'':
+        ''test_room''}}'
+      test: true
   test_room_2:
-    types:
+    behaviors:
     - room
     properties:
-      name:
-        type: string
-        default: Test Room 2
-      description:
-        type: string
-        default: Another test room
-      exits:
-        type: string
-        default: '{''south'': ''test_room''}'
-      objects:
-        type: string
-        default: '{}'
-      test:
-        type: boolean
-        default: true
+      name: Test Room 2
+      description: Another test room
+      exits: '{''south'': ''test_room''}'
+      objects: '{}'
+      test: true
   test_object:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: Test Object
-      description:
-        type: string
-        default: A simple test object
-      value:
-        type: number
-        default: 42
-      portable:
-        type: boolean
-        default: true
-      test:
-        type: boolean
-        default: true
+      name: Test Object
+      description: A simple test object
+      value: 42
+      portable: true
+      test: true
 action_definitions:
   look:
     name: look

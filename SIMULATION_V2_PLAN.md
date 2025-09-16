@@ -484,11 +484,12 @@ Acceptance criteria per phase:
 
 ---
 
-### Immediate Next Steps
-1) Create `motive/sim_v2` skeleton and core types: entity, properties, relations, definitions.
-2) Implement v1→v2 adapters for rooms/objects/characters and exits.
-3) Replace tags with typed properties at the wrapper layer; keep tests green.
-4) Land the unified Condition DSL and simple selectors (id/type/name), with string→AST parser and tests.
+### Immediate Next Steps (Updated Reality Check — 2025-09-16)
+1) Motive condition parsing: ensure v2 motives load into real condition trees (no `dummy`).
+2) Action parsing robustness: accept `> verb ...` in mixed-prose LLM responses.
+3) Object/NPC interactions: parameter binding and alias/name resolution in requirements.
+4) Movement via exits: normalize exit aliases in conversion; verify `move` works.
+5) Event scopes: tests for originator/room/adjacent observers.
 
 ---
 
@@ -520,20 +521,25 @@ effects:
 - This document is a living plan. Update after every meaningful change.
 - Keep priorities current and reflect completed/in-progress work.
 
-#### Current Work Queue (Prioritized)
-1. ✅ Scaffold core modules: `entity`, `properties`, `relations`, `definitions`
-2. ✅ Minimal TDD tests for entity/properties/relations
-3. ✅ v1→v2 adapters for rooms/objects/characters (no behavior change)
-4. ✅ Replace tags with typed properties at wrapper layer
-5. ✅ Query + Condition DSL (with string→AST parser)
-6. ✅ Effects primitives (set/move/link/emit)
-7. ✅ Unified exits (visible/traversable/locked) + computed gating
-8. ✅ VisibilityAspect + search/discover mechanics
-9. ✅ Triggers (edge detection + undo)
-10. ✅ Affordances (object-contributed actions)
-11. ✅ Status effects (apply/remove/duration/overlays)
-12. ✅ Entity lifecycle (spawn/destroy/clone)
-13. ☐ Portals (future extension of exits)
+#### Current Work Queue (Prioritized — updated)
+1. ☐ Motive condition parsing end-to-end (config → runtime) with tests
+2. ☐ Robust action parsing from LLM text with tests
+3. ☐ Object/NPC interaction requirements + alias resolution with tests
+4. ☐ Movement via exits/aliases verification with tests
+5. ☐ Event scopes (originator/room/adjacent) tests
+6. ✅ Scaffold core modules: `entity`, `properties`, `relations`, `definitions`
+7. ✅ Minimal TDD tests for entity/properties/relations
+8. ✅ v1→v2 adapters for rooms/objects/characters (no behavior change)
+9. ✅ Replace tags with typed properties at wrapper layer
+10. ✅ Query + Condition DSL (with string→AST parser)
+11. ✅ Effects primitives (set/move/link/emit)
+12. ✅ Unified exits (visible/traversable/locked) + computed gating
+13. ✅ VisibilityAspect + search/discover mechanics
+14. ✅ Triggers (edge detection + undo)
+15. ✅ Affordances (object-contributed actions)
+16. ✅ Status effects (apply/remove/duration/overlays)
+17. ✅ Entity lifecycle (spawn/destroy/clone)
+18. ☐ Portals (future extension of exits)
 
 #### Recently Completed
 - ✅ Drafted SIMULATION_V2_PLAN.md and got approval

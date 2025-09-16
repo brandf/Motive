@@ -1,14 +1,10 @@
 entity_definitions:
   patched_object:
-    types:
+    behaviors:
     - object
     properties:
-      name:
-        type: string
-        default: ''
-      description:
-        type: string
-        default: ''
+      name: ''
+      description: ''
 action_definitions:
   move_action_patched:
     name: move_action_patched

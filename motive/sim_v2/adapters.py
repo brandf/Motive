@@ -53,10 +53,12 @@ class V1ToV2Adapter:
         # CRITICAL: Convert v1 tags to boolean properties (tags are deprecated in v2)
         tags = v1_room.get("tags", [])
         for tag in tags:
-            properties[tag] = PropertySchema(
-                type=PropertyType.BOOLEAN,
-                default=True
-            )
+            # Skip complex objects (like merge strategies) - only process simple string tags
+            if isinstance(tag, str):
+                properties[tag] = PropertySchema(
+                    type=PropertyType.BOOLEAN,
+                    default=True
+                )
         
         return EntityDefinition(
             definition_id=v1_room["id"],
@@ -87,10 +89,12 @@ class V1ToV2Adapter:
         # CRITICAL: Convert v1 tags to boolean properties (tags are deprecated in v2)
         tags = v1_object_type.get("tags", [])
         for tag in tags:
-            properties[tag] = PropertySchema(
-                type=PropertyType.BOOLEAN,
-                default=True
-            )
+            # Skip complex objects (like merge strategies) - only process simple string tags
+            if isinstance(tag, str):
+                properties[tag] = PropertySchema(
+                    type=PropertyType.BOOLEAN,
+                    default=True
+                )
         
         return EntityDefinition(
             definition_id=v1_object_type["id"],
@@ -101,44 +105,28 @@ class V1ToV2Adapter:
     def character_to_definition(self, v1_character: Dict[str, Any]) -> EntityDefinition:
         """Convert v1 character config to v2 entity definition."""
         properties = {}
+        config = {}
         
-        # Core character properties
-        properties["name"] = PropertySchema(
-            type=PropertyType.STRING,
-            default=v1_character.get("name", "")
-        )
-        properties["backstory"] = PropertySchema(
-            type=PropertyType.STRING,
-            default=v1_character.get("backstory", "")
-        )
+        # Immutable configuration data (not runtime state)
+        config["name"] = v1_character.get("name", "")
+        config["backstory"] = v1_character.get("backstory", "")
         
         # Preserve the single motive field if it exists
         if "motive" in v1_character:
-            properties["motive"] = PropertySchema(
-                type=PropertyType.STRING,
-                default=v1_character.get("motive", "")
-            )
+            config["motive"] = v1_character.get("motive", "")
         
-        # CRITICAL: Preserve the complex motives array
+        # CRITICAL: Preserve the complex motives array, converting player_has_tag to character_has_property
         if "motives" in v1_character:
-            properties["motives"] = PropertySchema(
-                type=PropertyType.STRING,  # Store as JSON string for now
-                default=str(v1_character["motives"])  # Convert to string representation
-            )
+            converted_motives = self._convert_motive_conditions(v1_character["motives"])
+            config["motives"] = converted_motives  # Store as proper nested data
         
         # CRITICAL: Preserve initial_rooms
         if "initial_rooms" in v1_character:
-            properties["initial_rooms"] = PropertySchema(
-                type=PropertyType.STRING,  # Store as JSON string for now
-                default=str(v1_character["initial_rooms"])
-            )
+            config["initial_rooms"] = v1_character["initial_rooms"]
         
         # CRITICAL: Preserve aliases
         if "aliases" in v1_character:
-            properties["aliases"] = PropertySchema(
-                type=PropertyType.STRING,  # Store as JSON string for now
-                default=str(v1_character["aliases"])
-            )
+            config["aliases"] = v1_character["aliases"]
         
         # Convert v1 character properties to typed properties
         v1_props = v1_character.get("properties", {})
@@ -149,16 +137,62 @@ class V1ToV2Adapter:
         # CRITICAL: Convert v1 tags to boolean properties (tags are deprecated in v2)
         tags = v1_character.get("tags", [])
         for tag in tags:
-            properties[tag] = PropertySchema(
-                type=PropertyType.BOOLEAN,
-                default=True
-            )
+            # Skip complex objects (like merge strategies) - only process simple string tags
+            if isinstance(tag, str):
+                properties[tag] = PropertySchema(
+                    type=PropertyType.BOOLEAN,
+                    default=True
+                )
         
         return EntityDefinition(
             definition_id=v1_character["id"],
             types=["character"],
-            properties=properties
+            properties=properties,
+            config=config
         )
+    
+    def _convert_motive_conditions(self, motives: list) -> list:
+        """Convert player_has_tag conditions to character_has_property in motives."""
+        converted_motives = []
+        for motive in motives:
+            if isinstance(motive, dict):
+                converted_motive = motive.copy()
+                
+                # Convert success_conditions
+                if "success_conditions" in converted_motive:
+                    converted_motive["success_conditions"] = self._convert_condition_list(
+                        converted_motive["success_conditions"]
+                    )
+                
+                # Convert failure_conditions
+                if "failure_conditions" in converted_motive:
+                    converted_motive["failure_conditions"] = self._convert_condition_list(
+                        converted_motive["failure_conditions"]
+                    )
+                
+                converted_motives.append(converted_motive)
+            else:
+                converted_motives.append(motive)
+        
+        return converted_motives
+    
+    def _convert_condition_list(self, conditions: list) -> list:
+        """Convert player_has_tag conditions to character_has_property in a condition list."""
+        converted_conditions = []
+        for condition in conditions:
+            if isinstance(condition, dict):
+                converted_condition = condition.copy()
+                if condition.get("type") == "player_has_tag" and "tag" in condition:
+                    converted_condition["type"] = "character_has_property"
+                    converted_condition["property"] = condition["tag"]
+                    converted_condition["value"] = True
+                    # Remove the old tag field
+                    converted_condition.pop("tag", None)
+                converted_conditions.append(converted_condition)
+            else:
+                converted_conditions.append(condition)
+        
+        return converted_conditions
     
     def object_instance_to_entity(
         self, 
@@ -199,6 +233,8 @@ class V1ToV2Adapter:
             return PropertyType.NUMBER
         elif isinstance(value, str):
             return PropertyType.STRING
+        elif isinstance(value, (dict, list)):
+            return PropertyType.OBJECT
         else:
             # Default to string for unknown types
             return PropertyType.STRING
