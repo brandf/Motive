@@ -1,0 +1,23 @@
+entity_definitions:
+  lighter:
+    behaviors:
+      - character
+    attributes:
+      name: Lighter
+      backstory: Lights things.
+      motives: []
+  watcher:
+    behaviors:
+      - character
+    attributes:
+      name: Watcher
+      backstory: Watches things.
+      motives: []
+  torch_type:
+    behaviors:
+      - object
+    attributes:
+      name: Torch
+      description: A generic torch type.
+
+

@@ -1,0 +1,10 @@
+entity_definitions:
+  helper:
+    behaviors:
+      - character
+    attributes:
+      name: Helper
+      backstory: Asks for help.
+      motives: []
+
+

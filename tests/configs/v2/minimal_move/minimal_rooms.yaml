@@ -1,0 +1,31 @@
+entity_definitions:
+  room_a:
+    behaviors:
+      - room
+    attributes:
+      name: Room A
+      description: "A simple room A."
+    properties:
+      exits:
+        east:
+          id: east
+          name: East Door
+          destination_room_id: room_b
+          aliases: ["east", "e", "door"]
+      objects: {}
+  room_b:
+    behaviors:
+      - room
+    attributes:
+      name: Room B
+      description: "A simple room B."
+    properties:
+      exits:
+        west:
+          id: west
+          name: West Door
+          destination_room_id: room_a
+          aliases: ["west", "w", "door"]
+      objects: {}
+
+

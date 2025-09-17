@@ -1,0 +1,28 @@
+action_definitions:
+  look:
+    name: look
+    description: Look around.
+    cost: 1
+    category: observation
+    parameters:
+      - name: target
+        type: string
+        description: Optional thing to look at
+        required: false
+        default_value: null
+    requirements: []
+    effects:
+      - type: code_binding
+        function_name: look_at_target
+        observers:
+          - player
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+
+

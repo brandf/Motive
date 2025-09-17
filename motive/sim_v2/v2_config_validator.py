@@ -7,7 +7,7 @@ validate and provide typed access to the configuration data.
 """
 
 from typing import Dict, Any, List, Optional, Union
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from .definitions import EntityDefinition
 from .actions_pipeline import ActionDefinition
 
@@ -48,11 +48,11 @@ class V2GameConfig(BaseModel):
     
     # No theme/edition metadata needed - config includes handle organization
     
-    class Config:
-        # Allow extra fields for backward compatibility
-        extra = "allow"
+    # Allow extra fields for backward compatibility (Pydantic v2 style)
+    model_config = ConfigDict(extra="allow")
     
-    @validator('entity_definitions', pre=True)
+    @field_validator('entity_definitions', mode='before')
+    @classmethod
     def parse_entity_definitions(cls, v):
         """Parse entity definitions from dict format."""
         if isinstance(v, dict):
@@ -86,7 +86,8 @@ class V2GameConfig(BaseModel):
             return result
         return v
     
-    @validator('action_definitions', pre=True)
+    @field_validator('action_definitions', mode='before')
+    @classmethod
     def parse_action_definitions(cls, v):
         """Parse action definitions from dict format."""
         if isinstance(v, dict):

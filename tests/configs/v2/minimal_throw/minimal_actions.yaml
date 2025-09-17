@@ -1,0 +1,58 @@
+action_definitions:
+  pickup:
+    name: pickup
+    description: Pick up an object from the room.
+    cost: 1
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: Name of the object
+        required: true
+        default_value: null
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: handle_pickup_action
+        observers:
+          - player
+  throw:
+    name: throw
+    description: Throw an object from your inventory through an exit to an adjacent room.
+    cost: 1
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to throw.
+        required: true
+        default_value: null
+      - name: exit
+        type: string
+        description: The exit/direction to throw the object through.
+        required: true
+        default_value: null
+    requirements:
+      - type: object_in_inventory
+        object_name_param: object_name
+      - type: exit_exists
+        direction_param: exit
+    effects:
+      - type: code_binding
+        function_name: handle_throw_action
+        observers:
+          - player
+          - room_players
+          - adjacent_rooms
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+
+

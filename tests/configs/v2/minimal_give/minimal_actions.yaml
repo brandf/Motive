@@ -1,0 +1,57 @@
+action_definitions:
+  pickup:
+    name: pickup
+    description: Pick up an object from the room.
+    cost: 1
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: Name of the object
+        required: true
+        default_value: null
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: handle_pickup_action
+        observers:
+          - player
+  give:
+    name: give
+    description: Give an object from your inventory to another player.
+    cost: 1
+    category: inventory
+    parameters:
+      - name: player
+        type: string
+        description: The name of the player to give to.
+        required: true
+        default_value: null
+      - name: object_name
+        type: string
+        description: The name of the object to give.
+        required: true
+        default_value: null
+    requirements:
+      - type: player_in_room
+        target_player_param: player
+      - type: object_in_inventory
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: handle_give_action
+        observers:
+          - player
+          - room_players
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+
+

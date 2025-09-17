@@ -1,0 +1,16 @@
+includes:
+  - "minimal_actions.yaml"
+  - "minimal_rooms.yaml"
+  - "minimal_characters.yaml"
+
+game_settings:
+  num_rounds: 1
+  initial_ap_per_turn: 5
+  manual: "../docs/MANUAL.md"
+
+players:
+  - name: "Player_1"
+    provider: "dummy"
+    model: "test"
+
+

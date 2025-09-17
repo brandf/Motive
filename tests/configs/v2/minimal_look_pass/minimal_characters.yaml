@@ -1,0 +1,10 @@
+entity_definitions:
+  tester:
+    behaviors:
+      - character
+    attributes:
+      name: Test Character
+      backstory: Just here to test.
+      motives: []
+
+

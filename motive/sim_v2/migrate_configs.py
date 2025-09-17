@@ -50,18 +50,39 @@ def convert_to_v2_format(loader: V2ConfigLoader, original_config: Dict[str, Any]
     if loader.definitions._defs:
         v2_config["entity_definitions"] = {}
         for def_id, definition in loader.definitions._defs.items():
-            v2_config["entity_definitions"][def_id] = {
-                "behaviors": definition.types,
-                "properties": {}
-            }
-            
-            # Add config fields as top-level siblings
-            for config_key, config_value in definition.config.items():
-                v2_config["entity_definitions"][def_id][config_key] = config_value
-            
-            # Convert properties to simple key: value format
+            # Start with behaviors
+            ent: dict = {"behaviors": definition.types}
+
+            # Split immutable attributes from mutable properties
+            attributes: dict = {}
+            properties: dict = {}
+
+            # Move common immutable fields to attributes if present in config
+            # Characters: name, backstory, aliases, motives, initial_rooms
+            # Objects/Rooms: name, description
+            if definition.config:
+                for key in ("name", "description", "backstory", "aliases", "motives", "initial_rooms"):
+                    if key in definition.config:
+                        attributes[key] = definition.config[key]
+                # Include any other non-mutable metadata already under attributes in config
+                if "attributes" in definition.config and isinstance(definition.config["attributes"], dict):
+                    attributes.update(definition.config["attributes"])  # prefer explicit attributes
+
+            # Convert property schema defaults; keep mutable state in properties
             for prop_name, prop_schema in definition.properties.items():
-                v2_config["entity_definitions"][def_id]["properties"][prop_name] = prop_schema.default
+                # If a property duplicates an immutable attribute, prefer attribute and skip here
+                if prop_name in ("name", "description", "backstory", "aliases", "motives", "initial_rooms"):
+                    if prop_name not in attributes and prop_schema.default is not None:
+                        # Fallback: treat as attribute when schema mistakenly carries immutable
+                        attributes[prop_name] = prop_schema.default
+                    continue
+                properties[prop_name] = prop_schema.default
+
+            if attributes:
+                ent["attributes"] = attributes
+            ent["properties"] = properties
+
+            v2_config["entity_definitions"][def_id] = ent
     
     # Add action definitions
     if loader.actions:

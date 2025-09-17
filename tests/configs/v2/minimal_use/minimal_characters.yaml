@@ -1,0 +1,29 @@
+entity_definitions:
+  user:
+    behaviors:
+      - character
+    attributes:
+      name: User
+      backstory: Uses items.
+      motives: []
+  watcher:
+    behaviors:
+      - character
+    attributes:
+      name: Watcher
+      backstory: Watches actions.
+      motives: []
+  key_type:
+    behaviors:
+      - object
+    attributes:
+      name: Key
+      description: A generic key.
+  chest_type:
+    behaviors:
+      - object
+    attributes:
+      name: Chest
+      description: A generic chest.
+
+

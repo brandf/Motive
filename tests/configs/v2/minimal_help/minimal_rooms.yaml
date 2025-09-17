@@ -1,0 +1,12 @@
+entity_definitions:
+  doc_room:
+    behaviors:
+      - room
+    attributes:
+      name: Doc Room
+      description: "A room for help testing."
+    properties:
+      exits: {}
+      objects: {}
+
+

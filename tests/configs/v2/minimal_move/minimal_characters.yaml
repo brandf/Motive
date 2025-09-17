@@ -1,0 +1,10 @@
+entity_definitions:
+  walker:
+    behaviors:
+      - character
+    attributes:
+      name: Test Walker
+      backstory: Moves between two rooms.
+      motives: []
+
+

@@ -1,0 +1,30 @@
+action_definitions:
+  move:
+    name: move
+    description: Move between rooms using exit aliases.
+    cost: 1
+    category: movement
+    parameters:
+      - name: direction
+        type: string
+        description: Exit alias or name
+        required: true
+        default_value: null
+    requirements:
+      - type: exit_exists
+        direction_param: direction
+    effects:
+      - type: code_binding
+        function_name: handle_move_action
+        observers:
+          - player
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+
+

@@ -1,7 +1,7 @@
 import ast
 import logging
 import yaml
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, ValidationError
 
 from motive.config import (
@@ -114,14 +114,16 @@ class GameInitializer:
                 entity_types = entity_data.get('behaviors', entity_data.get('types', []))
                 self.game_logger.info(f"Processing entity {entity_id} with types {entity_types}")
                 if 'object' in entity_types:
-                    # Convert to ObjectTypeConfig - map entity_id to id field and extract name/description from properties
+                    # Convert to ObjectTypeConfig - map entity_id to id field and extract name/description from attributes/properties
                     config_data = {}
                     config_data['id'] = entity_id
                     
-                    # Extract name and description from properties
+                    # Prefer attributes over legacy properties
+                    attributes = entity_data.get('attributes', entity_data.get('config', {}).get('attributes', {}))
                     properties = entity_data.get('properties', {})
-                    config_data['name'] = properties.get('name', entity_id)
-                    config_data['description'] = properties.get('description', f"A {entity_id} object")
+                    name_source = attributes if attributes else properties
+                    config_data['name'] = name_source.get('name', entity_id)
+                    config_data['description'] = name_source.get('description', f"A {entity_id} object")
                     
                     # Copy other properties that might be relevant
                     for key, value in entity_data.items():
@@ -130,22 +132,32 @@ class GameInitializer:
                     
                     self.game_object_types[entity_id] = ObjectTypeConfig(**config_data)
                 elif 'character' in entity_types:
-                    # Convert to CharacterConfig - map entity_id to id field and extract name from properties
+                    # Convert to CharacterConfig - map entity_id to id field and extract name from attributes (preferred)
                     self.game_logger.info(f"Processing character entity {entity_id}, checking for converted character type")
                     config_data = {}
                     config_data['id'] = entity_id
                     
-                    # Extract name from properties
+                    # Extract name/backstory from attributes (preferred) or properties
+                    attributes = entity_data.get('attributes', entity_data.get('config', {}).get('attributes', {}))
                     properties = entity_data.get('properties', {})
-                    config_data['name'] = properties.get('name', entity_id)
-                    
+                    attr_source = attributes if attributes else properties
+                    config_data['name'] = attr_source.get('name', entity_id)
                     # Add required backstory field
-                    config_data['backstory'] = properties.get('backstory', f"A character with the role of {config_data['name']}")
+                    config_data['backstory'] = attr_source.get('backstory', f"A character with the role of {config_data['name']}")
                     
                     # Copy motives if present (v2 stores motives in config field)
-                    if hasattr(entity_def, 'config') and entity_def.config and 'motives' in entity_def.config:
-                        # Convert motives from dict format to MotiveConfig objects
+                    converted_motives = None
+                    # Prefer attributes.motives, support legacy config.motives
+                    motives_data = None
+                    if 'attributes' in entity_data and 'motives' in entity_data['attributes']:
+                        motives_data = entity_data['attributes']['motives']
+                    elif 'properties' in entity_data and 'motives' in entity_data['properties']:
+                        motives_data = entity_data['properties']['motives']
+                    elif hasattr(entity_def, 'config') and entity_def.config and 'motives' in entity_def.config:
                         motives_data = entity_def.config['motives']
+                    
+                    if motives_data is not None:
+                        # Convert motives from dict format to MotiveConfig objects
                         self.game_logger.info(f"Converting motives for {entity_id}: {len(motives_data)} motives found")
                         if motives_data:
                             from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
@@ -203,39 +215,66 @@ class GameInitializer:
                                 self.game_logger.error(f"Failed to parse motives for {entity_id}: {e}")
                                 config_data['motives'] = []
                         else:
+                            # Already a structured list of motive dicts
                             config_data['motives'] = motives_data
                     
-                    # Copy other properties that might be relevant
+                    # Copy other fields that might be relevant
                     for key, value in entity_data.items():
-                        if key not in ['behaviors', 'types', 'properties', 'motives']:
+                        if key not in ['behaviors', 'types', 'properties', 'attributes', 'motives']:
                             config_data[key] = value
                     
-                    # Store v2 EntityDefinition directly - no conversion needed
-                    self.game_character_types[entity_id] = entity_def
-                    self.game_logger.info(f"Stored v2 character entity {entity_id} directly")
+                    # Store a mutated v2 entity def that includes a 'config' section so downstream code can read motives
+                    stored_def = entity_data.copy()
+                    # Ensure attributes exist and include name/backstory when available
+                    stored_def.setdefault('attributes', {})
+                    if 'name' in config_data:
+                        stored_def['attributes']['name'] = config_data['name']
+                    if 'backstory' in config_data:
+                        stored_def['attributes']['backstory'] = config_data['backstory']
+                    # Move motives under attributes for v2 schema clarity
+                    if 'motives' in config_data and config_data['motives'] is not None:
+                        stored_def['attributes']['motives'] = config_data['motives']
+                    self.game_character_types[entity_id] = stored_def
+                    self.game_logger.info(f"Stored v2 character entity {entity_id} with attributes.motives: {bool(stored_def.get('attributes', {}).get('motives'))}")
                 elif 'room' in entity_types:
                     # Convert to room data - extract properties and store in game_rooms
+                    attributes = entity_data.get('attributes', {})
                     properties = entity_data.get('properties', {})
+                    room_source = attributes if attributes else properties
                     
                     # Parse exits and objects from string representations if needed
-                    exits = properties.get('exits', {})
+                    exits = room_source.get('exits', {})
                     if isinstance(exits, str):
                         try:
-                            exits = ast.literal_eval(exits.replace("'", '"'))
+                            # Handle YAML double-single-quote format ('' -> ')
+                            cleaned_exits = exits.replace("''", "'")
+                            exits = ast.literal_eval(cleaned_exits)
                         except:
-                            exits = {}
+                            # Fallback: try to parse as JSON-like format
+                            try:
+                                import json
+                                exits = json.loads(exits.replace("'", '"'))
+                            except:
+                                exits = {}
                     
-                    objects = properties.get('objects', {})
+                    objects = room_source.get('objects', {})
                     if isinstance(objects, str):
                         try:
-                            objects = ast.literal_eval(objects.replace("'", '"'))
+                            # Handle YAML double-single-quote format ('' -> ')
+                            cleaned_objects = objects.replace("''", "'")
+                            objects = ast.literal_eval(cleaned_objects)
                         except:
-                            objects = {}
+                            # Fallback: try to parse as JSON-like format
+                            try:
+                                import json
+                                objects = json.loads(objects.replace("'", '"'))
+                            except:
+                                objects = {}
                     
                     room_data = {
                         'id': entity_id,  # Add required id field
-                        'name': properties.get('name', entity_id),
-                        'description': properties.get('description', f"A room called {entity_id}"),
+                        'name': room_source.get('name', entity_id),
+                        'description': room_source.get('description', f"A room called {entity_id}"),
                         'exits': exits,
                         'objects': objects
                     }
@@ -288,12 +327,16 @@ class GameInitializer:
                 else:
                     # Dictionary
                     action_data = action_def
-                
+
                 # Map v2 action_id to v1 id field
                 if 'action_id' in action_data and 'id' not in action_data:
                     action_data = action_data.copy()
                     action_data['id'] = action_data.pop('action_id')
-                
+                # Ensure id exists for dict-based actions
+                if 'id' not in action_data:
+                    action_data = action_data.copy()
+                    action_data['id'] = action_id
+
                 self.game_actions[action_id] = ActionConfig(**action_data)
 
         # Handle v1 configs (actions)
@@ -316,14 +359,15 @@ class GameInitializer:
                 entity_types = entity_data.get('behaviors', entity_data.get('types', []))
                 self.game_logger.info(f"Processing entity {entity_id}: types = {entity_types}")
                 if 'object' in entity_types:
-                    # Convert to ObjectTypeConfig - map entity_id to id field and extract name/description from properties
+                    # Convert to ObjectTypeConfig - map entity_id to id field and extract name/description from attributes/properties
                     config_data = {}
                     config_data['id'] = entity_id
-                    
-                    # Extract name and description from properties
+                    # Prefer attributes over legacy properties
+                    attributes = entity_data.get('attributes', entity_data.get('config', {}).get('attributes', {}))
                     properties = entity_data.get('properties', {})
-                    config_data['name'] = properties.get('name', entity_id)
-                    config_data['description'] = properties.get('description', f"A {entity_id} object")
+                    name_source = attributes if attributes else properties
+                    config_data['name'] = name_source.get('name', entity_id)
+                    config_data['description'] = name_source.get('description', f"A {entity_id} object")
                     
                     # Copy other properties that might be relevant
                     for key, value in entity_data.items():
@@ -332,17 +376,17 @@ class GameInitializer:
                     
                     self.game_object_types[entity_id] = ObjectTypeConfig(**config_data)
                 elif 'character' in entity_types:
-                    # Convert to CharacterConfig - map entity_id to id field and extract name from properties
+                    # Convert to CharacterConfig - map entity_id to id field and extract from attributes
                     self.game_logger.info(f"Processing character entity {entity_id}, checking for converted character type")
                     config_data = {}
                     config_data['id'] = entity_id
-                    
-                    # Extract name from properties
+                    # Extract name/backstory from attributes (preferred) or properties
+                    attributes = entity_data.get('attributes', entity_data.get('config', {}).get('attributes', {}))
                     properties = entity_data.get('properties', {})
-                    config_data['name'] = properties.get('name', entity_id)
-                    
+                    attr_source = attributes if attributes else properties
+                    config_data['name'] = attr_source.get('name', entity_id)
                     # Add required backstory field
-                    config_data['backstory'] = properties.get('backstory', f"A character with the role of {config_data['name']}")
+                    config_data['backstory'] = attr_source.get('backstory', f"A character with the role of {config_data['name']}")
                     
                     # Copy motives if present (v2 stores motives in config field)
                     if hasattr(entity_def, 'config') and entity_def.config and 'motives' in entity_def.config:
@@ -407,37 +451,60 @@ class GameInitializer:
                         else:
                             config_data['motives'] = motives_data
                     
-                    # Copy other properties that might be relevant
+                    # Copy other fields that might be relevant
                     for key, value in entity_data.items():
-                        if key not in ['behaviors', 'types', 'properties', 'motives']:
+                        if key not in ['behaviors', 'types', 'properties', 'attributes', 'motives']:
                             config_data[key] = value
                     
-                    # Store v2 EntityDefinition directly - no conversion needed
-                    self.game_character_types[entity_id] = entity_def
-                    self.game_logger.info(f"Stored v2 character entity {entity_id} directly")
+                    # Store a mutated v2 entity def that includes an attributes section for downstream code
+                    stored_def = entity_data.copy()
+                    stored_def.setdefault('attributes', {})
+                    if 'name' in config_data:
+                        stored_def['attributes']['name'] = config_data['name']
+                    if 'backstory' in config_data:
+                        stored_def['attributes']['backstory'] = config_data['backstory']
+                    if 'motives' in config_data and config_data['motives'] is not None:
+                        stored_def['attributes']['motives'] = config_data['motives']
+                    self.game_character_types[entity_id] = stored_def
+                    self.game_logger.info(f"Stored v2 character entity {entity_id} with attributes.motives: {bool(stored_def.get('attributes', {}).get('motives'))}")
                 elif 'room' in entity_types:
                     # Convert to room data - extract properties and store in game_rooms
+                    attributes = entity_data.get('attributes', entity_data.get('config', {}).get('attributes', {}))
                     properties = entity_data.get('properties', {})
                     
                     # Parse exits and objects from string representations if needed
                     exits = properties.get('exits', {})
                     if isinstance(exits, str):
                         try:
-                            exits = ast.literal_eval(exits.replace("'", '"'))
+                            # Handle YAML double-single-quote format ('' -> ')
+                            cleaned_exits = exits.replace("''", "'")
+                            exits = ast.literal_eval(cleaned_exits)
                         except:
-                            exits = {}
+                            # Fallback: try to parse as JSON-like format
+                            try:
+                                import json
+                                exits = json.loads(exits.replace("'", '"'))
+                            except:
+                                exits = {}
                     
                     objects = properties.get('objects', {})
                     if isinstance(objects, str):
                         try:
-                            objects = ast.literal_eval(objects.replace("'", '"'))
+                            # Handle YAML double-single-quote format ('' -> ')
+                            cleaned_objects = objects.replace("''", "'")
+                            objects = ast.literal_eval(cleaned_objects)
                         except:
-                            objects = {}
+                            # Fallback: try to parse as JSON-like format
+                            try:
+                                import json
+                                objects = json.loads(objects.replace("'", '"'))
+                            except:
+                                objects = {}
                     
                     room_data = {
                         'id': entity_id,  # Add required id field
-                        'name': properties.get('name', entity_id),
-                        'description': properties.get('description', f"A room called {entity_id}"),
+                        'name': (attributes.get('name') if attributes else properties.get('name', entity_id)),
+                        'description': (attributes.get('description') if attributes else properties.get('description', f"A room called {entity_id}")),
                         'exits': exits,
                         'objects': objects
                     }
@@ -597,13 +664,19 @@ class GameInitializer:
                 char_motives = char_cfg.get('motives', None)  # New multiple motives
                 char_aliases = char_cfg.get('aliases', [])
             else:
-                # v2 EntityDefinition format - entity_id is the key, character data is in config
+                # v2 EntityDefinition format - entity_id is the key, character data is in attributes (preferred) or legacy config
                 char_id = char_id_to_assign  # Use the entity_id as the character id
-                config_data = char_cfg.get('config', {})
+                attributes = char_cfg.get('attributes', {})
+                legacy_config = char_cfg.get('config', {})
+                properties = char_cfg.get('properties', {})
+                # Prefer attributes, then legacy config; keep properties for fallback of motives only
+                config_data = attributes if attributes else legacy_config
                 char_name = config_data.get('name', char_id)
                 char_backstory = config_data.get('backstory', '')
                 char_motive = config_data.get('motive', None)  # Legacy single motive
                 char_motives = config_data.get('motives', None)  # New multiple motives
+                if not char_motives and properties and 'motives' in properties:
+                    char_motives = properties.get('motives')
                 char_aliases = config_data.get('aliases', [])
 
             # Convert motives dictionaries to MotiveConfig objects if needed
@@ -729,16 +802,29 @@ class GameInitializer:
                 # Single condition in a list
                 return ActionRequirementConfig(**conditions_data[0])
             else:
-                # Multiple conditions - require explicit operator
-                if not isinstance(conditions_data[0], dict) or 'operator' not in conditions_data[0]:
-                    raise ValueError("Multiple conditions require explicit 'operator' field (AND or OR)")
+                # Handle v2 format where operator is a separate list item
+                # Format: [{'operator': 'AND'}, {'type': '...', 'property': '...', 'value': '...'}, ...]
+                if len(conditions_data) >= 2 and isinstance(conditions_data[0], dict) and 'operator' in conditions_data[0]:
+                    operator = conditions_data[0]['operator']
+                    conditions = []
+                    for condition_dict in conditions_data[1:]:
+                        if isinstance(condition_dict, dict) and 'type' in condition_dict:
+                            conditions.append(ActionRequirementConfig(**condition_dict))
+                    
+                    if conditions:
+                        return MotiveConditionGroup(operator=operator, conditions=conditions)
                 
-                operator = conditions_data[0]['operator']
-                conditions = []
-                for condition_dict in conditions_data[1:]:
-                    conditions.append(ActionRequirementConfig(**condition_dict))
+                # Fallback: try to find operator in first condition
+                if isinstance(conditions_data[0], dict) and 'operator' in conditions_data[0]:
+                    operator = conditions_data[0]['operator']
+                    conditions = []
+                    for condition_dict in conditions_data[1:]:
+                        conditions.append(ActionRequirementConfig(**condition_dict))
+                    
+                    return MotiveConditionGroup(operator=operator, conditions=conditions)
                 
-                return MotiveConditionGroup(operator=operator, conditions=conditions)
+                # If no operator found, treat as single condition
+                return ActionRequirementConfig(**conditions_data[0])
         
         return ActionRequirementConfig(type="character_has_property", property="dummy", value=True)  # Default fallback
 

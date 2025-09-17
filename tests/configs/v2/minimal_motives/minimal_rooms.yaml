@@ -1,0 +1,11 @@
+entity_definitions:
+  motive_room:
+    behaviors:
+      - room
+    properties:
+      name: Motive Room
+      description: "A room for motive testing."
+      exits: {}
+      objects: {}
+
+

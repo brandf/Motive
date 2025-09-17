@@ -1,0 +1,30 @@
+action_definitions:
+  investigate:
+    name: investigate
+    description: Investigate a nearby object.
+    cost: 1
+    category: interaction
+    parameters:
+      - name: target
+        type: string
+        description: The name of the object to investigate.
+        required: true
+        default_value: null
+    requirements:
+      - type: object_in_room
+        object_name_param: target
+    effects:
+      - type: code_binding
+        function_name: handle_investigate_action
+        observers:
+          - player
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+
+

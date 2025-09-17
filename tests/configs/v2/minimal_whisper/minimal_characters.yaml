@@ -1,0 +1,17 @@
+entity_definitions:
+  talker_1:
+    behaviors:
+      - character
+    attributes:
+      name: Talker One
+      backstory: First speaker.
+      motives: []
+  talker_2:
+    behaviors:
+      - character
+    attributes:
+      name: Talker Two
+      backstory: Second listener.
+      motives: []
+
+

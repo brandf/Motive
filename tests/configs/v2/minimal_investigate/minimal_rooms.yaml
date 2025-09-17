@@ -1,0 +1,19 @@
+entity_definitions:
+  hall:
+    behaviors:
+      - room
+    attributes:
+      name: Hall
+      description: "A hall with a statue."
+    properties:
+      exits: {}
+      objects:
+        statue_1:
+          id: statue_1
+          name: Statue
+          object_type_id: statue_type
+          current_room_id: hall
+          description: "A mysterious statue."
+          properties: {}
+
+

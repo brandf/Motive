@@ -1,0 +1,28 @@
+action_definitions:
+  say:
+    name: say
+    description: Say something to other players in the room.
+    cost: 1
+    category: communication
+    parameters:
+      - name: phrase
+        type: string
+        description: The message to say to other players.
+        required: true
+        default_value: null
+    requirements: []
+    effects:
+      - type: generate_event
+        message: "Player {player_name} says: \"{phrase}\""
+        observers:
+          - room_players
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+
+

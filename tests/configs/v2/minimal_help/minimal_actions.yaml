@@ -1,0 +1,26 @@
+action_definitions:
+  help:
+    name: help
+    description: Show help.
+    cost:
+      type: code_binding
+      function_name: calculate_help_cost
+      value: 1
+    category: system
+    parameters: []
+    requirements: []
+    effects:
+      - type: code_binding
+        function_name: generate_help_message
+        observers:
+          - player
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+
+

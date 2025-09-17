@@ -1,0 +1,23 @@
+entity_definitions:
+  giver:
+    behaviors:
+      - character
+    attributes:
+      name: Giver
+      backstory: Gives items.
+      motives: []
+  listener:
+    behaviors:
+      - character
+    attributes:
+      name: Listener
+      backstory: Receives items.
+      motives: []
+  coin_type:
+    behaviors:
+      - object
+    attributes:
+      name: Coin
+      description: A shiny coin.
+
+

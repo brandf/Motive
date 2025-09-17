@@ -117,6 +117,14 @@ At runtime, the world is a graph of entities with typed properties and relations
 - ☐ Lint/validate configs and detect cycles at load time
 - ☐ TDD workflow docs and sample tests per module; CI gate on coverage/linters
 
+##### Deterministic Integration Strategy (v2)
+- ✅ Minimal, isolated feature tests with tiny v2 YAML configs per capability (move, inventory, look, etc.) using mocked LLMs with canned responses
+- ☐ Medium-sized “combination” scenarios to validate interactions across features (also with mocked LLMs):
+  - Inventory management task: move a set of objects from Room A to Room B using `pickup`, `drop`, `throw`, `move`; verify counts and observability
+  - Communication relay: characters in multiple rooms pass messages via `whisper`, `say`, `shout`, with `move` between rooms; verify who hears what and when
+  - Puzzles across rooms: combine `read`, `look`, `use`/`light` with exit state changes; verify conditions and success criteria advance
+- ☐ Keep medium configs self-contained under `tests/configs/v2/combination_*` and tests under `tests/integration_v2/` with deterministic canned conversations
+
 ---
 
 ### Data Model (Runtime)

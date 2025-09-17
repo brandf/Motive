@@ -1,0 +1,19 @@
+entity_definitions:
+  trade_room:
+    behaviors:
+      - room
+    attributes:
+      name: Trade Room
+      description: "Players can trade here."
+    properties:
+      exits: {}
+      objects:
+        coin_1:
+          id: coin_1
+          name: Coin
+          object_type_id: coin_type
+          current_room_id: trade_room
+          description: "A coin for trade."
+          properties: {}
+
+

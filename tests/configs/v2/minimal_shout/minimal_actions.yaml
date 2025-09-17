@@ -1,0 +1,28 @@
+action_definitions:
+  shout:
+    name: shout
+    description: Shout loudly, heard in adjacent rooms.
+    cost: 1
+    category: communication
+    parameters:
+      - name: phrase
+        type: string
+        description: The message to shout.
+        required: true
+        default_value: null
+    requirements: []
+    effects:
+      - type: generate_event
+        message: "Player {player_name} shouts: \"{phrase}\""
+        observers:
+          - adjacent_rooms
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+
+

@@ -1,0 +1,26 @@
+entity_definitions:
+  light_room:
+    behaviors:
+      - room
+    attributes:
+      name: Light Room
+      description: "Room with a torch to light."
+    properties:
+      exits: {}
+      objects:
+        torch_1:
+          id: torch_1
+          name: Torch
+          object_type_id: torch_type
+          current_room_id: light_room
+          description: "A wooden torch."
+          properties: { can_be_lit: true, is_lit: false }
+        rock_1:
+          id: rock_1
+          name: Rock
+          object_type_id: rock_type
+          current_room_id: light_room
+          description: "A small stone."
+          properties: {}
+
+

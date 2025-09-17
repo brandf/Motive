@@ -1,0 +1,26 @@
+entity_definitions:
+  use_room:
+    behaviors:
+      - room
+    attributes:
+      name: Use Room
+      description: "Room with a chest and a key to use."
+    properties:
+      exits: {}
+      objects:
+        key_1:
+          id: key_1
+          name: Key
+          object_type_id: key_type
+          current_room_id: use_room
+          description: "A small key."
+          properties: {}
+        chest_1:
+          id: chest_1
+          name: Chest
+          object_type_id: chest_type
+          current_room_id: use_room
+          description: "A sturdy chest."
+          properties: {}
+
+

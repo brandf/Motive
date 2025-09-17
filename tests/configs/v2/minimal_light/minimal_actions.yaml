@@ -1,0 +1,39 @@
+action_definitions:
+  light:
+    name: light
+    description: Light an object that can be lit.
+    cost: 1
+    category: interaction
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object to light.
+        required: true
+        default_value: null
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+      - type: object_property_equals
+        object_name_param: object_name
+        property: can_be_lit
+        value: true
+    effects:
+      - type: set_property
+        target: object
+        target_object_param: object_name
+        property: is_lit
+        value: true
+      - type: generate_event
+        message: "{player_name} lights the {object_name}."
+        observers:
+          - room_players
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+
+

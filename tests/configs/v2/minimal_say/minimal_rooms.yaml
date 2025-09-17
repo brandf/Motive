@@ -1,0 +1,12 @@
+entity_definitions:
+  chat_room:
+    behaviors:
+      - room
+    attributes:
+      name: Chat Room
+      description: "A small room for conversation."
+    properties:
+      exits: {}
+      objects: {}
+
+

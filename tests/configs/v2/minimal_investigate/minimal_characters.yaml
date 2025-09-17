@@ -1,0 +1,23 @@
+entity_definitions:
+  sleuth:
+    behaviors:
+      - character
+    attributes:
+      name: Sleuth
+      backstory: Investigates objects.
+      motives: []
+  bystander:
+    behaviors:
+      - character
+    attributes:
+      name: Bystander
+      backstory: Watches.
+      motives: []
+  statue_type:
+    behaviors:
+      - object
+    attributes:
+      name: Statue
+      description: An ornate statue.
+
+

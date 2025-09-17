@@ -60,8 +60,8 @@ This file contains essential guidance for AI agents working on the Motive projec
 **Testing Hierarchy (All Must Pass Before Real Games)**:
 1. ✅ Unit tests (system components)
 2. ✅ Integration tests (config loading)
-3. ❌ **MISSING**: Action execution tests (user workflows)
-4. ❌ **MISSING**: End-to-end workflow tests (complete user journeys)
+3. ✅ Action execution tests (test all actions with simple isolated test configs & mock LLMs & canned conversations)
+4. ✅ End-to-end workflow tests (complete user journeys w/ mock LLMs & canned conversations)
 5. ✅ Real game runs (final validation only)
 
 **NEVER run real games until action execution tests pass**: Real games are for final validation only.
@@ -226,6 +226,67 @@ Each workflow has: purpose, when to use, required inputs, confidence gate, steps
 - **Be completely self-contained**: All dependencies should be within the test directory
 - **Test the system, not the content**: Focus on config loading, validation, merging logic
 - **Use minimal test data**: Simple, focused test cases that verify specific functionality
+
+### Deterministic Integration Framework (required)
+
+To guarantee bugs are caught in tests before paid runs, we standardize on deterministic, fully isolated integration tests that exercise real code paths end-to-end while stubbing only the LLM.
+
+1) Test layout and naming
+- Tests live under `tests/integration_v2/` (or adjacent feature suites) and configs under `tests/configs/v2/`
+- One minimal test config per feature: `tests/configs/v2/<feature>/minimal_*.yaml`
+- One or more tests per feature: `tests/integration_v2/test_<feature>_*.py`
+
+2) Minimal v2 test config shape (no string-encoded structures)
+```yaml
+# tests/configs/v2/<feature>/minimal_game.yaml
+includes:
+  - "minimal_actions.yaml"
+  - "minimal_rooms.yaml"
+  - "minimal_characters.yaml"
+
+game_settings:
+  num_rounds: 1
+  initial_ap_per_turn: 5
+  manual: "../docs/MANUAL.md"  # Any readable path; tests may stub manual loading
+
+players:
+  - name: "Player_1"
+    provider: "dummy"
+    model: "test"
+```
+
+Key files used by includes:
+- `minimal_actions.yaml` defines just the actions needed for the scenario (e.g., `look`, `pass`) with `effects` mapped to real code bindings (e.g., `look_at_target`).
+- `minimal_rooms.yaml` provides one `room` entity with native YAML dicts for `exits` and `objects`.
+- `minimal_characters.yaml` provides one `character` entity with a simple `config` (name, optional motives).
+
+3) Deterministic LLM harness
+- Patch `motive.player.Player.get_response_and_update_history` to return canned `AIMessage` sequences (e.g., `"> look\n> pass"`).
+- Alternatively patch `motive.player.Player.__init__` to set a fake `llm_client` and avoid file logging.
+- Patch `GameMaster._load_manual_content` to return a static string for tests.
+- Always set `no_file_logging=True` and isolate logs in temporary dirs.
+
+4) Determinism requirements
+- Use fixed AP, single round where practical.
+- Avoid time/rand dependencies; if unavoidable, seed explicitly.
+- Assert concrete outcomes: events generated, AP consumption, room/object state, motive checks.
+
+5) Coverage matrix (build gradually)
+- Actions: parsing + execution for each core/feature action
+- Movement/exits: alias resolution, hidden exits, validation
+- Inventory: pickup/drop/give security and constraints
+- Interactions: object/NPC pathways (look/read/use/light/etc.)
+- Motives: success/failure condition trees, progression
+- Observability: event scoping and delivery
+- Logging/formatting: essential output structure without external I/O
+
+6) Execution pattern
+- Load via `load_v2_config(..., base_path="tests/configs/v2/<feature>")` with `validate=False` for speed where appropriate.
+- Initialize `GameMaster(config_dict, game_id, deterministic=True, no_file_logging=True)`.
+- Run a single player turn by awaiting `game_master._execute_player_turn(player, round_num=1)`.
+- Assert outcomes; no real network/LLM/filesystem side effects.
+
+Exit criteria for features: failing test exists before the fix, passes after; added to suite; paid runs only after all feature suites are green.
 
 ## Testing Anti-Patterns to Avoid
 

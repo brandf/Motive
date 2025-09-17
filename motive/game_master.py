@@ -247,12 +247,22 @@ class GameMaster:
         return game_log_dir
 
     def _initialize_players(self, player_configs: list[PlayerConfig]):
-        """Initializes players based on the provided list of PlayerConfig objects."""
+        """Initializes players from typed or dict configs."""
         for p_config in player_configs:
+            # Support both Pydantic PlayerConfig and plain dict
+            if hasattr(p_config, 'name'):
+                name = p_config.name
+                provider = p_config.provider
+                model = p_config.model
+            else:
+                name = p_config.get('name')
+                provider = p_config.get('provider')
+                model = p_config.get('model')
+
             player = Player(
-                name=p_config.name,
-                provider=p_config.provider,
-                model=p_config.model,
+                name=name,
+                provider=provider,
+                model=model,
                 log_dir=self.log_dir,
                 no_file_logging=self.no_file_logging  # Pass the log directory to the player
             )
@@ -478,6 +488,8 @@ class GameMaster:
         else:
             requirements = action_config.get('requirements', [])
         
+        from motive.requirements_evaluator import evaluate_requirement
+
         for req in requirements:
             # Handle both Pydantic objects and dictionaries from merged config
             if hasattr(req, 'type'):
@@ -485,6 +497,14 @@ class GameMaster:
             else:
                 req_type = req.get('type', '')
                 
+            # Prefer the generic evaluator first
+            handled, passed, err = evaluate_requirement(player_char, self, req, params)
+            if handled:
+                if not passed:
+                    return False, (err or "Requirement not met."), None
+                else:
+                    continue
+
             if req_type == "player_has_tag":
                 tag = req.tag if hasattr(req, 'tag') else req.get('tag', '')
                 if not player_char.has_tag(tag):

@@ -1,0 +1,38 @@
+entity_definitions:
+  room_a:
+    behaviors:
+      - room
+    attributes:
+      name: Room A
+      description: "Throw source."
+    properties:
+      exits:
+        east:
+          id: east
+          name: East Door
+          destination_room_id: room_b
+          aliases: ["east", "e", "door"]
+      objects:
+        rock_1:
+          id: rock_1
+          name: Rock
+          object_type_id: rock_type
+          current_room_id: room_a
+          description: "A throwable rock."
+          properties: {}
+  room_b:
+    behaviors:
+      - room
+    attributes:
+      name: Room B
+      description: "Adjacent."
+    properties:
+      exits:
+        west:
+          id: west
+          name: West Door
+          destination_room_id: room_a
+          aliases: ["west", "w", "door"]
+      objects: {}
+
+

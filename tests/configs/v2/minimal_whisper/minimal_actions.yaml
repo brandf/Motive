@@ -1,0 +1,35 @@
+action_definitions:
+  whisper:
+    name: whisper
+    description: Whisper privately to a specific player in the same room.
+    cost: 1
+    category: communication
+    parameters:
+      - name: player
+        type: string
+        description: The name of the player to whisper to.
+        required: true
+        default_value: null
+      - name: phrase
+        type: string
+        description: The private message to whisper.
+        required: true
+        default_value: null
+    requirements:
+      - type: player_in_room
+        target_player_param: player
+    effects:
+      - type: generate_event
+        message: "Player {player_name} whispers to {player}: \"{phrase}\""
+        observers:
+          - player
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []
+
+

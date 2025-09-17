@@ -1,0 +1,23 @@
+entity_definitions:
+  reader:
+    behaviors:
+      - character
+    attributes:
+      name: Reader
+      backstory: Likes reading.
+      motives: []
+  onlooker:
+    behaviors:
+      - character
+    attributes:
+      name: Onlooker
+      backstory: Watches others.
+      motives: []
+  note_type:
+    behaviors:
+      - object
+    attributes:
+      name: Note
+      description: A generic note.
+
+

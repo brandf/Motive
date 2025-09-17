@@ -1,0 +1,23 @@
+entity_definitions:
+  thrower:
+    behaviors:
+      - character
+    attributes:
+      name: Thrower
+      backstory: Throws rocks.
+      motives: []
+  receiver:
+    behaviors:
+      - character
+    attributes:
+      name: Receiver
+      backstory: Hears throws.
+      motives: []
+  rock_type:
+    behaviors:
+      - object
+    attributes:
+      name: Rock
+      description: A throwable rock type.
+
+

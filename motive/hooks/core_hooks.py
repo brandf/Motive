@@ -1024,3 +1024,184 @@ def handle_throw_action(game_master: Any, player_char: Character, action_config:
     
     return events_generated, feedback_messages
 
+
+def handle_investigate_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handle investigate action - thorough examination of objects."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    
+    target = params.get("target", "").strip()
+    if not target:
+        feedback_messages.append("You need to specify what to investigate.")
+        return events_generated, feedback_messages
+    
+    # Find the object in the current room
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    if not current_room:
+        feedback_messages.append("You are not in a valid room.")
+        return events_generated, feedback_messages
+    
+    # Look for the object in the room
+    target_object = None
+    for obj_id, obj in current_room.objects.items():
+        if obj.name.lower() == target.lower():
+            target_object = obj
+            break
+    
+    if not target_object:
+        feedback_messages.append(f"You don't see '{target}' in the current room.")
+        return events_generated, feedback_messages
+    
+    # Generate investigation description
+    investigation_desc = f"You carefully investigate the {target_object.name}."
+    
+    # Add object-specific investigation details if available
+    if hasattr(target_object, 'investigation_description') and target_object.investigation_description:
+        investigation_desc += f" {target_object.investigation_description}"
+    elif hasattr(target_object, 'description') and target_object.description:
+        investigation_desc += f" {target_object.description}"
+    else:
+        investigation_desc += " You examine it thoroughly but don't find anything unusual."
+    
+    feedback_messages.append(investigation_desc)
+    
+    # Create investigation event
+    investigation_event = Event(
+        event_type="investigation",
+        message=f"{player_char.name} investigates the {target_object.name}.",
+        timestamp=datetime.now(),
+        room_id=player_char.current_room_id,
+        player_id=player_char.player_id
+    )
+    events_generated.append(investigation_event)
+    
+    return events_generated, feedback_messages
+
+
+def handle_use_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handle use action - use an object from inventory on another object."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    
+    object_name = params.get("object_name", "").strip()
+    target = params.get("target", "").strip()
+    
+    if not object_name or not target:
+        feedback_messages.append("You need to specify both an object to use and a target.")
+        return events_generated, feedback_messages
+    
+    # Check if player has the object in inventory
+    if object_name not in player_char.inventory:
+        feedback_messages.append(f"You don't have '{object_name}' in your inventory.")
+        return events_generated, feedback_messages
+    
+    # Find the target object in the current room
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    if not current_room:
+        feedback_messages.append("You are not in a valid room.")
+        return events_generated, feedback_messages
+    
+    target_object = None
+    for obj_id, obj in current_room.objects.items():
+        if obj.name.lower() == target.lower():
+            target_object = obj
+            break
+    
+    if not target_object:
+        feedback_messages.append(f"You don't see '{target}' in the current room.")
+        return events_generated, feedback_messages
+    
+    # Generate use description
+    use_desc = f"You use the {object_name} on the {target_object.name}."
+    
+    # Add object-specific use effects if available
+    if hasattr(target_object, 'use_description') and target_object.use_description:
+        use_desc += f" {target_object.use_description}"
+    else:
+        use_desc += " Nothing obvious happens, but you feel like you've accomplished something."
+    
+    feedback_messages.append(use_desc)
+    
+    # Create use event
+    use_event = Event(
+        event_type="use",
+        message=f"{player_char.name} uses the {object_name} on the {target_object.name}.",
+        timestamp=datetime.now(),
+        room_id=player_char.current_room_id,
+        player_id=player_char.player_id
+    )
+    events_generated.append(use_event)
+    
+    return events_generated, feedback_messages
+
+
+def handle_light_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handle light action - light an object that can be lit."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    
+    object_name = params.get("object_name", "").strip()
+    if not object_name:
+        feedback_messages.append("You need to specify what to light.")
+        return events_generated, feedback_messages
+    
+    # Find the object in the current room
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    if not current_room:
+        feedback_messages.append("You are not in a valid room.")
+        return events_generated, feedback_messages
+    
+    target_object = None
+    for obj_id, obj in current_room.objects.items():
+        if obj.name.lower() == object_name.lower():
+            target_object = obj
+            break
+    
+    if not target_object:
+        feedback_messages.append(f"You don't see '{object_name}' in the current room.")
+        return events_generated, feedback_messages
+    
+    # Check if object can be lit
+    can_be_lit = False
+    if hasattr(target_object, 'properties') and target_object.properties:
+        can_be_lit = target_object.properties.get('can_be_lit', False)
+    elif hasattr(target_object, 'can_be_lit'):
+        can_be_lit = target_object.can_be_lit
+    
+    if not can_be_lit:
+        feedback_messages.append(f"The {target_object.name} cannot be lit.")
+        return events_generated, feedback_messages
+    
+    # Check if already lit
+    is_lit = False
+    if hasattr(target_object, 'properties') and target_object.properties:
+        is_lit = target_object.properties.get('is_lit', False)
+    elif hasattr(target_object, 'is_lit'):
+        is_lit = target_object.is_lit
+    
+    if is_lit:
+        feedback_messages.append(f"The {target_object.name} is already lit.")
+        return events_generated, feedback_messages
+    
+    # Light the object
+    if hasattr(target_object, 'properties'):
+        if target_object.properties is None:
+            target_object.properties = {}
+        target_object.properties['is_lit'] = True
+    else:
+        target_object.is_lit = True
+    
+    feedback_messages.append(f"You light the {target_object.name}. It now provides warm, flickering light.")
+    
+    # Create light event
+    light_event = Event(
+        event_type="light",
+        message=f"{player_char.name} lights the {target_object.name}.",
+        timestamp=datetime.now(),
+        room_id=player_char.current_room_id,
+        player_id=player_char.player_id
+    )
+    events_generated.append(light_event)
+    
+    return events_generated, feedback_messages
+

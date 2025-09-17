@@ -1,0 +1,12 @@
+entity_definitions:
+  start_room:
+    behaviors:
+      - room
+    attributes:
+      name: Start Room
+      description: "A tiny test room with nothing but walls."
+    properties:
+      exits: {}
+      objects: {}
+
+

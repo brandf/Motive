@@ -1,0 +1,9 @@
+entity_definitions:
+  note_type:
+    behaviors:
+      - object
+    attributes:
+      name: Note
+      description: A small paper note.
+
+

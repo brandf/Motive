@@ -1,0 +1,19 @@
+entity_definitions:
+  foyer:
+    behaviors:
+      - room
+    attributes:
+      name: Foyer
+      description: "A small entry room."
+    properties:
+      exits: {}
+      objects:
+        note_1:
+          id: note_1
+          name: Note
+          object_type_id: note_type
+          current_room_id: foyer
+          description: "A simple note."
+          properties: { }
+
+

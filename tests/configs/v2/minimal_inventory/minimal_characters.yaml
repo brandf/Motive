@@ -1,0 +1,10 @@
+entity_definitions:
+  holder:
+    behaviors:
+      - character
+    attributes:
+      name: Inventory Tester
+      backstory: Tests pickup and drop.
+      motives: []
+
+

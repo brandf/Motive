@@ -1,0 +1,17 @@
+entity_definitions:
+  sleuth:
+    behaviors:
+      - character
+    attributes:
+      name: sleuth
+      backstory: Solves a simple motive.
+      motives:
+        - id: find_clue
+          description: Find the hidden clue by setting found_clue=true.
+          success_conditions:
+            - type: character_has_property
+              property: found_clue
+              value: true
+          failure_conditions: []
+
+
