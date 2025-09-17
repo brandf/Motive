@@ -24,6 +24,8 @@ Legend:
 
 ### Pending (to add now)
 - [ ] Negative cases and variants (aliases, invalid targets, costs)
+  - [x] throw: invalid exit → no adjacent/throw event; inventory unchanged
+  - [x] use: missing target → no room_players use event; inventory unchanged
 
 ### Notes
 - Tests assert both: (1) action feedback returned to acting player, and (2) events distributed to appropriate observers (via `GameMaster.player_observations`).
