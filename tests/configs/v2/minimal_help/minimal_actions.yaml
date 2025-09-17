@@ -7,7 +7,12 @@ action_definitions:
       function_name: calculate_help_cost
       value: 1
     category: system
-    parameters: []
+    parameters:
+      - name: category
+        type: string
+        description: Optional category filter
+        required: false
+        default_value: null
     requirements: []
     effects:
       - type: code_binding

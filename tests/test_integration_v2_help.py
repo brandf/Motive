@@ -24,7 +24,11 @@ async def test_minimal_v2_help_player_only(tmp_path):
         gm = GameMaster(config, game_id="it_help", deterministic=True, log_dir=str(tmp_path), no_file_logging=True)
         p1 = gm.players[0]
         await gm._execute_player_turn(p1, round_num=1)
-        # No explicit observation; ensure no crash and AP decreased by code-binding cost (>=0)
+        # Minimal assertion: no crash and AP is non-negative
         assert p1.character.action_points >= 0
+
+
+# Note: Category-specific cost/message behavior will be covered in a dedicated test once
+# parameter parsing and event routing semantics for help are finalized.
 
 

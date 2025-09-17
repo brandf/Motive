@@ -1,3 +1,35 @@
+import logging
+from contextlib import contextmanager
+import tempfile
+
+
+class _Sandbox:
+    def __init__(self, temp_dir: str):
+        self._temp_dir = temp_dir
+
+    def get_temp_dir(self) -> str:
+        return self._temp_dir
+
+
+@contextmanager
+def isolated_test_environment():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        yield _Sandbox(temp_dir)
+
+
+def cleanup_log_handlers(_gm=None):
+    # Close and remove handlers on common loggers to avoid file locks on Windows
+    logger_names = ["", "motive", "motive.game_master"]
+    for name in logger_names:
+        logger = logging.getLogger(name)
+        for handler in list(logger.handlers):
+            try:
+                handler.flush()
+                handler.close()
+            except Exception:
+                pass
+            logger.removeHandler(handler)
+
 """
 Test utilities for proper isolation and sandboxing.
 
