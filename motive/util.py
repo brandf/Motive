@@ -445,13 +445,13 @@ def show_entities(config, entity_type: str = None) -> None:
             for prop_name, prop_value in entity_def.properties.items():
                 print(f"    {prop_name}: {prop_value}")
         
-        # Show config (for characters, this includes motives)
-        if hasattr(entity_def, 'config') and entity_def.config:
-            print(f"  Config:")
-            for config_key, config_value in entity_def.config.items():
-                if config_key == 'motives' and isinstance(config_value, list):
-                    print(f"    {config_key}: {len(config_value)} motives")
-                    for i, motive in enumerate(config_value, 1):
+        # Show attributes (immutable) including motives if present
+        if hasattr(entity_def, 'attributes') and entity_def.attributes:
+            print(f"  Attributes:")
+            for attr_key, attr_value in entity_def.attributes.items():
+                if attr_key == 'motives' and isinstance(attr_value, list):
+                    print(f"    {attr_key}: {len(attr_value)} motives")
+                    for i, motive in enumerate(attr_value, 1):
                         if isinstance(motive, dict):
                             motive_id = motive.get('id', f'motive_{i}')
                             motive_desc = motive.get('description', 'No description')
@@ -459,7 +459,7 @@ def show_entities(config, entity_type: str = None) -> None:
                         else:
                             print(f"      {i}. {motive}")
                 else:
-                    print(f"    {config_key}: {config_value}")
+                    print(f"    {attr_key}: {attr_value}")
         
         print()
 
@@ -494,7 +494,7 @@ def debug_config_loading(config_path: str) -> None:
             characters_without_motives = 0
             for entity_id, entity_def in config.entity_definitions.items():
                 if 'character' in entity_def.types:
-                    if hasattr(entity_def, 'config') and entity_def.config and 'motives' in entity_def.config:
+                    if hasattr(entity_def, 'attributes') and entity_def.attributes and 'motives' in entity_def.attributes:
                         characters_with_motives += 1
                     else:
                         characters_without_motives += 1
@@ -538,10 +538,10 @@ def debug_character_motives(config_path: str, character_id: str = None) -> None:
                     print(f"  Type: {type(char_def)}")
                     print(f"  Types: {char_def.types}")
                     print(f"  Properties: {char_def.properties}")
-                    print(f"  Config: {char_def.config}")
+                    print(f"  Attributes: {char_def.attributes}")
                     
-                    if hasattr(char_def, 'config') and char_def.config and 'motives' in char_def.config:
-                        motives = char_def.config['motives']
+                    if hasattr(char_def, 'attributes') and char_def.attributes and 'motives' in char_def.attributes:
+                        motives = char_def.attributes['motives']
                         print(f"  Motives ({len(motives)}):")
                         for i, motive in enumerate(motives, 1):
                             print(f"    {i}. {motive}")
@@ -553,8 +553,8 @@ def debug_character_motives(config_path: str, character_id: str = None) -> None:
             else:
                 print(f"All characters ({len(characters)}):")
                 for char_id, char_def in characters.items():
-                    has_motives = hasattr(char_def, 'config') and char_def.config and 'motives' in char_def.config
-                    motive_count = len(char_def.config['motives']) if has_motives else 0
+                    has_motives = hasattr(char_def, 'attributes') and char_def.attributes and 'motives' in char_def.attributes
+                    motive_count = len(char_def.attributes['motives']) if has_motives else 0
                     print(f"  {char_id}: {motive_count} motives")
         else:
             print("This is not a v2 config with entity_definitions")

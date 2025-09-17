@@ -119,7 +119,7 @@ class GameInitializer:
                     config_data['id'] = entity_id
                     
                     # Prefer attributes over legacy properties
-                    attributes = entity_data.get('attributes', entity_data.get('config', {}).get('attributes', {}))
+                    attributes = entity_data.get('attributes', {})
                     properties = entity_data.get('properties', {})
                     name_source = attributes if attributes else properties
                     config_data['name'] = name_source.get('name', entity_id)
@@ -138,7 +138,7 @@ class GameInitializer:
                     config_data['id'] = entity_id
                     
                     # Extract name/backstory from attributes (preferred) or properties
-                    attributes = entity_data.get('attributes', entity_data.get('config', {}).get('attributes', {}))
+                    attributes = entity_data.get('attributes', {})
                     properties = entity_data.get('properties', {})
                     attr_source = attributes if attributes else properties
                     config_data['name'] = attr_source.get('name', entity_id)
@@ -153,8 +153,7 @@ class GameInitializer:
                         motives_data = entity_data['attributes']['motives']
                     elif 'properties' in entity_data and 'motives' in entity_data['properties']:
                         motives_data = entity_data['properties']['motives']
-                    elif hasattr(entity_def, 'config') and entity_def.config and 'motives' in entity_def.config:
-                        motives_data = entity_def.config['motives']
+                    # drop legacy entity-level 'config' fallback
                     
                     if motives_data is not None:
                         # Convert motives from dict format to MotiveConfig objects
@@ -363,7 +362,7 @@ class GameInitializer:
                     config_data = {}
                     config_data['id'] = entity_id
                     # Prefer attributes over legacy properties
-                    attributes = entity_data.get('attributes', entity_data.get('config', {}).get('attributes', {}))
+                    attributes = entity_data.get('attributes', {})
                     properties = entity_data.get('properties', {})
                     name_source = attributes if attributes else properties
                     config_data['name'] = name_source.get('name', entity_id)
@@ -381,17 +380,21 @@ class GameInitializer:
                     config_data = {}
                     config_data['id'] = entity_id
                     # Extract name/backstory from attributes (preferred) or properties
-                    attributes = entity_data.get('attributes', entity_data.get('config', {}).get('attributes', {}))
+                    attributes = entity_data.get('attributes', {})
                     properties = entity_data.get('properties', {})
                     attr_source = attributes if attributes else properties
                     config_data['name'] = attr_source.get('name', entity_id)
                     # Add required backstory field
                     config_data['backstory'] = attr_source.get('backstory', f"A character with the role of {config_data['name']}")
                     
-                    # Copy motives if present (v2 stores motives in config field)
-                    if hasattr(entity_def, 'config') and entity_def.config and 'motives' in entity_def.config:
+                    # Copy motives if present (prefer attributes, then properties; no legacy 'config')
+                    motives_data = None
+                    if 'attributes' in entity_data and 'motives' in entity_data['attributes']:
+                        motives_data = entity_data['attributes']['motives']
+                    elif 'properties' in entity_data and 'motives' in entity_data['properties']:
+                        motives_data = entity_data['properties']['motives']
+                    if motives_data is not None:
                         # Convert motives from dict format to MotiveConfig objects
-                        motives_data = entity_def.config['motives']
                         self.game_logger.info(f"Converting motives for {entity_id}: {len(motives_data)} motives found")
                         if motives_data:
                             from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
@@ -469,7 +472,7 @@ class GameInitializer:
                     self.game_logger.info(f"Stored v2 character entity {entity_id} with attributes.motives: {bool(stored_def.get('attributes', {}).get('motives'))}")
                 elif 'room' in entity_types:
                     # Convert to room data - extract properties and store in game_rooms
-                    attributes = entity_data.get('attributes', entity_data.get('config', {}).get('attributes', {}))
+                    attributes = entity_data.get('attributes', {})
                     properties = entity_data.get('properties', {})
                     
                     # Parse exits and objects from string representations if needed
@@ -667,7 +670,7 @@ class GameInitializer:
                 # v2 EntityDefinition format - entity_id is the key, character data is in attributes (preferred) or legacy config
                 char_id = char_id_to_assign  # Use the entity_id as the character id
                 attributes = char_cfg.get('attributes', {})
-                legacy_config = char_cfg.get('config', {})
+                legacy_config = {}
                 properties = char_cfg.get('properties', {})
                 # Prefer attributes, then legacy config; keep properties for fallback of motives only
                 config_data = attributes if attributes else legacy_config
@@ -1079,7 +1082,7 @@ class GameInitializer:
             else:
                 # v2 EntityDefinition format - entity_id is the key, character data is in config
                 char_id = char_id_to_assign  # Use the entity_id as the character id
-                config_data = char_cfg.get('config', {})
+                config_data = {}
                 char_name = config_data.get('name', char_id)
                 char_backstory = config_data.get('backstory', '')
                 char_motive = config_data.get('motive', None)  # Legacy single motive

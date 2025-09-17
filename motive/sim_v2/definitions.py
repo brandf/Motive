@@ -12,8 +12,8 @@ class EntityDefinition:
     definition_id: str
     types: List[str]
     properties: Dict[str, PropertySchema] = field(default_factory=dict)
-    # Immutable configuration data (not runtime state)
-    config: Dict[str, Any] = field(default_factory=dict)
+    # Immutable attributes (name, description, backstory, motives, aliases, etc.)
+    attributes: Dict[str, Any] = field(default_factory=dict)
 
 
 class DefinitionRegistry:

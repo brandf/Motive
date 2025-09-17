@@ -59,9 +59,9 @@ class V2GameConfig(BaseModel):
             result = {}
             for entity_id, entity_data in v.items():
                 if isinstance(entity_data, dict):
-                    # Separate core fields from config fields
+                    # Separate core fields from immutable attributes and runtime properties
                     core_fields = {}
-                    config_fields = {}
+                    attributes_fields = {}
                     
                     # Map 'behaviors' to 'types' for compatibility
                     if 'behaviors' in entity_data:
@@ -69,16 +69,23 @@ class V2GameConfig(BaseModel):
                     elif 'types' in entity_data:
                         core_fields['types'] = entity_data.pop('types')
                     
-                    # Extract properties
+                    # Extract properties (mutable runtime state)
                     if 'properties' in entity_data:
                         core_fields['properties'] = entity_data.pop('properties')
+                    # Extract attributes (immutable config)
+                    if 'attributes' in entity_data:
+                        attributes_fields = entity_data.pop('attributes')
                     
-                    # Everything else goes to config
-                    config_fields = entity_data.copy()
+                    # Everything else previously fell into 'config'; reject it in v2
+                    if 'config' in entity_data:
+                        raise V2ConfigValidationError("Entity uses legacy 'config'. Move fields to 'attributes' or 'properties'.")
+                    # Preserve remaining fields under attributes to avoid data loss
+                    attributes_fields = {**attributes_fields, **entity_data}
                     
                     # Add definition_id
                     core_fields['definition_id'] = entity_id
-                    core_fields['config'] = config_fields
+                    # Emit explicit attributes only. Do not emit legacy 'config'.
+                    core_fields['attributes'] = attributes_fields
                     
                     result[entity_id] = EntityDefinition(**core_fields)
                 else:

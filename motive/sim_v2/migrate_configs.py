@@ -60,13 +60,13 @@ def convert_to_v2_format(loader: V2ConfigLoader, original_config: Dict[str, Any]
             # Move common immutable fields to attributes if present in config
             # Characters: name, backstory, aliases, motives, initial_rooms
             # Objects/Rooms: name, description
-            if definition.config:
+            # definition.config is removed; use definition.attributes
+            if getattr(definition, 'attributes', None):
                 for key in ("name", "description", "backstory", "aliases", "motives", "initial_rooms"):
-                    if key in definition.config:
-                        attributes[key] = definition.config[key]
-                # Include any other non-mutable metadata already under attributes in config
-                if "attributes" in definition.config and isinstance(definition.config["attributes"], dict):
-                    attributes.update(definition.config["attributes"])  # prefer explicit attributes
+                    if key in definition.attributes:
+                        attributes[key] = definition.attributes[key]
+                # Include any other immutable metadata already under attributes
+                attributes.update({k: v for k, v in definition.attributes.items() if k not in attributes})
 
             # Convert property schema defaults; keep mutable state in properties
             for prop_name, prop_schema in definition.properties.items():

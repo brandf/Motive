@@ -133,6 +133,14 @@ class V2ConfigPreprocessor:
             else:
                 merged_config = config_data
             
+            # Enforce: entity-level 'config' dicts are not allowed in v2 YAML
+            if 'entity_definitions' in merged_config and isinstance(merged_config['entity_definitions'], dict):
+                for _eid, _edef in merged_config['entity_definitions'].items():
+                    if isinstance(_edef, dict) and 'config' in _edef:
+                        raise V2ConfigLoadError(
+                            f"entity_definitions['{_eid}'] uses legacy 'config'. Move fields to 'attributes' (immutable) or 'properties' (mutable)."
+                        )
+
             # Cache the result
             self.loaded_configs[abs_path_str] = merged_config
             
