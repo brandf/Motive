@@ -9,6 +9,9 @@ Legend:
 ### Implemented (green)
 - [x] look: self observation only (player)
 - [x] move: exit by name/alias; observers: player, room_players
+  - Variants:
+    - [x] hidden exit not usable (player remains; no room event)
+    - [x] invalid exit not usable (player remains; no room event)
 - [x] inventory: pickup/drop; observers: player (+ room_players for drop)
 - [x] motives: success condition via set_property; private feedback only
 - [x] say: broadcast to room_players; non-actors in same room observe event
@@ -17,13 +20,16 @@ Legend:
 - [x] read: player-only feedback when reading object
 - [x] give: transfer object to target; observers: player, room_players
 - [x] throw: object thrown through exit; observers: player, room_players, adjacent_rooms
+  - Variants:
+    - [x] alias direction resolves (adjacent room observes; inventory updated)
+    - [x] hidden exit not usable (no adjacent_rooms throw event)
 - [x] investigate: player-only feedback
 - [x] use: player and room_players feedback
 - [x] help: player-only; dynamic cost via code_binding
 - [x] light: set object property and notify room_players
 
 ### Pending (to add now)
-- [ ] Negative cases and variants (aliases, invalid targets, costs)
+- [ ] Negative cases and variants (cost edges, additional scopes)
   - [x] throw: invalid exit → no adjacent/throw event; inventory unchanged
   - [x] use: missing target → no room_players use event; inventory unchanged
   - [x] give: target not present → no room event; inventory unchanged

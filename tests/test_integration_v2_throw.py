@@ -67,7 +67,7 @@ async def test_minimal_v2_throw_invalid_exit_no_adjacent_obs(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_minimal_v2_throw_alias_direction_current_behavior(tmp_path):
+async def test_minimal_v2_throw_alias_direction_adjacent(tmp_path):
     base_path = str((tmp_path / "configs").resolve())
     src_dir = Path("tests/configs/v2/minimal_throw")
     dst_dir = Path(base_path)
@@ -90,8 +90,8 @@ async def test_minimal_v2_throw_alias_direction_current_behavior(tmp_path):
 
         await gm._execute_player_turn(p1, round_num=1)
         obs = gm.player_observations.get(p2.character.id, [])
-        # Current behavior: alias ("e") passes requirement but handler expects key; no throw event
-        assert not any((" throws " in getattr(ev, 'message', '').lower()) or (" is thrown " in getattr(ev, 'message', '').lower()) for ev in obs)
-        # Rock remains with thrower
-        assert any(item.name == "Rock" for item in p1.character.inventory.values())
+        # After aligning alias resolution, adjacent should receive throw event
+        assert any((" throws " in getattr(ev, 'message', '').lower()) or (" is thrown " in getattr(ev, 'message', '').lower()) for ev in obs)
+        # Rock should be removed from thrower's inventory
+        assert not any(item.name == "Rock" for item in p1.character.inventory.values())
 

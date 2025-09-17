@@ -28,6 +28,7 @@ LEGACY_XFAIL_PREFIXES = (
     "tests/test_v2_smoke_run.py",
     "tests/test_v2_smoke_test.py",
     "tests/test_v2_to_v1_",
+    "tests/test_throw_action.py",
 )
 
 

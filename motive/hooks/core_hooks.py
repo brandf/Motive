@@ -946,14 +946,24 @@ def handle_throw_action(game_master: Any, player_char: Character, action_config:
         feedback_messages.append(f"You don't have a {object_name} in your inventory.")
         return events_generated, feedback_messages
     
-    # Check if exit exists
-    if exit_direction not in current_room.exits:
+    # Resolve exit by name or aliases (case-insensitive), mirroring move logic
+    exit_info = None
+    for _, ex in current_room.exits.items():
+        if ex.get('is_hidden', False):
+            continue
+        if ex.get('name', '').lower() == exit_direction.lower():
+            exit_info = ex
+            break
+        aliases = ex.get('aliases', [])
+        if any(alias.lower() == exit_direction.lower() for alias in aliases):
+            exit_info = ex
+            break
+    if not exit_info:
         feedback_messages.append(f"There is no exit '{exit_direction}' from this room.")
         return events_generated, feedback_messages
-    
+
     # Get target room
-    exit_info = current_room.exits[exit_direction]
-    target_room_id = exit_info.get("room_id")
+    target_room_id = exit_info.get("destination_room_id")
     if not target_room_id:
         feedback_messages.append(f"Exit '{exit_direction}' has no target room.")
         return events_generated, feedback_messages
