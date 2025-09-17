@@ -2,9 +2,10 @@ entity_definitions:
   patched_object:
     behaviors:
     - object
-    properties:
+    attributes:
       name: ''
       description: ''
+    properties: {}
 action_definitions:
   move_action_patched:
     name: move_action_patched

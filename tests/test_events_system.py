@@ -144,10 +144,11 @@ def test_distribute_events_player_scope():
     # Distribute events
     gm._distribute_events()
     
-    # Verify player1 (event originator) did NOT receive their own event
-    assert len(gm.player_observations["player1"]) == 0
+    # Verify player1 (targeted by player scope) received the event
+    assert len(gm.player_observations["player1"]) == 1
+    assert gm.player_observations["player1"][0].message == "Player1 requested help."
     
-    # Verify player2 (not the event originator) did NOT receive the event
+    # Verify player2 (not the target) did NOT receive the event
     assert len(gm.player_observations["player2"]) == 0
     
     # Verify event queue was cleared

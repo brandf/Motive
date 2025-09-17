@@ -2,7 +2,7 @@ entity_definitions:
   town_square:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Town Square
       description: "The heart of Blackwater, once bustling with merchants and travelers,\
         \ now feels empty and foreboding. \nA broken fountain sits in the center,\
@@ -13,6 +13,7 @@ entity_definitions:
         \ Yet in the center of the square, a small hearth \nstill burns - a symbol\
         \ of the town's stubborn hope that refuses to be extinguished by the growing\
         \ darkness.\n"
+    properties:
       exits: '{''tavern'': {''id'': ''tavern'', ''name'': ''Rusty Anchor Tavern'',
         ''destination_room_id'': ''tavern'', ''aliases'': [''tavern'', ''bar'', ''inn'']},
         ''guild'': {''id'': ''guild'', ''name'': "Adventurer''s Guild Hall", ''destination_room_id'':
@@ -58,7 +59,7 @@ entity_definitions:
   tavern:
     behaviors:
     - room
-    properties:
+    attributes:
       name: The Rusty Anchor Tavern
       description: "The warm glow of oil lamps illuminates this cozy tavern, filled\
         \ with the sounds of conversation \nand the clinking of tankards. A long wooden\
@@ -69,6 +70,7 @@ entity_definitions:
         \ else... something that makes \nyou uneasy. But the great hearth in the corner\
         \ burns bright, casting dancing shadows on the walls \nand providing a haven\
         \ of warmth and light against the darkness that threatens to consume the town.\n"
+    properties:
       exits: '{''square'': {''id'': ''square'', ''name'': ''Town Square'', ''destination_room_id'':
         ''town_square'', ''aliases'': [''square'', ''town'', ''main'']}, ''guild'':
         {''id'': ''guild'', ''name'': "Adventurer''s Guild Hall", ''destination_room_id'':
@@ -96,7 +98,7 @@ entity_definitions:
   adventurer_guild:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Adventurer's Guild Hall
       description: "A grand hall filled with the trappings of adventure and heroism.\
         \ Weapons and armor line the walls, \nand maps of distant lands cover large\
@@ -104,6 +106,7 @@ entity_definitions:
         \ and bounties. The guild master, a weathered veteran, sits behind a massive\
         \ \ndesk, reviewing reports and assigning quests. The air is filled with the\
         \ excitement of new \nadventures and the weight of past battles.\n"
+    properties:
       exits: '{''square'': {''id'': ''square'', ''name'': ''Town Square'', ''destination_room_id'':
         ''town_square'', ''aliases'': [''square'', ''town'', ''main'']}, ''tavern'':
         {''id'': ''tavern'', ''name'': ''Rusty Anchor Tavern'', ''destination_room_id'':
@@ -134,7 +137,7 @@ entity_definitions:
   thieves_den:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Thieves' Den
       description: "A hidden underground chamber accessible only through secret passages.\
         \ The walls are lined with \nstolen goods, and the air is thick with the smell\
@@ -143,6 +146,7 @@ entity_definitions:
         \ shadowy figure known only as \"The Raven,\" sits in a high-backed chair,\
         \ reviewing \ninformation and planning their next move. The room is dimly\
         \ lit by oil lamps, casting \ndancing shadows on the walls.\n"
+    properties:
       exits: '{''tavern'': {''id'': ''tavern'', ''name'': ''Rusty Anchor Tavern'',
         ''destination_room_id'': ''tavern'', ''aliases'': [''tavern'', ''bar'', ''inn''],
         ''is_hidden'': True}, ''market'': {''id'': ''market'', ''name'': ''Market
@@ -167,7 +171,7 @@ entity_definitions:
   church:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Sacred Heart Church
       description: "A beautiful stone church with tall stained glass windows that\
         \ cast colorful light across the \npews. The air is filled with the scent\
@@ -176,6 +180,7 @@ entity_definitions:
         \ The \naltar is adorned with fresh flowers, but there's an underlying sense\
         \ of unease. The church \nserves as both a place of worship and a refuge for\
         \ those seeking sanctuary from the town's \ntroubles.\n"
+    properties:
       exits: '{''square'': {''id'': ''square'', ''name'': ''Town Square'', ''destination_room_id'':
         ''town_square'', ''aliases'': [''square'', ''town'', ''main'']}, ''cemetery'':
         {''id'': ''cemetery'', ''name'': ''Blackwater Cemetery'', ''destination_room_id'':
@@ -206,7 +211,7 @@ entity_definitions:
   cemetery:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Blackwater Cemetery
       description: "An ancient cemetery filled with weathered gravestones and mausoleums.\
         \ The air is thick with \nthe scent of earth and decay, and the shadows seem\
@@ -215,6 +220,7 @@ entity_definitions:
         \ is particularly imposing, its doors slightly ajar. The cemetery serves as\
         \ both \na resting place for the dead and a gateway to the underground world\
         \ beneath the town.\n"
+    properties:
       exits: '{''forest'': {''id'': ''forest'', ''name'': ''Old Forest Path'', ''destination_room_id'':
         ''old_forest_path'', ''aliases'': [''forest'', ''woods'', ''path'']}, ''church'':
         {''id'': ''church'', ''name'': ''Sacred Heart Church'', ''destination_room_id'':
@@ -246,7 +252,7 @@ entity_definitions:
   bank:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Blackwater Bank
       description: "A once-prosperous bank now struggling with mysterious withdrawals\
         \ and suspicious transactions. \nThe marble floors and ornate columns speak\
@@ -255,6 +261,7 @@ entity_definitions:
         \ \nand there are whispers of missing funds and unexplained disappearances.\
         \ The bank serves as both \na financial institution and a repository of the\
         \ town's secrets.\n"
+    properties:
       exits: '{''square'': {''id'': ''square'', ''name'': ''Town Square'', ''destination_room_id'':
         ''town_square'', ''aliases'': [''square'', ''town'', ''main'']}, ''market'':
         {''id'': ''market'', ''name'': ''Market District'', ''destination_room_id'':
@@ -282,7 +289,7 @@ entity_definitions:
   market_district:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Market District
       description: "The commercial heart of Blackwater, where merchants once sold\
         \ their wares to travelers from \ndistant lands. Now, many stalls stand empty,\
@@ -290,6 +297,7 @@ entity_definitions:
         \ filled with the sounds of haggling and the smells of various \ngoods, but\
         \ there's an underlying tension that wasn't there before. The market serves\
         \ as both \na trading center and a gathering place for information and rumors.\n"
+    properties:
       exits: '{''bank'': {''id'': ''bank'', ''name'': ''Blackwater Bank'', ''destination_room_id'':
         ''bank'', ''aliases'': [''bank'', ''vault'', ''treasury'']}, ''guild'': {''id'':
         ''guild'', ''name'': "Adventurer''s Guild Hall", ''destination_room_id'':
@@ -314,7 +322,7 @@ entity_definitions:
   underground_tunnels:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Underground Tunnels
       description: "Ancient passages that run beneath the town, connecting various\
         \ locations in a hidden network. \nThe walls are lined with old stone and\
@@ -323,6 +331,7 @@ entity_definitions:
         dancing shadows, and the sound of dripping water echoes through the passages.\
         \ The tunnels \nserve as both a hidden transportation network and a place\
         \ where secrets are kept and dark \ndeeds are done.\n"
+    properties:
       exits: '{''cemetery'': {''id'': ''cemetery'', ''name'': ''Blackwater Cemetery'',
         ''destination_room_id'': ''cemetery'', ''aliases'': [''cemetery'', ''graveyard'',
         ''tombs'']}, ''church'': {''id'': ''church'', ''name'': ''Sacred Heart Church'',
@@ -350,7 +359,7 @@ entity_definitions:
   secret_cult_chamber:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Secret Cult Chamber
       description: "A hidden chamber deep beneath the town, where the cult performs\
         \ their dark rituals and \nplans their nefarious schemes. The walls are covered\
@@ -362,6 +371,7 @@ entity_definitions:
         \ Blackwater - a place \nwhere shadows gather and the light of hope has never\
         \ been allowed to shine. The very air \nseems to reject warmth and comfort,\
         \ as if the darkness itself has taken physical form.\n"
+    properties:
       exits: '{''tunnels'': {''id'': ''tunnels'', ''name'': ''Underground Tunnels'',
         ''destination_room_id'': ''underground_tunnels'', ''aliases'': [''tunnels'',
         ''underground'', ''passages'']}, ''forest_escape'': {''id'': ''forest_escape'',
@@ -406,7 +416,7 @@ entity_definitions:
   old_forest_path:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Old Forest Path
       description: "A narrow, overgrown path leading into the dark forest that borders\
         \ Blackwater. The trees \nare ancient and twisted, their branches forming\
@@ -416,6 +426,7 @@ entity_definitions:
         \ from the \ntown and a gateway to the deeper mysteries of the forest. There\
         \ are signs that someone has \nbeen using this path recently, and the forest\
         \ seems to be watching and waiting.\n"
+    properties:
       exits: '{''square'': {''id'': ''square'', ''name'': ''Town Square'', ''destination_room_id'':
         ''town_square'', ''aliases'': [''square'', ''town'', ''main'']}, ''cemetery'':
         {''id'': ''cemetery'', ''name'': ''Blackwater Cemetery'', ''destination_room_id'':

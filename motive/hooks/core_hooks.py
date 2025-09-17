@@ -467,22 +467,27 @@ def handle_whisper_action(game_master: Any, player_char: Character, action_confi
         ))
         return events_generated, feedback_messages
 
-    # Find the target player in the current room by name or alias
+    # Find the target player in the current room by player display name, character name, or character aliases
     target_player = None
-    for player_id in current_room.player_ids:
-        if player_id in game_master.players:
-            player = game_master.players[player_id]
-            # Check if the player name matches
-            if player.name.lower() == target_player_name.lower():
-                target_player = player
-                break
-            
-            # Check if any character alias matches
-            if hasattr(player, 'character') and player.character:
-                character_aliases = getattr(player.character, 'aliases', [])
-                if any(alias.lower() == target_player_name.lower() for alias in character_aliases):
-                    target_player = player
-                    break
+    for candidate in game_master.players:
+        candidate_char = getattr(candidate, 'character', None)
+        if not candidate_char:
+            continue
+        if candidate_char.current_room_id != current_room.id:
+            continue
+        # Match by player display name
+        if candidate.name.lower() == target_player_name.lower():
+            target_player = candidate
+            break
+        # Match by character name
+        if getattr(candidate_char, 'name', '').lower() == target_player_name.lower():
+            target_player = candidate
+            break
+        # Match by character aliases (if any)
+        character_aliases = getattr(candidate_char, 'aliases', [])
+        if any(alias.lower() == target_player_name.lower() for alias in character_aliases):
+            target_player = candidate
+            break
 
     if not target_player:
         feedback_messages.append(f"You don't see any player named '{target_player_name}' in this room.")
@@ -496,8 +501,8 @@ def handle_whisper_action(game_master: Any, player_char: Character, action_confi
         ))
         return events_generated, feedback_messages
 
-    # Don't whisper to yourself
-    if target_player.id == player_char.id:
+    # Don't whisper to yourself (compare character ids)
+    if getattr(target_player, 'character', None) and target_player.character.id == player_char.id:
         feedback_messages.append("You can't whisper to yourself.")
         events_generated.append(Event(
             message=f"Player {player_char.name} attempted to whisper to themselves.",
@@ -528,7 +533,7 @@ def handle_whisper_action(game_master: Any, player_char: Character, action_confi
         event_type="player_communication",
         source_room_id=current_room.id,
         timestamp=datetime.now().isoformat(),
-        related_player_id=target_player.id,
+        related_player_id=target_player.character.id,
         observers=["player"]  # Only the target player sees this event
     ))
     

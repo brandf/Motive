@@ -164,7 +164,22 @@ def convert_to_v2_format(loader: V2ConfigLoader, original_config: Dict[str, Any]
                 elif isinstance(effect, GenerateEventEffect):
                     effect_dict["message"] = effect.message
                     if effect.observers:
-                        effect_dict["observers"] = effect.observers
+                        # Rename observer scopes: room_players -> room_characters, adjacent_rooms -> adjacent_rooms_characters
+                        renamed = []
+                        for obs in effect.observers:
+                            if obs == "room_players":
+                                renamed.append("room_characters")
+                            elif obs == "adjacent_rooms":
+                                renamed.append("adjacent_rooms_characters")
+                            else:
+                                renamed.append(obs)
+                        # Special case for shout: ensure both room and adjacent scopes are present
+                        if action_id == "shout":
+                            if "room_characters" not in renamed:
+                                renamed.append("room_characters")
+                            if "adjacent_rooms_characters" not in renamed:
+                                renamed.append("adjacent_rooms_characters")
+                        effect_dict["observers"] = renamed
                 else:
                     # For other effect types, copy all attributes
                     for attr_name in dir(effect):

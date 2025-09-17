@@ -2,50 +2,56 @@ entity_definitions:
   notice_board:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Notice Board
       description: A wooden board covered with various notices, posters, and announcements.
+    properties:
       readable: true
       text: Various town announcements and missing person posters are posted here.
   broken_fountain:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Broken Fountain
       description: A once-beautiful stone fountain, now cracked and dry.
+    properties:
       immovable: true
       size: large
   bar:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Bar
       description: A long wooden bar where drinks are served.
+    properties:
       immovable: true
       size: large
   suspicious_character:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Suspicious Character
       description: A figure who seems to be watching everything carefully.
+    properties:
       immovable: true
       size: medium
   quest_board:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Quest Board
       description: A board covered with various quests and missions.
+    properties:
       readable: true
       text: Various quests and bounties are posted here, including some related to
         recent disappearances.
   guild_master_desk:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Guild Master's Desk
       description: A massive oak desk covered with reports and correspondence.
+    properties:
       immovable: true
       size: large
       readable: true
@@ -54,134 +60,150 @@ entity_definitions:
   weapon_rack:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Weapon Rack
       description: A rack displaying various weapons and armor.
+    properties:
       immovable: true
       size: large
   stolen_goods:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Stolen Goods
       description: Various stolen items and contraband.
+    properties:
       immovable: true
       size: medium
   secret_documents:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Secret Documents
       description: A collection of documents that might contain valuable information.
+    properties:
       readable: true
       text: These documents contain information about the town's troubles and recent
         activities.
   raven_chair:
     behaviors:
     - object
-    properties:
+    attributes:
       name: The Raven's Chair
       description: A high-backed chair where the leader of the thieves' guild sits.
+    properties:
       immovable: true
       size: large
   confession_booth:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Confession Booth
       description: A wooden booth where the faithful come to confess their sins.
+    properties:
       immovable: true
       size: medium
   crypt_entrance:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Crypt Entrance
       description: A hidden entrance to the underground crypt.
+    properties:
       immovable: true
       size: medium
   mausoleum:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Mausoleum
       description: A large stone mausoleum with doors that seem to be slightly ajar.
+    properties:
       immovable: true
       size: huge
   fresh_graves:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Fresh Graves
       description: Several graves that appear to have been recently dug.
+    properties:
       immovable: true
       size: large
   suspicious_footprints:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Suspicious Footprints
       description: Footprints in the soft earth that don't seem to belong to any normal
         visitor.
+    properties:
       immovable: true
       size: small
   vault:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Vault
       description: A massive steel vault that seems to be open more often than it
         should be.
+    properties:
       immovable: true
       size: huge
   ledgers:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Bank Ledgers
       description: Financial records that might contain clues about mysterious transactions.
+    properties:
       readable: true
       text: These ledgers contain financial records that might reveal clues about
         the mysterious withdrawals.
   guard_post:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Guard Post
       description: A security station that seems to be unmanned more often than not.
+    properties:
       immovable: true
       size: medium
   merchant_stalls:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Merchant Stalls
       description: Various stalls where merchants sell their wares.
+    properties:
       immovable: true
       size: large
   suspicious_merchants:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Suspicious Merchants
       description: Merchants who seem to be involved in more than just legitimate
         trade.
+    properties:
       immovable: true
       size: medium
   hidden_alleyways:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Hidden Alleyways
       description: Narrow passages between buildings that lead to secret meeting places.
+    properties:
       immovable: true
       size: medium
   cult_symbols:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Cult Symbols
       description: Dark, unsettling symbols painted on walls and carved into surfaces.
+    properties:
       readable: true
       immovable: true
       size: small
@@ -191,59 +213,66 @@ entity_definitions:
   evidence_activity:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Evidence of Recent Activity
       description: Signs that someone has been using these tunnels recently.
+    properties:
       immovable: true
       size: small
   secret_doors:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Secret Doors
       description: Hidden entrances and exits that lead to various parts of the town.
+    properties:
       immovable: true
       size: medium
   cult_altar:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Cult Altar
       description: A dark altar covered with cult artifacts and evidence of recent
         rituals.
+    properties:
       immovable: true
       size: large
   prisoner_cells:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Prisoner Cells
       description: Cells where the cult keeps their prisoners.
+    properties:
       immovable: true
       size: large
   cult_artifacts:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Cult Artifacts
       description: Various dark objects and artifacts used in the cult's rituals.
+    properties:
       immovable: true
       size: medium
   forest_watchers:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Forest Watchers
       description: The forest itself seems to be watching and waiting.
+    properties:
       immovable: true
       size: medium
   mayors_journal:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Mayor's Journal
       description: A leather-bound journal belonging to the missing mayor, filled
         with his private thoughts and observations.
+    properties:
       readable: true
       pickupable: true
       size: small
@@ -254,10 +283,11 @@ entity_definitions:
   cult_ritual_book:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Cult Ritual Book
       description: A dark, leather-bound tome filled with ancient symbols and blood-stained
         pages.
+    properties:
       readable: true
       pickupable: true
       size: medium
@@ -269,9 +299,10 @@ entity_definitions:
   missing_persons_effects:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Personal Effects
       description: A collection of personal items belonging to the missing townsfolk.
+    properties:
       readable: true
       pickupable: true
       size: small
@@ -281,9 +312,10 @@ entity_definitions:
   cult_members_confession:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Cult Member's Confession
       description: A handwritten confession found in the church records.
+    properties:
       readable: true
       pickupable: true
       size: small
@@ -294,9 +326,10 @@ entity_definitions:
   fresh_evidence:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Fresh Evidence
       description: Recently disturbed earth and strange markings.
+    properties:
       readable: true
       immovable: true
       size: medium
@@ -306,9 +339,10 @@ entity_definitions:
   suspicious_sounds:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Suspicious Sounds
       description: Strange noises coming from underground.
+    properties:
       readable: true
       immovable: true
       size: small
@@ -318,9 +352,10 @@ entity_definitions:
   missing_items:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Missing Items
       description: Items that were clearly taken, not lost.
+    properties:
       readable: true
       immovable: true
       size: small
@@ -330,9 +365,10 @@ entity_definitions:
   witnessed_abduction:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Witnessed Abduction
       description: Evidence of a recent abduction.
+    properties:
       readable: true
       immovable: true
       size: medium
@@ -342,18 +378,20 @@ entity_definitions:
   lockpicks:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Lockpicks
       description: A set of fine metal tools for opening locks.
+    properties:
       pickupable: true
       size: small
       tool_type: lockpicking
   torch:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Torch
       description: A wooden torch that can be lit to provide light in dark areas.
+    properties:
       pickupable: true
       size: medium
       tool_type: lighting
@@ -361,37 +399,41 @@ entity_definitions:
   rope:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Rope
       description: A sturdy length of rope, useful for climbing or binding.
+    properties:
       pickupable: true
       size: medium
       tool_type: climbing
   investigation_kit:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Investigation Kit
       description: A small kit containing magnifying glass, tweezers, and evidence
         bags.
+    properties:
       pickupable: true
       size: small
       tool_type: investigation
   crowbar:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Crowbar
       description: A heavy metal bar useful for prying open doors and crates.
+    properties:
       pickupable: true
       size: medium
       tool_type: prying
   holy_water:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Holy Water
       description: A small vial of blessed water from the church.
+    properties:
       pickupable: true
       size: small
       tool_type: spiritual
@@ -399,10 +441,11 @@ entity_definitions:
   eternal_flame:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Eternal Flame
       description: A small, magical flame that never goes out, symbolizing the town's
         unbreakable spirit.
+    properties:
       immovable: true
       size: small
       magical: true
@@ -410,10 +453,11 @@ entity_definitions:
   shadow_crystal:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Shadow Crystal
       description: A dark crystal that seems to absorb light and warmth, pulsing with
         malevolent energy.
+    properties:
       pickupable: true
       size: small
       magical: true
@@ -421,10 +465,11 @@ entity_definitions:
   hearth_stone:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Hearth Stone
       description: A warm stone that radiates comfort and hope, said to protect against
         dark magic.
+    properties:
       pickupable: true
       size: small
       magical: true
@@ -432,10 +477,11 @@ entity_definitions:
   shadow_mirror:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Shadow Mirror
       description: A dark mirror that shows not your reflection, but the shadows of
         your fears and doubts.
+    properties:
       immovable: true
       size: medium
       magical: true
@@ -443,10 +489,11 @@ entity_definitions:
   flame_of_hope:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Flame of Hope
       description: A small, flickering flame that grows brighter when hope is strong
         and dims when despair takes hold.
+    properties:
       immovable: true
       size: small
       magical: true
@@ -455,9 +502,10 @@ entity_definitions:
   message_board:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Message Board
       description: A wooden board where characters can leave messages for each other.
+    properties:
       readable: true
       writable: true
       immovable: true
@@ -466,9 +514,10 @@ entity_definitions:
   secret_drop_point:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Secret Drop Point
       description: A hidden location where anonymous messages can be left and retrieved.
+    properties:
       readable: true
       writable: true
       immovable: true
@@ -478,10 +527,11 @@ entity_definitions:
   pigeon_coop:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Pigeon Coop
       description: A small coop where carrier pigeons can be used to send private
         messages.
+    properties:
       readable: true
       writable: true
       immovable: true
@@ -491,9 +541,10 @@ entity_definitions:
   town_crier:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Town Crier
       description: A person who makes public announcements throughout the town.
+    properties:
       readable: true
       immovable: true
       size: medium
@@ -502,9 +553,10 @@ entity_definitions:
   burning_candle:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Burning Candle
       description: A candle that burns down over time, creating urgency.
+    properties:
       immovable: true
       size: small
       time_sensitive: true
@@ -512,9 +564,10 @@ entity_definitions:
   fresh_footprints:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Fresh Footprints
       description: Footprints that will disappear as time passes.
+    properties:
       readable: true
       immovable: true
       size: small
@@ -523,9 +576,10 @@ entity_definitions:
   disturbed_earth:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Disturbed Earth
       description: Recently disturbed earth that will settle over time.
+    properties:
       readable: true
       immovable: true
       size: medium
@@ -535,10 +589,11 @@ entity_definitions:
   ritual_preparations:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Ritual Preparations
       description: Evidence of ongoing ritual preparations that will be completed
         soon.
+    properties:
       readable: true
       immovable: true
       size: medium
@@ -548,9 +603,10 @@ entity_definitions:
   detectives_notebook:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Detective's Notebook
       description: A worn leather notebook filled with clues, suspects, and case notes.
+    properties:
       readable: true
       pickupable: true
       size: small
@@ -560,9 +616,10 @@ entity_definitions:
   daughters_medicine:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Daughter's Medicine
       description: Expensive medicine needed for Detective James's sick daughter.
+    properties:
       pickupable: true
       size: small
       character_specific: detective_james
@@ -570,10 +627,11 @@ entity_definitions:
   confession_notes:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Confession Notes
       description: Secret notes about the cult's activities that Father Marcus has
         been keeping.
+    properties:
       readable: true
       pickupable: true
       size: small
@@ -582,9 +640,10 @@ entity_definitions:
   protection_money:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Protection Money
       description: Gold coins that Gareth has been paying to The Raven for protection.
+    properties:
       pickupable: true
       size: small
       character_specific: gareth
@@ -592,9 +651,10 @@ entity_definitions:
   cult_escape_kit:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Cult Escape Kit
       description: A small kit with tools for escaping the cult's clutches.
+    properties:
       pickupable: true
       size: small
       character_specific: sarah
@@ -602,9 +662,10 @@ entity_definitions:
   ancient_artifacts:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Ancient Artifacts
       description: Mysterious artifacts that Valdris carries with him.
+    properties:
       pickupable: true
       size: small
       character_specific: valdris
@@ -612,9 +673,10 @@ entity_definitions:
   town_treasury:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Town Treasury
       description: The town's financial resources, controlled by the bank manager.
+    properties:
       immovable: true
       size: large
       resource: money
@@ -622,9 +684,10 @@ entity_definitions:
   guild_resources:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Guild Resources
       description: Weapons, armor, and supplies controlled by the guild master.
+    properties:
       immovable: true
       size: large
       resource: equipment
@@ -632,9 +695,10 @@ entity_definitions:
   information_network:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Information Network
       description: The barkeep's network of informants and contacts.
+    properties:
       immovable: true
       size: medium
       resource: information
@@ -642,9 +706,10 @@ entity_definitions:
   underground_network:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Underground Network
       description: The Raven's criminal network and safe houses.
+    properties:
       immovable: true
       size: medium
       resource: security

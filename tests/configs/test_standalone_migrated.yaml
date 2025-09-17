@@ -2,9 +2,10 @@ entity_definitions:
   test_room:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Test Room
       description: A simple test room
+    properties:
       exits: '{''north'': ''test_room_2''}'
       objects: '{''test_object_1'': {''object_type_id'': ''test_object'', ''name'':
         ''Test Object 1'', ''description'': ''First test object''}}'
@@ -13,9 +14,10 @@ entity_definitions:
   test_room_2:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Test Room 2
       description: Another test room
+    properties:
       exits: '{''south'': ''test_room''}'
       objects: '{}'
       temperature: cool
@@ -23,23 +25,14 @@ entity_definitions:
   test_object:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Test Object
       description: A simple test object
+    properties:
       value: 42
       test_property: test_value
       portable: true
       test: true
-  test_character:
-    behaviors:
-    - character
-    properties:
-      level: 1
-      health: 100
-      test: true
-    name: Test Character
-    backstory: This is a test character for standalone testing
-    motive: To test the standalone config system
 action_definitions:
   test_move:
     name: Test Move

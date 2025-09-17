@@ -21,7 +21,16 @@ class Event(BaseModel):
     timestamp: str = Field(..., description="ISO formatted timestamp when the event occurred.")
     related_object_id: Optional[str] = None
     related_player_id: Optional[str] = None
-    observers: List[Literal["player", "room_players", "adjacent_rooms", "all_players", "game_master"]] = Field(..., description="Scopes of observers who should receive this event.")
+    observers: List[Literal[
+        "player",
+        "room_players",
+        "adjacent_rooms",
+        "all_players",
+        "game_master",
+        # New v2 names (backward compatible)
+        "room_characters",
+        "adjacent_rooms_characters",
+    ]] = Field(..., description="Scopes of observers who should receive this event.")
 
 class ActionRequirementConfig(BaseModel):
     """Base model for action requirements."""
@@ -48,7 +57,16 @@ class ActionEffectConfig(BaseModel):
 
     # Fields for generate_event effect
     message: Optional[str] = None
-    observers: Optional[List[Literal["player", "room_players", "adjacent_rooms", "all_players", "game_master"]]] = None
+    observers: Optional[List[Literal[
+        "player",
+        "room_players",
+        "adjacent_rooms",
+        "all_players",
+        "game_master",
+        # New v2 names (backward compatible)
+        "room_characters",
+        "adjacent_rooms_characters",
+    ]]] = None
 
     # Fields for code_binding effect
     function_name: Optional[str] = None

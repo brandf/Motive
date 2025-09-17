@@ -239,10 +239,11 @@ class GameInitializer:
                     # Convert to room data - extract properties and store in game_rooms
                     attributes = entity_data.get('attributes', {})
                     properties = entity_data.get('properties', {})
-                    room_source = attributes if attributes else properties
-                    
-                    # Parse exits and objects from string representations if needed
-                    exits = room_source.get('exits', {})
+
+                    # Parse exits from properties (fallback to attributes) and normalize
+                    exits = properties.get('exits', {}) if properties else {}
+                    if not exits and attributes:
+                        exits = attributes.get('exits', {})
                     if isinstance(exits, str):
                         try:
                             # Handle YAML double-single-quote format ('' -> ')
@@ -255,8 +256,11 @@ class GameInitializer:
                                 exits = json.loads(exits.replace("'", '"'))
                             except:
                                 exits = {}
-                    
-                    objects = room_source.get('objects', {})
+
+                    # Parse objects from properties (fallback to attributes) and normalize
+                    objects = properties.get('objects', {}) if properties else {}
+                    if not objects and attributes:
+                        objects = attributes.get('objects', {})
                     if isinstance(objects, str):
                         try:
                             # Handle YAML double-single-quote format ('' -> ')
@@ -272,8 +276,8 @@ class GameInitializer:
                     
                     room_data = {
                         'id': entity_id,  # Add required id field
-                        'name': room_source.get('name', entity_id),
-                        'description': room_source.get('description', f"A room called {entity_id}"),
+                        'name': attributes.get('name', properties.get('name', entity_id)),
+                        'description': attributes.get('description', properties.get('description', f"A room called {entity_id}")),
                         'exits': exits,
                         'objects': objects
                     }
@@ -471,43 +475,56 @@ class GameInitializer:
                     self.game_character_types[entity_id] = stored_def
                     self.game_logger.info(f"Stored v2 character entity {entity_id} with attributes.motives: {bool(stored_def.get('attributes', {}).get('motives'))}")
                 elif 'room' in entity_types:
-                    # Convert to room data - extract properties and store in game_rooms
+                    # Convert to room data - extract properties/attributes and store in game_rooms
                     attributes = entity_data.get('attributes', {})
                     properties = entity_data.get('properties', {})
-                    
-                    # Parse exits and objects from string representations if needed
-                    exits = properties.get('exits', {})
+
+                    # Parse exits from properties (fallback to attributes) and normalize
+                    exits = properties.get('exits', {}) if properties else {}
+                    if not exits and attributes:
+                        exits = attributes.get('exits', {})
                     if isinstance(exits, str):
                         try:
                             # Handle YAML double-single-quote format ('' -> ')
                             cleaned_exits = exits.replace("''", "'")
                             exits = ast.literal_eval(cleaned_exits)
-                        except:
-                            # Fallback: try to parse as JSON-like format
+                        except Exception:
+                            # Try YAML-safe load
                             try:
-                                import json
-                                exits = json.loads(exits.replace("'", '"'))
-                            except:
-                                exits = {}
-                    
-                    objects = properties.get('objects', {})
+                                exits = yaml.safe_load(exits)
+                            except Exception:
+                                # Fallback: try to parse as JSON-like format
+                                try:
+                                    import json
+                                    exits = json.loads(exits.replace("'", '"'))
+                                except Exception:
+                                    exits = {}
+
+                    # Parse objects from properties (fallback to attributes) and normalize
+                    objects = properties.get('objects', {}) if properties else {}
+                    if not objects and attributes:
+                        objects = attributes.get('objects', {})
                     if isinstance(objects, str):
                         try:
                             # Handle YAML double-single-quote format ('' -> ')
                             cleaned_objects = objects.replace("''", "'")
                             objects = ast.literal_eval(cleaned_objects)
-                        except:
-                            # Fallback: try to parse as JSON-like format
+                        except Exception:
+                            # Try YAML-safe load
                             try:
-                                import json
-                                objects = json.loads(objects.replace("'", '"'))
-                            except:
-                                objects = {}
-                    
+                                objects = yaml.safe_load(objects)
+                            except Exception:
+                                # Fallback: try to parse as JSON-like format
+                                try:
+                                    import json
+                                    objects = json.loads(objects.replace("'", '"'))
+                                except Exception:
+                                    objects = {}
+
                     room_data = {
                         'id': entity_id,  # Add required id field
-                        'name': (attributes.get('name') if attributes else properties.get('name', entity_id)),
-                        'description': (attributes.get('description') if attributes else properties.get('description', f"A room called {entity_id}")),
+                        'name': attributes.get('name', properties.get('name', entity_id)),
+                        'description': attributes.get('description', properties.get('description', f"A room called {entity_id}")),
                         'exits': exits,
                         'objects': objects
                     }
@@ -550,6 +567,13 @@ class GameInitializer:
                 properties=room_cfg.get('properties', {})
             )
             self.rooms[room_id] = room
+            # Debug: log exits/objects parsed for each room
+            try:
+                num_exits = len(room.exits) if isinstance(room.exits, dict) else 0
+                num_objects = len(room_cfg.get('objects', {}) or {})
+                init_data['warnings'].append(f"Room '{room_id}' initialized with {num_exits} exits and {num_objects} object specs")
+            except Exception:
+                pass
             init_data['rooms_created'] += 1
 
             # Place objects defined within the room config

@@ -2,9 +2,10 @@ entity_definitions:
   test_object:
     behaviors:
     - object
-    properties:
+    attributes:
       name: Test Object
       description: This object tests advanced merging
+    properties:
       base_value: 1
       advanced_value: 2
       base: true

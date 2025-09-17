@@ -625,18 +625,24 @@ class GameMaster:
                 if not player_name:
                     return False, f"Missing parameter '{target_player_param}' for player_in_room requirement.", None
                 
-                # Check if the target player is in the same room
-                target_player = None
-                for player in self.players:
-                    if hasattr(player, 'character') and player.character:
-                        if player.character.name.lower() == player_name.lower():
-                            target_player = player.character
-                            break
+                # Resolve target by player.display name, character.name, or character.aliases
+                target_character = None
+                for candidate in self.players:
+                    candidate_char = getattr(candidate, 'character', None)
+                    if not candidate_char:
+                        continue
+                    if (candidate.name.lower() == player_name.lower()) or (candidate_char.name.lower() == player_name.lower()):
+                        target_character = candidate_char
+                        break
+                    aliases = getattr(candidate_char, 'aliases', [])
+                    if any(alias.lower() == player_name.lower() for alias in aliases):
+                        target_character = candidate_char
+                        break
                 
-                if not target_player:
+                if not target_character:
                     return False, f"Player '{player_name}' not found.", None
                 
-                if target_player.current_room_id != player_char.current_room_id:
+                if target_character.current_room_id != player_char.current_room_id:
                     return False, f"Player '{player_name}' is not in the same room.", None
             # Add other requirement types here
             else:
@@ -903,27 +909,36 @@ class GameMaster:
                 player_char = player.character
                 if not player_char:
                     continue
-                
-                observes = False
-                # Determine if the player should observe this event based on scopes
-                if "all_players" in event.observers:
-                    observes = True
-                elif "player" in event.observers and event.related_player_id == player_char.id:
-                    observes = True
-                elif "room_players" in event.observers and player_char.current_room_id == event.source_room_id:
-                    observes = True
-                elif "adjacent_rooms" in event.observers:
-                    # Check if player's current room is adjacent to event_room
+
+                is_originator = (event.related_player_id == player_char.id)
+
+                # Compute scope matches independently (union of scopes)
+                match_all_players = "all_players" in event.observers
+                # Player-scoped events target the player whose id matches related_player_id
+                match_player_target = ("player" in event.observers) and (event.related_player_id == player_char.id)
+                # Support both legacy and new observer scope names
+                has_room_scope = ("room_players" in event.observers) or ("room_characters" in event.observers)
+                match_room        = has_room_scope and (player_char.current_room_id == event.source_room_id)
+                match_adjacent    = False
+                if ("adjacent_rooms" in event.observers) or ("adjacent_rooms_characters" in event.observers):
                     for exit_data in event_room.exits.values():
                         if exit_data['destination_room_id'] == player_char.current_room_id:
-                            observes = True
+                            match_adjacent = True
                             break
-                # Add more observer types here as needed (e.g., target_player, target_object_owner)
 
-                if observes and player_char.id in self.player_observations:
-                    # Don't let players observe their own events - they already get feedback
-                    if event.related_player_id != player_char.id:
-                        self.player_observations[player_char.id].append(event)
+                should_deliver = False
+                if match_player_target:
+                    # Deliver player-scoped event to the targeted player (speaker or listener)
+                    should_deliver = True
+                elif is_originator:
+                    # Originator does not hear room/adjacent echoes, but can get all_players
+                    should_deliver = match_all_players
+                else:
+                    # Non-origin players get union of room/adjacent/all_players scopes
+                    should_deliver = match_room or match_adjacent or match_all_players
+
+                if should_deliver and player_char.id in self.player_observations:
+                    self.player_observations[player_char.id].append(event)
         
         self.event_queue.clear() # Clear the queue after distributing all events
 
@@ -978,15 +993,15 @@ class GameMaster:
             return True, "All players observer"
         elif "player" in event.observers and event.related_player_id == player_char.id:
             return True, "Target player observer"
-        elif "room_players" in event.observers and player_char.current_room_id == event.source_room_id:
-            return True, "Room players observer"
-        elif "adjacent_rooms" in event.observers:
+        elif ("room_players" in event.observers or "room_characters" in event.observers) and player_char.current_room_id == event.source_room_id:
+            return True, "Room characters observer"
+        elif ("adjacent_rooms" in event.observers) or ("adjacent_rooms_characters" in event.observers):
             # Check if player's current room is adjacent to event_room
             event_room = self.rooms.get(event.source_room_id)
             if event_room:
                 for exit_data in event_room.exits.values():
                     if exit_data['destination_room_id'] == player_char.current_room_id:
-                        return True, "Adjacent room observer"
+                        return True, "Adjacent rooms characters observer"
             return False, "Not in adjacent room"
         else:
             return False, "No matching observer scope"

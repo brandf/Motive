@@ -8,6 +8,13 @@
 - Maintain backwards compatibility via loaders/adapters; migrate in phases without breaking existing content.
 - Develop with TDD: small red/green cycles, incremental PRs, green main at all times.
 
+### Directional Policy Update — v2 is the baseline (2025-09-17)
+- The v2 minimal, deterministic integration tests are the source of truth for behavior and observability. Real game content (e.g., Hearth & Shadow) must conform to these semantics.
+- Migration preserves the spirit of v1 content (names, descriptions, motifs, rooms/objects, any special H&S actions) while adopting v2 constructs fully.
+- Enforce `attributes` (immutable) vs `properties` (mutable) semantics. Entity-level `config` dicts are not allowed in v2 YAML and are rejected at load time.
+- Once H&S v2 parity is green, we will decommission v1 code and configs entirely; v2 becomes the new baseline for all future features.
+- Post-migration, expand H&S to showcase v2 capabilities (triggers, affordances, visibility, computed props) and use findings to inform v3.
+
 ### High-Level Architecture Overview
 At runtime, the world is a graph of entities with typed properties and relations. Logic is driven by declarative Conditions, Effects, and Triggers, with Actions orchestrating changes and an Event Bus driving observability.
 
@@ -110,6 +117,7 @@ At runtime, the world is a graph of entities with typed properties and relations
 - ☐ v2 YAML schemas for Definitions/Instances/Actions
 - ☐ Loader that merges layers and instantiates entities
 - ☐ Adapter that reads v1 configs and emits v2 definitions (no breaking change)
+- Enforcement: entity-level `config` dicts are invalid in v2; load-time validation must error and instruct authors to move fields to `attributes` (immutable) or `properties` (mutable).
 
 #### Tooling & Tests
 - ☐ Golden tests for query/conditions/effects/trigger engines

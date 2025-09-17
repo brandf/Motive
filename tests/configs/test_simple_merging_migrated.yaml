@@ -2,9 +2,10 @@ entity_definitions:
   new_room:
     behaviors:
     - room
-    properties:
+    attributes:
       name: New Room
       description: A new room added by simple merging
+    properties:
       exits: '{}'
       objects: '{}'
       temperature: warm
@@ -12,9 +13,10 @@ entity_definitions:
   base_room:
     behaviors:
     - room
-    properties:
+    attributes:
       name: Base Room
       description: A room from the base config
+    properties:
       exits: '{}'
       objects: '{}'
       temperature: cool
@@ -22,9 +24,10 @@ entity_definitions:
   new_object:
     behaviors:
     - object
-    properties:
+    attributes:
       name: New Object
       description: This is a new object added by simple merging
+    properties:
       value: 42
       new: true
       test: true

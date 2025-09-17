@@ -73,7 +73,7 @@ action_definitions:
     - type: generate_event
       message: 'Player {player_name} says: "{phrase}"'
       observers:
-      - room_players
+      - room_characters
   whisper:
     name: whisper
     description: Whisper privately to a specific player in the same room.
@@ -95,10 +95,8 @@ action_definitions:
       description: ''
       target_player_param: player
     effects:
-    - type: generate_event
-      message: 'Player {player_name} whispers to {player}: "{phrase}"'
-      observers:
-      - player
+    - type: code_binding
+      function_name: handle_whisper_action
   shout:
     name: shout
     description: Shout loudly, potentially heard in adjacent rooms.
@@ -115,7 +113,8 @@ action_definitions:
     - type: generate_event
       message: 'Player {player_name} shouts: "{phrase}"'
       observers:
-      - adjacent_rooms
+      - adjacent_rooms_characters
+      - room_characters
   pickup:
     name: pickup
     description: Pick up an object from the current room.
@@ -248,82 +247,3 @@ action_definitions:
       - player
       - room_players
       - adjacent_rooms
-  investigate:
-    name: investigate
-    description: Investigate an object or area more thoroughly than a simple look.
-    cost: 15
-    category: interaction
-    parameters:
-    - name: target
-      type: string
-      description: The name of the object or area to investigate.
-      required: true
-      default_value: null
-    requirements:
-    - type: object_in_room
-      description: ''
-      object_name_param: target
-    effects:
-    - type: code_binding
-      function_name: handle_investigate_action
-      observers:
-      - player
-  use:
-    name: use
-    description: Use an object from your inventory on another object or target.
-    cost: 15
-    category: interaction
-    parameters:
-    - name: object_name
-      type: string
-      description: The name of the object from your inventory to use.
-      required: true
-      default_value: null
-    - name: target
-      type: string
-      description: The target object or area to use the object on.
-      required: true
-      default_value: null
-    requirements:
-    - type: object_in_inventory
-      description: ''
-      object_name_param: object_name
-    - type: object_in_room
-      description: ''
-      object_name_param: target
-    effects:
-    - type: code_binding
-      function_name: handle_use_action
-      observers:
-      - player
-      - room_players
-  light:
-    name: light
-    description: Light an object that can be lit (torch, candle, etc.).
-    cost: 10
-    category: interaction
-    parameters:
-    - name: object_name
-      type: string
-      description: The name of the object to light.
-      required: true
-      default_value: null
-    requirements:
-    - type: object_in_room
-      description: ''
-      object_name_param: object_name
-    - type: object_property_equals
-      description: ''
-      object_name_param: object_name
-      property: can_be_lit
-      value: true
-    effects:
-    - type: set_property
-      target: object
-      target_object_param: object_name
-      property: is_lit
-      value: true
-    - type: generate_event
-      message: '{{player_name}} lights the {{object_name}}.'
-      observers:
-      - room_players

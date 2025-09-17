@@ -7,6 +7,13 @@ A concrete recovery plan to complete v2 migration, validate outputs, and remove 
 - Validate all migrated YAML files (syntax + structure)
 - Update `GameMaster` to work with v2 configs directly (NO v2→v1 conversion)
 - Remove all v1 config files and code once v2 is proven
+- Enforce `attributes` vs `properties` semantics; reject entity-level `config` in v2 YAML with a hard error (forces proper migration)
+
+## Policy: v2 Baseline and H&S Migration Scope (2025-09-17)
+- v2 deterministic integration tests define expected behavior and observer scopes. Real content (Hearth & Shadow) must match these semantics.
+- Preserve H&S v1 spirit (narrative content and bespoke actions) but adopt v2 systems completely.
+- After v2 H&S passes deterministic real-config tests, proceed to remove v1 code/configs and treat v2 as the canonical baseline.
+- Post-migration, expand H&S to exercise v2 features (triggers, affordances, visibility, computed props) to pressure-test toward v3.
 
 ## Reality Check (2025-09-16)
 Recent real runs (including 5 parallel games) revealed gaps that contradict prior status. The following issues must be addressed before proceeding to Phase 3:

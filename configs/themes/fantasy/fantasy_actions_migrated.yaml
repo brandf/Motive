@@ -27,4 +27,4 @@ action_definitions:
     - type: generate_event
       message: '{{player_name}} lights the {{object_name}}.'
       observers:
-      - room_players
+      - room_characters
