@@ -3,102 +3,103 @@ object_types:
     id: torch
     name: Torch
     description: A simple wooden torch, useful for illumination.
-    tags: ["light_source"]
     properties:
+      light_source: true
       is_lit: false
   generic_fountain:
     id: generic_fountain
     name: Fountain
     description: A basic fountain.
-    tags: ["immovable"]
-    properties: {}
+    properties:
+      immovable: true
   generic_sign:
     id: generic_sign
     name: Sign
     description: A generic sign.
-    tags: []
     properties: {}
   # Size-constrained objects
   tiny_gem:
     id: tiny_gem
     name: Tiny Gem
     description: A small, precious gem that sparkles in the light.
-    tags: ["requires_size"]
     properties:
+      requires_size: true
       required_size: "tiny"
   small_potion:
     id: small_potion
     name: Small Potion
     description: A small vial of healing potion.
-    tags: ["requires_size"]
     properties:
+      requires_size: true
       required_size: "small"
   large_sword:
     id: large_sword
     name: Large Sword
     description: A massive two-handed sword that requires great strength to wield.
-    tags: ["requires_size"]
     properties:
+      requires_size: true
       required_size: "large"
   huge_boulder:
     id: huge_boulder
     name: Huge Boulder
     description: An enormous boulder that only the strongest can move.
-    tags: ["requires_size"]
     properties:
+      requires_size: true
       required_size: "huge"
   # Class-constrained objects
   warrior_armor:
     id: warrior_armor
     name: Warrior's Armor
     description: Heavy plate armor that only warriors can wear.
-    tags: ["requires_class"]
     properties:
+      requires_class: true
       required_class: "warrior"
   mage_staff:
     id: mage_staff
     name: Mage's Staff
     description: A magical staff that only mages can channel power through.
-    tags: ["requires_class"]
     properties:
+      requires_class: true
       required_class: "mage"
   rogue_dagger:
     id: rogue_dagger
     name: Rogue's Dagger
     description: A finely crafted dagger that only rogues can wield effectively.
-    tags: ["requires_class"]
     properties:
+      requires_class: true
       required_class: "rogue"
   # Level-constrained objects
   legendary_sword:
     id: legendary_sword
     name: Legendary Sword
     description: A sword of immense power that only high-level heroes can wield.
-    tags: ["requires_level"]
     properties:
+      requires_level: true
       required_level: 15
   epic_armor:
     id: epic_armor
     name: Epic Armor
     description: Legendary armor that requires great experience to wear.
-    tags: ["requires_level"]
     properties:
+      requires_level: true
       required_level: 20
   # Multi-constraint objects
   paladin_sword:
     id: paladin_sword
     name: Paladin's Sword
     description: A holy sword that requires both warrior class and high level.
-    tags: ["requires_class", "requires_level"]
     properties:
+      requires_class: true
+      requires_level: true
       required_class: "warrior"
       required_level: 10
   giant_warhammer:
     id: giant_warhammer
     name: Giant Warhammer
     description: A massive warhammer that requires both large size and warrior class.
-    tags: ["requires_size", "requires_class"]
     properties:
+      requires_size: true
+      requires_class: true
       required_size: "large"
       required_class: "warrior"
   # Custom constraint objects
@@ -106,7 +107,6 @@ object_types:
     id: elven_artifact
     name: Elven Artifact
     description: An ancient elven artifact that only elves of good alignment can use.
-    tags: []
     properties:
       custom_constraints:
         - type: "race"
@@ -117,7 +117,6 @@ object_types:
     id: dragon_scale
     name: Dragon Scale
     description: A scale from an ancient dragon, only usable by those with dragon blood.
-    tags: []
     properties:
       custom_constraints:
         - type: "heritage"
@@ -129,11 +128,13 @@ object_types:
     id: ancient_altar
     name: Ancient Altar
     description: A sacred altar that has been in this place for centuries.
-    tags: ["immovable", "magically_bound"]
-    properties: {}
+    properties:
+      immovable: true
+      magically_bound: true
   town_statue:
     id: town_statue
     name: Town Statue
     description: A large statue of the town's founder, too heavy to move.
-    tags: ["immovable", "too_heavy"]
-    properties: {}
+    properties:
+      immovable: true
+      too_heavy: true

@@ -118,23 +118,20 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                     # Fallback to original logic for other two-parameter actions
                     match = re.match(r'^(\S+)\s+(.+)$', param_string)
                     if match:
-                        first_param = match.group(1)
+                        first_param_raw = match.group(1)
                         rest = match.group(2).strip()
+                        # De-quote first param if quoted (e.g., "Key" -> Key)
+                        first_param = _extract_quoted_content(first_param_raw)
                         
-                        # Check if rest is a quoted string
-                        if ((rest.startswith('\'') and rest.endswith('\'')) or 
-                            (rest.startswith('"') and rest.endswith('"'))):
-                            quoted_content = rest[1:-1]
-                            # Assign to parameters in order
-                            params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = first_param
-                            params[parameters[1].get('name', 'param2') if hasattr(parameters[1], 'get') else parameters[1].name] = quoted_content
-                        else:
-                            # Fallback: assign first word to first param, rest to second
-                            params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = first_param
-                            params[parameters[1].get('name', 'param2') if hasattr(parameters[1], 'get') else parameters[1].name] = rest
+                        # Always normalize second param by de-quoting if quoted
+                        second_param = _extract_quoted_content(rest)
+                        # Assign to parameters in order
+                        params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = first_param
+                        params[parameters[1].get('name', 'param2') if hasattr(parameters[1], 'get') else parameters[1].name] = second_param
                     else:
-                        # Fallback: assign raw string to first parameter
-                        params[parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name] = param_string
+                        # Fallback: assign raw (but de-quoted) string to first parameter
+                        first_param_name = parameters[0].get('name', 'param1') if hasattr(parameters[0], 'get') else parameters[0].name
+                        params[first_param_name] = _extract_quoted_content(param_string)
             elif "target" in [(p.get('name', '') if hasattr(p, 'get') else p.name) for p in parameters]:
                 params["target"] = param_string
             elif parameters:

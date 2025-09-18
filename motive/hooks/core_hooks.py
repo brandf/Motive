@@ -89,7 +89,7 @@ def generate_help_message(game_master: Any, player_char: Character, action_confi
         source_room_id=player_char.current_room_id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["room_players"]
+        observers=["room_characters"]
     ))
 
     return events_generated, feedback_messages
@@ -102,10 +102,39 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
     event_message = ""
 
     if not target_name:
-        # No target specified, describe the current room
+        # No target specified, describe the current room, but gate on visibility
         current_room = game_master.rooms.get(player_char.current_room_id)
         if current_room:
-            # Use the same formatting method as initial room description
+            # Visibility gating: if room is dark and no lit light sources in room inventories, it's too dark
+            is_dark = bool(getattr(current_room, 'properties', {}) and current_room.properties.get('dark', False))
+            has_light = False
+            if is_dark:
+                for p in game_master.players:
+                    pc = getattr(p, 'character', None)
+                    if not pc or pc.current_room_id != current_room.id:
+                        continue
+                    for obj in pc.inventory.values():
+                        try:
+                            if obj.get_property('is_lit', False):
+                                has_light = True
+                                break
+                        except Exception:
+                            continue
+                    if has_light:
+                        break
+            if is_dark and not has_light:
+                # Too dark to see; private feedback and player-scoped event
+                feedback_messages.append("It's too dark to see anything here.")
+                events_generated.append(Event(
+                    message=f"{player_char.name} struggles to see in the darkness.",
+                    event_type="player_action_failed",
+                    source_room_id=player_char.current_room_id,
+                    timestamp=datetime.now().isoformat(),
+                    related_player_id=player_char.id,
+                    observers=["player"]
+                ))
+                return events_generated, feedback_messages
+            # Visible: show formatted description
             feedback_messages.append(current_room.get_formatted_description())
             event_message = f"{player_char.name} looks around the room."
             events_generated.append(Event(
@@ -114,7 +143,7 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
                 source_room_id=player_char.current_room_id,
                 timestamp=datetime.now().isoformat(),
                 related_player_id=player_char.id,
-                observers=["room_players"]
+                observers=["room_characters"]
             ))
         else:
             feedback_messages.append("You are in an unknown location.")
@@ -171,7 +200,7 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
                 timestamp=datetime.now().isoformat(),
                 related_player_id=player_char.id,
                 related_object_id=target_object.id,
-                observers=["player", "room_players", "game_master"]
+                observers=["player", "room_characters", "game_master"]
             ))
         else:
             feedback_messages.append(f"You don't see any '{target_name}' here or in your inventory.")
@@ -247,6 +276,36 @@ def handle_move_action(game_master: Any, player_char: Character, action_config: 
         ))
         return events_generated, feedback_messages
 
+    # Evaluate visibility and travel requirements on the exit, if present
+    def _eval_reqs(reqs: Any) -> Tuple[bool, str]:
+        if not reqs:
+            return True, ""
+        from motive.requirements_evaluator import evaluate_requirement
+        # Normalize to list
+        checks = reqs if isinstance(reqs, list) else [reqs]
+        for req in checks:
+            handled, passed, err = evaluate_requirement(player_char, game_master, req, params)
+            # If requirement type is unknown (handled=False), treat as failure to be conservative
+            if not handled or not passed:
+                return False, (err or "Requirement not met.")
+        return True, ""
+
+    # Do not block movement based on visibility requirements; those affect discovery/description.
+    # Movement is gated by travel_requirements only.
+
+    travel_ok, trav_err = _eval_reqs(exit_data.get('travel_requirements'))
+    if not travel_ok:
+        feedback_messages.append(f"You cannot travel {direction}: {trav_err or 'travel requirements not met.'}")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to move '{direction}' but travel requirements failed. {trav_err}",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+
     destination_room_id = exit_data['destination_room_id']
     destination_room = game_master.rooms.get(destination_room_id)
 
@@ -287,7 +346,7 @@ def handle_move_action(game_master: Any, player_char: Character, action_config: 
         source_room_id=current_room.id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["room_players"]  # Only players in the source room see the exit
+        observers=["room_characters"]  # Only characters in the source room see the exit
     ))
     
     # Generate enter event for players in the destination room
@@ -297,7 +356,7 @@ def handle_move_action(game_master: Any, player_char: Character, action_config: 
         source_room_id=destination_room.id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["room_players"]  # Only players in the destination room see the enter
+        observers=["room_characters"]  # Only characters in the destination room see the enter
     ))
     
     return events_generated, feedback_messages
@@ -328,7 +387,7 @@ def handle_say_action(game_master: Any, player_char: Character, action_config: A
         source_room_id=player_char.current_room_id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["room_players"]  # Only other players in the room hear the speech
+        observers=["room_characters"]  # Characters in the room hear the speech
     ))
     
     return events_generated, feedback_messages
@@ -414,7 +473,7 @@ def handle_read_action(game_master: Any, player_char: Character, action_config: 
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
         related_object_id=obj_to_read.id,
-        observers=["room_players"]
+        observers=["room_characters"]
     ))
     
     return events_generated, feedback_messages
@@ -579,7 +638,7 @@ def handle_shout_action(game_master: Any, player_char: Character, action_config:
         source_room_id=current_room.id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["player", "room_players", "adjacent_rooms"]  # Heard in current room and adjacent rooms
+        observers=["player", "room_characters", "adjacent_rooms_characters"]  # Heard in current and adjacent rooms
     ))
     
     return events_generated, feedback_messages
@@ -673,7 +732,7 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
         timestamp=timestamp,
         related_object_id=target_object.id,
         related_player_id=player_char.id,
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     events.append(room_pickup_event)
     
@@ -685,7 +744,7 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
         timestamp=timestamp,
         related_object_id=target_object.id,
         related_player_id=player_char.id,
-        observers=["adjacent_rooms"]
+        observers=["adjacent_rooms_characters"]
     )
     events.append(adjacent_pickup_event)
     
@@ -711,7 +770,7 @@ def handle_drop_action(game_master: Any, player_char: Character, action_config: 
             source_room_id=player_char.current_room_id,
             timestamp=datetime.now().isoformat(),
             related_player_id=player_char.id,
-            observers=["room_players"]
+            observers=["room_characters"]
         )
         events.append(error_event)
         feedback_messages.append("Cannot perform 'drop': No object name provided.")
@@ -734,7 +793,7 @@ def handle_drop_action(game_master: Any, player_char: Character, action_config: 
             source_room_id=player_char.current_room_id,
             timestamp=datetime.now().isoformat(),
             related_player_id=player_char.id,
-            observers=["room_players"]
+            observers=["room_characters"]
         )
         events.append(error_event)
         feedback_messages.append(f"Cannot perform 'drop': Object '{object_name}' not in inventory.")
@@ -776,7 +835,7 @@ def handle_drop_action(game_master: Any, player_char: Character, action_config: 
         timestamp=timestamp,
         related_object_id=target_object.id,
         related_player_id=player_char.id,
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     events.append(room_drop_event)
     
@@ -788,7 +847,7 @@ def handle_drop_action(game_master: Any, player_char: Character, action_config: 
         timestamp=timestamp,
         related_object_id=target_object.id,
         related_player_id=player_char.id,
-        observers=["adjacent_rooms"]
+        observers=["adjacent_rooms_characters"]
     )
     events.append(adjacent_drop_event)
     
@@ -902,7 +961,7 @@ def handle_give_action(game_master: Any, player_char: Character, action_config: 
         source_room_id=player_char.current_room_id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["player", "room_players"]
+        observers=["player", "room_characters"]
     ))
     
     return events_generated, feedback_messages
@@ -997,7 +1056,7 @@ def handle_throw_action(game_master: Any, player_char: Character, action_config:
         source_room_id=player_char.current_room_id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["player", "room_players"]
+        observers=["player", "room_characters"]
     )
     events_generated.append(current_room_event)
     
@@ -1008,7 +1067,7 @@ def handle_throw_action(game_master: Any, player_char: Character, action_config:
         source_room_id=target_room_id,
         timestamp=datetime.now().isoformat(),
         related_player_id=player_char.id,
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     events_generated.append(target_room_event)
     
@@ -1080,15 +1139,16 @@ def handle_investigate_action(game_master: Any, player_char: Character, action_c
     
     feedback_messages.append(investigation_desc)
     
-    # Create investigation event
-    investigation_event = Event(
-        event_type="investigation",
+    # Create investigation event (v2 schema)
+    events_generated.append(Event(
         message=f"{player_char.name} investigates the {target_object.name}.",
-        timestamp=datetime.now(),
-        room_id=player_char.current_room_id,
-        player_id=player_char.player_id
-    )
-    events_generated.append(investigation_event)
+        event_type="player_action",
+        source_room_id=player_char.current_room_id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        related_object_id=target_object.id,
+        observers=["room_characters"]
+    ))
     
     return events_generated, feedback_messages
 
@@ -1099,54 +1159,283 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
     events_generated: List[Event] = []
     
     object_name = params.get("object_name", "").strip()
-    target = params.get("target", "").strip()
-    
-    if not object_name or not target:
-        feedback_messages.append("You need to specify both an object to use and a target.")
+    target = (params.get("target", "") or "").strip()
+
+    if not object_name:
+        feedback_messages.append("You need to specify an object to use.")
         return events_generated, feedback_messages
-    
-    # Check if player has the object in inventory
-    if object_name not in player_char.inventory:
+
+    # Check if player has the object in inventory (by name match)
+    inv_object = None
+    for obj in player_char.inventory.values():
+        if obj.name.lower() == object_name.lower():
+            inv_object = obj
+            break
+    if not inv_object:
         feedback_messages.append(f"You don't have '{object_name}' in your inventory.")
         return events_generated, feedback_messages
-    
-    # Find the target object in the current room
+
+    # Helper: get entity interactions dict
+    def _get_interactions(entity: Any) -> Dict[str, Any]:
+        if entity is None:
+            return {}
+        try:
+            ih = entity.get_property('interactions', None)  # Prefer via accessor
+            if ih:
+                return ih
+        except Exception:
+            pass
+        return getattr(entity, 'properties', {}).get('interactions', {}) or {}
+
+    # Helper: check simple when-conditions
+    def _when_matches(when: Dict[str, Any], context: Dict[str, Any]) -> bool:
+        if not when:
+            return True
+        target_obj = context.get('target_object')
+        room = context.get('room')
+        # target_has_property: {property: 'is_locked', equals: True}
+        thp = when.get('target_has_property')
+        if thp:
+            if not target_obj:
+                return False
+            prop = thp.get('property')
+            expected = thp.get('equals', True)
+            try:
+                actual = target_obj.get_property(prop, None)
+            except Exception:
+                actual = getattr(getattr(target_obj, 'properties', {}), 'get', lambda *_: None)(prop)
+            if actual != expected:
+                return False
+        # room_has_exit: {exit_name: 'bedroom door'} (matches name or alias)
+        rhe = when.get('room_has_exit')
+        if rhe:
+            if not room:
+                return False
+            exit_name = (rhe.get('exit_name') or rhe.get('name') or '').lower()
+            if not exit_name:
+                return False
+            found = False
+            for ex in room.exits.values():
+                if ex.get('name', '').lower() == exit_name:
+                    found = True
+                    break
+                aliases = [a.lower() for a in ex.get('aliases', [])]
+                if exit_name in aliases:
+                    found = True
+                    break
+            if not found:
+                return False
+        return True
+
+    # Helper: apply a single effect with a target selector
+    def _apply_effect(eff: Dict[str, Any], context: Dict[str, Any]):
+        nonlocal events_generated, feedback_messages
+        eff_type = (eff or {}).get('type')
+        if eff_type == 'set_property':
+            prop = eff.get('property')
+            if not prop:
+                return
+            target_ref = (eff.get('target') or 'self').lower()
+            toggle = bool(eff.get('toggle', False))
+            value = eff.get('value')
+            target_entity = None
+            if target_ref in ('self', 'object', 'inventory_object'):
+                target_entity = context.get('inv_object')
+            elif target_ref in ('target', 'target_object'):
+                target_entity = context.get('target_object')
+            elif target_ref == 'room':
+                target_entity = context.get('room')
+            elif target_ref == 'player':
+                target_entity = context.get('player_char')
+            if not target_entity:
+                return
+            if toggle:
+                try:
+                    current_val = bool(target_entity.get_property(prop, False))
+                except Exception:
+                    current_val = bool(getattr(target_entity, 'properties', {}).get(prop, False))
+                new_val = not current_val
+                try:
+                    target_entity.set_property(prop, new_val)
+                except Exception:
+                    if getattr(target_entity, 'properties', None) is None:
+                        target_entity.properties = {}
+                    target_entity.properties[prop] = new_val
+            else:
+                try:
+                    target_entity.set_property(prop, value)
+                except Exception:
+                    if getattr(target_entity, 'properties', None) is None:
+                        target_entity.properties = {}
+                    target_entity.properties[prop] = value
+        elif eff_type == 'add_tag':
+            tag = eff.get('tag')
+            if not tag:
+                return
+            target_ref = (eff.get('target') or 'self').lower()
+            target_entity = context.get('inv_object') if target_ref in ('self','object','inventory_object') else (
+                context.get('target_object') if target_ref in ('target','target_object') else (
+                    context.get('room') if target_ref=='room' else context.get('player_char')
+                )
+            )
+            if target_entity and hasattr(target_entity, 'add_tag'):
+                target_entity.add_tag(tag)
+        elif eff_type == 'remove_tag':
+            tag = eff.get('tag')
+            if not tag:
+                return
+            target_ref = (eff.get('target') or 'self').lower()
+            target_entity = context.get('inv_object') if target_ref in ('self','object','inventory_object') else (
+                context.get('target_object') if target_ref in ('target','target_object') else (
+                    context.get('room') if target_ref=='room' else context.get('player_char')
+                )
+            )
+            if target_entity and hasattr(target_entity, 'remove_tag'):
+                target_entity.remove_tag(tag)
+        elif eff_type == 'generate_event':
+            msg_tmpl = eff.get('message', '')
+            observers = eff.get('observers', [])
+            inv_obj = context.get('inv_object')
+            tgt = context.get('target_object')
+            fmt_params = dict(params)
+            fmt_params.update({
+                'player_name': player_char.name,
+                'object_name': inv_obj.name if inv_obj else '',
+                'target_name': tgt.name if tgt else ''
+            })
+            try:
+                msg = msg_tmpl.format(**fmt_params)
+            except Exception:
+                msg = msg_tmpl
+            events_generated.append(Event(
+                message=msg,
+                event_type="player_action",
+                source_room_id=player_char.current_room_id,
+                timestamp=datetime.now().isoformat(),
+                related_player_id=player_char.id,
+                observers=observers
+            ))
+
+    # Helper: process interactions spec (list of effects or list of rules {when, effects})
+    def _process_interactions(spec: Any, context: Dict[str, Any]) -> bool:
+        if not spec:
+            return False
+        applied_any = False
+        # Normalize to list
+        entries = spec if isinstance(spec, list) else [spec]
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            # Two shapes: direct effect (has 'type') or rule (has 'effects' and optional 'when')
+            if 'type' in entry:
+                _apply_effect(entry, context)
+                applied_any = True
+            else:
+                when = entry.get('when', {})
+                effects = entry.get('effects', [])
+                if _when_matches(when, context):
+                    for eff in effects:
+                        _apply_effect(eff, context)
+                    applied_any = applied_any or bool(effects)
+        return applied_any
+
+    # Resolve target object in room if provided
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    target_object = None
+    if target:
+        if current_room:
+            for obj in current_room.objects.values():
+                if obj.name.lower() == target.lower():
+                    target_object = obj
+                    break
+
+    # Compose common context for interactions
+    context = {
+        'player_char': player_char,
+        'inv_object': inv_object,
+        'target_object': target_object,
+        'room': current_room,
+    }
+
+    # Try interactions on inventory object, then target object, then room, then character (any entity can host interactions)
+    applied = False
+    for entity in (inv_object, target_object, current_room, player_char):
+        interactions = _get_interactions(entity)
+        if isinstance(interactions, dict) and 'use' in interactions:
+            applied = _process_interactions(interactions['use'], context) or applied
+
+    if applied:
+        # Provide generic feedback based on lit state if present (common UX)
+        try:
+            is_lit_val = inv_object.get_property('is_lit', None)
+        except Exception:
+            is_lit_val = getattr(inv_object, 'properties', {}).get('is_lit', None)
+        if is_lit_val is True:
+            feedback_messages.append(f"You light the {inv_object.name}.")
+        elif is_lit_val is False:
+            # If explicitly false after a toggle, assume extinguished
+            feedback_messages.append(f"You extinguish the {inv_object.name}.")
+        else:
+            if target_object:
+                feedback_messages.append(f"You use the {inv_object.name} on the {target_object.name}.")
+            else:
+                feedback_messages.append(f"You use the {inv_object.name}.")
+        return events_generated, feedback_messages
+
+    # If no interactions, and no explicit target provided and the item is a tool, perform default behavior
+    tool_type = inv_object.get_property('tool_type', None)
+    if not target and tool_type == 'lighting':
+        # Toggle is_lit property
+        currently_lit = bool(inv_object.get_property('is_lit', False))
+        new_state = not currently_lit
+        try:
+            inv_object.set_property('is_lit', new_state)
+        except Exception:
+            # Fallback: ensure properties dict exists
+            if getattr(inv_object, 'properties', None) is None:
+                inv_object.properties = {}
+            inv_object.properties['is_lit'] = new_state
+        action_word = "light" if new_state else "extinguish"
+        # Feedback and events
+        feedback_messages.append(f"You {action_word} the {inv_object.name}.")
+        events_generated.append(Event(
+            message=f"{player_char.name} {action_word}s the {inv_object.name}.",
+            event_type="player_action",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "room_characters"]
+        ))
+        return events_generated, feedback_messages
+
+    # Generic use on target in room (legacy behavior)
     current_room = game_master.rooms.get(player_char.current_room_id)
     if not current_room:
         feedback_messages.append("You are not in a valid room.")
         return events_generated, feedback_messages
-    
+
     target_object = None
-    for obj_id, obj in current_room.objects.items():
-        if obj.name.lower() == target.lower():
-            target_object = obj
-            break
-    
-    if not target_object:
-        feedback_messages.append(f"You don't see '{target}' in the current room.")
-        return events_generated, feedback_messages
-    
-    # Generate use description
-    use_desc = f"You use the {object_name} on the {target_object.name}."
-    
-    # Add object-specific use effects if available
-    if hasattr(target_object, 'use_description') and target_object.use_description:
-        use_desc += f" {target_object.use_description}"
+    if target:
+        for obj_id, obj in current_room.objects.items():
+            if obj.name.lower() == target.lower():
+                target_object = obj
+                break
+
+    use_desc = f"You use the {object_name}"
+    if target_object:
+        use_desc += f" on the {target_object.name}."
     else:
-        use_desc += " Nothing obvious happens, but you feel like you've accomplished something."
-    
+        use_desc += "."
     feedback_messages.append(use_desc)
-    
-    # Create use event
-    use_event = Event(
-        event_type="use",
-        message=f"{player_char.name} uses the {object_name} on the {target_object.name}.",
-        timestamp=datetime.now(),
-        room_id=player_char.current_room_id,
-        player_id=player_char.player_id
-    )
-    events_generated.append(use_event)
-    
+
+    events_generated.append(Event(
+        message=f"{player_char.name} uses the {object_name}{' on the ' + target_object.name if target_object else ''}.",
+        event_type="player_action",
+        source_room_id=player_char.current_room_id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        observers=["room_characters"]
+    ))
     return events_generated, feedback_messages
 
 
@@ -1208,15 +1497,16 @@ def handle_light_action(game_master: Any, player_char: Character, action_config:
     
     feedback_messages.append(f"You light the {target_object.name}. It now provides warm, flickering light.")
     
-    # Create light event
-    light_event = Event(
-        event_type="light",
+    # Create light event (v2 schema)
+    events_generated.append(Event(
         message=f"{player_char.name} lights the {target_object.name}.",
-        timestamp=datetime.now(),
-        room_id=player_char.current_room_id,
-        player_id=player_char.player_id
-    )
-    events_generated.append(light_event)
+        event_type="player_action",
+        source_room_id=player_char.current_room_id,
+        timestamp=datetime.now().isoformat(),
+        related_player_id=player_char.id,
+        related_object_id=target_object.id,
+        observers=["room_characters"]
+    ))
     
     return events_generated, feedback_messages
 

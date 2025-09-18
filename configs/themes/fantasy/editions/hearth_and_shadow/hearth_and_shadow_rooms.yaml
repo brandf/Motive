@@ -30,7 +30,6 @@ rooms:
       flame_of_hope: {id: flame_of_hope, name: Flame of Hope, object_type_id: flame_of_hope, current_room_id: town_square, description: A small, flickering flame that grows brighter when hope is strong and dims when despair takes hold.}
       message_board: {id: message_board, name: Message Board, object_type_id: message_board, current_room_id: town_square, description: A wooden board where characters can leave messages for each other.}
       town_crier: {id: town_crier, name: Town Crier, object_type_id: town_crier, current_room_id: town_square, description: A person who makes public announcements throughout the town.}
-    tags: []
     properties: {}
 
   tavern:
@@ -54,7 +53,6 @@ rooms:
       suspicious_character: {id: suspicious_character, name: Hooded Figure, object_type_id: suspicious_character, current_room_id: tavern, description: A figure in a dark hood sits alone in the corner, watching everything carefully. They seem to be waiting for something.}
       secret_drop_point: {id: secret_drop_point, name: Secret Drop Point, object_type_id: secret_drop_point, current_room_id: tavern, description: A hidden location where anonymous messages can be left and retrieved.}
       pigeon_coop: {id: pigeon_coop, name: Pigeon Coop, object_type_id: pigeon_coop, current_room_id: tavern, description: A small coop where carrier pigeons can be used to send private messages.}
-    tags: []
     properties: {}
 
   adventurer_guild:
@@ -77,7 +75,6 @@ rooms:
       lockpicks: {id: lockpicks, name: Lockpicks, object_type_id: lockpicks, current_room_id: adventurer_guild, description: A set of fine metal tools for opening locks.}
       torch: {id: torch, name: Torch, object_type_id: torch, current_room_id: adventurer_guild, description: A wooden torch that can be lit to provide light in dark areas.}
       investigation_kit: {id: investigation_kit, name: Investigation Kit, object_type_id: investigation_kit, current_room_id: adventurer_guild, description: A small kit containing magnifying glass, tweezers, and evidence bags.}
-    tags: []
     properties: {}
 
   thieves_den:
@@ -98,8 +95,9 @@ rooms:
       stolen_goods: {id: stolen_goods, name: Stolen Goods, object_type_id: stolen_goods, current_room_id: thieves_den, description: Various stolen items and contraband are scattered around the room. Some seem to be recently acquired.}
       secret_documents: {id: secret_documents, name: Secret Documents, object_type_id: secret_documents, current_room_id: thieves_den, description: A collection of documents and maps that might contain valuable information about the town's troubles.}
       raven_chair: {id: raven_chair, name: The Raven's Chair, object_type_id: raven_chair, current_room_id: thieves_den, description: A high-backed chair where the leader of the thieves' guild sits. It seems to be the center of power in this hidden world.}
-    tags: ["hidden", "underground"]
-    properties: {}
+    properties:
+      hidden: true
+      underground: true
 
   church:
     id: church
@@ -122,7 +120,6 @@ rooms:
       cult_members_confession: {id: cult_members_confession, name: Cult Member's Confession, object_type_id: cult_members_confession, current_room_id: church, description: A handwritten confession found in the church records.}
       holy_water: {id: holy_water, name: Holy Water, object_type_id: holy_water, current_room_id: church, description: A small vial of blessed water from the church.}
       hearth_stone: {id: hearth_stone, name: Hearth Stone, object_type_id: hearth_stone, current_room_id: church, description: A warm stone that radiates comfort and hope, said to protect against dark magic.}
-    tags: []
     properties: {}
 
   cemetery:
@@ -145,8 +142,9 @@ rooms:
       suspicious_footprints: {id: suspicious_footprints, name: Suspicious Footprints, object_type_id: suspicious_footprints, current_room_id: cemetery, description: Footprints in the soft earth that don't seem to belong to any normal visitor. They lead toward the mausoleum.}
       fresh_footprints: {id: fresh_footprints, name: Fresh Footprints, object_type_id: fresh_footprints, current_room_id: cemetery, description: Fresh footprints in the dust. They appear to be recent and will fade soon.}
       disturbed_earth: {id: disturbed_earth, name: Disturbed Earth, object_type_id: disturbed_earth, current_room_id: cemetery, description: Recently disturbed earth that will settle over time.}
-    tags: ["dark", "spooky"]
-    properties: {}
+    properties:
+      dark: true
+      spooky: true
 
   bank:
     id: bank
@@ -167,7 +165,6 @@ rooms:
       guard_post: {id: guard_post, name: Guard Post, object_type_id: guard_post, current_room_id: bank, description: A security station that seems to be unmanned more often than not. The guard appears to be frequently absent.}
       mayors_journal: {id: mayors_journal, name: Mayor's Journal, object_type_id: mayors_journal, current_room_id: bank, description: A leather-bound journal belonging to the missing mayor, hidden in the vault.}
       missing_items: {id: missing_items, name: Missing Items, object_type_id: missing_items, current_room_id: bank, description: Empty spaces where items once sat, suggesting a systematic search.}
-    tags: []
     properties: {}
 
   market_district:
@@ -189,7 +186,6 @@ rooms:
       merchant_stalls: {id: merchant_stalls, name: Merchant Stalls, object_type_id: merchant_stalls, current_room_id: market_district, description: Various stalls where merchants sell their wares. Many are empty, and the remaining merchants seem nervous.}
       suspicious_merchants: {id: suspicious_merchants, name: Suspicious Merchants, object_type_id: suspicious_merchants, current_room_id: market_district, description: Merchants who seem to be involved in more than just legitimate trade. They often gather in hushed conversations.}
       hidden_alleyways: {id: hidden_alleyways, name: Hidden Alleyways, object_type_id: hidden_alleyways, current_room_id: market_district, description: Narrow passages between buildings that lead to secret meeting places and hidden entrances.}
-    tags: []
     properties: {}
 
   underground_tunnels:
@@ -211,8 +207,10 @@ rooms:
       cult_symbols: {id: cult_symbols, name: Cult Symbols, object_type_id: cult_symbols, current_room_id: underground_tunnels, description: Strange symbols carved into the walls that seem to pulse with an otherworldly energy. They make you feel uneasy.}
       evidence_activity: {id: evidence_activity, name: Evidence of Recent Activity, object_type_id: evidence_activity, current_room_id: underground_tunnels, description: Signs that someone has been using these tunnels recently. Footprints, dropped items, and other traces of recent passage.}
       secret_doors: {id: secret_doors, name: Secret Doors, object_type_id: secret_doors, current_room_id: underground_tunnels, description: Hidden entrances and exits that lead to various parts of the town. Some seem to have been recently used.}
-    tags: ["hidden", "underground", "dark"]
-    properties: {}
+    properties:
+      hidden: true
+      underground: true
+      dark: true
 
   secret_cult_chamber:
     id: secret_cult_chamber
@@ -239,8 +237,11 @@ rooms:
       shadow_mirror: {id: shadow_mirror, name: Shadow Mirror, object_type_id: shadow_mirror, current_room_id: secret_cult_chamber, description: A dark mirror that shows not your reflection, but the shadows of your fears and doubts.}
       ritual_preparations: {id: ritual_preparations, name: Ritual Preparations, object_type_id: ritual_preparations, current_room_id: secret_cult_chamber, description: Evidence of ongoing ritual preparations that will be completed soon.}
       burning_candle: {id: burning_candle, name: Burning Candle, object_type_id: burning_candle, current_room_id: secret_cult_chamber, description: A candle that burns down over time, creating urgency.}
-    tags: ["hidden", "underground", "dark", "evil"]
-    properties: {}
+    properties:
+      hidden: true
+      underground: true
+      dark: true
+      evil: true
 
   old_forest_path:
     id: old_forest_path
@@ -260,5 +261,6 @@ rooms:
       wooden_sign: {id: wooden_sign, name: Wooden Sign, object_type_id: wooden_sign, current_room_id: old_forest_path, description: A weathered wooden sign pointing deeper into the forest. The writing is faded and hard to read.}
       ancient_altar: {id: ancient_altar, name: Ancient Altar, object_type_id: ancient_altar, current_room_id: old_forest_path, description: A sacred altar that has been in this place for centuries. It seems to be connected to the forest's ancient magic.}
       forest_watchers: {id: forest_watchers, name: Forest Watchers, object_type_id: forest_watchers, current_room_id: old_forest_path, description: The forest itself seems to be watching and waiting. You can feel unseen eyes upon you.}
-    tags: ["dark", "forest"]
-    properties: {}
+    properties:
+      dark: true
+      forest: true

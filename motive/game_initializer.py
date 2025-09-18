@@ -124,6 +124,12 @@ class GameInitializer:
                     name_source = attributes if attributes else properties
                     config_data['name'] = name_source.get('name', entity_id)
                     config_data['description'] = name_source.get('description', f"A {entity_id} object")
+                    # Preserve object type properties (e.g., interactions, defaults)
+                    if properties:
+                        config_data['properties'] = properties
+                    # Preserve tags if present (v2 discourages tags, but keep for backward compat in types)
+                    if 'tags' in entity_data:
+                        config_data['tags'] = entity_data.get('tags', [])
                     
                     # Copy other properties that might be relevant
                     for key, value in entity_data.items():
@@ -274,12 +280,20 @@ class GameInitializer:
                             except:
                                 objects = {}
                     
+                    # Carry through additional room properties (e.g., dark, hidden)
+                    filtered_properties = {}
+                    if isinstance(properties, dict):
+                        for k, v in properties.items():
+                            if k not in ('exits', 'objects'):
+                                filtered_properties[k] = v
+
                     room_data = {
                         'id': entity_id,  # Add required id field
                         'name': attributes.get('name', properties.get('name', entity_id)),
                         'description': attributes.get('description', properties.get('description', f"A room called {entity_id}")),
                         'exits': exits,
-                        'objects': objects
+                        'objects': objects,
+                        'properties': filtered_properties
                     }
                     self.game_rooms[entity_id] = room_data
         
@@ -371,6 +385,12 @@ class GameInitializer:
                     name_source = attributes if attributes else properties
                     config_data['name'] = name_source.get('name', entity_id)
                     config_data['description'] = name_source.get('description', f"A {entity_id} object")
+                    # Preserve object type properties (e.g., interactions, defaults)
+                    if properties:
+                        config_data['properties'] = properties
+                    # Preserve tags if present (v2 discourages tags, but keep for backward compat in types)
+                    if 'tags' in entity_data:
+                        config_data['tags'] = entity_data.get('tags', [])
                     
                     # Copy other properties that might be relevant
                     for key, value in entity_data.items():
@@ -521,12 +541,20 @@ class GameInitializer:
                                 except Exception:
                                     objects = {}
 
+                    # Carry through additional room properties (e.g., dark, hidden)
+                    filtered_properties = {}
+                    if isinstance(properties, dict):
+                        for k, v in properties.items():
+                            if k not in ('exits', 'objects'):
+                                filtered_properties[k] = v
+
                     room_data = {
                         'id': entity_id,  # Add required id field
                         'name': attributes.get('name', properties.get('name', entity_id)),
                         'description': attributes.get('description', properties.get('description', f"A room called {entity_id}")),
                         'exits': exits,
-                        'objects': objects
+                        'objects': objects,
+                        'properties': filtered_properties
                     }
                     self.game_rooms[entity_id] = room_data
         
@@ -544,7 +572,7 @@ class GameInitializer:
                 self.game_characters.update(raw_config['characters'])
         
         # Extract rooms from merged config (only if not already populated from v2 entity_definitions)
-        if 'rooms' in raw_config and raw_config['rooms']:
+        if not self.game_rooms and 'rooms' in raw_config and raw_config['rooms']:
             self.game_rooms = raw_config['rooms']
         elif not self.game_rooms:
             # Initialize empty rooms if none defined and none loaded from entity_definitions

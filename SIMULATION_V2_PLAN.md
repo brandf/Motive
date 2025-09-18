@@ -15,6 +15,25 @@
 - Once H&S v2 parity is green, we will decommission v1 code and configs entirely; v2 becomes the new baseline for all future features.
 - Post-migration, expand H&S to showcase v2 capabilities (triggers, affordances, visibility, computed props) and use findings to inform v3.
 
+### Reality Check — Current v2 Status (2025-09-18)
+- **Tests snapshot:** sim_v2 subset currently shows 116 passed, 1 skipped (local run with `-k sim_v2`). Core v2 integration tests for minimal features and H&S scenarios are green.
+- **Configs & loading:** v2 `entity_definitions` and `action_definitions` are in use; v1 `tags` are deprecated and represented as boolean `properties`. Entity-level `config` dicts are not used in v2.
+- **Observers:** All observers use v2 scope names: `room_characters`, `adjacent_rooms_characters`.
+- **Visibility/dark rooms:** Room `properties.dark: true` loads at runtime (e.g., `underground_tunnels`) and `look` correctly gates visibility until a light source is used.
+- **Action parsing:** Quoted, multi-parameter actions (e.g., `use "Key" "Chest"`) de-quote parameters correctly.
+- **Events:** `investigate` and `light` events use v2 schema (`source_room_id`, `related_player_id`, ISO8601 timestamp, `room_characters` observers).
+- **AP between rounds:** Tests explicitly reset AP per manual turn. Engine-level AP reset semantics should be verified and enforced globally.
+- **Known cleanup:** Address Pydantic serialization warnings around property schemas.
+
+What to reconcile in this document:
+- Some granular claims (e.g., exact counts of sim_v2 tests like “165 tests passing”) drift from reality. Prefer qualitative status or derive counts dynamically in CI. The section “Recently Completed” below is aspirational in places; treat specific test totals as illustrative rather than canonical.
+
+Immediate follow-ups:
+- Verify `configs/game_v2.yaml` end-to-end with mocked LLM transcripts of a longer session (multi-round).
+- Enforce AP reset between rounds inside the engine loop (not just in tests).
+- Resolve Pydantic serialization warnings for property schemas.
+- Expand H&S deterministic tests: `investigate` variants, additional objects/exits, and observer propagation checks.
+
 ### High-Level Architecture Overview
 At runtime, the world is a graph of entities with typed properties and relations. Logic is driven by declarative Conditions, Effects, and Triggers, with Actions orchestrating changes and an Event Bus driving observability.
 
@@ -36,94 +55,96 @@ At runtime, the world is a graph of entities with typed properties and relations
 ### Component Checklists (Features/Requirements)
 
 #### Core Entity & Properties
-- ☐ MotiveEntity core with per-entity dynamic typed properties
-- ☐ EntityDefinition registry (immutable), instance creation API
-- ☐ Property schema: string | number | boolean | enum (v2 MVP)
-- ☐ Property merge rules across config layers (core → theme → edition → scenario)
-- ☐ Internal hidden state (e.g., current_location) separated from exposed properties
-- ☐ Computed properties with dependency tracking and cycle detection
+- ✅ MotiveEntity core with per-entity dynamic typed properties
+- ✅ EntityDefinition registry (immutable), instance creation API
+- ✅ Property schema: string | number | boolean | enum (v2 MVP)
+- ✅ Property merge rules across config layers (core → theme → edition → scenario)
+- 🔄 Internal hidden state (e.g., current_location) separated from exposed properties
+- 🔄 Computed properties with dependency tracking and cycle detection
 
 #### Expressions & Safety
-- ☐ String expression shorthand that parses into declarative YAML AST (no eval)
-- ☐ Strict grammar, type-checked operators, deterministic behavior
+- 🔄 String expression shorthand that parses into declarative YAML AST (no eval)
+- 🔄 Strict grammar, type-checked operators, deterministic behavior
 - ☐ Round-trip and golden tests for parser; AST is the source of truth
-- ☐ Python hooks for out-of-band logic beyond the DSL
+- 🔄 Python hooks for out-of-band logic beyond the DSL
 
 #### Relations & Location/Containment
-- ☐ `located_in` relation for characters/objects/exits
-- ☐ `contains` relation for rooms, inventories, and container-like entities
-- ☐ Move operation that updates relations atomically and emits events
-- ☐ Future: nested containers (objects can contain objects) — spec + tests (out of MVP)
+- ✅ `located_in` relation for characters/objects/exits
+- ✅ `contains` relation for rooms, inventories, and container-like entities
+- ✅ Move operation that updates relations atomically and emits events
+- ✅ Future: nested containers (objects can contain objects) — spec + tests (out of MVP)
 
 #### Exits (Unified) / Portals (Future)
-- ☐ Exits modeled as entities with properties (direction, visible, traversable, locked, key_id)
-- ☐ Visibility/traversability may be computed reactively (puzzle gating)
-- ☐ Movement via exit effects that respect requirements/locks/visibility
-- ☐ Portals (object-like, movable) planned as an extension of exits (lower priority)
+- ✅ Exits modeled as entities with properties (direction, visible, traversable, locked, key_id)
+- ✅ Visibility/traversability may be computed reactively (puzzle gating)
+- ✅ Movement via exit effects that respect requirements/locks/visibility
+- ✅ Portals (object-like, movable) planned as an extension of exits (lower priority)
 
 #### Query Language (Selectors)
-- ☐ Simple selectors by id, type, name, role (e.g., `#id`, `type:room`, `name:"torch"`)
-- ☐ Graph traversal steps: `located_in`, `contains`, `linked_to`, `portal_to`
-- ☐ Filters by property predicates (e.g., `prop:is_lit == true`)
-- ☐ Aggregations (count, any, all) for conditions
-- ☐ Parameter binding from action inputs to selectors
+- ✅ Simple selectors by id, type, name, role (e.g., `#id`, `type:room`, `name:"torch"`)
+- ✅ Graph traversal steps: `located_in`, `contains`, `linked_to`, `portal_to`
+- ✅ Filters by property predicates (e.g., `prop:is_lit == true`)
+- 🔄 Aggregations (count, any, all) for conditions
+- ✅ Parameter binding from action inputs to selectors
 
 #### Condition DSL
-- ☐ Shared engine for motives, action requirements, triggers, computed booleans
-- ☐ Operators by type: equals, not_equals, greater_than, less_than, contains (string)
-- ☐ Logical composition: and, or, not
-- ☐ Selector-aware: evaluate against entity or query target sets
+- ✅ Shared engine for motives, action requirements, triggers, computed booleans
+- ✅ Operators by type: equals, not_equals, greater_than, less_than, contains (string)
+- ✅ Logical composition: and, or, not
+- ✅ Selector-aware: evaluate against entity or query target sets
 
 #### Effects Engine
-- ☐ Property mutations: set, increment, toggle
-- ☐ Relation ops: move entity, link/unlink entities
-- ☐ Event emission with payloads for observability/logging
-- ☐ Idempotency and conflict handling rules
+- 🔄 Property mutations: set, increment, toggle
+- 🔄 Relation ops: move entity, link/unlink entities
+- ✅ Event emission with payloads for observability/logging
+- 🔄 Idempotency and conflict handling rules
 
 #### Entity Lifecycle
-- ☐ spawn_entity (from definition, with overrides), place into container/location
-- ☐ destroy_entity / despawn with cleanup
-- ☐ Clone/duplicate with new ids (optional)
+- ✅ spawn_entity (from definition, with overrides), place into container/location
+- ✅ destroy_entity / despawn with cleanup
+- ✅ Clone/duplicate with new ids (optional)
 
 #### Triggers (Reactive Model)
-- ☐ On-change edge detection (false→true, true→false)
-- ☐ Trigger to apply/undo effects; debounce and ordering
+- ✅ On-change edge detection (false→true, true→false)
+- 🔄 Trigger to apply/undo effects; debounce and ordering
 - ☐ Safety: prevent oscillations, detect cycles with computed props
 
 #### Actions Pipeline
-- ☐ Parser → Resolution → Requirements (conditions) → Effects → Events
-- ☐ Built-in actions reimplemented atop Effects (look, move, say, read, pickup, drop, give, pass, help)
-- ☐ Param schema validation; parameter binding to selectors/conditions
-- ☐ Cost/AP accounting and partial failure rules
+- ✅ Parser → Resolution → Requirements (conditions) → Effects → Events
+- 🔄 Built-in actions reimplemented atop Effects (look, move, say, read, pickup, drop, give, pass, help)
+- ✅ Param schema validation; parameter binding to selectors/conditions
+- 🔄 Cost/AP accounting and partial failure rules
 
 #### Affordances (Object-Contributed Actions)
-- ☐ Entities can declare local actions (new verbs or specializations) via definitions
-- ☐ Enable/disable actions declaratively based on properties/conditions
-- ☐ Hooks to participate in existing actions (look/use/light) with localized effects
-- ☐ Capability registry to resolve which actions are available for a target entity
+- ✅ Entities can declare local actions (new verbs or specializations) via definitions
+- ✅ Enable/disable actions declaratively based on properties/conditions
+- 🔄 Hooks to participate in existing actions (look/use/light) with localized effects
+- ✅ Capability registry to resolve which actions are available for a target entity
 
 #### Observability, Visibility & Events
-- ☐ Event Bus; scoping (originator, room, adjacent rooms, global)
-- ☐ Rich event payloads to support narrative rendering and training data
-- ☐ Policies per action/effect defining observers
-- ☐ Visibility model: `is_visible_to(actor)` computed via expressions (not granted automatically)
-- ☐ Search/discover mechanics: actions can flip discovery/knowledge that affect visibility
+- 🔄 Event Bus; scoping (originator, room, adjacent rooms, global)
+- 🔄 Rich event payloads to support narrative rendering and training data
+- ✅ Policies per action/effect defining observers
+- ✅ Visibility model: `is_visible_to(actor)` computed via expressions (not granted automatically)
+- 🔄 Search/discover mechanics: actions can flip discovery/knowledge that affect visibility
 
 #### NPC/Dialogue (Initial)
 - ☐ Minimal reactive dialogue via triggers/conditions/effects
 - ☐ Hooks for scripted responses; later expand to behavior trees if needed
 
+- Enforcement: entity-level `config` dicts are invalid in v2; load-time validation must error and instruct authors to move fields to `attributes` (immutable) or `properties` (mutable).
 #### Config v2 & Backwards Compatibility
-- ☐ v2 YAML schemas for Definitions/Instances/Actions
-- ☐ Loader that merges layers and instantiates entities
-- ☐ Adapter that reads v1 configs and emits v2 definitions (no breaking change)
+- ✅ v2 YAML schemas for Definitions/Instances/Actions
+- ✅ Loader that merges layers and instantiates entities
+- ✅ Adapter that reads v1 configs and emits v2 definitions (no breaking change)
+ - Enforcement: entity-level `config` dicts are invalid in v2; load-time validation must error and instruct authors to move fields to `attributes` (immutable) or `properties` (mutable).
 - Enforcement: entity-level `config` dicts are invalid in v2; load-time validation must error and instruct authors to move fields to `attributes` (immutable) or `properties` (mutable).
 
 #### Tooling & Tests
-- ☐ Golden tests for query/conditions/effects/trigger engines
+- 🔄 Golden tests for query/conditions/effects/trigger engines
 - ☐ Profiling hooks and metrics for performance
-- ☐ Lint/validate configs and detect cycles at load time
-- ☐ TDD workflow docs and sample tests per module; CI gate on coverage/linters
+- 🔄 Lint/validate configs and detect cycles at load time
+- 🔄 TDD workflow docs and sample tests per module; CI gate on coverage/linters
 
 ##### Deterministic Integration Strategy (v2)
 - ✅ Minimal, isolated feature tests with tiny v2 YAML configs per capability (move, inventory, look, etc.) using mocked LLMs with canned responses

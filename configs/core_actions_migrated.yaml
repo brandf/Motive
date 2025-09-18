@@ -56,7 +56,7 @@ action_definitions:
       function_name: handle_move_action
       observers:
       - player
-      - room_players
+      - room_characters
   say:
     name: say
     description: Say something to other players in the room.
@@ -158,7 +158,7 @@ action_definitions:
       function_name: handle_drop_action
       observers:
       - player
-      - room_players
+      - room_characters
   read:
     name: read
     description: Read text from an object (like signs, books, etc.).
@@ -179,6 +179,44 @@ action_definitions:
       function_name: handle_read_action
       observers:
       - player
+  investigate:
+    name: investigate
+    description: Investigate an object in the current room.
+    cost: 10
+    category: interaction
+    parameters:
+    - name: target
+      type: string
+      description: The name of the object to investigate.
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: handle_investigate_action
+  use:
+    name: use
+    description: Use an object from your inventory, optionally on a target.
+    cost: 10
+    category: interaction
+    parameters:
+    - name: object_name
+      type: string
+      description: The name of the object to use.
+      required: true
+      default_value: null
+    - name: target
+      type: string
+      description: Optional name of the target in the current room.
+      required: false
+      default_value: null
+    requirements:
+    - type: object_in_inventory
+      description: ''
+      object_name_param: object_name
+    effects:
+    - type: code_binding
+      function_name: handle_use_action
   pass:
     name: pass
     description: End your turn without taking any action.
@@ -215,7 +253,7 @@ action_definitions:
       function_name: handle_give_action
       observers:
       - player
-      - room_players
+      - room_characters
   throw:
     name: throw
     description: Throw an object from your inventory through an exit to an adjacent
@@ -245,5 +283,5 @@ action_definitions:
       function_name: handle_throw_action
       observers:
       - player
-      - room_players
-      - adjacent_rooms
+      - room_characters
+      - adjacent_rooms_characters

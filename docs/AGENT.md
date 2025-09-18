@@ -81,6 +81,14 @@ This file contains essential guidance for AI agents working on the Motive projec
 3. **Eliminate old structures entirely** once migration is complete
 4. **Never create "compatibility layers"** that convert new back to old
 
+## No Tags in v2 (Properties Only)
+
+**Policy**: Tags are deprecated and must not be used anywhere in v2 (configs, code, tests).
+
+- Treat any `tags:` usage as a bug to fix immediately.
+- Use boolean properties instead (e.g., `hidden: true`, `dark: true`, `underground: true`).
+- Migration from v1 must convert tags → properties; do not add runtime workarounds for tags.
+
 ## Never Encode Complex Structures as Strings in YAML
 
 **Use YAML's native structure syntax**:

@@ -396,6 +396,16 @@ entity_definitions:
       size: medium
       tool_type: lighting
       fuel: 100
+      is_lit: false
+      interactions:
+        use:
+        - type: set_property
+          property: is_lit
+          toggle: true
+        - type: generate_event
+          message: '{player_name} uses {object_name}.'
+          observers:
+          - room_characters
   rope:
     behaviors:
     - object

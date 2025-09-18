@@ -48,7 +48,7 @@ actions:
     effects:
       - type: code_binding
         function_name: handle_move_action
-        observers: ["player", "room_players"]
+        observers: ["player", "room_characters"]
   say:
     id: say
     name: say
@@ -63,7 +63,7 @@ actions:
     effects:
       - type: generate_event
         message: "Player {player_name} says: \"{phrase}\""
-        observers: ["room_players"]
+        observers: ["room_characters"]
   whisper:
     id: whisper
     name: whisper
@@ -136,7 +136,7 @@ actions:
       - type: code_binding
         function_module: motive.hooks.core_hooks
         function_name: handle_drop_action
-        observers: ["player", "room_players"]
+        observers: ["player", "room_characters"]
   read:
     id: read
     name: read
@@ -184,7 +184,7 @@ actions:
     effects:
       - type: code_binding
         function_name: handle_give_action
-        observers: ["player", "room_players"]
+        observers: ["player", "room_characters"]
   throw:
     id: throw
     name: throw
@@ -206,4 +206,4 @@ actions:
     effects:
       - type: code_binding
         function_name: handle_throw_action
-        observers: ["player", "room_players", "adjacent_rooms"]
+        observers: ["player", "room_characters", "adjacent_rooms_characters"]

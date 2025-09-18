@@ -52,13 +52,13 @@ class V1ToV2Adapter:
         
         # CRITICAL: Convert v1 tags to boolean properties (tags are deprecated in v2)
         tags = v1_room.get("tags", [])
-        for tag in tags:
-            # Skip complex objects (like merge strategies) - only process simple string tags
-            if isinstance(tag, str):
-                properties[tag] = PropertySchema(
-                    type=PropertyType.BOOLEAN,
-                    default=True
-                )
+        if isinstance(tags, list):
+            for tag in tags:
+                if isinstance(tag, str):
+                    properties[tag] = PropertySchema(
+                        type=PropertyType.BOOLEAN,
+                        default=True
+                    )
         
         return EntityDefinition(
             definition_id=v1_room["id"],
@@ -88,13 +88,13 @@ class V1ToV2Adapter:
         
         # CRITICAL: Convert v1 tags to boolean properties (tags are deprecated in v2)
         tags = v1_object_type.get("tags", [])
-        for tag in tags:
-            # Skip complex objects (like merge strategies) - only process simple string tags
-            if isinstance(tag, str):
-                properties[tag] = PropertySchema(
-                    type=PropertyType.BOOLEAN,
-                    default=True
-                )
+        if isinstance(tags, list):
+            for tag in tags:
+                if isinstance(tag, str):
+                    properties[tag] = PropertySchema(
+                        type=PropertyType.BOOLEAN,
+                        default=True
+                    )
         
         return EntityDefinition(
             definition_id=v1_object_type["id"],
@@ -136,13 +136,13 @@ class V1ToV2Adapter:
         
         # CRITICAL: Convert v1 tags to boolean properties (tags are deprecated in v2)
         tags = v1_character.get("tags", [])
-        for tag in tags:
-            # Skip complex objects (like merge strategies) - only process simple string tags
-            if isinstance(tag, str):
-                properties[tag] = PropertySchema(
-                    type=PropertyType.BOOLEAN,
-                    default=True
-                )
+        if isinstance(tags, list):
+            for tag in tags:
+                if isinstance(tag, str):
+                    properties[tag] = PropertySchema(
+                        type=PropertyType.BOOLEAN,
+                        default=True
+                    )
         
         return EntityDefinition(
             definition_id=v1_character["id"],
