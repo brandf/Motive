@@ -10,6 +10,7 @@ Comprehensive utility for Motive game management including:
 
 import argparse
 import yaml
+import warnings
 import json
 import sys
 import shutil
@@ -55,7 +56,13 @@ def show_raw_config(config: Union[Dict[str, Any], 'GameConfig', 'V2GameConfig'],
     # Convert config object to dict for output
     if hasattr(config, 'dict'):
         # Pydantic model (v2)
-        config_dict = config.dict()
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="Pydantic serializer warnings:",
+                category=UserWarning,
+            )
+            config_dict = config.dict()
     elif hasattr(config, '__dict__'):
         # Object with __dict__ (v1 GameConfig)
         config_dict = config.__dict__

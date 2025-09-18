@@ -1066,6 +1066,9 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
             await gm.run_game_worker()
         else:
             await gm.run_game()
+        
+        # Return the GameMaster object for testing
+        return gm
     except KeyboardInterrupt:
         print("\nGame interrupted by user.")
         sys.exit(0)

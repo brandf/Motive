@@ -1,5 +1,6 @@
 import ast
 import logging
+import warnings
 import yaml
 from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, ValidationError
@@ -81,7 +82,17 @@ class GameInitializer:
         
         # Get the raw merged config data
         if hasattr(self.game_config, 'model_dump'):
-            raw_config = self.game_config.model_dump()
+            # Avoid Pydantic serializer warnings by silencing during export
+            try:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings(
+                        "ignore",
+                        message="Pydantic serializer warnings:",
+                        category=UserWarning,
+                    )
+                    raw_config = self.game_config.model_dump()
+            except Exception:
+                raw_config = self.game_config.dict() if hasattr(self.game_config, 'dict') else self.game_config
         elif hasattr(self.game_config, '__dict__'):
             raw_config = self.game_config.__dict__
         else:
@@ -104,7 +115,13 @@ class GameInitializer:
             for entity_id, entity_def in raw_config['entity_definitions'].items():
                 if hasattr(entity_def, 'dict'):
                     # Pydantic object
-                    entity_data = entity_def.dict()
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings(
+                            "ignore",
+                            message="Pydantic serializer warnings:",
+                            category=UserWarning,
+                        )
+                        entity_data = entity_def.dict()
                 else:
                     # Dictionary
                     entity_data = entity_def
@@ -327,7 +344,16 @@ class GameInitializer:
         
         # Get the raw merged config data
         if hasattr(self.game_config, 'model_dump'):
-            raw_config = self.game_config.model_dump()
+            try:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings(
+                        "ignore",
+                        message="Pydantic serializer warnings:",
+                        category=UserWarning,
+                    )
+                    raw_config = self.game_config.model_dump()
+            except Exception:
+                raw_config = self.game_config.dict() if hasattr(self.game_config, 'dict') else self.game_config
         elif hasattr(self.game_config, '__dict__'):
             raw_config = self.game_config.__dict__
         else:
@@ -340,7 +366,13 @@ class GameInitializer:
             for action_id, action_def in raw_config['action_definitions'].items():
                 if hasattr(action_def, 'dict'):
                     # Pydantic object
-                    action_data = action_def.dict()
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings(
+                            "ignore",
+                            message="Pydantic serializer warnings:",
+                            category=UserWarning,
+                        )
+                        action_data = action_def.dict()
                 else:
                     # Dictionary
                     action_data = action_def
@@ -367,7 +399,13 @@ class GameInitializer:
             for entity_id, entity_def in raw_config['entity_definitions'].items():
                 if hasattr(entity_def, 'dict'):
                     # Pydantic object
-                    entity_data = entity_def.dict()
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings(
+                            "ignore",
+                            message="Pydantic serializer warnings:",
+                            category=UserWarning,
+                        )
+                        entity_data = entity_def.dict()
                 else:
                     # Dictionary
                     entity_data = entity_def
