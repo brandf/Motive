@@ -54,14 +54,14 @@ def test_drop_action_success():
     # Test drop action
     events, feedback = handle_drop_action(game_master, player_char, action_config, {"object_name": "Torch"})
     
-    # Verify we get 3 events (player, room_players, adjacent_rooms)
+    # Verify we get 3 events (player, room_characters, adjacent_rooms_characters)
     assert len(events) == 3
     
-    # Verify event details - check the room_players event (index 1)
+    # Verify event details - check the room_characters event (index 1)
     event = events[1]
     assert event.event_type == "player_action"
     assert "drops the Torch" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     assert event.source_room_id == "test_room"
     assert event.related_object_id == "test_torch"
     assert event.related_player_id == "test_player"
@@ -114,7 +114,7 @@ def test_drop_action_object_not_in_inventory():
     # Test drop action
     events, feedback = handle_drop_action(game_master, player_char, action_config, {"object_name": "Torch"})
     
-    # Verify we get 1 event (error case only generates room_players event)
+    # Verify we get 1 event (error case only generates room_characters event)
     assert len(events) == 1
     
     # Verify event details
@@ -122,7 +122,7 @@ def test_drop_action_object_not_in_inventory():
     assert event.event_type == "player_action"
     assert "attempts to drop the Torch" in event.message
     assert "but it is not in their inventory" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify object was not moved
     assert "test_torch" not in player_char.inventory
@@ -180,14 +180,14 @@ def test_drop_action_case_insensitive():
     # Test drop action with lowercase name
     events, feedback = handle_drop_action(game_master, player_char, action_config, {"object_name": "torch"})
     
-    # Verify we get 3 events (player, room_players, adjacent_rooms)
+    # Verify we get 3 events (player, room_characters, adjacent_rooms_characters)
     assert len(events) == 3
     
-    # Verify event details - check the room_players event (index 1)
+    # Verify event details - check the room_characters event (index 1)
     event = events[1]
     assert event.event_type == "player_action"
     assert "drops the Torch" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify object was moved from inventory to room
     assert "test_torch" not in player_char.inventory
@@ -240,7 +240,7 @@ def test_drop_action_no_object_name():
     assert event.event_type == "player_action"
     assert "attempts to drop" in event.message
     assert "but no object was specified" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify feedback
     assert len(feedback) == 1
@@ -301,14 +301,14 @@ def test_drop_action_multiple_objects_same_name():
     # Test drop action - should drop the first one found
     events, feedback = handle_drop_action(game_master, player_char, action_config, {"object_name": "Torch"})
     
-    # Verify we get 3 events (player, room_players, adjacent_rooms)
+    # Verify we get 3 events (player, room_characters, adjacent_rooms_characters)
     assert len(events) == 3
     
-    # Verify event details - check the room_players event (index 1)
+    # Verify event details - check the room_characters event (index 1)
     event = events[1]
     assert event.event_type == "player_action"
     assert "drops the Torch" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify one object was moved from inventory to room
     assert len(player_char.inventory) == 1

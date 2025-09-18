@@ -15,7 +15,7 @@ action_definitions:
       - type: generate_event
         message: "Player {player_name} says: \"{phrase}\""
         observers:
-          - room_players
+          - room_characters
   pass:
     name: pass
     description: End turn.

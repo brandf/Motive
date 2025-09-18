@@ -49,7 +49,7 @@ actions:
       - type: code_binding
         function_module: motive.hooks.core_hooks
         function_name: handle_say_action
-        observers: ["player", "room_players"]
+        observers: ["player", "room_characters"]
 
   help:
     id: help
@@ -85,7 +85,7 @@ actions:
       - type: code_binding
         function_module: motive.hooks.core_hooks
         function_name: handle_move_action
-        observers: ["player", "room_players", "adjacent_rooms"]
+        observers: ["player", "room_characters", "adjacent_rooms_characters"]
 
   pickup:
     id: pickup
@@ -106,7 +106,7 @@ actions:
       - type: code_binding
         function_module: motive.hooks.core_hooks
         function_name: handle_pickup_action
-        observers: ["player", "room_players"]
+        observers: ["player", "room_characters"]
 
 # Define rooms directly
 rooms:

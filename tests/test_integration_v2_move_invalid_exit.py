@@ -68,7 +68,7 @@ action_definitions:
         function_name: handle_move_action
         observers:
           - player
-          - room_players
+          - room_characters
   pass:
     name: pass
     description: End turn.

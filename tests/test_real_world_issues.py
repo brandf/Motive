@@ -35,7 +35,7 @@ def test_bullet_point_character_in_recent_events():
 
 
 def test_look_action_should_generate_events():
-    """Test that look actions should generate events for room_players scope."""
+    """Test that look actions should generate events for room_characters scope."""
     # This test catches the missing event generation for look actions
     
     # Mock the look action handler
@@ -47,18 +47,18 @@ def test_look_action_should_generate_events():
             "source_room_id": "town_square",
             "timestamp": datetime.now().isoformat(),
             "related_player_id": "hero_instance_0",
-            "observers": ["room_players"]
+            "observers": ["room_characters"]
         }]
         
         # Test that the handler can return events
         result = mock_look_handler("town_square", MagicMock(), {})
         assert len(result) == 1
         assert result[0]["message"] == "Hero looks around the room."
-        assert result[0]["observers"] == ["room_players"]
+        assert result[0]["observers"] == ["room_characters"]
 
 
 def test_help_action_should_generate_events():
-    """Test that help actions should generate events for room_players scope."""
+    """Test that help actions should generate events for room_characters scope."""
     # This test catches the missing event generation for help actions
     
     # Mock the help action handler
@@ -70,18 +70,18 @@ def test_help_action_should_generate_events():
             "source_room_id": "town_square", 
             "timestamp": datetime.now().isoformat(),
             "related_player_id": "hero_instance_0",
-            "observers": ["room_players"]
+            "observers": ["room_characters"]
         }]
         
         # Test that the handler can return events
         result = mock_help_handler("town_square", MagicMock(), {})
         assert len(result) == 1
         assert result[0]["message"] == "Hero requests help."
-        assert result[0]["observers"] == ["room_players"]
+        assert result[0]["observers"] == ["room_characters"]
 
 
 def test_pickup_action_should_generate_events():
-    """Test that pickup actions should generate events for room_players scope."""
+    """Test that pickup actions should generate events for room_characters scope."""
     # This test catches the missing event generation for pickup actions
     
     # Mock the pickup action handler
@@ -93,14 +93,14 @@ def test_pickup_action_should_generate_events():
             "source_room_id": "town_square",
             "timestamp": datetime.now().isoformat(),
             "related_player_id": "hero_instance_0",
-            "observers": ["room_players"]
+            "observers": ["room_characters"]
         }]
         
         # Test that the handler can return events
         result = mock_pickup_handler("fountain", "town_square", MagicMock(), {})
         assert len(result) == 1
         assert result[0]["message"] == "Hero picks up the fountain."
-        assert result[0]["observers"] == ["room_players"]
+        assert result[0]["observers"] == ["room_characters"]
 
 
 def test_first_turn_observations_delivery():
@@ -116,7 +116,7 @@ def test_first_turn_observations_delivery():
             "source_room_id": "town_square",
             "timestamp": datetime.now().isoformat(),
             "related_player_id": "hero_instance_0",
-            "observers": ["room_players"]
+            "observers": ["room_characters"]
         }]
     }
     
@@ -229,7 +229,7 @@ def test_event_distribution_immediate_timing():
         "source_room_id": "town_square",
         "timestamp": datetime.now().isoformat(),
         "related_player_id": "hero_instance_0",
-        "observers": ["room_players"]
+        "observers": ["room_characters"]
     }
     
     # Add event to queue (this should happen immediately after action execution)
@@ -238,7 +238,7 @@ def test_event_distribution_immediate_timing():
     
     # Distribute events (this should happen immediately after adding to queue)
     for event in event_queue:
-        if "room_players" in event["observers"]:
+        if "room_characters" in event["observers"]:
             # Simulate distribution to players in same room
             player_observations["player2"].append(event)
     
@@ -260,7 +260,7 @@ def test_self_observation_prevention():
         """Distribute event to relevant players, excluding the originator."""
         for player in players:
             if player["id"] != event["related_player_id"]:  # Don't observe own events
-                if "room_players" in event["observers"]:
+                if "room_characters" in event["observers"]:
                     player_observations[player["id"]].append(event)
     
     # Mock players
@@ -278,7 +278,7 @@ def test_self_observation_prevention():
         "source_room_id": "town_square",
         "timestamp": datetime.now().isoformat(),
         "related_player_id": "hero_instance_0",
-        "observers": ["room_players"]
+        "observers": ["room_characters"]
     }
     
     # Distribute event

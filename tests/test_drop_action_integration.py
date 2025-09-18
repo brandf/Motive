@@ -61,7 +61,7 @@ class TestDropActionIntegration:
         )
         
         # Verify action execution
-        assert len(events) == 3  # player, room_players, adjacent_rooms
+        assert len(events) == 3  # player, room_characters, adjacent_rooms_characters
         assert len(feedback) == 1
         assert "You drop the Torch" in feedback[0]
         
@@ -154,11 +154,11 @@ class TestDropActionIntegration:
         # Room players event
         room_event = events[1]
         assert room_event.event_type == "player_action"
-        assert room_event.observers == ["room_players"]
+        assert room_event.observers == ["room_characters"]
         assert "TestPlayer drops the Torch" in room_event.message
         
         # Adjacent rooms event
         adjacent_event = events[2]
         assert adjacent_event.event_type == "player_action"
-        assert adjacent_event.observers == ["adjacent_rooms"]
+        assert adjacent_event.observers == ["adjacent_rooms_characters"]
         assert "TestPlayer drops something" in adjacent_event.message

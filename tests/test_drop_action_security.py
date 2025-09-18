@@ -121,14 +121,14 @@ def test_drop_action_special_characters():
     # Test drop action with special characters
     events, feedback = handle_drop_action(game_master, player_char, action_config, {"object_name": "Object with Special Chars: !@#$%^&*()"})
     
-    # Verify we get 3 events (player, room_players, adjacent_rooms)
+    # Verify we get 3 events (player, room_characters, adjacent_rooms_characters)
     assert len(events) == 3
     
-    # Verify event details - check the room_players event (index 1)
+    # Verify event details - check the room_characters event (index 1)
     event = events[1]
     assert event.event_type == "player_action"
     assert "drops the Object with Special Chars" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify object was moved from inventory to room
     assert "special_obj" not in player_char.inventory
@@ -182,14 +182,14 @@ def test_drop_action_unicode_characters():
     # Test drop action with unicode characters
     events, feedback = handle_drop_action(game_master, player_char, action_config, {"object_name": "魔法の杖"})
     
-    # Verify we get 3 events (player, room_players, adjacent_rooms)
+    # Verify we get 3 events (player, room_characters, adjacent_rooms_characters)
     assert len(events) == 3
     
-    # Verify event details - check the room_players event (index 1)
+    # Verify event details - check the room_characters event (index 1)
     event = events[1]
     assert event.event_type == "player_action"
     assert "drops the 魔法の杖" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify object was moved from inventory to room
     assert "unicode_obj" not in player_char.inventory
@@ -249,14 +249,14 @@ def test_drop_action_cross_room_exploit():
     # Test drop action
     events, feedback = handle_drop_action(game_master, player_char, action_config, {"object_name": "Test Object"})
     
-    # Verify we get 3 events (player, room_players, adjacent_rooms)
+    # Verify we get 3 events (player, room_characters, adjacent_rooms_characters)
     assert len(events) == 3
     
-    # Verify event details - check the room_players event (index 1)
+    # Verify event details - check the room_characters event (index 1)
     event = events[1]
     assert event.event_type == "player_action"
     assert "drops the Test Object" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     assert event.source_room_id == "room2"  # Event should be from player's current room
     
     # Verify object was moved to player's current room, not object's original room
@@ -329,14 +329,14 @@ def test_drop_action_inventory_integrity():
     # Test dropping middle object
     events, feedback = handle_drop_action(game_master, player_char, action_config, {"object_name": "Object 2"})
     
-    # Verify we get 3 events (player, room_players, adjacent_rooms)
+    # Verify we get 3 events (player, room_characters, adjacent_rooms_characters)
     assert len(events) == 3
     
-    # Verify event details - check the room_players event (index 1)
+    # Verify event details - check the room_characters event (index 1)
     event = events[1]
     assert event.event_type == "player_action"
     assert "drops the Object 2" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify only the specified object was moved
     assert len(player_char.inventory) == 2

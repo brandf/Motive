@@ -20,18 +20,18 @@ def test_event_creation():
         source_room_id="room1",
         timestamp=datetime.now().isoformat(),
         related_player_id="hero_instance_0",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     
     assert event.message == "Player1 says: \"Hello!\"."
     assert event.event_type == "player_communication"
     assert event.source_room_id == "room1"
     assert event.related_player_id == "hero_instance_0"
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
 
 
-def test_distribute_events_room_players_scope():
-    """Test that events with room_players scope are distributed correctly."""
+def test_distribute_events_room_characters_scope():
+    """Test that events with room_characters scope are distributed correctly."""
     # Create a mock GameMaster with minimal setup
     gm = GameMaster.__new__(GameMaster)
     gm.game_logger = MagicMock()
@@ -75,7 +75,7 @@ def test_distribute_events_room_players_scope():
         source_room_id="room1",
         timestamp=datetime.now().isoformat(),
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     
     # Add event to queue
@@ -211,8 +211,8 @@ def test_distribute_events_all_players_scope():
     assert len(gm.event_queue) == 0
 
 
-def test_distribute_events_adjacent_rooms_scope():
-    """Test that events with adjacent_rooms scope are distributed correctly."""
+def test_distribute_events_adjacent_rooms_characters_scope():
+    """Test that events with adjacent_rooms_characters scope are distributed correctly."""
     # Create a mock GameMaster with minimal setup
     gm = GameMaster.__new__(GameMaster)
     gm.game_logger = MagicMock()
@@ -271,7 +271,7 @@ def test_distribute_events_adjacent_rooms_scope():
         source_room_id="room1",
         timestamp=datetime.now().isoformat(),
         related_player_id="system",
-        observers=["adjacent_rooms"]
+        observers=["adjacent_rooms_characters"]
     )
     
     # Add event to queue
@@ -322,7 +322,7 @@ def test_distribute_events_unknown_room():
         source_room_id="unknown_room",
         timestamp=datetime.now().isoformat(),
         related_player_id="system",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     
     # Add event to queue
@@ -390,7 +390,7 @@ def test_self_observation_prevention():
         source_room_id="room1",
         timestamp=datetime.now().isoformat(),
         related_player_id="player1",  # Same as player1's character ID
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     
     # Add event to queue

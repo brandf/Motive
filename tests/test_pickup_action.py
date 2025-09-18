@@ -74,11 +74,11 @@ def test_pickup_action_success():
     assert "You pick up the Torch." in player_event.message
     
     room_event = events[1]
-    assert room_event.observers == ["room_players"]
+    assert room_event.observers == ["room_characters"]
     assert "TestPlayer picks up the Torch." in room_event.message
     
     adjacent_event = events[2]
-    assert adjacent_event.observers == ["adjacent_rooms"]
+    assert adjacent_event.observers == ["adjacent_rooms_characters"]
     assert "TestPlayer picks up something." in adjacent_event.message
 
 

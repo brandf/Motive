@@ -81,7 +81,7 @@ class MockGameMaster:
                     observes = True
                 elif "player" in event.observers and event.related_player_id == player.id:
                     observes = True
-                elif "room_players" in event.observers and player.current_room_id == event.source_room_id:
+                elif "room_characters" in event.observers and player.current_room_id == event.source_room_id:
                     observes = True
                 
                 if observes and event.related_player_id != player.id:
@@ -116,7 +116,7 @@ def test_container_interior_pickup_drop():
         source_room_id=interior_room,
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(pickup_event)
     gm.distribute_events()
@@ -137,7 +137,7 @@ def test_container_interior_pickup_drop():
         source_room_id=interior_room,
         timestamp="2025-01-01T12:01:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(drop_event)
     gm.distribute_events()
@@ -170,7 +170,7 @@ def test_container_interior_give_action():
         source_room_id=interior_room,
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(give_event)
     gm.distribute_events()
@@ -204,7 +204,7 @@ def test_container_interior_communication():
         source_room_id=interior_room,
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(say_event)
     gm.distribute_events()
@@ -241,7 +241,7 @@ def test_container_interior_shout():
         source_room_id=interior_room,
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players", "adjacent_rooms"]
+        observers=["room_characters", "adjacent_rooms_characters"]
     )
     gm.event_queue.append(shout_event)
     gm.distribute_events()
@@ -281,7 +281,7 @@ def test_container_interior_object_interactions():
         source_room_id=interior_room,
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(read_event)
     gm.distribute_events()
@@ -300,7 +300,7 @@ def test_container_interior_object_interactions():
         source_room_id=interior_room,
         timestamp="2025-01-01T12:01:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(open_event)
     gm.distribute_events()
@@ -339,7 +339,7 @@ def test_container_interior_multiple_containers():
         source_room_id=bag_interior,
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(say_event)
     gm.distribute_events()
@@ -357,7 +357,7 @@ def test_container_interior_multiple_containers():
         source_room_id=hole_interior,
         timestamp="2025-01-01T12:01:00",
         related_player_id="player2",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(say_event2)
     gm.distribute_events()
@@ -392,7 +392,7 @@ def test_container_interior_exit_reentry():
         source_room_id=interior_room,  # Event happens in interior room
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(exit_event)
     gm.distribute_events()
@@ -414,7 +414,7 @@ def test_container_interior_exit_reentry():
         source_room_id=interior_room,  # Event happens in interior room
         timestamp="2025-01-01T12:01:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(reenter_event)
     gm.distribute_events()

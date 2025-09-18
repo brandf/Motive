@@ -47,7 +47,7 @@ async def test_hns_telephone_shout_say_whisper(tmp_path):
             print("DEBUG P2 OBS:", p2_debug)
             assert any(
                 isinstance(getattr(ev, "observers", []), list)
-                and ("adjacent_rooms" in getattr(ev, "observers", []) or "adjacent_rooms_characters" in getattr(ev, "observers", []))
+                and ("adjacent_rooms_characters" in getattr(ev, "observers", []) or "adjacent_rooms_characters_characters" in getattr(ev, "observers", []))
                 and getattr(ev, "related_player_id", None) == p1.character.id
                 for ev in p2_obs
             ), p2_debug
@@ -69,7 +69,7 @@ async def test_hns_telephone_shout_say_whisper(tmp_path):
             print("DEBUG P1 OBS:", p1_debug)
             assert any(
                 isinstance(getattr(ev, "observers", []), list)
-                and ("adjacent_rooms" in getattr(ev, "observers", []) or "adjacent_rooms_characters" in getattr(ev, "observers", []))
+                and ("adjacent_rooms_characters" in getattr(ev, "observers", []) or "adjacent_rooms_characters_characters" in getattr(ev, "observers", []))
                 and getattr(ev, "related_player_id", None) == p2.character.id
                 for ev in p1_obs
             ), p1_debug

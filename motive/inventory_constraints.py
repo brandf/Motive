@@ -42,7 +42,7 @@ def check_inventory_constraints(
             timestamp=datetime.now().isoformat(),
             related_object_id=object_to_add.id,
             related_player_id=target_player.id,
-            observers=["room_players"]
+            observers=["room_characters"]
         )
         return False, error_msg, error_event
     
@@ -56,7 +56,7 @@ def check_inventory_constraints(
             timestamp=datetime.now().isoformat(),
             related_object_id=object_to_add.id,
             related_player_id=target_player.id,
-            observers=["room_players"]
+            observers=["room_characters"]
         )
         return False, error_msg, error_event
     
@@ -70,7 +70,7 @@ def check_inventory_constraints(
             timestamp=datetime.now().isoformat(),
             related_object_id=object_to_add.id,
             related_player_id=target_player.id,
-            observers=["room_players"]
+            observers=["room_characters"]
         )
         return False, error_msg, error_event
     
@@ -101,7 +101,7 @@ def check_inventory_constraints(
                 timestamp=datetime.now().isoformat(),
                 related_object_id=object_to_add.id,
                 related_player_id=target_player.id,
-                observers=["room_players"]
+                observers=["room_characters"]
             )
             return False, error_msg, error_event
     
@@ -119,7 +119,7 @@ def check_inventory_constraints(
                 timestamp=datetime.now().isoformat(),
                 related_object_id=object_to_add.id,
                 related_player_id=target_player.id,
-                observers=["room_players"]
+                observers=["room_characters"]
             )
             return False, error_msg, error_event
     
@@ -137,7 +137,7 @@ def check_inventory_constraints(
                 timestamp=datetime.now().isoformat(),
                 related_object_id=object_to_add.id,
                 related_player_id=target_player.id,
-                observers=["room_players"]
+                observers=["room_characters"]
             )
             return False, error_msg, error_event
     
@@ -158,7 +158,7 @@ def check_inventory_constraints(
                     timestamp=datetime.now().isoformat(),
                     related_object_id=object_to_add.id,
                     related_player_id=target_player.id,
-                    observers=["room_players"]
+                    observers=["room_characters"]
                 )
                 return False, error_msg, error_event
     

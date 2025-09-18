@@ -42,7 +42,7 @@ class TestGiveActionParsing:
                 ActionEffectConfig(
                     type="code_binding",
                     function_name="handle_give_action",
-                    observers=["player", "room_players"]
+                    observers=["player", "room_characters"]
                 )
             ]
         )
@@ -213,7 +213,7 @@ class TestGiveActionExecution:
         event = events[0]
         assert "Player_1 gives a torch to Player_2" in event.message
         assert event.event_type == "item_transfer"
-        assert event.observers == ["player", "room_players"]
+        assert event.observers == ["player", "room_characters"]
     
     def test_give_action_execution_object_not_in_inventory(self):
         """Test give action when object is not in giver's inventory."""

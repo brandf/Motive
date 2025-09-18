@@ -61,11 +61,11 @@ class TestRealCodeIntegration:
         action_config = MockActionConfig()
         events, feedback = look_at_target(game_master, player_char, action_config, {})
         
-        # Verify it generates events for room_players scope
+        # Verify it generates events for room_characters scope
         assert len(events) == 1  # One event for the room look (duplicate removed)
         room_look_event = events[0]
         assert "looks around the room" in room_look_event.message
-        assert room_look_event.observers == ["room_players"]
+        assert room_look_event.observers == ["room_characters"]
     
     def test_help_action_generates_events_real_code(self):
         """Test that the real generate_help_message function generates events."""
@@ -98,10 +98,10 @@ class TestRealCodeIntegration:
         action_config = MockActionConfig()
         events, feedback = generate_help_message(game_master, player_char, action_config, {})
         
-        # Verify it generates events for room_players scope
+        # Verify it generates events for room_characters scope
         assert len(events) == 1
         assert events[0].message == "TestPlayer requests help."
-        assert events[0].observers == ["room_players"]
+        assert events[0].observers == ["room_characters"]
         
         # Verify it includes action prompt in feedback (example actions removed to avoid duplication)
         assert "Available actions by category:" in feedback[0]
@@ -147,11 +147,11 @@ class TestRealCodeIntegration:
         
         # Verify it generates events for multiple scopes
         assert len(events) == 3
-        # Check that we have events for player, room_players, and adjacent_rooms
+        # Check that we have events for player, room_characters, and adjacent_rooms_characters
         observers = [event.observers[0] for event in events]
         assert "player" in observers
-        assert "room_players" in observers  
-        assert "adjacent_rooms" in observers
+        assert "room_characters" in observers  
+        assert "adjacent_rooms_characters" in observers
         # Check that we have the right event types
         event_types = [event.event_type for event in events]
         assert "item_pickup" in event_types
@@ -198,7 +198,7 @@ class TestRealCodeIntegration:
         # Verify it works correctly
         assert len(events) == 1
         assert events[0].message == "TestPlayer reads the wooden sign."
-        assert events[0].observers == ["room_players"]
+        assert events[0].observers == ["room_characters"]
         assert "Welcome to the test room!" in feedback[0]
     
     def test_read_action_no_text_real_code(self):
@@ -244,7 +244,7 @@ class TestRealCodeIntegration:
         # Verify it handles the no-text case
         assert len(events) == 1
         assert events[0].message == "TestPlayer attempts to read the rock, but it has no text."
-        assert events[0].observers == ["room_players"]
+        assert events[0].observers == ["room_characters"]
         assert "has no readable text" in feedback[0]
     
     def test_bullet_point_character_encoding_real_code(self):
@@ -294,7 +294,7 @@ class TestRealCodeIntegration:
                     source_room_id="test_room",
                     timestamp=datetime.now().isoformat(),
                     related_player_id="other_player",
-                    observers=["room_players"]
+                    observers=["room_characters"]
                 )
             ]
             

@@ -120,8 +120,8 @@ action_definitions:
         function_name: handle_throw_action
         observers:
           - player
-          - room_players
-          - adjacent_rooms
+          - room_characters
+          - adjacent_rooms_characters
   pass:
     name: pass
     description: End turn.

@@ -64,7 +64,7 @@ def test_pickup_immovable_object():
     assert event.event_type == "player_action"
     assert "attempts to add the Fountain to their inventory" in event.message
     assert "but it is immovable" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify object was not moved to inventory
     assert "fountain" not in player_char.inventory
@@ -132,7 +132,7 @@ def test_pickup_too_heavy_object():
     assert event.event_type == "player_action"
     assert "attempts to add the Boulder to their inventory" in event.message
     assert "but it is too heavy" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify object was not moved to inventory
     assert "boulder" not in player_char.inventory
@@ -200,7 +200,7 @@ def test_pickup_magically_bound_object():
     assert event.event_type == "player_action"
     assert "attempts to add the Sacred Altar to their inventory" in event.message
     assert "but it is magically bound to this location" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify object was not moved to inventory
     assert "altar" not in player_char.inventory
@@ -268,7 +268,7 @@ def test_pickup_object_with_multiple_constraints():
     assert event.event_type == "player_action"
     assert "attempts to add the Ancient Statue to their inventory" in event.message
     assert "but it is immovable" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify object was not moved to inventory
     assert "statue" not in player_char.inventory
@@ -331,11 +331,11 @@ def test_pickup_normal_object_still_works():
     # Verify we get 3 events (successful pickup)
     assert len(events) == 3
     
-    # Verify event details - check the room_players event (index 1)
+    # Verify event details - check the room_characters event (index 1)
     event = events[1]
     assert event.event_type == "player_action"
     assert "picks up the Torch" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify object was moved to inventory
     assert "torch" in player_char.inventory
@@ -403,7 +403,7 @@ def test_pickup_constraint_case_insensitive():
     assert event.event_type == "player_action"
     assert "attempts to add the Fountain to their inventory" in event.message  # Uses actual object name
     assert "but it is immovable" in event.message
-    assert event.observers == ["room_players"]
+    assert event.observers == ["room_characters"]
     
     # Verify object was not moved to inventory
     assert "fountain" not in player_char.inventory

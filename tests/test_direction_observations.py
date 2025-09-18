@@ -52,13 +52,13 @@ def test_move_action_includes_direction_in_events():
     exit_event = events[0]
     assert exit_event.event_type == "player_exit"
     assert "left the room via North Exit" in exit_event.message
-    assert exit_event.observers == ["room_players"]
+    assert exit_event.observers == ["room_characters"]
     
     # Verify enter event includes direction
     enter_event = events[1]
     assert enter_event.event_type == "player_enter"
     assert "entered the room from North Exit" in enter_event.message
-    assert enter_event.observers == ["room_players"]
+    assert enter_event.observers == ["room_characters"]
 
 
 def test_move_action_with_multiple_exits():

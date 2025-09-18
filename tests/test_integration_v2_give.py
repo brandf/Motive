@@ -8,7 +8,7 @@ from tests.utils.llm_mock import llm_script
 
 
 @pytest.mark.asyncio
-async def test_minimal_v2_give_room_players(tmp_path):
+async def test_minimal_v2_give_room_characters(tmp_path):
     base_path = str((tmp_path / "configs").resolve())
     src_dir = Path("tests/configs/v2/minimal_give")
     dst_dir = Path(base_path)
@@ -30,7 +30,7 @@ async def test_minimal_v2_give_room_players(tmp_path):
 
         await gm._execute_player_turn(p1, round_num=1)
         obs = gm.player_observations.get(p2.character.id, [])
-        assert len(obs) >= 1, "Expected room_players observation for give action"
+        assert len(obs) >= 1, "Expected room_characters observation for give action"
 
 
 @pytest.mark.asyncio

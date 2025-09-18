@@ -8,7 +8,7 @@ from tests.utils.llm_mock import llm_script
 
 
 @pytest.mark.asyncio
-async def test_minimal_v2_light_room_players(tmp_path):
+async def test_minimal_v2_light_room_characters(tmp_path):
     base_path = str((tmp_path / "configs").resolve())
     src_dir = Path("tests/configs/v2/minimal_light")
     dst_dir = Path(base_path)

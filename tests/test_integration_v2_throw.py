@@ -31,7 +31,7 @@ async def test_minimal_v2_throw_adjacent(tmp_path):
 
         await gm._execute_player_turn(p1, round_num=1)
         obs = gm.player_observations.get(p2.character.id, [])
-        # Throw uses observers: player, room_players, adjacent_rooms (core); assert adjacent heard something
+        # Throw uses observers: player, room_characters, adjacent_rooms_characters (core); assert adjacent heard something
         assert len(obs) >= 1
 
 

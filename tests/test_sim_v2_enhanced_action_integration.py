@@ -40,7 +40,7 @@ class MockGameMaster:
         self.player_observations[player_id] = []
         return player
     
-    def get_adjacent_rooms(self, room_id: str) -> List[str]:
+    def get_adjacent_rooms_characters(self, room_id: str) -> List[str]:
         """Get rooms adjacent via exits AND portals."""
         adjacent = []
         room = self.rooms.get(room_id)
@@ -67,12 +67,12 @@ class MockGameMaster:
                     observes = True
                 elif "player" in event.observers and event.related_player_id == player.id:
                     observes = True
-                elif "room_players" in event.observers and player.current_room_id == event.source_room_id:
+                elif "room_characters" in event.observers and player.current_room_id == event.source_room_id:
                     observes = True
-                elif "adjacent_rooms" in event.observers:
+                elif "adjacent_rooms_characters" in event.observers:
                     # Check if player's current room is adjacent via exits OR portals
-                    adjacent_rooms = self.get_adjacent_rooms(event.source_room_id)
-                    if player.current_room_id in adjacent_rooms:
+                    adjacent_rooms_characters = self.get_adjacent_rooms_characters(event.source_room_id)
+                    if player.current_room_id in adjacent_rooms_characters:
                         observes = True
                 
                 if observes and event.related_player_id != player.id:
@@ -105,7 +105,7 @@ def test_shout_through_portals():
         source_room_id="tavern",
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["player", "room_players", "adjacent_rooms"]
+        observers=["player", "room_characters", "adjacent_rooms_characters"]
     )
     gm.event_queue.append(shout_event)
     gm.distribute_events()
@@ -154,7 +154,7 @@ def test_unified_move_action_with_portals():
         source_room_id="tavern",
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(move_event)
     gm.distribute_events()
@@ -194,7 +194,7 @@ def test_unified_move_action_with_containers():
         source_room_id="tavern",
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(move_event)
     gm.distribute_events()
@@ -229,7 +229,7 @@ def test_throw_through_portals():
         source_room_id="tavern",
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players", "adjacent_rooms"]
+        observers=["room_characters", "adjacent_rooms_characters"]
     )
     gm.event_queue.append(throw_event)
     gm.distribute_events()
@@ -265,7 +265,7 @@ def test_throw_into_containers():
         source_room_id="tavern",
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players"]
+        observers=["room_characters"]
     )
     gm.event_queue.append(throw_event)
     gm.distribute_events()
@@ -299,7 +299,7 @@ def test_throw_portals_and_containers():
         source_room_id="tavern",
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players", "adjacent_rooms"]
+        observers=["room_characters", "adjacent_rooms_characters"]
     )
     gm.event_queue.append(throw_portal_event)
     gm.distribute_events()
@@ -319,7 +319,7 @@ def test_throw_portals_and_containers():
         source_room_id="tavern",
         timestamp="2025-01-01T12:01:00",
         related_player_id="player1",
-        observers=["room_players", "adjacent_rooms"]
+        observers=["room_characters", "adjacent_rooms_characters"]
     )
     gm.event_queue.append(throw_container_event)
     gm.distribute_events()
@@ -355,7 +355,7 @@ def test_shout_into_containers():
         source_room_id=interior_room,
         timestamp="2025-01-01T12:00:00",
         related_player_id="player1",
-        observers=["room_players", "adjacent_rooms"]  # Should include container interior
+        observers=["room_characters", "adjacent_rooms_characters"]  # Should include container interior
     )
     gm.event_queue.append(shout_event)
     gm.distribute_events()

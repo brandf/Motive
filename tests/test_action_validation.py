@@ -90,7 +90,7 @@ def mock_game_master_validation():
                     description="Say something.", 
                     parameters=[ParameterConfig(name="phrase", type="string", description="What to say")], 
                     requirements=[], 
-                    effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="handle_say_action", observers=["player", "room_players"])]
+                    effects=[ActionEffectConfig(type="code_binding", function_module="motive.hooks.core_hooks", function_name="handle_say_action", observers=["player", "room_characters"])]
                 ),
                 "help": ActionConfig(
                     id="help", 

@@ -44,7 +44,7 @@ def test_observation_report_includes_player_checkboxes_and_reasons(monkeypatch):
         source_room_id="room_a",
         timestamp="t",
         related_player_id="c1",
-        observers=["room_players"],
+        observers=["room_characters"],
     )
     gm.event_queue = [e]
 

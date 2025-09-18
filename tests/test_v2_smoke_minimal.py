@@ -29,7 +29,7 @@ action_definitions:
     effects:
       - type: generate_event
         message: '{player_name} says: "{phrase}".'
-        observers: [room_players]
+        observers: [room_characters]
 """,
         encoding="utf-8",
     )
