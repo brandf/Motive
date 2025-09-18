@@ -23,6 +23,7 @@ class GameSettingsV2(BaseModel):
     initial_ap_per_turn: int = Field(default=30, ge=1, le=1000)
     manual: str = Field(default="docs/MANUAL.md")
     log_path: Optional[str] = Field(default=None, description="Relative path for game logs (e.g., 'fantasy/hearth_and_shadow/{game_id}')")
+    hints: Optional[List[Dict[str, Any]]] = Field(default=None, description="List of hints to show to players")
 
 
 class PlayerConfigV2(BaseModel):

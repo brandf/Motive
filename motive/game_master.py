@@ -1132,6 +1132,7 @@ class GameMaster:
                     "You did not provide any actions.",
                     "",
                     "Remember: Actions must be on their own line and start with '>' (e.g., '> look', '> move west').",
+                    "If you tried to perform an action without the '>' prefix, please use the correct format next time.",
                     "Your turn ends prematurely as a penalty."
                 ]
                 combined_feedback = "\n".join(feedback_parts)

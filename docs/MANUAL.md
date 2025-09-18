@@ -14,6 +14,7 @@ This document provides a comprehensive guide to the world of Motive, detailing t
 *   [Game Environments: Rooms, Exits, and Objects](#game-environment-rooms-exits-and-objects)
 *   [Player Actions: Categories and Parameters](#player-actions-categories-and-parameters)
 *   [Communication and Social Engineering](#communication-and-social-engineering)
+*   [Gameplay Tips and Strategies](#gameplay-tips-and-strategies)
 
 ## Game Overview
 
@@ -64,6 +65,8 @@ Players interact with the game world and other players by performing actions. Ea
 
 ### Action Syntax
 
+**CRITICAL: All actions must start with `>` on their own line!**
+
 Players communicate with the Game Master (GM) through natural language messages. Within these messages, specific actions are indicated by lines starting with a `>` character. This allows for both freeform communication and structured command input.
 
 *   **Action Prefix:** Any line within a player's response that begins with `>` (after trimming leading whitespace) will be interpreted as an action. For example: `> look`.
@@ -71,6 +74,14 @@ Players communicate with the Game Master (GM) through natural language messages.
 *   **Quoted Parameters:** If an action requires a parameter with multiple words (e.g., a phrase for a 'say' action), the parameter should be enclosed in single or double quotes. For example: `> say "Hello there!"` or `> whisper "John" "secret message"`.
 *   **Multiple Actions:** A single player response can contain multiple action lines. These actions will be executed sequentially by the GM.
 *   **Invalid Actions/No Actions Penalty:** If a player's response contains no lines prefixed with `>` or if any parsed action is invalid (e.g., unknown action name, incorrect parameters), the player's turn will immediately end, as if they had spent all their action points. This is a penalty for not following the action syntax rules. The GM will provide helpful feedback about valid actions and suggestions for similar actions when possible.
+
+**Common Mistakes to Avoid:**
+- ❌ `look fresh evidence` (missing `>` prefix)
+- ✅ `> look fresh evidence` (correct format)
+- ❌ `move to sacred heart church` (incorrect direction)
+- ✅ `> move church` (correct format)
+- ❌ `talk to town crier` (invalid action)
+- ✅ `> say "Hello"` (correct format)
 
 ### Action Categories
 
@@ -84,14 +95,16 @@ Actions are organized into the following categories:
 
 Performing an action results in changes to the game state and the generation of events. These events are then processed by the GM to determine which players observe them, creating the observability mechanic that drives strategic gameplay.
 
-### Current Core Actions
+### Essential Actions (Use `> help` in-game for complete list)
 
-The following core actions are currently implemented and available to all players:
+The following are the most commonly used actions. Use `> help` during the game to see all available actions and their detailed usage.
 
 #### **Movement Actions**
-- **`move`**: Move in a specified direction through room exits
 - **`look`**: Look around the current room or examine specific objects
-  - **Special syntax**: `> look inventory` - View your carried items
+  - Examples: `> look`, `> look "fresh evidence"`, `> look inventory`
+- **`move`**: Move in a specified direction through room exits
+  - Examples: `> move north`, `> move church`, `> move tavern`
+  - Note: Use the exact exit names shown in the room description
 
 #### **Communication Actions**
 - **`say`**: Speak to all players in the same room
@@ -100,43 +113,39 @@ The following core actions are currently implemented and available to all player
 - **`whisper`**: Send a private message to a specific player in the same room
   - Format: `> whisper "player_name" "message"`
   - Example: `> whisper "John" "Meet me in the library"`
-  - Note: Both player name and message must be quoted. Only the target player will see this message.
-- **`shout`**: Speak loudly, potentially heard in adjacent rooms
 
 #### **Inventory Actions**
-- **`pickup`**: Pick up an object from the current room (subject to inventory constraints)
-- **`drop`**: Drop an object from your inventory into the current room
-- **`give`**: Give an object from your inventory to another player in the same room
-  - Format: `> give "player_name" "object_name"`
-  - Example: `> give "John" "torch"`
-  - Note: Both player name and object name must be quoted. The transfer is visible to all players in the room.
-- **`throw`**: Throw an object from your inventory through an exit to an adjacent room
-  - Format: `> throw "object_name" "exit"`
-  - Example: `> throw "torch" "north"`
-  - Note: Both object name and exit must be quoted. The action is visible to players in both rooms.
-- **`look inventory`**: View your carried items and their properties
+- **`pickup`**: Pick up an object from the current room
+  - Examples: `> pickup "torch"`, `> pickup "fresh evidence"`
+- **`use`**: Use an object from your inventory, optionally on a target
+  - Examples: `> use "torch"`, `> use "key" on "door"`
 
-#### **Interaction Actions**
+#### **System Actions**
 - **`help`**: Get help with available actions (costs 1 AP)
 - **`pass`**: End your turn without taking any action (costs 0 AP)
+
+**Remember:** Use `> help` in-game to see all available actions and their detailed usage!
 
 ### Action Aliases
 
 Some objects in the game define **action aliases** that allow you to use alternative command names. These aliases redirect to core actions, making interactions more intuitive and thematic.
 
-**Examples:**
-- **`read`**: Many readable objects (like signs, books, journals) accept `read` as an alias for `look`
-- **`investigate`**: Objects that can be examined in detail (like evidence, clues) accept `investigate` as an alias for `look`
-- **`examine`**: Similar to investigate, some objects accept `examine` as an alias for `look`
+**Common Aliases:**
+- **`examine`**: Many objects accept `examine` as an alias for `look`
+  - Example: `> examine "fresh evidence"` (same as `> look "fresh evidence"`)
+- **`read`**: Readable objects (like signs, books, journals) accept `read` as an alias for `look`
+  - Example: `> read "notice board"` (same as `> look "notice board"`)
+- **`investigate`**: Objects that can be examined in detail accept `investigate` as an alias for `look`
+  - Example: `> investigate "cult symbols"` (same as `> look "cult symbols"`)
 
 **How it works:**
-- When you type `> read "Quest Board"`, the system checks if the Quest Board object has a `read` alias
-- If it does, the command is automatically redirected to `> look "Quest Board"`
+- When you type `> examine "fresh evidence"`, the system checks if the object has an `examine` alias
+- If it does, the command is automatically redirected to `> look "fresh evidence"`
 - The action executes normally with the same cost and effects as the core action
 - If an object doesn't have the alias you're trying to use, you'll get an "unknown action" error
 
 **Benefits:**
-- More intuitive commands: `read` feels natural for books, `investigate` for evidence
+- More intuitive commands: `examine` feels natural for evidence, `read` for books
 - Thematic consistency: Different objects can have different interaction verbs
 - Flexible design: Objects can define their own aliases without changing core actions
 
@@ -170,3 +179,34 @@ Communication between players is a vital component of Motive, routed entirely th
 *   **Strategic importance:** This direction-specific information is crucial when multiple exits exist, allowing players to track each other's movements and make informed tactical decisions.
 
 This system allows players to engage in complex social interactions, form alliances, spread misinformation, and strategize based on what they believe other players know or don't know. The ability to control who sees and hears what fosters a rich environment for emergent gameplay and strategic depth.
+
+## Gameplay Tips and Strategies
+
+### Getting Started
+1. **Always start with `> look`** to understand your surroundings
+2. **Use `> help`** to see all available actions and their costs
+3. **Examine objects** with `> look "object_name"` or `> examine "object_name"`
+4. **Pick up interesting items** with `> pickup "object_name"`
+
+### Effective Investigation
+- **Look at everything**: Objects often contain important clues
+- **Use aliases**: `> examine "evidence"` feels more natural than `> look "evidence"`
+- **Check your inventory**: `> look inventory` to see what you're carrying
+- **Share information**: Use `> say` or `> whisper` to communicate with other players
+
+### Common Patterns
+- **Multi-word objects**: Use quotes for objects with multiple words
+  - `> pickup "fresh evidence"` ✅
+  - `> pickup fresh evidence` ❌ (will only pick up "fresh")
+- **Movement**: Use exact exit names from room descriptions
+  - `> move church` ✅ (if "church" is listed as an exit)
+  - `> move to sacred heart church` ❌ (too verbose)
+- **Communication**: Always quote your messages
+  - `> say "Hello there!"` ✅
+  - `> say Hello there!` ❌ (missing quotes)
+
+### Strategic Considerations
+- **Information is power**: What you observe vs. what others observe creates strategic opportunities
+- **Collaboration**: Working with other players can help achieve mutual goals
+- **Secrets**: Your motive is secret - decide carefully when and with whom to share information
+- **Time management**: You have limited action points per turn - plan your actions carefully
