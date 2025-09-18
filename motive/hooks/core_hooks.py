@@ -131,7 +131,7 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
                     source_room_id=player_char.current_room_id,
                     timestamp=datetime.now().isoformat(),
                     related_player_id=player_char.id,
-                    observers=["player"]
+                    observers=["room_characters"]
                 ))
                 return events_generated, feedback_messages
             # Visible: show formatted description

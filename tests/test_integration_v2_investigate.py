@@ -29,7 +29,8 @@ async def test_minimal_v2_investigate_player_only(tmp_path):
 
         await gm._execute_player_turn(p1, round_num=1)
         obs = gm.player_observations.get(p2.character.id, [])
-        assert not any("investigates" in getattr(ev, 'message', '') for ev in obs)
+        # The investigate alias should redirect to look, so we should see "looked at" not "investigates"
+        assert any("looked at" in getattr(ev, 'message', '') for ev in obs)
 
 
 @pytest.mark.asyncio

@@ -20,3 +20,4 @@ training_data/processed/
 
 # Environment variables
 .env
+.aider*

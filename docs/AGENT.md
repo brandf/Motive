@@ -451,9 +451,29 @@ Before committing changes, verify all items are complete:
 
 **Core actions** are actions that are defined in all themes and editions of Motive. These are fundamental actions available to all players regardless of the game theme or edition. They form the basic interaction layer that all games share.
 
-Current core actions include: `move`, `say`, `look` (including `look inventory`), `help`, `whisper`, `shout`, `pickup`, `drop`, `read`, `pass`.
+Current core actions include: `move`, `say`, `look` (including `look inventory`), `help`, `whisper`, `shout`, `pickup`, `drop`, `use`, `give`, `throw`, `pass`.
 
 **Note**: The `inventory` action has been integrated into the `look` action as `look inventory` to follow the verb + noun design principle.
+
+## Action Aliases System
+
+**Action aliases** allow objects to define alternative command names that redirect to core actions. This system provides thematic consistency and intuitive interactions without cluttering the core action set.
+
+**Implementation:**
+- Objects define `action_aliases` in their configuration (e.g., `read: look`, `investigate: look`)
+- Action parser checks aliases when an action is not found in core actions
+- Aliases redirect to the actual action with the same parameters and cost
+- Objects can define multiple aliases (e.g., `read: look`, `investigate: look`, `examine: look`)
+
+**Examples:**
+- `read "Quest Board"` → `look "Quest Board"` (if Quest Board has `read: look` alias)
+- `investigate "Fresh Evidence"` → `look "Fresh Evidence"` (if Fresh Evidence has `investigate: look` alias)
+
+**Benefits:**
+- Cleaner core action set (no need for `read`, `investigate`, `examine` as separate actions)
+- Thematic consistency (different objects can have different interaction verbs)
+- Flexible design (objects define their own aliases)
+- Maintains single source of truth for action logic
 
 ---
 

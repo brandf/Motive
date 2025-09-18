@@ -148,6 +148,10 @@ class GameInitializer:
                     if 'tags' in entity_data:
                         config_data['tags'] = entity_data.get('tags', [])
                     
+                    # Preserve action aliases from attributes
+                    if 'action_aliases' in attributes:
+                        config_data['action_aliases'] = attributes['action_aliases']
+                    
                     # Copy other properties that might be relevant
                     for key, value in entity_data.items():
                         if key not in ['behaviors', 'types', 'properties']:
@@ -430,6 +434,10 @@ class GameInitializer:
                     if 'tags' in entity_data:
                         config_data['tags'] = entity_data.get('tags', [])
                     
+                    # Preserve action aliases from attributes
+                    if 'action_aliases' in attributes:
+                        config_data['action_aliases'] = attributes['action_aliases']
+                    
                     # Copy other properties that might be relevant
                     for key, value in entity_data.items():
                         if key not in ['behaviors', 'types', 'properties']:
@@ -668,8 +676,16 @@ class GameInitializer:
                         else:
                             obj_type_description = obj_type.get('description')
                         
+                        # Extract action_aliases from entity definition
+                        obj_type_aliases = {}
+                        if hasattr(obj_type, 'action_aliases') and obj_type.action_aliases:
+                            obj_type_aliases = obj_type.action_aliases
+                        elif hasattr(obj_type, 'attributes') and obj_type.attributes and 'action_aliases' in obj_type.attributes:
+                            obj_type_aliases = obj_type.attributes['action_aliases']
+                        
                         final_tags = set(obj_type_tags).union(obj_instance_cfg.get('tags', []))
                         final_properties = {**obj_type_properties, **obj_instance_cfg.get('properties', {})}
+                        final_aliases = {**obj_type_aliases, **obj_instance_cfg.get('action_aliases', {})}
 
                         game_obj = GameObject(
                             obj_id=obj_instance_cfg['id'],
@@ -677,7 +693,8 @@ class GameInitializer:
                             description=obj_instance_cfg.get('description') or obj_type_description,
                             current_location_id=room.id,
                             tags=list(final_tags),
-                            properties=final_properties
+                            properties=final_properties,
+                            action_aliases=final_aliases
                         )
                         room.add_object(game_obj)
                         self.game_objects[game_obj.id] = game_obj
@@ -1014,8 +1031,16 @@ class GameInitializer:
                         else:
                             obj_type_description = obj_type.get('description')
                         
+                        # Extract action_aliases from entity definition
+                        obj_type_aliases = {}
+                        if hasattr(obj_type, 'action_aliases') and obj_type.action_aliases:
+                            obj_type_aliases = obj_type.action_aliases
+                        elif hasattr(obj_type, 'attributes') and obj_type.attributes and 'action_aliases' in obj_type.attributes:
+                            obj_type_aliases = obj_type.attributes['action_aliases']
+                        
                         final_tags = set(obj_type_tags).union(obj_instance_cfg.get('tags', []))
                         final_properties = {**obj_type_properties, **obj_instance_cfg.get('properties', {})}
+                        final_aliases = {**obj_type_aliases, **obj_instance_cfg.get('action_aliases', {})}
 
                         game_obj = GameObject(
                             obj_id=obj_instance_cfg['id'],
@@ -1023,7 +1048,8 @@ class GameInitializer:
                             description=obj_instance_cfg.get('description') or obj_type_description,
                             current_location_id=room.id,
                             tags=list(final_tags),
-                            properties=final_properties
+                            properties=final_properties,
+                            action_aliases=final_aliases
                         )
                         room.add_object(game_obj)
                         self.game_objects[game_obj.id] = game_obj

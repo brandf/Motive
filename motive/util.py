@@ -571,6 +571,73 @@ def debug_character_motives(config_path: str, character_id: str = None) -> None:
         import traceback
         traceback.print_exc()
 
+def debug_action_aliases(config_path: str, object_id: str = None) -> None:
+    """Debug action aliases in object definitions."""
+    print("Action Aliases Debug:")
+    print("===================")
+    
+    try:
+        config = load_config(config_path)
+        
+        if hasattr(config, 'entity_definitions'):
+            # V2 config - check entity definitions
+            objects_with_aliases = {}
+            for entity_id, entity_def in config.entity_definitions.items():
+                if 'object' in entity_def.types:
+                    # Check both direct attribute and in attributes dict
+                    aliases = None
+                    if hasattr(entity_def, 'action_aliases') and entity_def.action_aliases:
+                        aliases = entity_def.action_aliases
+                    elif hasattr(entity_def, 'attributes') and entity_def.attributes and 'action_aliases' in entity_def.attributes:
+                        aliases = entity_def.attributes['action_aliases']
+                    
+                    if aliases:
+                        objects_with_aliases[entity_id] = aliases
+            
+            if object_id:
+                if object_id in objects_with_aliases:
+                    print(f"Object: {object_id}")
+                    print(f"  Action aliases: {objects_with_aliases[object_id]}")
+                else:
+                    print(f"Object '{object_id}' not found or has no action aliases")
+                    print(f"Available objects with aliases: {list(objects_with_aliases.keys())}")
+            else:
+                print(f"Objects with action aliases ({len(objects_with_aliases)}):")
+                for obj_id, aliases in objects_with_aliases.items():
+                    print(f"  {obj_id}: {aliases}")
+                
+                # Also check if any objects should have aliases but don't
+                all_objects = {}
+                for entity_id, entity_def in config.entity_definitions.items():
+                    if 'object' in entity_def.types:
+                        all_objects[entity_id] = entity_def
+                
+                objects_without_aliases = []
+                for obj_id, obj_def in all_objects.items():
+                    # Check both direct attribute and in attributes dict
+                    has_aliases = False
+                    if hasattr(obj_def, 'action_aliases') and obj_def.action_aliases:
+                        has_aliases = True
+                    elif hasattr(obj_def, 'attributes') and obj_def.attributes and 'action_aliases' in obj_def.attributes:
+                        has_aliases = True
+                    
+                    if not has_aliases:
+                        objects_without_aliases.append(obj_id)
+                
+                if objects_without_aliases:
+                    print(f"\nObjects without action aliases ({len(objects_without_aliases)}):")
+                    for obj_id in objects_without_aliases[:10]:  # Show first 10
+                        print(f"  {obj_id}")
+                    if len(objects_without_aliases) > 10:
+                        print(f"  ... and {len(objects_without_aliases) - 10} more")
+        else:
+            print("This is not a v2 config with entity_definitions")
+            
+    except Exception as e:
+        print(f"❌ Debug failed: {e}")
+        import traceback
+        traceback.print_exc()
+
 
 def show_includes(config: Dict[str, Any], config_path: str) -> None:
     """Display include information for hierarchical configs."""
@@ -1164,6 +1231,13 @@ Training Data Examples:
         metavar='CHARACTER_ID',
         help='Debug character motives (optionally for specific character)'
     )
+    config_parser.add_argument(
+        '--debug-aliases',
+        nargs='?',
+        const='all',
+        metavar='OBJECT_ID',
+        help='Debug action aliases (optionally for specific object)'
+    )
     
     # Training data subcommand
     training_parser = subparsers.add_parser('training', help='Manage training data')
@@ -1278,6 +1352,10 @@ def handle_config_command(args):
     if args.debug_motives:
         character_id = None if args.debug_motives == 'all' else args.debug_motives
         debug_character_motives(args.config, character_id)
+    
+    if args.debug_aliases:
+        object_id = None if args.debug_aliases == 'all' else args.debug_aliases
+        debug_action_aliases(args.config, object_id)
     
     if args.all or args.includes:
         show_includes(config, args.config)

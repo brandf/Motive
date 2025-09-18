@@ -15,9 +15,12 @@ entity_definitions:
       motives: []
   statue_type:
     behaviors:
-      - object
+    - object
     attributes:
       name: Statue
       description: An ornate statue.
+    action_aliases:
+      investigate: look
+      examine: look
 
 

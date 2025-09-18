@@ -159,41 +159,6 @@ action_definitions:
       observers:
       - player
       - room_characters
-  read:
-    name: read
-    description: Read text from an object (like signs, books, etc.).
-    cost: 5
-    category: interaction
-    parameters:
-    - name: object_name
-      type: string
-      description: The name of the object to read.
-      required: true
-      default_value: null
-    requirements:
-    - type: object_in_room
-      description: ''
-      object_name_param: object_name
-    effects:
-    - type: code_binding
-      function_name: handle_read_action
-      observers:
-      - player
-  investigate:
-    name: investigate
-    description: Investigate an object in the current room.
-    cost: 10
-    category: interaction
-    parameters:
-    - name: target
-      type: string
-      description: The name of the object to investigate.
-      required: true
-      default_value: null
-    requirements: []
-    effects:
-    - type: code_binding
-      function_name: handle_investigate_action
   use:
     name: use
     description: Use an object from your inventory, optionally on a target.

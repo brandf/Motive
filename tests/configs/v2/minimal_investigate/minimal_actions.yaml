@@ -1,21 +1,19 @@
 action_definitions:
-  investigate:
-    name: investigate
-    description: Investigate a nearby object.
+  look:
+    name: look
+    description: Look at a nearby object or around the room.
     cost: 1
     category: interaction
     parameters:
       - name: target
         type: string
-        description: The name of the object to investigate.
-        required: true
+        description: The name of the object to look at, or leave empty to look around the room.
+        required: false
         default_value: null
-    requirements:
-      - type: object_in_room
-        object_name_param: target
+    requirements: []
     effects:
       - type: code_binding
-        function_name: handle_investigate_action
+        function_name: look_at_target
         observers:
           - player
   pass:

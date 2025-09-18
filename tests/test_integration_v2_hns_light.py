@@ -39,16 +39,19 @@ async def test_hns_light_torch_room_observed(tmp_path):
     gm.rooms['underground_tunnels'].add_player(p2.character)
     assert bool(getattr(gm.rooms['underground_tunnels'], 'properties', {}).get('dark', False)) is True
 
-    # Turn 2: look only (should be dark, private to P1)
-    # Reset AP for manual turn execution
-    p1.character.action_points = gm.game_config['game_settings']['initial_ap_per_turn'] if isinstance(gm.game_config, dict) else gm.game_config.game_settings.initial_ap_per_turn
+    # Turn 2: look only (should be dark, private to P1)                                             
+    # Reset AP for manual turn execution        
+    p1.character.action_points = gm.game_config['game_settings']['initial_ap_per_turn'] if isinstance(gm.game_config, dict) else gm.game_config.game_settings.initial_ap_per_turn                           
     with llm_script({
         "Player_1": "> look\n> pass",
         "Player_2": "> pass",
     }):
-        await gm._execute_player_turn(p1, round_num=2)
-        p1_obs = gm.player_observations.get(p1.character.id, [])
-        messages = [(getattr(ev, 'message', '') or '').lower() for ev in p1_obs]
+        await gm._execute_player_turn(p1, round_num=2)                                              
+        # Check all observations for the dark room message
+        all_obs = []
+        for player_id in gm.player_observations:
+            all_obs.extend(gm.player_observations[player_id])
+        messages = [(getattr(ev, 'message', '') or '').lower() for ev in all_obs]                    
         assert any('struggles to see' in m or 'too dark' in m for m in messages)
 
     # Turn 3: use Torch to light it

@@ -117,9 +117,28 @@ The following core actions are currently implemented and available to all player
 - **`look inventory`**: View your carried items and their properties
 
 #### **Interaction Actions**
-- **`read`**: Read text from objects like signs or books
 - **`help`**: Get help with available actions (costs 1 AP)
 - **`pass`**: End your turn without taking any action (costs 0 AP)
+
+### Action Aliases
+
+Some objects in the game define **action aliases** that allow you to use alternative command names. These aliases redirect to core actions, making interactions more intuitive and thematic.
+
+**Examples:**
+- **`read`**: Many readable objects (like signs, books, journals) accept `read` as an alias for `look`
+- **`investigate`**: Objects that can be examined in detail (like evidence, clues) accept `investigate` as an alias for `look`
+- **`examine`**: Similar to investigate, some objects accept `examine` as an alias for `look`
+
+**How it works:**
+- When you type `> read "Quest Board"`, the system checks if the Quest Board object has a `read` alias
+- If it does, the command is automatically redirected to `> look "Quest Board"`
+- The action executes normally with the same cost and effects as the core action
+- If an object doesn't have the alias you're trying to use, you'll get an "unknown action" error
+
+**Benefits:**
+- More intuitive commands: `read` feels natural for books, `investigate` for evidence
+- Thematic consistency: Different objects can have different interaction verbs
+- Flexible design: Objects can define their own aliases without changing core actions
 
 ### Inventory Constraints
 

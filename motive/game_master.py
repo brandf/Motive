@@ -1118,7 +1118,13 @@ class GameMaster:
                 continue # Continue to the while loop condition to end the turn
 
             # Parse all actions from the player's response
-            parsed_actions, invalid_actions = parse_player_response(response.content, self.game_actions)
+            # Get current room objects for alias checking
+            current_room = self.rooms.get(player_char.current_room_id)
+            room_objects = {}
+            if current_room and hasattr(current_room, 'objects'):
+                room_objects = current_room.objects
+            
+            parsed_actions, invalid_actions = parse_player_response(response.content, self.game_actions, room_objects)
 
             if not parsed_actions and not invalid_actions:
                 # Penalty for not providing any actions at all

@@ -9,7 +9,8 @@ class GameObject:
         description: str,
         current_location_id: str, # Can be a room_id or player_character_id
         tags: Optional[List[str]] = None,
-        properties: Optional[Dict[str, Any]] = None
+        properties: Optional[Dict[str, Any]] = None,
+        action_aliases: Optional[Dict[str, str]] = None
     ):
         self.id = obj_id
         self.name = name
@@ -17,6 +18,7 @@ class GameObject:
         self.current_location_id = current_location_id
         self.tags = set(tags) if tags else set()
         self.properties = properties if properties else {}
+        self.action_aliases = action_aliases if action_aliases else {}
 
     def add_tag(self, tag: str):
         self.tags.add(tag)

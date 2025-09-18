@@ -2,7 +2,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from motive.config import ActionConfig, ParameterConfig
 import re
 
-def _parse_single_action_line(action_line: str, available_actions: Dict[str, ActionConfig]) -> Optional[Tuple[ActionConfig, Dict[str, Any]]]:
+def _parse_single_action_line(action_line: str, available_actions: Dict[str, ActionConfig], room_objects: Optional[Dict[str, Any]] = None) -> Optional[Tuple[ActionConfig, Dict[str, Any]]]:
     """Parses a single action line into an ActionConfig and its parameters."""
     # Find the longest matching action name to handle multi-word actions
     found_action_name = None
@@ -25,6 +25,30 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                 found_action_name = act_name_key # Store the original key from available_actions
     
     if not found_action_name:
+        # Check for object aliases if room_objects are provided
+        if room_objects:
+            # Extract the first word as potential action name
+            words = action_line.strip().split()
+            if words:
+                potential_action = words[0].lower()
+                # Check each object for aliases
+                for obj_id, obj_data in room_objects.items():
+                    # Handle both GameObject instances and dict data
+                    if hasattr(obj_data, 'action_aliases'):
+                        aliases = obj_data.action_aliases
+                    elif isinstance(obj_data, dict) and 'action_aliases' in obj_data:
+                        aliases = obj_data['action_aliases']
+                    else:
+                        continue
+                    
+                    if potential_action in aliases:
+                        # Found an alias! Redirect to the actual action
+                        actual_action = aliases[potential_action]
+                        # Reconstruct the action line with the actual action
+                        remaining_words = words[1:] if len(words) > 1 else []
+                        new_action_line = f"{actual_action} {' '.join(remaining_words)}"
+                        # Recursively parse with the redirected action
+                        return _parse_single_action_line(new_action_line, available_actions, room_objects)
         return None
 
     action_config = available_actions.get(found_action_name)
@@ -139,7 +163,7 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                 pass
     return action_config, params
 
-def parse_player_response(player_response: str, available_actions: Dict[str, ActionConfig]) -> Tuple[List[Tuple[ActionConfig, Dict[str, Any]]], List[str]]:
+def parse_player_response(player_response: str, available_actions: Dict[str, ActionConfig], room_objects: Optional[Dict[str, Any]] = None) -> Tuple[List[Tuple[ActionConfig, Dict[str, Any]]], List[str]]:
     """Extracts and parses actions from a player's response.
 
     Looks for lines starting with '>' as indicators of actions.
@@ -156,7 +180,7 @@ def parse_player_response(player_response: str, available_actions: Dict[str, Act
         if trimmed_line.startswith(">"):
             action_line = trimmed_line[1:].strip()
             if action_line:
-                parsed_action = _parse_single_action_line(action_line, available_actions)
+                parsed_action = _parse_single_action_line(action_line, available_actions, room_objects)
                 if parsed_action:
                     action_config, params = parsed_action
                     # Check for parse errors in the parameters

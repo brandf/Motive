@@ -33,8 +33,8 @@ async def test_hns_read_room_object_event(tmp_path):
 
         await gm._execute_player_turn(p1, round_num=1)
         p2_obs = gm.player_observations.get(p2.character.id, [])
-        # Read handler emits observers=[room_characters]; check either sees read attempt
+        # Read alias redirects to look, so check for "looked at" message
         combined = p2_obs + gm.player_observations.get(p1.character.id, [])
-        assert any("reads the" in (getattr(ev, "message", "") or "") or "attempts to read" in (getattr(ev, "message", "") or "") for ev in combined)
+        assert any("looked at" in (getattr(ev, "message", "") or "") for ev in combined)
 
 

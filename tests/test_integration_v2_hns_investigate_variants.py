@@ -35,7 +35,7 @@ async def test_hns_investigate_readable_journal_broadcast(tmp_path):
 
         # Room-scoped investigation event should be visible to p2
         p2_msgs = [(getattr(ev, 'message', '') or '').lower() for ev in gm.player_observations.get(p2.character.id, [])]
-        assert any('investigates' in m for m in p2_msgs)
+        assert any('looked at' in m for m in p2_msgs)
 
 
 @pytest.mark.asyncio
@@ -63,6 +63,6 @@ async def test_hns_investigate_guild_desk_broadcast(tmp_path):
 
         # Room-scoped investigation event should be visible to p2
         p2_msgs = [(getattr(ev, 'message', '') or '').lower() for ev in gm.player_observations.get(p2.character.id, [])]
-        assert any('investigates' in m for m in p2_msgs)
+        assert any('looked at' in m for m in p2_msgs)
 
 
