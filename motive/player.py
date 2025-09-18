@@ -28,7 +28,7 @@ class Player:
         
         # Performance optimizations
         self.response_cache = {}        # Response caching
-        self.max_context_messages = 6   # Reduced from unlimited
+        self.max_context_messages = 10000  # Effectively unlimited context
         self.summary_threshold = 8       # When to create summary
         self.max_response_length = 1000 # Max length for LLM responses
         
@@ -55,6 +55,15 @@ class Player:
     def add_message(self, message: Any):
         """Adds a message to the player's full conversation history."""
         self.conversation_history.append(message)
+        
+        # Also add to recent_messages for context building
+        # This ensures system messages (like action format instructions) are preserved
+        if len(self.recent_messages) < self.max_context_messages:
+            self.recent_messages.append(message)
+        else:
+            # If we're at capacity, remove oldest and add new
+            self.recent_messages.pop(0)
+            self.recent_messages.append(message)
 
     def _build_smart_context(self, new_human_message: HumanMessage) -> List[Any]:
         """
@@ -74,10 +83,20 @@ class Player:
         if self.conversation_summary:
             context.append(HumanMessage(content=f"[Previous context: {self.conversation_summary}]"))
         
-        # Add only recent messages (up to max_context_messages)
-        # Ensure we don't add too many if summary is also present
-        available_slots = self.max_context_messages - (2 if self.conversation_summary else 1) # System + (Summary)
-        context.extend(self.recent_messages[-available_slots:])
+        # Prioritize system messages - always include them if they exist
+        system_messages = [msg for msg in self.recent_messages if isinstance(msg, SystemMessage)]
+        other_messages = [msg for msg in self.recent_messages if not isinstance(msg, SystemMessage)]
+        
+        # Add system messages first (they're critical and should never be dropped)
+        context.extend(system_messages)
+        
+        # Calculate remaining slots for other messages
+        # Reserve space for: system messages + (summary) + new message
+        reserved_slots = len(system_messages) + (1 if self.conversation_summary else 0) + 1
+        remaining_slots = self.max_context_messages - reserved_slots
+        
+        if remaining_slots > 0:
+            context.extend(other_messages[-remaining_slots:])
         
         # Add the new message
         context.append(new_human_message)

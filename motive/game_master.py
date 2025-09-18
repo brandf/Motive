@@ -1056,6 +1056,10 @@ class GameMaster:
                 character_assignment = player_char.get_introduction_message()
                 message_content_parts.append(character_assignment)
                 
+                # Add the game manual for first interaction only
+                manual_text = f"**📖 GAME MANUAL:**\n{self.manual_content}"
+                message_content_parts.append(manual_text)
+                
                 # Add initial location with character's reason
                 initial_location_text = f"**🏠 Initial location:**\n{current_room_description}"
                 if hasattr(player_char, 'initial_room_reason') and player_char.initial_room_reason:
@@ -1079,15 +1083,21 @@ class GameMaster:
             
             # Send system message for first interaction only
             if is_first_interaction:
-                system_prompt = f"You are a player in a text-based adventure game. Below is the game manual. Read it carefully to understand the rules, your role, and how to interact with the game world.\n\n" \
-                                f"--- GAME MANUAL START ---\n{self.manual_content}\n--- GAME MANUAL END ---\n\n" \
-                                f"IMPORTANT: All actions must be on their own line and start with '>' (e.g., '> look', '> move west', '> say hello'). " \
-                                f"Without the '>' prefix, your actions will be ignored and you'll receive a penalty.\n\n" \
-                                f"Now, based on the manual and your character, respond with your actions."
+                # System message should only contain persistent instructions, not the manual
+                system_prompt = f"You are a player in a text-based adventure game.\n\n" \
+                                f"🚨 CRITICAL ACTION FORMAT RULE 🚨\n" \
+                                f"ALL actions MUST start with '>' on their own line!\n" \
+                                f"✅ CORRECT: > look\n" \
+                                f"✅ CORRECT: > say \"hello\"\n" \
+                                f"✅ CORRECT: > move north\n" \
+                                f"❌ WRONG: look (missing >)\n" \
+                                f"❌ WRONG: say hello (missing >)\n" \
+                                f"❌ WRONG: move north (missing >)\n" \
+                                f"Without the '>' prefix, your actions will be IGNORED and you'll receive a penalty!"
                 
                 system_msg = SystemMessage(content=system_prompt)
                 player.add_message(system_msg)
-                self.game_logger.info(f"GM ➡️ {player.name} (SYSTEM, with manual: {self.manual_path}):\n{system_prompt[:50]}...")
+                self.game_logger.info(f"GM ➡️ {player.name} (SYSTEM):\n{system_prompt}")
                 player.logger.info(f"{player.name} ⬅️ GM (SYSTEM):\n{system_prompt}")
                 self.player_first_interaction_done[player_char.id] = True
             
