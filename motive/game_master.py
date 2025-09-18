@@ -937,8 +937,11 @@ class GameMaster:
                     # Non-origin players get union of room/adjacent/all_players scopes
                     should_deliver = match_room or match_adjacent or match_all_players
 
+                # Don't add "player" scoped events to observations for the originator
+                # These should be handled as immediate feedback, not observations
                 if should_deliver and player_char.id in self.player_observations:
-                    self.player_observations[player_char.id].append(event)
+                    if not (is_originator and "player" in event.observers):
+                        self.player_observations[player_char.id].append(event)
         
         self.event_queue.clear() # Clear the queue after distributing all events
 
@@ -1053,12 +1056,18 @@ class GameMaster:
             
             # Add character assignment and initial location for first interaction
             if is_first_interaction:
-                character_assignment = player_char.get_introduction_message()
-                message_content_parts.append(character_assignment)
-                
-                # Add the game manual for first interaction only
+                # Add the game manual FIRST for first interaction only
                 manual_text = f"**📖 GAME MANUAL:**\n{self.manual_content}"
                 message_content_parts.append(manual_text)
+                
+                # Add clear separation between manual and game start
+                message_content_parts.append("---")
+                message_content_parts.append("**🎮 GAME BEGINS NOW**")
+                message_content_parts.append("---")
+                
+                # Add character assignment
+                character_assignment = player_char.get_introduction_message()
+                message_content_parts.append(character_assignment)
                 
                 # Add initial location with character's reason
                 initial_location_text = f"**🏠 Initial location:**\n{current_room_description}"

@@ -382,7 +382,7 @@ def handle_say_action(game_master: Any, player_char: Character, action_config: A
 
     feedback_messages.append(f"You say: \'{phrase}\'.")
     events_generated.append(Event(
-        message=f"{player_char.name} says: \"{phrase}\".",
+        message=f"{player_char.get_display_name()} says: \"{phrase}\".",
         event_type="player_communication",
         source_room_id=player_char.current_room_id,
         timestamp=datetime.now().isoformat(),
@@ -726,7 +726,7 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
     
     # Event for other players in the room
     room_pickup_event = Event(
-        message=f"{player_char.name} picks up the {target_object.name}.",
+        message=f"{player_char.get_display_name()} picks up the {target_object.name}.",
         event_type="player_action",
         source_room_id=player_char.current_room_id,
         timestamp=timestamp,
@@ -738,7 +738,7 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
     
     # Event for adjacent rooms (optional - they might hear the pickup)
     adjacent_pickup_event = Event(
-        message=f"{player_char.name} picks up something.",
+        message=f"{player_char.get_display_name()} picks up something.",
         event_type="player_action",
         source_room_id=player_char.current_room_id,
         timestamp=timestamp,
@@ -1141,7 +1141,7 @@ def handle_investigate_action(game_master: Any, player_char: Character, action_c
     
     # Create investigation event (v2 schema)
     events_generated.append(Event(
-        message=f"{player_char.name} investigates the {target_object.name}.",
+        message=f"{player_char.get_display_name()} investigates the {target_object.name}.",
         event_type="player_action",
         source_room_id=player_char.current_room_id,
         timestamp=datetime.now().isoformat(),
@@ -1429,7 +1429,7 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
     feedback_messages.append(use_desc)
 
     events_generated.append(Event(
-        message=f"{player_char.name} uses the {object_name}{' on the ' + target_object.name if target_object else ''}.",
+        message=f"{player_char.get_display_name()} uses the {object_name}{' on the ' + target_object.name if target_object else ''}.",
         event_type="player_action",
         source_room_id=player_char.current_room_id,
         timestamp=datetime.now().isoformat(),

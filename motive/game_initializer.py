@@ -863,7 +863,8 @@ class GameInitializer:
                 current_room_id=selected_room_id,
                 action_points=self.initial_ap_per_turn, # Use configurable initial AP
                 aliases=char_aliases,
-                deterministic=self.deterministic  # Pass deterministic flag
+                deterministic=self.deterministic,  # Pass deterministic flag
+                short_name=getattr(char_cfg, 'short_name', None) if hasattr(char_cfg, 'short_name') else char_cfg.get('short_name', None) if isinstance(char_cfg, dict) else None
             )
             
             # Store the initial room reason for use in initial turn message
@@ -1279,7 +1280,8 @@ class GameInitializer:
                 current_room_id=selected_room_id,
                 action_points=self.initial_ap_per_turn, # Use configurable initial AP
                 aliases=char_aliases,
-                deterministic=self.deterministic  # Pass deterministic flag
+                deterministic=self.deterministic,  # Pass deterministic flag
+                short_name=getattr(char_cfg, 'short_name', None) if hasattr(char_cfg, 'short_name') else char_cfg.get('short_name', None) if isinstance(char_cfg, dict) else None
             )
             
             # Store the initial room reason for use in initial turn message

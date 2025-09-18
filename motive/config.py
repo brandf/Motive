@@ -187,6 +187,7 @@ class CharacterConfig(BaseModel):
     motives: Optional[List[MotiveConfig]] = None  # New multiple motives field
     aliases: List[str] = []  # Alternative names for this character
     initial_rooms: Optional[List[InitialRoomConfig]] = None  # Character-specific starting locations
+    short_name: Optional[str] = None  # Short display name for observations
 
 class ThemeConfig(BaseModel):
     """Configuration for a game theme (e.g., 'Fantasy')."""

@@ -4,12 +4,27 @@ entity_definitions:
     - object
     attributes:
       name: Notice Board
-      description: A wooden board covered with various notices, posters, and announcements.
+      description: A weathered wooden board covered with missing person posters and town announcements.
     properties:
       readable: true
-      text: Various town announcements and missing person posters are posted here.
+      text: |
+        **MISSING PERSONS:**
+        • Mayor Thompson - Last seen 3 days ago near the Old Forest Path. Reward: 100 gold coins for information.
+        • Sarah Chen's daughter - Missing since the mayor's disappearance. Desperate mother seeking help.
+        • Three townsfolk from Market District - Vanished without trace. Pattern suggests cult activity.
+        
+        **TOWN ANNOUNCEMENTS:**
+        • Guard Captain O'Malley requests all citizens report suspicious activities to the bank guard post.
+        • Adventurer's Guild offering protection services - contact Guild Master Elena at the tavern.
+        • Church services suspended due to "unforeseen circumstances" - Father Marcus unavailable.
+        
+        **REWARD POSTERS:**
+        • Information about cult symbols: 50 gold coins
+        • Location of underground tunnels: 75 gold coins
+        • Evidence of recent ritual activity: 100 gold coins
     action_aliases:
       read: look
+      examine: look
   broken_fountain:
     behaviors:
     - object
@@ -342,14 +357,20 @@ entity_definitions:
     - object
     attributes:
       name: Fresh Evidence
-      description: Recently disturbed earth and strange markings.
+      description: A disturbed patch of earth near the fountain with strange markings and bloodstains.
     properties:
       readable: true
-      immovable: true
+      pickupable: true
       size: medium
-      text: The earth has been recently disturbed. Strange symbols are carved into
-        the ground, still wet with what appears to be blood. Footprints lead away
-        from the site - someone was here recently.
+      text: |
+        **CRIME SCENE EVIDENCE:**
+        The earth has been recently disturbed in a circular pattern. Strange symbols are carved into the ground, still wet with what appears to be blood. The symbols appear to be some form of ritual marking.
+        
+        **FOOTPRINTS:** Multiple sets of footprints lead away from the site toward the Old Forest Path. The prints suggest 2-3 people were here recently, and one set appears to be dragging something heavy.
+        
+        **BLOOD ANALYSIS:** The blood appears fresh (less than 24 hours old) and there's enough to suggest serious injury or worse.
+        
+        **RITUAL SYMBOLS:** The carved symbols match patterns seen in other parts of town, suggesting this is part of a larger cult ritual.
     action_aliases:
       investigate: look
       examine: look

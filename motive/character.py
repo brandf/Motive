@@ -20,7 +20,8 @@ class Character:
         properties: Optional[Dict[str, Any]] = None,
         action_points: int = 3, # Default action points
         aliases: Optional[List[str]] = None,
-        deterministic: bool = False  # Use deterministic selection instead of random
+        deterministic: bool = False,  # Use deterministic selection instead of random
+        short_name: Optional[str] = None  # Short display name for observations
     ):
         self.id = char_id
         self.name = name
@@ -31,6 +32,7 @@ class Character:
         self.properties = properties if properties else {}
         self.action_points = action_points
         self.aliases = aliases if aliases else []
+        self.short_name = short_name
         
         # Handle motive assignment - prioritize selected_motive, then motives, then legacy motive
         if selected_motive:
@@ -82,6 +84,13 @@ class Character:
             if game_obj.name.lower() == item_name_or_id.lower():
                 return game_obj
         return None
+
+    def get_display_name(self) -> str:
+        """Gets the display name for this character (short name if available, otherwise full name)."""
+        # Check if we have a short_name property
+        if hasattr(self, 'short_name') and self.short_name:
+            return self.short_name
+        return self.name
 
     def add_tag(self, tag: str):
         self.tags.add(tag)

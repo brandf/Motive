@@ -799,7 +799,7 @@ def main():
         runner.run(fancy_mode=args.fancy)
         return
     
-    # Run single game
+        # Run single game
     asyncio.run(run_game(
         config_path=args.config,
         game_id=args.game_id,

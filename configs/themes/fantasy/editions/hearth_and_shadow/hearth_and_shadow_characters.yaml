@@ -4,6 +4,7 @@ entity_definitions:
     - character
     properties: {}
     name: Detective James Thorne
+    short_name: Detective Thorne
     backstory: "A former city guard turned private investigator, James Thorne arrived\
       \ in Blackwater \nthree months ago to investigate the mysterious disappearances.\
       \ His sharp mind and \nkeen observational skills have made him a valuable asset\
@@ -484,6 +485,7 @@ entity_definitions:
     - character
     properties: {}
     name: Captain Marcus "Ironjaw" O'Malley
+    short_name: Captain O'Malley
     backstory: "The town's guard captain who has been secretly working with the cult\
       \ for months, \nproviding them with information and turning a blind eye to their\
       \ activities. He's \nmotivated by greed and the promise of power, but recent\
