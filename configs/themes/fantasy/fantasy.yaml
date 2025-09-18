@@ -1,10 +1,7 @@
-# Include core configuration and fantasy theme components
 includes:
-  - "../../core.yaml"
-  - "fantasy_objects.yaml"
-  - "fantasy_actions.yaml"
-  - "fantasy_characters.yaml"
-  - "fantasy_rooms.yaml"
-
-id: fantasy
+- ../../core.yaml
+- fantasy_objects.yaml
+- fantasy_actions.yaml
+testid: fantasy
 name: Fantasy Theme
+theme_id: fantasy

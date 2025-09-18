@@ -1,9 +1,0 @@
-includes:
-- ../../fantasy_migrated.yaml
-- hearth_and_shadow_rooms_migrated.yaml
-- hearth_and_shadow_characters_migrated.yaml
-- hearth_and_shadow_objects_migrated.yaml
-testid: hearth_and_shadow_migrated
-name: Hearth and Shadow (Migrated)
-theme_id: fantasy
-edition_id: hearth_and_shadow

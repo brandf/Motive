@@ -1,447 +1,550 @@
-# Hearth and Shadow edition objects - Blackwater Town
-object_types:
+entity_definitions:
   notice_board:
-    id: notice_board
-    name: Notice Board
-    description: A wooden board covered with various notices, posters, and announcements.
+    behaviors:
+    - object
+    attributes:
+      name: Notice Board
+      description: A wooden board covered with various notices, posters, and announcements.
     properties:
       readable: true
-      text: "Various town announcements and missing person posters are posted here."
-  
+      text: Various town announcements and missing person posters are posted here.
+    action_aliases:
+      read: look
   broken_fountain:
-    id: broken_fountain
-    name: Broken Fountain
-    description: A once-beautiful stone fountain, now cracked and dry.
+    behaviors:
+    - object
+    attributes:
+      name: Broken Fountain
+      description: A once-beautiful stone fountain, now cracked and dry.
     properties:
       immovable: true
       size: large
-  
   bar:
-    id: bar
-    name: Bar
-    description: A long wooden bar where drinks are served.
+    behaviors:
+    - object
+    attributes:
+      name: Bar
+      description: A long wooden bar where drinks are served.
     properties:
       immovable: true
       size: large
-  
   suspicious_character:
-    id: suspicious_character
-    name: Suspicious Character
-    description: A figure who seems to be watching everything carefully.
+    behaviors:
+    - object
+    attributes:
+      name: Suspicious Character
+      description: A figure who seems to be watching everything carefully.
     properties:
       immovable: true
       size: medium
-  
   quest_board:
-    id: quest_board
-    name: Quest Board
-    description: A board covered with various quests and missions.
+    behaviors:
+    - object
+    attributes:
+      name: Quest Board
+      description: A board covered with various quests and missions.
     properties:
       readable: true
-      text: "Various quests and bounties are posted here, including some related to recent disappearances."
-  
+      text: Various quests and bounties are posted here, including some related to
+        recent disappearances.
+    action_aliases:
+      read: look
   guild_master_desk:
-    id: guild_master_desk
-    name: Guild Master's Desk
-    description: A massive oak desk covered with reports and correspondence.
+    behaviors:
+    - object
+    attributes:
+      name: Guild Master's Desk
+      description: A massive oak desk covered with reports and correspondence.
     properties:
       immovable: true
       size: large
       readable: true
-      text: "The desk contains various reports and maps that might contain valuable information."
-  
+      text: The desk contains various reports and maps that might contain valuable
+        information.
+    action_aliases:
+      investigate: look
+      examine: look
+      read: look
   weapon_rack:
-    id: weapon_rack
-    name: Weapon Rack
-    description: A rack displaying various weapons and armor.
+    behaviors:
+    - object
+    attributes:
+      name: Weapon Rack
+      description: A rack displaying various weapons and armor.
     properties:
       immovable: true
       size: large
-  
   stolen_goods:
-    id: stolen_goods
-    name: Stolen Goods
-    description: Various stolen items and contraband.
+    behaviors:
+    - object
+    attributes:
+      name: Stolen Goods
+      description: Various stolen items and contraband.
     properties:
       immovable: true
       size: medium
-  
   secret_documents:
-    id: secret_documents
-    name: Secret Documents
-    description: A collection of documents that might contain valuable information.
+    behaviors:
+    - object
+    attributes:
+      name: Secret Documents
+      description: A collection of documents that might contain valuable information.
     properties:
       readable: true
-      text: "These documents contain information about the town's troubles and recent activities."
-  
+      text: These documents contain information about the town's troubles and recent
+        activities.
   raven_chair:
-    id: raven_chair
-    name: The Raven's Chair
-    description: A high-backed chair where the leader of the thieves' guild sits.
+    behaviors:
+    - object
+    attributes:
+      name: The Raven's Chair
+      description: A high-backed chair where the leader of the thieves' guild sits.
     properties:
       immovable: true
       size: large
-  
   confession_booth:
-    id: confession_booth
-    name: Confession Booth
-    description: A wooden booth where the faithful come to confess their sins.
+    behaviors:
+    - object
+    attributes:
+      name: Confession Booth
+      description: A wooden booth where the faithful come to confess their sins.
     properties:
       immovable: true
       size: medium
-  
   crypt_entrance:
-    id: crypt_entrance
-    name: Crypt Entrance
-    description: A hidden entrance to the underground crypt.
+    behaviors:
+    - object
+    attributes:
+      name: Crypt Entrance
+      description: A hidden entrance to the underground crypt.
     properties:
       immovable: true
       size: medium
-  
   mausoleum:
-    id: mausoleum
-    name: Mausoleum
-    description: A large stone mausoleum with doors that seem to be slightly ajar.
+    behaviors:
+    - object
+    attributes:
+      name: Mausoleum
+      description: A large stone mausoleum with doors that seem to be slightly ajar.
     properties:
       immovable: true
       size: huge
-  
   fresh_graves:
-    id: fresh_graves
-    name: Fresh Graves
-    description: Several graves that appear to have been recently dug.
+    behaviors:
+    - object
+    attributes:
+      name: Fresh Graves
+      description: Several graves that appear to have been recently dug.
     properties:
       immovable: true
       size: large
-  
   suspicious_footprints:
-    id: suspicious_footprints
-    name: Suspicious Footprints
-    description: Footprints in the soft earth that don't seem to belong to any normal visitor.
+    behaviors:
+    - object
+    attributes:
+      name: Suspicious Footprints
+      description: Footprints in the soft earth that don't seem to belong to any normal
+        visitor.
     properties:
       immovable: true
       size: small
-  
   vault:
-    id: vault
-    name: Vault
-    description: A massive steel vault that seems to be open more often than it should be.
+    behaviors:
+    - object
+    attributes:
+      name: Vault
+      description: A massive steel vault that seems to be open more often than it
+        should be.
     properties:
       immovable: true
       size: huge
-  
   ledgers:
-    id: ledgers
-    name: Bank Ledgers
-    description: Financial records that might contain clues about mysterious transactions.
+    behaviors:
+    - object
+    attributes:
+      name: Bank Ledgers
+      description: Financial records that might contain clues about mysterious transactions.
     properties:
       readable: true
-      text: "These ledgers contain financial records that might reveal clues about the mysterious withdrawals."
-  
+      text: These ledgers contain financial records that might reveal clues about
+        the mysterious withdrawals.
+    action_aliases:
+      read: look
+      investigate: look
   guard_post:
-    id: guard_post
-    name: Guard Post
-    description: A security station that seems to be unmanned more often than not.
+    behaviors:
+    - object
+    attributes:
+      name: Guard Post
+      description: A security station that seems to be unmanned more often than not.
     properties:
       immovable: true
       size: medium
-  
   merchant_stalls:
-    id: merchant_stalls
-    name: Merchant Stalls
-    description: Various stalls where merchants sell their wares.
+    behaviors:
+    - object
+    attributes:
+      name: Merchant Stalls
+      description: Various stalls where merchants sell their wares.
     properties:
       immovable: true
       size: large
-  
   suspicious_merchants:
-    id: suspicious_merchants
-    name: Suspicious Merchants
-    description: Merchants who seem to be involved in more than just legitimate trade.
+    behaviors:
+    - object
+    attributes:
+      name: Suspicious Merchants
+      description: Merchants who seem to be involved in more than just legitimate
+        trade.
     properties:
       immovable: true
       size: medium
-  
   hidden_alleyways:
-    id: hidden_alleyways
-    name: Hidden Alleyways
-    description: Narrow passages between buildings that lead to secret meeting places.
+    behaviors:
+    - object
+    attributes:
+      name: Hidden Alleyways
+      description: Narrow passages between buildings that lead to secret meeting places.
     properties:
       immovable: true
       size: medium
-  
   cult_symbols:
-    id: cult_symbols
-    name: Cult Symbols
-    description: Strange symbols carved into the walls that seem to pulse with otherworldly energy.
+    behaviors:
+    - object
+    attributes:
+      name: Cult Symbols
+      description: Dark, unsettling symbols painted on walls and carved into surfaces.
     properties:
+      readable: true
       immovable: true
-      size: medium
-  
+      size: small
+      text: The symbols seem to pulse with dark energy. They appear to be some form
+        of ancient writing, but the meaning is unclear. However, they all seem to
+        point toward the same direction - deeper into the underground.
   evidence_activity:
-    id: evidence_activity
-    name: Evidence of Recent Activity
-    description: Signs that someone has been using these tunnels recently.
+    behaviors:
+    - object
+    attributes:
+      name: Evidence of Recent Activity
+      description: Signs that someone has been using these tunnels recently.
     properties:
       immovable: true
       size: small
-  
   secret_doors:
-    id: secret_doors
-    name: Secret Doors
-    description: Hidden entrances and exits that lead to various parts of the town.
+    behaviors:
+    - object
+    attributes:
+      name: Secret Doors
+      description: Hidden entrances and exits that lead to various parts of the town.
     properties:
       immovable: true
       size: medium
-  
   cult_altar:
-    id: cult_altar
-    name: Cult Altar
-    description: A dark altar covered with cult artifacts and evidence of recent rituals.
+    behaviors:
+    - object
+    attributes:
+      name: Cult Altar
+      description: A dark altar covered with cult artifacts and evidence of recent
+        rituals.
     properties:
       immovable: true
       size: large
-  
   prisoner_cells:
-    id: prisoner_cells
-    name: Prisoner Cells
-    description: Cells where the cult keeps their prisoners.
+    behaviors:
+    - object
+    attributes:
+      name: Prisoner Cells
+      description: Cells where the cult keeps their prisoners.
     properties:
       immovable: true
       size: large
-  
   cult_artifacts:
-    id: cult_artifacts
-    name: Cult Artifacts
-    description: Various dark objects and artifacts used in the cult's rituals.
+    behaviors:
+    - object
+    attributes:
+      name: Cult Artifacts
+      description: Various dark objects and artifacts used in the cult's rituals.
     properties:
       immovable: true
       size: medium
-  
   forest_watchers:
-    id: forest_watchers
-    name: Forest Watchers
-    description: The forest itself seems to be watching and waiting.
+    behaviors:
+    - object
+    attributes:
+      name: Forest Watchers
+      description: The forest itself seems to be watching and waiting.
     properties:
       immovable: true
       size: medium
-
-  # Key Story Objects
   mayors_journal:
-    id: mayors_journal
-    name: Mayor's Journal
-    description: A leather-bound journal belonging to the missing mayor, filled with his private thoughts and observations.
+    behaviors:
+    - object
+    attributes:
+      name: Mayor's Journal
+      description: A leather-bound journal belonging to the missing mayor, filled
+        with his private thoughts and observations.
     properties:
       readable: true
       pickupable: true
       size: small
-      text: "The cult's influence grows stronger each day. I fear they have infiltrated the town guard. Father Marcus seems troubled - I must speak with him. The disappearances are not random - they're targeting specific people. I've hidden evidence in the bank vault. If something happens to me, find Detective Thorne."
-
+    action_aliases:
+      read: look
+      investigate: look
+    text: The cult's influence grows stronger each day. I fear they have infiltrated
+      the town guard. Father Marcus seems troubled - I must speak with him. The
+      disappearances are not random - they're targeting specific people. I've hidden
+      evidence in the bank vault. If something happens to me, find Detective Thorne.
   cult_ritual_book:
-    id: cult_ritual_book
-    name: Cult Ritual Book
-    description: A dark, leather-bound tome filled with ancient symbols and blood-stained pages.
+    behaviors:
+    - object
+    attributes:
+      name: Cult Ritual Book
+      description: A dark, leather-bound tome filled with ancient symbols and blood-stained
+        pages.
     properties:
       readable: true
       pickupable: true
       size: medium
-      text: "The Shadowed Hand seeks to summon the Dark Lord through blood sacrifice. The ritual requires seven pure souls, taken during the new moon. The mayor was the first - his blood opened the gateway. The next six must be taken in sequence: the priest, the warrior, the merchant, the child, the innocent, and the betrayer."
-
+      text: 'The Shadowed Hand seeks to summon the Dark Lord through blood sacrifice.
+        The ritual requires seven pure souls, taken during the new moon. The mayor
+        was the first - his blood opened the gateway. The next six must be taken in
+        sequence: the priest, the warrior, the merchant, the child, the innocent,
+        and the betrayer.'
   missing_persons_effects:
-    id: missing_persons_effects
-    name: Personal Effects
-    description: A collection of personal items belonging to the missing townsfolk.
+    behaviors:
+    - object
+    attributes:
+      name: Personal Effects
+      description: A collection of personal items belonging to the missing townsfolk.
     properties:
       readable: true
       pickupable: true
       size: small
-      text: "Letters, jewelry, and small trinkets. Each item tells a story of a life interrupted. A child's doll, a wedding ring, a merchant's ledger. All taken from their owners before they disappeared."
-
+      text: Letters, jewelry, and small trinkets. Each item tells a story of a life
+        interrupted. A child's doll, a wedding ring, a merchant's ledger. All taken
+        from their owners before they disappeared.
   cult_members_confession:
-    id: cult_members_confession
-    name: Cult Member's Confession
-    description: A handwritten confession found in the church records.
+    behaviors:
+    - object
+    attributes:
+      name: Cult Member's Confession
+      description: A handwritten confession found in the church records.
     properties:
       readable: true
       pickupable: true
       size: small
-      text: "I was forced to join the Shadowed Hand. They threatened my family. The cult is planning something big - a ritual that will change everything. They have people in high places. I can't say more, but the mayor knows too much. They're coming for him next."
-
+      text: I was forced to join the Shadowed Hand. They threatened my family. The
+        cult is planning something big - a ritual that will change everything. They
+        have people in high places. I can't say more, but the mayor knows too much.
+        They're coming for him next.
   fresh_evidence:
-    id: fresh_evidence
-    name: Fresh Evidence
-    description: Recently disturbed earth and strange markings.
+    behaviors:
+    - object
+    attributes:
+      name: Fresh Evidence
+      description: Recently disturbed earth and strange markings.
     properties:
       readable: true
       immovable: true
       size: medium
-      text: "The earth has been recently disturbed. Strange symbols are carved into the ground, still wet with what appears to be blood. Footprints lead away from the site - someone was here recently."
-
-  cult_symbols:
-    id: cult_symbols
-    name: Cult Symbols
-    description: Dark, unsettling symbols painted on walls and carved into surfaces.
-    properties:
-      readable: true
-      immovable: true
-      size: small
-      text: "The symbols seem to pulse with dark energy. They appear to be some form of ancient writing, but the meaning is unclear. However, they all seem to point toward the same direction - deeper into the underground."
-
+      text: The earth has been recently disturbed. Strange symbols are carved into
+        the ground, still wet with what appears to be blood. Footprints lead away
+        from the site - someone was here recently.
+    action_aliases:
+      investigate: look
+      examine: look
+      read: look
   suspicious_sounds:
-    id: suspicious_sounds
-    name: Suspicious Sounds
-    description: Strange noises coming from underground.
+    behaviors:
+    - object
+    attributes:
+      name: Suspicious Sounds
+      description: Strange noises coming from underground.
     properties:
       readable: true
       immovable: true
       size: small
-      text: "Low, chanting voices echo from below. The sound is muffled but unmistakable - someone is performing a ritual. The voices seem to be getting louder, more urgent."
-
+      text: Low, chanting voices echo from below. The sound is muffled but unmistakable
+        - someone is performing a ritual. The voices seem to be getting louder, more
+        urgent.
   missing_items:
-    id: missing_items
-    name: Missing Items
-    description: Items that were clearly taken, not lost.
+    behaviors:
+    - object
+    attributes:
+      name: Missing Items
+      description: Items that were clearly taken, not lost.
     properties:
       readable: true
       immovable: true
       size: small
-      text: "Empty spaces where items once sat. Dust outlines show where objects were recently removed. The pattern suggests a systematic search - someone was looking for something specific."
-
+      text: Empty spaces where items once sat. Dust outlines show where objects were
+        recently removed. The pattern suggests a systematic search - someone was looking
+        for something specific.
   witnessed_abduction:
-    id: witnessed_abduction
-    name: Witnessed Abduction
-    description: Evidence of a recent abduction.
+    behaviors:
+    - object
+    attributes:
+      name: Witnessed Abduction
+      description: Evidence of a recent abduction.
     properties:
       readable: true
       immovable: true
       size: medium
-      text: "Struggle marks on the ground, a torn piece of clothing, and a single drop of blood. Someone was taken by force, and recently. The trail leads toward the underground tunnels."
-
-  # Interactive Tools
+      text: Struggle marks on the ground, a torn piece of clothing, and a single drop
+        of blood. Someone was taken by force, and recently. The trail leads toward
+        the underground tunnels.
   lockpicks:
-    id: lockpicks
-    name: Lockpicks
-    description: A set of fine metal tools for opening locks.
+    behaviors:
+    - object
+    attributes:
+      name: Lockpicks
+      description: A set of fine metal tools for opening locks.
     properties:
       pickupable: true
       size: small
       tool_type: lockpicking
-
   torch:
-    id: torch
-    name: Torch
-    description: A wooden torch that can be lit to provide light in dark areas.
+    behaviors:
+    - object
+    attributes:
+      name: Torch
+      description: A wooden torch that can be lit to provide light in dark areas.
     properties:
       pickupable: true
       size: medium
       tool_type: lighting
       fuel: 100
-
+      is_lit: false
+      interactions:
+        use:
+        - type: set_property
+          property: is_lit
+          toggle: true
+        - type: generate_event
+          message: '{player_name} uses {object_name}.'
+          observers:
+          - room_characters
   rope:
-    id: rope
-    name: Rope
-    description: A sturdy length of rope, useful for climbing or binding.
+    behaviors:
+    - object
+    attributes:
+      name: Rope
+      description: A sturdy length of rope, useful for climbing or binding.
     properties:
       pickupable: true
       size: medium
       tool_type: climbing
-
   investigation_kit:
-    id: investigation_kit
-    name: Investigation Kit
-    description: A small kit containing magnifying glass, tweezers, and evidence bags.
+    behaviors:
+    - object
+    attributes:
+      name: Investigation Kit
+      description: A small kit containing magnifying glass, tweezers, and evidence
+        bags.
     properties:
       pickupable: true
       size: small
       tool_type: investigation
-
   crowbar:
-    id: crowbar
-    name: Crowbar
-    description: A heavy metal bar useful for prying open doors and crates.
+    behaviors:
+    - object
+    attributes:
+      name: Crowbar
+      description: A heavy metal bar useful for prying open doors and crates.
     properties:
       pickupable: true
       size: medium
       tool_type: prying
-
   holy_water:
-    id: holy_water
-    name: Holy Water
-    description: A small vial of blessed water from the church.
+    behaviors:
+    - object
+    attributes:
+      name: Holy Water
+      description: A small vial of blessed water from the church.
     properties:
       pickupable: true
       size: small
       tool_type: spiritual
       blessed: true
-
-  # Hearth and Shadow Themed Objects
   eternal_flame:
-    id: eternal_flame
-    name: Eternal Flame
-    description: A small, magical flame that never goes out, symbolizing the town's unbreakable spirit.
+    behaviors:
+    - object
+    attributes:
+      name: Eternal Flame
+      description: A small, magical flame that never goes out, symbolizing the town's
+        unbreakable spirit.
     properties:
       immovable: true
       size: small
       magical: true
       hearth_symbol: true
-
   shadow_crystal:
-    id: shadow_crystal
-    name: Shadow Crystal
-    description: A dark crystal that seems to absorb light and warmth, pulsing with malevolent energy.
+    behaviors:
+    - object
+    attributes:
+      name: Shadow Crystal
+      description: A dark crystal that seems to absorb light and warmth, pulsing with
+        malevolent energy.
     properties:
       pickupable: true
       size: small
       magical: true
       shadow_symbol: true
-
   hearth_stone:
-    id: hearth_stone
-    name: Hearth Stone
-    description: A warm stone that radiates comfort and hope, said to protect against dark magic.
+    behaviors:
+    - object
+    attributes:
+      name: Hearth Stone
+      description: A warm stone that radiates comfort and hope, said to protect against
+        dark magic.
     properties:
       pickupable: true
       size: small
       magical: true
       hearth_symbol: true
-
   shadow_mirror:
-    id: shadow_mirror
-    name: Shadow Mirror
-    description: A dark mirror that shows not your reflection, but the shadows of your fears and doubts.
+    behaviors:
+    - object
+    attributes:
+      name: Shadow Mirror
+      description: A dark mirror that shows not your reflection, but the shadows of
+        your fears and doubts.
     properties:
       immovable: true
       size: medium
       magical: true
       shadow_symbol: true
-
   flame_of_hope:
-    id: flame_of_hope
-    name: Flame of Hope
-    description: A small, flickering flame that grows brighter when hope is strong and dims when despair takes hold.
+    behaviors:
+    - object
+    attributes:
+      name: Flame of Hope
+      description: A small, flickering flame that grows brighter when hope is strong
+        and dims when despair takes hold.
     properties:
       immovable: true
       size: small
       magical: true
       hearth_symbol: true
       responsive: true
-
-  # Information Flow Systems
   message_board:
-    id: message_board
-    name: Message Board
-    description: A wooden board where characters can leave messages for each other.
+    behaviors:
+    - object
+    attributes:
+      name: Message Board
+      description: A wooden board where characters can leave messages for each other.
     properties:
       readable: true
       writable: true
       immovable: true
       size: medium
       communication: true
-
   secret_drop_point:
-    id: secret_drop_point
-    name: Secret Drop Point
-    description: A hidden location where anonymous messages can be left and retrieved.
+    behaviors:
+    - object
+    attributes:
+      name: Secret Drop Point
+      description: A hidden location where anonymous messages can be left and retrieved.
     properties:
       readable: true
       writable: true
@@ -449,11 +552,13 @@ object_types:
       size: small
       hidden: true
       communication: true
-
   pigeon_coop:
-    id: pigeon_coop
-    name: Pigeon Coop
-    description: A small coop where carrier pigeons can be used to send private messages.
+    behaviors:
+    - object
+    attributes:
+      name: Pigeon Coop
+      description: A small coop where carrier pigeons can be used to send private
+        messages.
     properties:
       readable: true
       writable: true
@@ -461,160 +566,177 @@ object_types:
       size: medium
       communication: true
       private: true
-
   town_crier:
-    id: town_crier
-    name: Town Crier
-    description: A person who makes public announcements throughout the town.
+    behaviors:
+    - object
+    attributes:
+      name: Town Crier
+      description: A person who makes public announcements throughout the town.
     properties:
       readable: true
       immovable: true
       size: medium
       communication: true
       public: true
-
-  # Time-Sensitive Elements
   burning_candle:
-    id: burning_candle
-    name: Burning Candle
-    description: A candle that burns down over time, creating urgency.
+    behaviors:
+    - object
+    attributes:
+      name: Burning Candle
+      description: A candle that burns down over time, creating urgency.
     properties:
       immovable: true
       size: small
       time_sensitive: true
       fuel: 100
-
   fresh_footprints:
-    id: fresh_footprints
-    name: Fresh Footprints
-    description: Footprints that will disappear as time passes.
+    behaviors:
+    - object
+    attributes:
+      name: Fresh Footprints
+      description: Footprints that will disappear as time passes.
     properties:
       readable: true
       immovable: true
       size: small
       time_sensitive: true
-      text: "Fresh footprints in the dust. They appear to be recent and will fade soon."
-
+      text: Fresh footprints in the dust. They appear to be recent and will fade soon.
   disturbed_earth:
-    id: disturbed_earth
-    name: Disturbed Earth
-    description: Recently disturbed earth that will settle over time.
+    behaviors:
+    - object
+    attributes:
+      name: Disturbed Earth
+      description: Recently disturbed earth that will settle over time.
     properties:
       readable: true
       immovable: true
       size: medium
       time_sensitive: true
-      text: "The earth has been recently disturbed. It will settle and become less obvious over time."
-
+      text: The earth has been recently disturbed. It will settle and become less
+        obvious over time.
   ritual_preparations:
-    id: ritual_preparations
-    name: Ritual Preparations
-    description: Evidence of ongoing ritual preparations that will be completed soon.
+    behaviors:
+    - object
+    attributes:
+      name: Ritual Preparations
+      description: Evidence of ongoing ritual preparations that will be completed
+        soon.
     properties:
       readable: true
       immovable: true
       size: medium
       time_sensitive: true
-      text: "The cult is preparing for a major ritual. The preparations will be complete soon."
-
-  # Character-Specific Starting Items
+      text: The cult is preparing for a major ritual. The preparations will be complete
+        soon.
   detectives_notebook:
-    id: detectives_notebook
-    name: Detective's Notebook
-    description: A worn leather notebook filled with clues, suspects, and case notes.
+    behaviors:
+    - object
+    attributes:
+      name: Detective's Notebook
+      description: A worn leather notebook filled with clues, suspects, and case notes.
     properties:
       readable: true
       pickupable: true
       size: small
       character_specific: detective_james
-      text: "Case notes on the Blackwater disappearances. Contains sketches of suspects and evidence."
-
+      text: Case notes on the Blackwater disappearances. Contains sketches of suspects
+        and evidence.
   daughters_medicine:
-    id: daughters_medicine
-    name: Daughter's Medicine
-    description: Expensive medicine needed for Detective James's sick daughter.
+    behaviors:
+    - object
+    attributes:
+      name: Daughter's Medicine
+      description: Expensive medicine needed for Detective James's sick daughter.
     properties:
       pickupable: true
       size: small
       character_specific: detective_james
       valuable: true
-
   confession_notes:
-    id: confession_notes
-    name: Confession Notes
-    description: Secret notes about the cult's activities that Father Marcus has been keeping.
+    behaviors:
+    - object
+    attributes:
+      name: Confession Notes
+      description: Secret notes about the cult's activities that Father Marcus has
+        been keeping.
     properties:
       readable: true
       pickupable: true
       size: small
       character_specific: father_marcus
-      text: "Detailed notes about the cult's rituals and plans. Very dangerous if discovered."
-
+      text: Detailed notes about the cult's rituals and plans. Very dangerous if discovered.
   protection_money:
-    id: protection_money
-    name: Protection Money
-    description: Gold coins that Gareth has been paying to The Raven for protection.
+    behaviors:
+    - object
+    attributes:
+      name: Protection Money
+      description: Gold coins that Gareth has been paying to The Raven for protection.
     properties:
       pickupable: true
       size: small
       character_specific: gareth
       valuable: true
-
   cult_escape_kit:
-    id: cult_escape_kit
-    name: Cult Escape Kit
-    description: A small kit with tools for escaping the cult's clutches.
+    behaviors:
+    - object
+    attributes:
+      name: Cult Escape Kit
+      description: A small kit with tools for escaping the cult's clutches.
     properties:
       pickupable: true
       size: small
       character_specific: sarah
       survival: true
-
   ancient_artifacts:
-    id: ancient_artifacts
-    name: Ancient Artifacts
-    description: Mysterious artifacts that Valdris carries with him.
+    behaviors:
+    - object
+    attributes:
+      name: Ancient Artifacts
+      description: Mysterious artifacts that Valdris carries with him.
     properties:
       pickupable: true
       size: small
       character_specific: valdris
       magical: true
-
-  # Resource Management
   town_treasury:
-    id: town_treasury
-    name: Town Treasury
-    description: The town's financial resources, controlled by the bank manager.
+    behaviors:
+    - object
+    attributes:
+      name: Town Treasury
+      description: The town's financial resources, controlled by the bank manager.
     properties:
       immovable: true
       size: large
       resource: money
       amount: 1000
-
   guild_resources:
-    id: guild_resources
-    name: Guild Resources
-    description: Weapons, armor, and supplies controlled by the guild master.
+    behaviors:
+    - object
+    attributes:
+      name: Guild Resources
+      description: Weapons, armor, and supplies controlled by the guild master.
     properties:
       immovable: true
       size: large
       resource: equipment
       amount: 50
-
   information_network:
-    id: information_network
-    name: Information Network
-    description: The barkeep's network of informants and contacts.
+    behaviors:
+    - object
+    attributes:
+      name: Information Network
+      description: The barkeep's network of informants and contacts.
     properties:
       immovable: true
       size: medium
       resource: information
       reach: town_wide
-
   underground_network:
-    id: underground_network
-    name: Underground Network
-    description: The Raven's criminal network and safe houses.
+    behaviors:
+    - object
+    attributes:
+      name: Underground Network
+      description: The Raven's criminal network and safe houses.
     properties:
       immovable: true
       size: medium

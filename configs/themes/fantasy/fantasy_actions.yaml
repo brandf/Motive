@@ -1,26 +1,30 @@
-actions:
+action_definitions:
   light_torch:
-    id: light_torch
     name: light torch
-    cost: 10
     description: Light a torch you are holding.
+    cost: 10
+    category: general
     parameters:
-      - name: object_name
-        type: string
-        description: The name of the torch to light.
+    - name: object_name
+      type: string
+      description: The name of the torch to light.
+      required: true
+      default_value: null
     requirements:
-      - type: player_has_object_in_inventory
-        object_name_param: object_name
-      - type: object_property_equals
-        object_name_param: object_name
-        property: is_lit
-        value: false
+    - type: player_has_object_in_inventory
+      description: ''
+      object_name_param: object_name
+    - type: object_property_equals
+      description: ''
+      object_name_param: object_name
+      property: is_lit
+      value: false
     effects:
-      - type: set_property
-        target_type: object
-        target_id_param: object_name
-        property: is_lit
-        value: true
-      - type: generate_event
-        message: "{{player_name}} lights the {{object_name}}."
-        observers: ["room_characters"]
+    - type: set_property
+      target: player
+      property: is_lit
+      value: true
+    - type: generate_event
+      message: '{{player_name}} lights the {{object_name}}.'
+      observers:
+      - room_characters

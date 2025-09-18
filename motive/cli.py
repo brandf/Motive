@@ -984,14 +984,36 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
     
     # Apply command line overrides
     if rounds is not None:
-        print(f"Overriding rounds: {game_config.game_settings.num_rounds} -> {rounds}")
-        game_config.game_settings.num_rounds = rounds
+        # Handle both v1 and v2 configs
+        if hasattr(game_config, 'game_settings'):
+            print(f"Overriding rounds: {game_config.game_settings.num_rounds} -> {rounds}")
+            game_config.game_settings.num_rounds = rounds
+        else:
+            # v2 config - modify the dict directly
+            if 'game_settings' not in game_config:
+                game_config['game_settings'] = {}
+            print(f"Overriding rounds: {game_config['game_settings'].get('num_rounds', 'default')} -> {rounds}")
+            game_config['game_settings']['num_rounds'] = rounds
+    
     if ap is not None:
-        print(f"Overriding action points: {game_config.game_settings.initial_ap_per_turn} -> {ap}")
-        game_config.game_settings.initial_ap_per_turn = ap
+        if hasattr(game_config, 'game_settings'):
+            print(f"Overriding action points: {game_config.game_settings.initial_ap_per_turn} -> {ap}")
+            game_config.game_settings.initial_ap_per_turn = ap
+        else:
+            if 'game_settings' not in game_config:
+                game_config['game_settings'] = {}
+            print(f"Overriding action points: {game_config['game_settings'].get('initial_ap_per_turn', 'default')} -> {ap}")
+            game_config['game_settings']['initial_ap_per_turn'] = ap
+    
     if manual is not None:
-        print(f"Overriding manual: {game_config.game_settings.manual} -> {manual}")
-        game_config.game_settings.manual = manual
+        if hasattr(game_config, 'game_settings'):
+            print(f"Overriding manual: {game_config.game_settings.manual} -> {manual}")
+            game_config.game_settings.manual = manual
+        else:
+            if 'game_settings' not in game_config:
+                game_config['game_settings'] = {}
+            print(f"Overriding manual: {game_config['game_settings'].get('manual', 'default')} -> {manual}")
+            game_config['game_settings']['manual'] = manual
     if hint is not None:
         print(f"Adding hint: {hint}")
         # Add hint to game settings

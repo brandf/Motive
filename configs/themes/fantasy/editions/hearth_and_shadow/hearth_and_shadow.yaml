@@ -1,11 +1,8 @@
-# Include the theme and hearth and shadow edition components
 includes:
-  - "../../fantasy.yaml"
-  - "hearth_and_shadow_rooms.yaml"
-  - "hearth_and_shadow_characters.yaml"
-  - "hearth_and_shadow_objects.yaml"
-  - "hearth_and_shadow_actions.yaml"
-
+- ../../fantasy.yaml
+- hearth_and_shadow_rooms.yaml
+- hearth_and_shadow_characters.yaml
+- hearth_and_shadow_objects.yaml
 testid: hearth_and_shadow
 name: Hearth and Shadow
 theme_id: fantasy

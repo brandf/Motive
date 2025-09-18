@@ -1,6 +1,4 @@
-# Include core components
 includes:
-  - "core_actions.yaml"
-  - "core_objects.yaml"
-  - "core_rooms.yaml"
-  - "core_characters.yaml"
+- core_actions.yaml
+testid: core
+name: Core
