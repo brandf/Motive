@@ -9,7 +9,7 @@ from tests.utils.llm_mock import llm_script
 @pytest.mark.asyncio
 async def test_hns_investigate_readable_journal_broadcast(tmp_path):
     base_path = "configs"
-    config = load_and_validate_v2_config("game_v2.yaml", base_path, validate=True)
+    config = load_and_validate_v2_config("game.yaml", base_path, validate=True)
 
     with llm_script({
         "Player_1": "> look\n> investigate \"Mayor's Journal\"\n> pass",
@@ -41,7 +41,7 @@ async def test_hns_investigate_readable_journal_broadcast(tmp_path):
 @pytest.mark.asyncio
 async def test_hns_investigate_guild_desk_broadcast(tmp_path):
     base_path = "configs"
-    config = load_and_validate_v2_config("game_v2.yaml", base_path, validate=True)
+    config = load_and_validate_v2_config("game.yaml", base_path, validate=True)
 
     with llm_script({
         "Player_1": "> look\n> investigate \"Guild Master's Desk\"\n> pass",

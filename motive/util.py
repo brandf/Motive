@@ -139,13 +139,16 @@ def show_actions(config) -> None:
     print("Available Actions:")
     print("=================")
     
-    # Handle both dict configs (v1) and GameConfig objects (v2)
-    if hasattr(config, 'actions'):
-        # GameConfig object (v2)
+    # Handle both v1 and v2 configs
+    if hasattr(config, 'action_definitions'):
+        # V2GameConfig object - use action_definitions
+        actions = config.action_definitions
+    elif hasattr(config, 'actions'):
+        # GameConfig object (v1) - use actions
         actions = config.actions
     else:
-        # Dictionary config (v1)
-        actions = config.get('actions', {})
+        # Dictionary config - check for v2 first, then v1
+        actions = config.get('action_definitions', config.get('actions', {}))
     
     if not actions:
         print("No actions found in this configuration.")
@@ -1305,9 +1308,32 @@ def handle_config_command(args):
     if args.validate:
         print("Validating configuration through Pydantic models...")
         try:
-            from motive.config_validator import validate_merged_config
-            validated_config = validate_merged_config(config)
-            print("Configuration validation successful!")
+            # Check if this is a v2 config
+            if isinstance(config, dict):
+                is_v2_config = ('entity_definitions' in config and config['entity_definitions']) or \
+                              ('action_definitions' in config and config['action_definitions'])
+            else:
+                # Check if it's a V2GameConfig object
+                is_v2_config = hasattr(config, 'entity_definitions') or hasattr(config, 'action_definitions')
+            
+            if is_v2_config:
+                # Use v2 validation
+                from motive.sim_v2.v2_config_validator import validate_v2_config
+                if isinstance(config, dict):
+                    validated_config = validate_v2_config(config)
+                else:
+                    # Already a V2GameConfig object, no need to re-validate
+                    validated_config = config
+                print("V2 configuration validation successful!")
+            else:
+                # Use v1 validation
+                from motive.config_validator import validate_merged_config
+                if isinstance(config, dict):
+                    validated_config = validate_merged_config(config)
+                else:
+                    # Already a GameConfig object, no need to re-validate
+                    validated_config = config
+                print("V1 configuration validation successful!")
             print()
         except Exception as e:
             print(f"Configuration validation failed: {e}")

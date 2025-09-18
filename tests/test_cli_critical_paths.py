@@ -31,8 +31,7 @@ class TestParallelGameRunner:
         """Test ParallelGameRunner initialization with valid config."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 5
   manual: test_manual.md
@@ -85,8 +84,7 @@ players:
         
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 5
   manual: test_manual.md
@@ -95,6 +93,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -134,8 +134,7 @@ players:
         
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 5
   manual: test_manual.md
@@ -144,6 +143,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -169,8 +170,7 @@ players:
         """Test exception handling in _start_single_game."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 5
   manual: test_manual.md
@@ -179,6 +179,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -202,8 +204,7 @@ players:
         """Test parsing of structured worker messages."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 5
   manual: test_manual.md
@@ -212,6 +213,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -256,8 +259,7 @@ players:
         """Test parsing player names with edge cases."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 5
   manual: test_manual.md
@@ -266,6 +268,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -294,8 +298,7 @@ class TestConfigLoading:
         """Test loading a valid config file."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 10
   manual: test_manual.md
@@ -307,6 +310,8 @@ players:
   - name: Player_2
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -326,17 +331,15 @@ players:
             config_path = f.name
         
         try:
-            with patch('sys.exit') as mock_exit:
+            with pytest.raises(Exception):  # Should raise YAML parsing error
                 load_config(config_path, validate=True)
-                mock_exit.assert_called_once_with(1)
         finally:
             os.unlink(config_path)
     
     def test_load_config_nonexistent_file(self):
         """Test loading a nonexistent config file."""
-        with patch('sys.exit') as mock_exit:
+        with pytest.raises(FileNotFoundError):
             load_config("nonexistent_config.yaml", validate=True)
-            mock_exit.assert_called_once_with(1)
 
 
 class TestArgumentParsing:
@@ -346,8 +349,7 @@ class TestArgumentParsing:
         """Test main function with valid arguments."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 5
   manual: test_manual.md
@@ -356,6 +358,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -393,8 +397,7 @@ players:
         """Test main function with invalid parallel count."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 5
   manual: test_manual.md
@@ -403,6 +406,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -496,8 +501,7 @@ class TestRunGameFunction:
         """Test run_game with valid config."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 2
   manual: test_manual.md
@@ -506,6 +510,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -533,8 +539,7 @@ players:
         """Test run_game in worker mode."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 2
   manual: test_manual.md
@@ -543,6 +548,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -567,8 +574,7 @@ players:
         """Test run_game handling KeyboardInterrupt."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 2
   manual: test_manual.md
@@ -577,6 +583,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         
@@ -600,8 +608,7 @@ players:
         """Test run_game handling general exceptions."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write("""
-theme: fantasy
-edition: hearth_and_shadow
+# v2 config
 game_settings:
   num_rounds: 2
   manual: test_manual.md
@@ -610,6 +617,8 @@ players:
   - name: Player_1
     provider: google
     model: gemini-2.5-flash
+entity_definitions: {}
+action_definitions: {}
 """)
             config_path = f.name
         

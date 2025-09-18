@@ -14,7 +14,7 @@ class TestMotiveConditionsFix:
     def test_motive_conditions_not_dummy(self):
         """Test that motive conditions are real, not dummy placeholders."""
         # Load v2 config
-        config = load_and_validate_v2_config("game_v2.yaml", "configs")
+        config = load_and_validate_v2_config("game.yaml", "configs")
         
         # Create GameInitializer
         import logging

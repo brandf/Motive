@@ -22,8 +22,7 @@ from enum import Enum
 
 from dotenv import load_dotenv
 from motive.game_master import GameMaster
-from motive.config import GameConfig, PlayerConfig
-from motive.config_loader import load_game_config, load_and_validate_game_config
+# v1 config imports removed - v1 is DEAD
 from motive.sim_v2.config_loader import V2ConfigLoader
 
 
@@ -504,380 +503,7 @@ def setup_logging():
     )
 
 
-def _convert_v2_to_v1_config(v2_config_data: Dict[str, Any]) -> GameConfig:
-    """Convert v2 config data to v1 GameConfig format."""
-    print(f"DEBUG: _convert_v2_to_v1_config called with type: {type(v2_config_data)}")
-    print(f"DEBUG: v2_config_data keys: {list(v2_config_data.keys()) if isinstance(v2_config_data, dict) else 'Not a dict'}")
-    
-    # Extract basic game settings with defaults
-    game_settings_data = v2_config_data.get('game_settings', {})
-    if not game_settings_data:
-        # Provide defaults for entity definition configs
-        game_settings_data = {
-            'num_rounds': 10,
-            'initial_ap_per_turn': 30,
-            'manual': 'docs/MANUAL.md'
-        }
-    
-    players_data = v2_config_data.get('players', [])
-    if not players_data:
-        # Provide default players for entity definition configs
-        players_data = [
-            {'name': 'Player_1', 'provider': 'google', 'model': 'gemini-2.5-flash'},
-            {'name': 'Player_2', 'provider': 'google', 'model': 'gemini-2.5-flash'}
-        ]
-    
-    # Convert players
-    players = [PlayerConfig(**player_data) for player_data in players_data]
-    
-    # Convert entity definitions to v1 format
-    entity_definitions = v2_config_data.get('entity_definitions', {})
-    print(f"DEBUG: entity_definitions type: {type(entity_definitions)}")
-    print(f"DEBUG: entity_definitions keys: {list(entity_definitions.keys()) if isinstance(entity_definitions, dict) else 'Not a dict'}")
-    
-    # Separate entities by type
-    rooms = {}
-    object_types = {}
-    character_types = {}
-    characters = {}
-    
-    for entity_id, entity_def in entity_definitions.items():
-        print(f"DEBUG: Processing entity {entity_id}, type: {type(entity_def)}")
-        print(f"DEBUG: entity_def content: {entity_def}")
-        entity_types = entity_def.get('types', [])
-        
-        if 'room' in entity_types:
-            rooms[entity_id] = _convert_room_definition(entity_id, entity_def)
-        elif 'object' in entity_types:
-            object_types[entity_id] = _convert_object_definition(entity_id, entity_def)
-        elif 'character' in entity_types:
-            print(f"DEBUG: Converting character {entity_id}")
-            character_types[entity_id] = _convert_character_definition(entity_id, entity_def)
-    
-    # Convert action definitions
-    action_definitions = v2_config_data.get('action_definitions', {})
-    actions = {}
-    for action_id, action_def in action_definitions.items():
-        actions[action_id] = _convert_action_definition(action_id, action_def)
-    
-    # Create GameConfig
-    from motive.config import GameSettings
-    game_settings = GameSettings(**game_settings_data)
-    
-    return GameConfig(
-        game_settings=game_settings,
-        players=players,
-        rooms=rooms,
-        object_types=object_types,
-        character_types=character_types,
-        characters=characters,
-        actions=actions,
-        # No theme/edition metadata needed - config includes handle organization
-    )
-
-
-def _convert_room_definition(room_id: str, entity_def: Dict[str, Any]) -> Dict[str, Any]:
-    """Convert v2 room definition to v1 format."""
-    from motive.config import RoomConfig
-    properties = entity_def.get('properties', {})
-    
-    return RoomConfig(
-        id=room_id,
-        name=properties.get('name', room_id),
-        description=properties.get('description', ''),
-        exits={},  # TODO: Convert exits from v2 format
-        objects={},  # TODO: Convert objects from v2 format
-        tags=[],  # TODO: Convert tags from v2 format
-        properties=_extract_property_values(properties)
-    )
-
-
-def _convert_object_definition(object_id: str, entity_def: Dict[str, Any]) -> Dict[str, Any]:
-    """Convert v2 object definition to v1 format."""
-    from motive.config import ObjectTypeConfig
-    print(f"DEBUG: _convert_object_definition called with object_id={object_id}, entity_def type={type(entity_def)}")
-    print(f"DEBUG: entity_def keys: {list(entity_def.keys()) if isinstance(entity_def, dict) else 'Not a dict'}")
-    properties = entity_def.get('properties', {})
-    
-    return ObjectTypeConfig(
-        id=object_id,
-        name=properties.get('name', object_id),
-        description=properties.get('description', ''),
-        properties=_extract_property_values(properties)
-    )
-
-
-def _convert_character_definition(character_id: str, entity_def: Dict[str, Any]) -> Dict[str, Any]:
-    """Convert v2 character definition to v1 format.
-
-    Ensures motives are converted into proper MotiveConfig objects with parsed
-    success/failure conditions (no placeholder 'dummy' fallbacks).
-    """
-    from motive.config import (
-        CharacterConfig,
-        MotiveConfig,
-        ActionRequirementConfig,
-        MotiveConditionGroup,
-    )
-    properties = entity_def.get('properties', {})
-    
-    # Helpers to build typed condition objects
-    def _build_condition(cond_data: Any):
-        # Single dict condition
-        if isinstance(cond_data, dict) and 'type' in cond_data:
-            return ActionRequirementConfig(**cond_data)
-        # List form: [ {operator: AND|OR}, {cond1}, {cond2}, ... ] or [ {cond} ] or [ {operator: AND, conditions: [...]} ]
-        if isinstance(cond_data, list):
-            if len(cond_data) == 1 and isinstance(cond_data[0], dict) and 'type' in cond_data[0]:
-                return ActionRequirementConfig(**cond_data[0])
-            if len(cond_data) == 1 and isinstance(cond_data[0], dict) and 'operator' in cond_data[0] and 'conditions' in cond_data[0]:
-                # Handle nested structure in list: [{operator: AND, conditions: [...]}]
-                operator = cond_data[0]['operator']
-                conditions = []
-                for item in cond_data[0]['conditions']:
-                    if isinstance(item, dict) and 'type' in item:
-                        conditions.append(ActionRequirementConfig(**item))
-                return MotiveConditionGroup(operator=operator, conditions=conditions)
-            if len(cond_data) >= 2 and isinstance(cond_data[0], dict) and 'operator' in cond_data[0]:
-                operator = cond_data[0]['operator']
-                conditions = []
-                for item in cond_data[1:]:
-                    if isinstance(item, dict):
-                        conditions.append(ActionRequirementConfig(**item))
-                return MotiveConditionGroup(operator=operator, conditions=conditions)
-        # Handle nested structure: {operator: AND, conditions: [{cond1}, {cond2}]}
-        if isinstance(cond_data, dict) and 'operator' in cond_data and 'conditions' in cond_data:
-            operator = cond_data['operator']
-            conditions = []
-            for item in cond_data['conditions']:
-                if isinstance(item, dict) and 'type' in item:
-                    conditions.append(ActionRequirementConfig(**item))
-            return MotiveConditionGroup(operator=operator, conditions=conditions)
-        # Unknown/empty
-        return None
-
-    # Convert complex fields from string representations back to typed objects
-    motive_objs = None
-    
-    # Check for motives in config field (v2 format)
-    config_data = entity_def.get('config', {})
-    if 'motives' in config_data:
-        motives_data = config_data['motives']
-    elif 'config' in config_data and 'motives' in config_data['config']:
-        # Handle nested config structure
-        motives_data = config_data['config']['motives']
-    elif 'motives' in entity_def:
-        motives_data = entity_def['motives']
-    else:
-        motives_data = None
-    
-    if motives_data is not None:
-        if isinstance(motives_data, list):
-            # Direct list of motive objects (v2 format)
-            motive_objs = []
-            for m in motives_data:
-                if isinstance(m, dict) and 'id' in m and 'description' in m:
-                    sc = _build_condition(m.get('success_conditions', []))
-                    fc = _build_condition(m.get('failure_conditions', []))
-                    motive_objs.append(
-                        MotiveConfig(
-                            id=m['id'],
-                            description=m['description'],
-                            success_conditions=sc,
-                            failure_conditions=fc,
-                        )
-                    )
-        elif isinstance(motives_data, str):
-            # String representation (legacy format)
-            try:
-                import ast
-                # Fix single quotes to double quotes for valid Python syntax
-                motives_str_fixed = motives_data.replace("''", '"')
-                motives_list = ast.literal_eval(motives_str_fixed)
-                if isinstance(motives_list, list):
-                    motive_objs = []
-                    for m in motives_list:
-                        if isinstance(m, dict) and 'id' in m and 'description' in m:
-                            sc = _build_condition(m.get('success_conditions', []))
-                            fc = _build_condition(m.get('failure_conditions', []))
-                            motive_objs.append(
-                                MotiveConfig(
-                                    id=m['id'],
-                                    description=m['description'],
-                                    success_conditions=sc,
-                                    failure_conditions=fc,
-                                )
-                            )
-            except (ValueError, SyntaxError):
-                motive_objs = None
-    
-    aliases = []
-    if 'aliases' in config_data:
-        aliases_data = config_data['aliases']
-    elif 'config' in config_data and 'aliases' in config_data['config']:
-        # Handle nested config structure
-        aliases_data = config_data['config']['aliases']
-    elif 'aliases' in entity_def:
-        aliases_data = entity_def['aliases']
-    else:
-        aliases_data = None
-    
-    if aliases_data is not None:
-        if isinstance(aliases_data, list):
-            # Direct list (v2 format)
-            aliases = aliases_data
-        elif isinstance(aliases_data, str):
-            # String representation (legacy format)
-            try:
-                import ast
-                # Fix single quotes to double quotes for valid Python syntax
-                aliases_str_fixed = aliases_data.replace("''", '"')
-                aliases = ast.literal_eval(aliases_str_fixed)
-            except (ValueError, SyntaxError):
-                # If parsing fails, keep as empty list
-                aliases = []
-    
-    initial_rooms = []
-    if 'initial_rooms' in config_data:
-        initial_rooms_data = config_data['initial_rooms']
-    elif 'config' in config_data and 'initial_rooms' in config_data['config']:
-        # Handle nested config structure
-        initial_rooms_data = config_data['config']['initial_rooms']
-    elif 'initial_rooms' in entity_def:
-        initial_rooms_data = entity_def['initial_rooms']
-    else:
-        initial_rooms_data = None
-    
-    if initial_rooms_data is not None:
-        if isinstance(initial_rooms_data, list):
-            # Direct list (v2 format) - convert strings to InitialRoomConfig objects
-            initial_rooms = []
-            for room_data in initial_rooms_data:
-                if isinstance(room_data, str):
-                    # Simple string format - create InitialRoomConfig with defaults
-                    from motive.config import InitialRoomConfig
-                    initial_rooms.append(InitialRoomConfig(
-                        room_id=room_data,
-                        chance=100,
-                        reason="Default starting location"
-                    ))
-                elif isinstance(room_data, dict):
-                    # Already in InitialRoomConfig format
-                    from motive.config import InitialRoomConfig
-                    initial_rooms.append(InitialRoomConfig(**room_data))
-        elif isinstance(initial_rooms_data, str):
-            # String representation (legacy format)
-            try:
-                import ast
-                # Fix single quotes to double quotes for valid Python syntax
-                initial_rooms_str_fixed = initial_rooms_data.replace("''", '"')
-                initial_rooms_list = ast.literal_eval(initial_rooms_str_fixed)
-                if isinstance(initial_rooms_list, list):
-                    initial_rooms = []
-                    for room_data in initial_rooms_list:
-                        if isinstance(room_data, str):
-                            from motive.config import InitialRoomConfig
-                            initial_rooms.append(InitialRoomConfig(
-                                room_id=room_data,
-                                chance=100,
-                                reason="Default starting location"
-                            ))
-                        elif isinstance(room_data, dict):
-                            from motive.config import InitialRoomConfig
-                            initial_rooms.append(InitialRoomConfig(**room_data))
-            except (ValueError, SyntaxError):
-                # If parsing fails, keep as empty list
-                initial_rooms = []
-    
-    # Extract name and backstory from nested config structure
-    name = character_id  # default
-    backstory = ''
-    motive = ''
-    
-    if 'name' in config_data:
-        name = config_data['name']
-    elif 'config' in config_data and 'name' in config_data['config']:
-        name = config_data['config']['name']
-    elif 'name' in entity_def:
-        name = entity_def['name']
-    
-    if 'backstory' in config_data:
-        backstory = config_data['backstory']
-    elif 'config' in config_data and 'backstory' in config_data['config']:
-        backstory = config_data['config']['backstory']
-    elif 'backstory' in entity_def:
-        backstory = entity_def['backstory']
-    
-    if 'motive' in config_data:
-        motive = config_data['motive']
-    elif 'config' in config_data and 'motive' in config_data['config']:
-        motive = config_data['config']['motive']
-    elif 'motive' in entity_def:
-        motive = entity_def['motive']
-    
-    char_config = CharacterConfig(
-        id=character_id,
-        name=name,
-        backstory=backstory,
-        motive=motive,
-        motives=motive_objs,
-        aliases=aliases,
-        initial_rooms=initial_rooms
-    )
-    return char_config
-
-
-def _convert_action_definition(action_id: str, action_def: Dict[str, Any]) -> Dict[str, Any]:
-    """Convert v2 action definition to v1 format."""
-    from motive.config import CostConfig, ParameterConfig, ActionRequirementConfig, ActionEffectConfig
-    
-    # Handle cost - can be a number or a complex object
-    cost = action_def.get('cost', 10)
-    if isinstance(cost, dict):
-        # Complex cost object (e.g., code_binding) - convert to CostConfig
-        converted_cost = CostConfig(**cost)
-    else:
-        # Simple numeric cost
-        converted_cost = cost
-    
-    # Convert parameters to ParameterConfig objects
-    parameters = []
-    for param_data in action_def.get('parameters', []):
-        parameters.append(ParameterConfig(**param_data))
-    
-    # Convert requirements to ActionRequirementConfig objects
-    requirements = []
-    for req_data in action_def.get('requirements', []):
-        requirements.append(ActionRequirementConfig(**req_data))
-    
-    # Convert effects to ActionEffectConfig objects
-    effects = []
-    for effect_data in action_def.get('effects', []):
-        effects.append(ActionEffectConfig(**effect_data))
-    
-    # Create ActionConfig object
-    from motive.config import ActionConfig
-    return ActionConfig(
-        id=action_id,
-        name=action_def.get('name', action_id),
-        description=action_def.get('description', ''),
-        cost=converted_cost,
-        category=action_def.get('category', 'general'),
-        parameters=parameters,
-        requirements=requirements,
-        effects=effects
-    )
-
-
-def _extract_property_values(properties: Dict[str, Any]) -> Dict[str, Any]:
-    """Extract default values from v2 property schemas."""
-    result = {}
-    for prop_name, prop_schema in properties.items():
-        if isinstance(prop_schema, dict) and 'default' in prop_schema:
-            result[prop_name] = prop_schema['default']
-        else:
-            result[prop_name] = prop_schema
-    return result
+# All v1 conversion functions removed - v1 is DEAD
 
 
 def _is_hierarchical_v2_config(config_data: Dict[str, Any], base_path: str) -> bool:
@@ -899,9 +525,9 @@ def _is_hierarchical_v2_config(config_data: Dict[str, Any], base_path: str) -> b
     return False
 
 
-def load_config(config_path: str, validate: bool = True) -> Union[GameConfig, 'V2GameConfig']:
+def load_config(config_path: str, validate: bool = True) -> 'V2GameConfig':
     """Load game configuration from file with optional validation.
-    Returns a GameConfig (v1) or V2GameConfig (v2) object.
+    Returns a V2GameConfig object - v1 is DEAD.
     """
     try:
         # Check if it's a v2 config or hierarchical config
@@ -922,9 +548,9 @@ def load_config(config_path: str, validate: bool = True) -> Union[GameConfig, 'V
                 # Return v2 config directly - GameMaster will be updated to work with v2
                 return v2_config
             else:
-                # Use hierarchical config loader with validation (v1)
-                config_file = Path(config_path).name
-                return load_and_validate_game_config(config_file, base_path, validate=validate)
+                # This is a v1 hierarchical config - v1 is DEAD!
+                print("ERROR: Found v1 hierarchical config - v1 is DEAD! Please use v2 configs only.", file=sys.stderr)
+                raise ValueError("v1 configs are no longer supported. Please use v2 configs.")
         elif 'entity_definitions' in raw_config or 'action_definitions' in raw_config:
             # This is a standalone v2 config - use v2 pre-processor + Pydantic validation
             from motive.sim_v2.v2_config_preprocessor import load_and_validate_v2_config
@@ -935,14 +561,13 @@ def load_config(config_path: str, validate: bool = True) -> Union[GameConfig, 'V
             # Return v2 config directly - GameMaster will be updated to work with v2
             return v2_config
         else:
-            # Traditional config loading (v1)
-            with open(config_path, 'r', encoding='utf-8') as f:
-                config_data = yaml.safe_load(f)
-            return GameConfig(**config_data)
+            # This is a v1 config - v1 is DEAD!
+            print("ERROR: Found v1 config - v1 is DEAD! Please use v2 configs only.", file=sys.stderr)
+            raise ValueError("v1 configs are no longer supported. Please use v2 configs.")
         
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_path}' not found.", file=sys.stderr)
-        sys.exit(1)
+        raise FileNotFoundError(f"Configuration file '{config_path}' not found.")
     except Exception as e:
         # Check if it's a validation error
         if hasattr(e, 'validation_errors') and e.validation_errors:
@@ -951,7 +576,7 @@ def load_config(config_path: str, validate: bool = True) -> Union[GameConfig, 'V
                 print(f"  - {error}", file=sys.stderr)
         else:
             print(f"Error loading configuration: {e}", file=sys.stderr)
-        sys.exit(1)
+        raise e
 
 
 async def run_game(config_path: str, game_id: str = None, validate: bool = True,
@@ -980,43 +605,52 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
     
     # Load configuration
     print(f"Loading configuration from: {config_path}")
-    game_config = load_config(config_path, validate=validate)
+    try:
+        game_config = load_config(config_path, validate=validate)
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+        return  # Ensure function exits even when sys.exit is mocked
+    except Exception as e:
+        print(f"Error loading configuration: {e}", file=sys.stderr)
+        sys.exit(1)
+        return  # Ensure function exits even when sys.exit is mocked
     
-    # Apply command line overrides
+    # Apply command line overrides - v2 config only
     if rounds is not None:
-        # Handle both v1 and v2 configs
-        if hasattr(game_config, 'game_settings'):
-            print(f"Overriding rounds: {game_config.game_settings.num_rounds} -> {rounds}")
-            game_config.game_settings.num_rounds = rounds
-        else:
-            # v2 config - modify the dict directly
-            if 'game_settings' not in game_config:
-                game_config['game_settings'] = {}
-            print(f"Overriding rounds: {game_config['game_settings'].get('num_rounds', 'default')} -> {rounds}")
-            game_config['game_settings']['num_rounds'] = rounds
+        # v2 config - modify the Pydantic object
+        if not hasattr(game_config, 'game_settings') or game_config.game_settings is None:
+            # Create a new game_settings object
+            from motive.sim_v2.v2_config_validator import GameSettings
+            game_config.game_settings = GameSettings()
+        print(f"Overriding rounds: {game_config.game_settings.num_rounds} -> {rounds}")
+        game_config.game_settings.num_rounds = rounds
     
     if ap is not None:
-        if hasattr(game_config, 'game_settings'):
-            print(f"Overriding action points: {game_config.game_settings.initial_ap_per_turn} -> {ap}")
-            game_config.game_settings.initial_ap_per_turn = ap
-        else:
-            if 'game_settings' not in game_config:
-                game_config['game_settings'] = {}
-            print(f"Overriding action points: {game_config['game_settings'].get('initial_ap_per_turn', 'default')} -> {ap}")
-            game_config['game_settings']['initial_ap_per_turn'] = ap
+        # v2 config - modify the Pydantic object
+        if not hasattr(game_config, 'game_settings') or game_config.game_settings is None:
+            # Create a new game_settings object
+            from motive.sim_v2.v2_config_validator import GameSettings
+            game_config.game_settings = GameSettings()
+        print(f"Overriding action points: {game_config.game_settings.initial_ap_per_turn} -> {ap}")
+        game_config.game_settings.initial_ap_per_turn = ap
     
     if manual is not None:
-        if hasattr(game_config, 'game_settings'):
-            print(f"Overriding manual: {game_config.game_settings.manual} -> {manual}")
-            game_config.game_settings.manual = manual
-        else:
-            if 'game_settings' not in game_config:
-                game_config['game_settings'] = {}
-            print(f"Overriding manual: {game_config['game_settings'].get('manual', 'default')} -> {manual}")
-            game_config['game_settings']['manual'] = manual
+        # v2 config - modify the Pydantic object
+        if not hasattr(game_config, 'game_settings') or game_config.game_settings is None:
+            # Create a new game_settings object
+            from motive.sim_v2.v2_config_validator import GameSettings
+            game_config.game_settings = GameSettings()
+        print(f"Overriding manual: {game_config.game_settings.manual} -> {manual}")
+        game_config.game_settings.manual = manual
+    
     if hint is not None:
         print(f"Adding hint: {hint}")
-        # Add hint to game settings
+        # Add hint to game settings - v2 config only
+        if not hasattr(game_config, 'game_settings') or game_config.game_settings is None:
+            # Create a new game_settings object
+            from motive.sim_v2.v2_config_validator import GameSettings
+            game_config.game_settings = GameSettings()
         if game_config.game_settings.hints is None:
             game_config.game_settings.hints = []
         # Create a simple hint that shows every round for all players
@@ -1028,7 +662,11 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
     
     if hint_character is not None:
         print(f"Adding character-specific hint for character: {hint_character}")
-        # Add character-specific hint to game settings
+        # Add character-specific hint to game settings - v2 config only
+        if not hasattr(game_config, 'game_settings') or game_config.game_settings is None:
+            # Create a new game_settings object
+            from motive.sim_v2.v2_config_validator import GameSettings
+            game_config.game_settings = GameSettings()
         if game_config.game_settings.hints is None:
             game_config.game_settings.hints = []
         # Create a hint that shows only for the specified character
@@ -1045,19 +683,21 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
         else:
             print("Warning: --hint-character format should be 'character_id:hint_text'")
     
-    # Handle players count override
+    # Handle players count override - v2 config only
     if players is not None:
-        print(f"Overriding player count: {len(game_config.players)} -> {players}")
+        current_players = game_config.players if hasattr(game_config, 'players') else []
+        
+        print(f"Overriding player count: {len(current_players)} -> {players}")
         if players <= 0:
             # Handle zero or negative players
             game_config.players = []
-        elif players < len(game_config.players):
+        elif players < len(current_players):
             # Use first N players
-            game_config.players = game_config.players[:players]
-        elif players > len(game_config.players):
+            game_config.players = current_players[:players]
+        elif players > len(current_players):
             # Create additional players by duplicating existing ones
-            original_players = game_config.players.copy()
-            additional_needed = players - len(game_config.players)
+            original_players = current_players.copy()
+            additional_needed = players - len(current_players)
             
             for i in range(additional_needed):
                 # Pick a random player to duplicate (or cycle through if deterministic)
@@ -1068,29 +708,26 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
                     source_player = random.choice(original_players)
                 
                 # Create a new player with modified name
-                new_player = source_player.model_copy()
-                new_player.name = f"{source_player.name}_{i + 1}"
+                new_player = source_player.copy()
+                new_player['name'] = f"{source_player['name']}_{i + 1}"
                 game_config.players.append(new_player)
     
-    # Check LangSmith configuration
-    if os.getenv("LANGCHAIN_TRACING_V2") == "true":
-        print("LangSmith tracing is enabled. Ensure LANGCHAIN_API_KEY is set in .env.")
-    else:
-        print("LangSmith tracing is disabled. Set LANGCHAIN_TRACING_V2='true' in .env to enable.")
+    # Initialize and run the game
+    print(f"Initializing game with ID: {game_id}")
+    
+    # Create GameMaster with v2 config
+    game_master = GameMaster(game_config, game_id=game_id, deterministic=deterministic, log_dir=log_dir, no_file_logging=no_file_logging, character=character, motive=motive)
     
     # Run the game
     try:
-        # Use the same GameMaster for both v1 and v2 configs
-        gm = GameMaster(game_config=game_config, game_id=game_id, deterministic=deterministic,
-                        log_dir=log_dir, no_file_logging=no_file_logging, character=character, motive=motive)
         if worker:
             # In worker mode, suppress most stdout output and use structured progress reporting
-            await gm.run_game_worker()
+            await game_master.run_game_worker()
         else:
-            await gm.run_game()
+            await game_master.run_game()
         
         # Return the GameMaster object for testing
-        return gm
+        return game_master
     except KeyboardInterrupt:
         print("\nGame interrupted by user.")
         sys.exit(0)
@@ -1100,170 +737,87 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
 
 
 def main():
-    """Main CLI entry point."""
-    parser = argparse.ArgumentParser(
-        description="Motive - A platform for LLM benchmarking through turn-based games",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  motive                                    # Run with default config
-  motive -c configs/game.yaml              # Run with specific config
-  motive -c tests/configs/integration/game_test.yaml         # Run test configuration
-  motive -c configs/game_new.yaml          # Run hierarchical config
-  motive --game-id my-game-123             # Run with specific game ID
-        """
-    )
+    """Main entry point for the CLI."""
+    parser = argparse.ArgumentParser(description="Motive - Interactive LLM Game Platform")
     
-    parser.add_argument(
-        '-c', '--config',
-        default='configs/game.yaml',
-        help='Path to game configuration file (default: configs/game.yaml)'
-    )
+    # Configuration
+    parser.add_argument("-c", "--config", default="configs/game.yaml", 
+                       help="Path to game configuration file")
     
-    parser.add_argument(
-        '--game-id',
-        help='Specific game ID to use (default: auto-generated)'
-    )
+    # Game settings
+    parser.add_argument("--rounds", type=int, help="Number of rounds to play")
+    parser.add_argument("--ap", type=int, help="Action points per turn")
+    parser.add_argument("--players", type=int, help="Number of players")
+    parser.add_argument("--manual", help="Path to manual file")
+    parser.add_argument("--hint", help="Add a hint for all players")
+    parser.add_argument("--hint-character", help="Add a character-specific hint (format: character_id:hint_text)")
+    parser.add_argument("--character", help="Character to play as")
+    parser.add_argument("--motive", help="Motive to pursue")
     
-    parser.add_argument(
-        '--no-validate',
-        action='store_true',
-        help='Skip Pydantic validation of merged configuration (for debugging)'
-    )
+    # Game behavior
+    parser.add_argument("--deterministic", action="store_true", 
+                       help="Run in deterministic mode with fixed random seed")
+    parser.add_argument("--worker", action="store_true", 
+                       help="Run in worker mode (for parallel games)")
+    parser.add_argument("--no-validate", action="store_true", 
+                       help="Skip configuration validation")
     
-    parser.add_argument(
-        '--version',
-        action='version',
-        version='%(prog)s 0.0.1'
-    )
+    # Logging
+    parser.add_argument("--log-dir", default="logs", help="Directory for log files")
+    parser.add_argument("--no-file-logging", action="store_true", 
+                       help="Disable file logging")
     
-    # Game settings overrides
-    parser.add_argument(
-        '--rounds',
-        type=int,
-        help='Number of rounds to run (overrides config)'
-    )
-    parser.add_argument(
-        '--ap',
-        type=int,
-        help='Initial action points per turn (overrides config)'
-    )
-    parser.add_argument(
-        '--manual',
-        type=str,
-        help='Path to game manual (overrides config)'
-    )
-    parser.add_argument(
-        '--hint',
-        type=str,
-        help='Add a hint that will be shown to all players every round'
-    )
-    parser.add_argument(
-        '--hint-character',
-        type=str,
-        help='Add a hint shown only to a specific character. Format: "character_id:hint_text"'
-    )
-    parser.add_argument(
-        '--deterministic',
-        action='store_true',
-        help='Run in deterministic mode with fixed random seed for reproducible results'
-    )
-    parser.add_argument(
-        '--players',
-        type=int,
-        help='Number of players to use (overrides config). If more than config players, creates additional players by duplicating existing ones. If more than available characters, will error.'
-    )
-    parser.add_argument(
-        '--character',
-        type=str,
-        help='Force assignment of a specific character ID to the first player (for testing specific characters)'
-    )
-    parser.add_argument(
-        '--motive',
-        type=str,
-        help='Force assignment of a specific motive ID to the character (for testing specific motives)'
-    )
+    # Game ID
+    parser.add_argument("--game-id", help="Custom game ID")
     
-    # Parallel execution
-    parser.add_argument(
-        '--parallel',
-        type=int,
-        metavar='N',
-        help='Run N games in parallel with progress monitoring. Does not run a game itself, just monitors parallel instances.'
-    )
-    
-    # Worker mode (internal use)
-    parser.add_argument(
-        '--worker',
-        action='store_true',
-        help=argparse.SUPPRESS  # Hide from help since it's internal
-    )
-    
-    # Fancy terminal mode
-    parser.add_argument(
-        '--fancy',
-        action='store_true',
-        help='Enable fancy terminal UI with live progress updates (may not work in all terminals)'
-    )
-    
-    # Logging configuration
-    parser.add_argument(
-        '--log-dir',
-        type=str,
-        default='logs',
-        help='Base directory for log files (default: logs)'
-    )
-    parser.add_argument(
-        '--no-file-logging',
-        action='store_true',
-        help='Disable file logging (logs only to stdout)'
-    )
+    # Parallel games
+    parser.add_argument("--parallel", type=int, metavar="N", 
+                       help="Run N parallel games")
+    parser.add_argument("--fancy", action="store_true", 
+                       help="Use fancy progress display for parallel games")
     
     args = parser.parse_args()
     
-    # Validate config file exists
-    if not Path(args.config).exists():
-        print(f"Error: Configuration file '{args.config}' not found.", file=sys.stderr)
-        sys.exit(1)
-    
-    # Handle parallel mode
+    # Handle parallel games
     if args.parallel:
-        if args.parallel < 1:
-            print("Error: --parallel must specify at least 1 game", file=sys.stderr)
-            sys.exit(1)
-        
-        # Prepare game arguments
-        game_args = {
-            'game_id': args.game_id,
-            'rounds': args.rounds,
-            'ap': args.ap,
-            'players': args.players,
-            'hint': args.hint,
-            'hint_character': args.hint_character,
-            'character': args.character,
-            'motive': args.motive,
-            'deterministic': args.deterministic,
-            'manual': args.manual,
-            'no_validate': args.no_validate,
-            'log_dir': args.log_dir,
-            'no_file_logging': args.no_file_logging
-        }
-        
-        # Remove None values
-        game_args = {k: v for k, v in game_args.items() if v is not None}
-        
-        # Run parallel games
-        runner = ParallelGameRunner(args.parallel, args.config, **game_args)
+        runner = ParallelGameRunner(
+            num_games=args.parallel,
+            config_path=args.config,
+            rounds=args.rounds,
+            ap=args.ap,
+            players=args.players,
+            manual=args.manual,
+            hint=args.hint,
+            hint_character=args.hint_character,
+            character=args.character,
+            deterministic=args.deterministic,
+            no_validate=args.no_validate,
+            log_dir=args.log_dir,
+            no_file_logging=args.no_file_logging,
+            game_id=args.game_id
+        )
         runner.run(fancy_mode=args.fancy)
-    else:
-        # Run single game
-        validate = not args.no_validate
-        asyncio.run(run_game(args.config, args.game_id, validate=validate, 
-                            rounds=args.rounds, ap=args.ap, manual=args.manual, hint=args.hint,
-                            hint_character=args.hint_character, deterministic=args.deterministic, 
-                            players=args.players, character=args.character, motive=args.motive, worker=args.worker,
-                            log_dir=args.log_dir, no_file_logging=args.no_file_logging))
+        return
+    
+    # Run single game
+    asyncio.run(run_game(
+        config_path=args.config,
+        game_id=args.game_id,
+        validate=not args.no_validate,
+        rounds=args.rounds,
+        ap=args.ap,
+        manual=args.manual,
+        hint=args.hint,
+        hint_character=args.hint_character,
+        deterministic=args.deterministic,
+        players=args.players,
+        character=args.character,
+        motive=args.motive,
+        worker=args.worker,
+        log_dir=args.log_dir,
+        no_file_logging=args.no_file_logging
+    ))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

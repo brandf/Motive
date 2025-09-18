@@ -8,8 +8,8 @@ from motive.cli import load_config, run_game
 
 @pytest.mark.asyncio
 async def test_real_config_boot_smoke(tmp_path):
-    cfg_path = Path("configs/game_v2.yaml").resolve()
-    assert cfg_path.exists(), "configs/game_v2.yaml must exist for real-config boot smoke"
+    cfg_path = Path("configs/game.yaml").resolve()
+    assert cfg_path.exists(), "configs/game.yaml must exist for real-config boot smoke"
 
     # Ensure the v2 config loads successfully
     game_config = load_config(str(cfg_path), validate=True)

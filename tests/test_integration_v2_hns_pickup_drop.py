@@ -10,7 +10,7 @@ from tests.utils.llm_mock import llm_script
 async def test_hns_pickup_and_drop_broadcast(tmp_path):
     # Use real H&S content: Bank contains "Mayor's Journal" which is pickupable
     base_path = "configs"
-    config = load_and_validate_v2_config("game_v2.yaml", base_path, validate=True)
+    config = load_and_validate_v2_config("game.yaml", base_path, validate=True)
 
     # Turn 1: pickup
     with llm_script({

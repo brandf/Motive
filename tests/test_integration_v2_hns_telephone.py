@@ -10,7 +10,7 @@ from tests.utils.llm_mock import llm_script
 async def test_hns_telephone_shout_say_whisper(tmp_path):
     # Use real H&S config with two players; we will reposition to simulate the relay
     base_path = "configs"
-    config = load_and_validate_v2_config("game_v2.yaml", base_path, validate=True)
+    config = load_and_validate_v2_config("game.yaml", base_path, validate=True)
 
     # Arrange two players; we will move them between rooms across tavern -> town_square -> bank
     with llm_script({

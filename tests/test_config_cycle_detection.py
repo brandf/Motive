@@ -40,7 +40,7 @@ class TestConfigCycleDetection:
         # This should work without errors
         config = loader.load_config("core.yaml")
         assert config is not None
-        assert "actions" in config
+        assert "action_definitions" in config
     
     def test_self_reference_detection(self):
         """Test that a config including itself is detected as a cycle."""

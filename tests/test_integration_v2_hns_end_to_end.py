@@ -14,7 +14,7 @@ async def test_hns_end_to_end_three_rounds(tmp_path):
 
     with llm_script(scripts, manual="Test Manual"):
         await run_game(
-            config_path="configs/game_v2.yaml",
+            config_path="configs/game.yaml",
             game_id="hns_end_to_end_three_rounds",
             validate=True,
             rounds=3,
@@ -62,7 +62,7 @@ async def test_hns_end_to_end_minimal_realistic(tmp_path):
 
     with llm_script(scripts, manual="Comprehensive Test Manual"):
         result = await run_game(
-            config_path="configs/game_v2.yaml",
+            config_path="configs/game.yaml",
             game_id="hns_end_to_end_comprehensive",
             validate=True,
             rounds=3,

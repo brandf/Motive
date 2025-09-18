@@ -9,7 +9,7 @@ from tests.utils.llm_mock import llm_script
 @pytest.mark.asyncio
 async def test_hns_read_room_object_event(tmp_path):
     base_path = "configs"
-    config = load_and_validate_v2_config("game_v2.yaml", base_path, validate=True)
+    config = load_and_validate_v2_config("game.yaml", base_path, validate=True)
 
     with llm_script({
         # 'Mayor's Journal' object is in 'bank' per migrated rooms
