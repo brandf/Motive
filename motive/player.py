@@ -63,8 +63,12 @@ class Player:
         """
         context = []
         
-        # Always include system prompt
-        context.append(SystemMessage(content="You are a helpful assistant. Be concise and focused. Keep responses under 1000 characters."))
+        # Check if there's already a system message in recent messages
+        has_system_message = any(isinstance(msg, SystemMessage) for msg in self.recent_messages)
+        
+        # Only add generic system prompt if no game-specific system message exists
+        if not has_system_message:
+            context.append(SystemMessage(content="You are a helpful assistant. Be concise and focused. Keep responses under 1000 characters."))
         
         # Add conversation summary if available
         if self.conversation_summary:

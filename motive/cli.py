@@ -709,7 +709,7 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
                 
                 # Create a new player with modified name
                 new_player = source_player.copy()
-                new_player['name'] = f"{source_player['name']}_{i + 1}"
+                new_player.name = f"{source_player.name}_{i + 1}"
                 game_config.players.append(new_player)
     
     # Initialize and run the game
