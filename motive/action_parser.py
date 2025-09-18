@@ -93,6 +93,8 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                (param_string.startswith("\"") and param_string.endswith("\"")):
                 params[param_name] = param_string[1:-1]
             else:
+                # For single parameters, treat the entire remaining string as the parameter
+                # This allows multi-word arguments without quotes for the last parameter
                 params[param_name] = param_string
         else:
             # Handle multiple parameters - try to parse them intelligently
@@ -138,6 +140,17 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                         params['object_name'] = ""
                         params['exit'] = ""
                         params['_throw_parse_error'] = f"Invalid throw format. Expected: throw \"object_name\" \"exit\". Got: {param_string}. Error: {str(e)}"
+                elif 'object_name' in param_names and 'target' in param_names:
+                    # Specialized parsing for use action: use <object> [on/at <target>]
+                    try:
+                        object_name, target = _parse_use_parameters(param_string)
+                        params['object_name'] = object_name
+                        params['target'] = target
+                    except Exception as e:
+                        # If use parsing fails, provide helpful error message
+                        params['object_name'] = ""
+                        params['target'] = ""
+                        params['_use_parse_error'] = f"Invalid use format. Expected: use \"object_name\" [on/at \"target\"]. Got: {param_string}. Error: {str(e)}"
                 else:
                     # Fallback to original logic for other two-parameter actions
                     match = re.match(r'^(\S+)\s+(.+)$', param_string)
@@ -184,9 +197,9 @@ def parse_player_response(player_response: str, available_actions: Dict[str, Act
                 if parsed_action:
                     action_config, params = parsed_action
                     # Check for parse errors in the parameters
-                    if '_whisper_parse_error' in params or '_give_parse_error' in params or '_throw_parse_error' in params:
+                    if '_whisper_parse_error' in params or '_give_parse_error' in params or '_throw_parse_error' in params or '_use_parse_error' in params:
                         # Treat as invalid action with helpful error message
-                        error_msg = params.get('_whisper_parse_error') or params.get('_give_parse_error') or params.get('_throw_parse_error')
+                        error_msg = params.get('_whisper_parse_error') or params.get('_give_parse_error') or params.get('_throw_parse_error') or params.get('_use_parse_error')
                         invalid_actions.append(f"{action_line} - {error_msg}")
                     else:
                         parsed_actions.append(parsed_action)
@@ -547,3 +560,64 @@ def _parse_throw_parameters(param_string: str) -> Tuple[str, str]:
         raise ValueError("Exit direction cannot be empty")
     
     return object_name.strip(), exit_direction.strip()
+
+
+def _parse_use_parameters(param_string: str) -> Tuple[str, str]:
+    """
+    Parse use action parameters: use <object> [on/at <target>]
+    
+    Handles CLI-compatible formats:
+    - use torch
+    - use "magic sword"
+    - use torch on door
+    - use "magic sword" on "locked chest"
+    - use torch at wall
+    
+    Returns:
+        Tuple of (object_name, target)
+        target will be empty string if not provided
+    Raises:
+        ValueError: If format is invalid
+    """
+    param_string = param_string.strip()
+    
+    if not param_string:
+        raise ValueError("Use action requires an object name")
+    
+    # Look for common prepositions that indicate a target
+    prepositions = ['on', 'at', 'with', 'against']
+    
+    # Find the first preposition
+    preposition_pos = -1
+    preposition = None
+    for prep in prepositions:
+        # Look for the preposition as a whole word (not part of another word)
+        pattern = r'\b' + re.escape(prep) + r'\b'
+        match = re.search(pattern, param_string, re.IGNORECASE)
+        if match and (preposition_pos == -1 or match.start() < preposition_pos):
+            preposition_pos = match.start()
+            preposition = prep
+    
+    if preposition_pos != -1:
+        # Split on the preposition
+        object_part = param_string[:preposition_pos].strip()
+        target_part = param_string[preposition_pos + len(preposition):].strip()
+        
+        # Extract quoted content from both parts
+        object_name = _extract_quoted_content(object_part)
+        target = _extract_quoted_content(target_part)
+        
+        # Validate object name is not empty
+        if not object_name.strip():
+            raise ValueError("Object name cannot be empty")
+        
+        return object_name.strip(), target.strip()
+    else:
+        # No preposition found, treat entire string as object name
+        object_name = _extract_quoted_content(param_string)
+        
+        # Validate object name is not empty
+        if not object_name.strip():
+            raise ValueError("Object name cannot be empty")
+        
+        return object_name.strip(), ""
