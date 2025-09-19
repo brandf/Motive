@@ -144,9 +144,9 @@ def test_distribute_events_player_scope():
     # Distribute events
     gm._distribute_events()
     
-    # Verify player1 (targeted by player scope) received the event
-    assert len(gm.player_observations["player1"]) == 1
-    assert gm.player_observations["player1"][0].message == "Player1 requested help."
+    # Verify player1 (targeted by player scope) did NOT receive the event as observation
+    # because players don't see their own actions as observations (they get direct feedback instead)
+    assert len(gm.player_observations["player1"]) == 0
     
     # Verify player2 (not the target) did NOT receive the event
     assert len(gm.player_observations["player2"]) == 0

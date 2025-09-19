@@ -192,7 +192,7 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
         if target_object:
             obj_description = f"You look at the {target_object.name}. {target_object.description}"
             feedback_messages.append(obj_description)
-            event_message = f"Player {player_char.name} looked at {target_object.name}."
+            event_message = f"{player_char.get_display_name()} looked at {target_object.name}."
             events_generated.append(Event(
                 message=event_message,
                 event_type="player_action",
@@ -204,7 +204,7 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
             ))
         else:
             feedback_messages.append(f"You don't see any '{target_name}' here or in your inventory.")
-            event_message = f"Player {player_char.name} tried to look at non-existent object '{target_name}'."
+            event_message = f"{player_char.get_display_name()} tried to look at non-existent object '{target_name}'."
             events_generated.append(Event(
                 message=event_message,
                 event_type="player_action_failed",
@@ -586,14 +586,14 @@ def handle_whisper_action(game_master: Any, player_char: Character, action_confi
         observers=["player"]  # Only the speaker sees this event
     ))
     
-    # Event for the target player
+    # Event for the target player (as observation, not direct feedback)
     events_generated.append(Event(
-        message=f"{player_char.name} whispers to you: \"{phrase}\"",
+        message=f"{player_char.get_display_name()} whispers to you: \"{phrase}\"",
         event_type="player_communication",
         source_room_id=current_room.id,
         timestamp=datetime.now().isoformat(),
-        related_player_id=target_player.character.id,
-        observers=["player"]  # Only the target player sees this event
+        related_player_id=player_char.id,  # The speaker is the related player
+        observers=["room_characters"]  # Target sees this as an observation
     ))
     
     return events_generated, feedback_messages

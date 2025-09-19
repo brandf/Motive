@@ -143,7 +143,7 @@ action_definitions:
     config = load_and_validate_v2_config("game.yaml", base_path, validate=True)
 
     with llm_script({
-        "Player_1": "> pickup \"Key\"\n> use \"Key\" \"Chest\"\n> pass",
+            "Player_1": "> pickup \"Key\"\n> use Key on Chest\n> pass",
     }):
         gm = GameMaster(config, game_id="min_two_use", deterministic=True, log_dir=str(tmp_path), no_file_logging=True)
         p1 = gm.players[0]

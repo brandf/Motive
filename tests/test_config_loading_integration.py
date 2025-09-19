@@ -88,10 +88,9 @@ class TestConfigLoadingIntegration:
         config = load_config("configs/game.yaml", validate=True)
         
         # Count entities from config
-        config_room_count = sum(1 for entity_def in config.entity_definitions.values() 
+        config_room_count = sum(1 for entity_def in config.entity_definitions.values()
                                if 'room' in entity_def.types)
-        config_character_count = sum(1 for entity_def in config.entity_definitions.values() 
-                                   if 'character' in entity_def.types)
+        config_player_count = len(config.players)  # Number of players, not character types
         
         # Initialize GameMaster
         with (
@@ -108,14 +107,14 @@ class TestConfigLoadingIntegration:
             
             # Count entities from GameMaster
             gamemaster_room_count = len(game_master.rooms)
-            gamemaster_character_count = len(game_master.players)
+            gamemaster_player_count = len(game_master.players)
             
             # Verify counts match
             assert gamemaster_room_count == config_room_count, \
                 f"Room count mismatch: config={config_room_count}, gamemaster={gamemaster_room_count}"
             
-            assert gamemaster_character_count == config_character_count, \
-                f"Character count mismatch: config={config_character_count}, gamemaster={gamemaster_character_count}"
+            assert gamemaster_player_count == config_player_count, \
+                f"Player count mismatch: config={config_player_count}, gamemaster={gamemaster_player_count}"
     
     def test_config_loading_failure_scenarios(self):
         """Test config loading failure scenarios."""

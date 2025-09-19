@@ -220,7 +220,7 @@ action_definitions:
 
     # Single turn: pickup key, use on gate (which sets can_see_secret), then move
     with llm_script({
-        "Player_1": "> pickup \"Key\"\n> use Key Gate\n> move east\n> pass",
+        "Player_1": "> pickup \"Key\"\n> use Key on Gate\n> move east\n> pass",
     }):
         gm = GameMaster(config, game_id="min_exit_reqs", deterministic=True, log_dir=str(tmp_path), no_file_logging=True)
         p1 = gm.players[0]
