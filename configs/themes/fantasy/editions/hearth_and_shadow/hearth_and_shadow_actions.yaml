@@ -1,0 +1,105 @@
+action_definitions:
+  # H&S specific investigation actions
+  talk:
+    name: talk
+    description: Talk to an NPC or character to gather information or have a conversation.
+    cost: 10
+    category: communication
+    parameters:
+    - name: target
+      type: string
+      description: The name of the NPC or character to talk to.
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: handle_talk_action
+
+  investigate:
+    name: investigate
+    description: Investigate an object or area for clues and information.
+    cost: 15
+    category: investigation
+    parameters:
+    - name: target
+      type: string
+      description: The object or area to investigate
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: handle_investigate_action
+      observers:
+        - player
+        - room_characters
+
+  read:
+    name: read
+    description: Read a readable object like a book, note, or sign.
+    cost: 10
+    category: interaction
+    parameters:
+    - name: object
+      type: string
+      description: The name of the object to read
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: handle_read_action
+      observers:
+        - player
+
+  light:
+    name: light
+    description: Light a lightable object like a torch or candle.
+    cost: 10
+    category: interaction
+    parameters:
+    - name: object
+      type: string
+      description: The name of the object to light
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: handle_light_action
+      observers:
+        - player
+        - room_characters
+
+  expose:
+    name: expose
+    description: Expose someone or something using evidence and testimony.
+    cost: 20
+    category: investigation
+    parameters:
+    - name: target
+      type: string
+      description: The person or group to expose.
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: handle_expose_action
+
+  arrest:
+    name: arrest
+    description: Arrest someone and bring them to justice.
+    cost: 25
+    category: investigation
+    parameters:
+    - name: target
+      type: string
+      description: The person to arrest.
+      required: true
+      default_value: null
+    requirements: []
+    effects:
+    - type: code_binding
+      function_name: handle_arrest_action

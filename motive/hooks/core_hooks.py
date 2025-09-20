@@ -193,13 +193,52 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
             obj_description = f"You look at the {target_object.name}. {target_object.description}"
             feedback_messages.append(obj_description)
             event_message = f"{player_char.get_display_name()} looked at {target_object.name}."
+            
+            # Check for interactions on the target object
+            if hasattr(target_object, 'interactions') and target_object.interactions:
+                look_interaction = target_object.interactions.get('look')
+                if look_interaction and 'effects' in look_interaction:
+                        # Process the interaction effects
+                        for effect in look_interaction['effects']:
+                            if effect.get('type') == 'increment_property':
+                                property_name = effect.get('property')
+                                increment_value = effect.get('increment_value', 1)
+                                if property_name:
+                                    current_value = player_char.get_property(property_name, 0)
+                                    new_value = current_value + increment_value
+                                    player_char.set_property(property_name, new_value)
+                                    feedback_messages.append(f"You found important information! {property_name.replace('_', ' ').title()}: {new_value}")
+                            elif effect.get('type') == 'generate_event':
+                                message_template = effect.get('message', '')
+                                if message_template:
+                                    # Replace template variables
+                                    message = message_template.replace('{{player_name}}', player_char.get_display_name())
+                                    # Replace player property templates
+                                    import re
+                                    property_pattern = r'\{\{player_property:(\w+)\}\}'
+                                    def replace_property(match):
+                                        prop_name = match.group(1)
+                                        # Get the updated value after increment
+                                        return str(player_char.get_property(prop_name, 0))
+                                    message = re.sub(property_pattern, replace_property, message)
+                                    observers = effect.get('observers', ['room_characters'])
+                                    events_generated.append(Event(
+                                        message=message,
+                                        event_type="action_event",
+                                        source_room_id=player_char.current_room_id,
+                                        timestamp=datetime.now().isoformat(),
+                                        related_player_id=player_char.id,
+                                        related_object_id=str(getattr(target_object, 'id', 'unknown')),
+                                        observers=observers
+                                    ))
+            
             events_generated.append(Event(
                 message=event_message,
                 event_type="player_action",
                 source_room_id=player_char.current_room_id,
                 timestamp=datetime.now().isoformat(),
                 related_player_id=player_char.id,
-                related_object_id=target_object.id,
+                related_object_id=str(getattr(target_object, 'id', 'unknown')),
                 observers=["player", "room_characters", "game_master"]
             ))
         else:
@@ -213,6 +252,276 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
                 related_player_id=player_char.id,
                 observers=["player", "game_master"]
             ))
+    
+    return events_generated, feedback_messages
+
+def handle_talk_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handles talking to NPCs or characters."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    target_name = params.get("target")
+    
+    if not target_name:
+        feedback_messages.append("Talk action requires a target.")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to talk without specifying a target.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+    
+    # Find the target character in the current room
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    target_character = None
+    
+    if current_room:
+        # Check if the room has characters
+        if hasattr(current_room, 'characters') and current_room.characters:
+            for char_id, char_data in current_room.characters.items():
+                if char_data.get('name', '').lower() == target_name.lower():
+                    target_character = char_data
+                    break
+    
+    if target_character:
+        # Check for talk interactions on the target character
+        if 'interactions' in target_character:
+            talk_interaction = target_character['interactions'].get('talk')
+            if talk_interaction and 'effects' in talk_interaction:
+                # Process the interaction effects
+                for effect in talk_interaction['effects']:
+                    if effect.get('type') == 'increment_property':
+                        property_name = effect.get('property')
+                        increment_value = effect.get('increment_value', 1)
+                        if property_name:
+                            current_value = player_char.get_property(property_name, 0)
+                            new_value = current_value + increment_value
+                            player_char.set_property(property_name, new_value)
+                            feedback_messages.append(f"You learned valuable information! {property_name.replace('_', ' ').title()}: {new_value}")
+                    elif effect.get('type') == 'generate_event':
+                        message_template = effect.get('message', '')
+                        if message_template:
+                            # Replace template variables
+                            message = message_template.replace('{{player_name}}', player_char.get_display_name())
+                            message = message.replace('{{target}}', target_character.get('name', target_name))
+                            # Replace player property templates
+                            import re
+                            property_pattern = r'\{\{player_property:(\w+)\}\}'
+                            def replace_property(match):
+                                prop_name = match.group(1)
+                                # Get the updated value after increment
+                                return str(player_char.get_property(prop_name, 0))
+                            message = re.sub(property_pattern, replace_property, message)
+                            observers = effect.get('observers', ['room_characters'])
+                            events_generated.append(Event(
+                                message=message,
+                                event_type="action_event",
+                                source_room_id=player_char.current_room_id,
+                                timestamp=datetime.now().isoformat(),
+                                related_player_id=player_char.id,
+                                observers=observers
+                            ))
+        
+        # Generate the basic talk event
+        event_message = f"{player_char.get_display_name()} talks to {target_character.get('name', target_name)}."
+        events_generated.append(Event(
+            message=event_message,
+            event_type="action_event",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["room_characters"]
+        ))
+    else:
+        feedback_messages.append(f"You don't see '{target_name}' here to talk to.")
+        events_generated.append(Event(
+            message=f"{player_char.get_display_name()} tried to talk to non-existent character '{target_name}'.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+    
+    return events_generated, feedback_messages
+
+def handle_expose_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handles exposing cult members or other targets."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    target_name = params.get("target")
+    
+    if not target_name:
+        feedback_messages.append("Expose action requires a target.")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to expose without specifying a target.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+    
+    # Find the target character in the current room
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    target_character = None
+    
+    if current_room:
+        # Check if the room has characters
+        if hasattr(current_room, 'characters') and current_room.characters:
+            for char_id, char_data in current_room.characters.items():
+                if char_data.get('name', '').lower() == target_name.lower():
+                    target_character = char_data
+                    break
+    
+    if target_character:
+        # Check for expose interactions on the target character
+        if 'interactions' in target_character:
+            expose_interaction = target_character['interactions'].get('expose')
+            if expose_interaction and 'effects' in expose_interaction:
+                # Process the interaction effects
+                for effect in expose_interaction['effects']:
+                    if effect.get('type') == 'set_property':
+                        property_name = effect.get('property')
+                        property_value = effect.get('value')
+                        if property_name:
+                            player_char.set_property(property_name, property_value)
+                            feedback_messages.append(f"You expose {target_character.get('name', target_name)}! {property_name.replace('_', ' ').title()}: {property_value}")
+                    elif effect.get('type') == 'generate_event':
+                        message_template = effect.get('message', '')
+                        if message_template:
+                            # Replace template variables
+                            message = message_template.replace('{{player_name}}', player_char.get_display_name())
+                            message = message.replace('{{target}}', target_character.get('name', target_name))
+                            # Replace player property templates
+                            import re
+                            property_pattern = r'\{\{player_property:(\w+)\}\}'
+                            def replace_property(match):
+                                prop_name = match.group(1)
+                                return str(player_char.get_property(prop_name, 0))
+                            message = re.sub(property_pattern, replace_property, message)
+                            observers = effect.get('observers', ['room_characters'])
+                            events_generated.append(Event(
+                                message=message,
+                                event_type="action_event",
+                                source_room_id=player_char.current_room_id,
+                                timestamp=datetime.now().isoformat(),
+                                related_player_id=player_char.id,
+                                observers=observers
+                            ))
+        
+        # Generate the basic expose event
+        event_message = f"{player_char.get_display_name()} exposes {target_character.get('name', target_name)}."
+        events_generated.append(Event(
+            message=event_message,
+            event_type="action_event",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["room_characters"]
+        ))
+    else:
+        feedback_messages.append(f"You don't see '{target_name}' here to expose.")
+        events_generated.append(Event(
+            message=f"{player_char.get_display_name()} tried to expose non-existent character '{target_name}'.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+    
+    return events_generated, feedback_messages
+
+def handle_arrest_action(game_master: Any, player_char: Character, action_config: Any, params: Dict[str, Any]) -> Tuple[List[Event], List[str]]:
+    """Handles arresting cult members or other targets."""
+    feedback_messages: List[str] = []
+    events_generated: List[Event] = []
+    target_name = params.get("target")
+    
+    if not target_name:
+        feedback_messages.append("Arrest action requires a target.")
+        events_generated.append(Event(
+            message=f"Player {player_char.name} attempted to arrest without specifying a target.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
+        return events_generated, feedback_messages
+    
+    # Find the target character in the current room
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    target_character = None
+    
+    if current_room:
+        # Check if the room has characters
+        if hasattr(current_room, 'characters') and current_room.characters:
+            for char_id, char_data in current_room.characters.items():
+                if char_data.get('name', '').lower() == target_name.lower():
+                    target_character = char_data
+                    break
+    
+    if target_character:
+        # Check for arrest interactions on the target character
+        if 'interactions' in target_character:
+            arrest_interaction = target_character['interactions'].get('arrest')
+            if arrest_interaction and 'effects' in arrest_interaction:
+                # Process the interaction effects
+                for effect in arrest_interaction['effects']:
+                    if effect.get('type') == 'set_property':
+                        property_name = effect.get('property')
+                        property_value = effect.get('value')
+                        if property_name:
+                            player_char.set_property(property_name, property_value)
+                            feedback_messages.append(f"You arrest {target_character.get('name', target_name)}! {property_name.replace('_', ' ').title()}: {property_value}")
+                    elif effect.get('type') == 'generate_event':
+                        message_template = effect.get('message', '')
+                        if message_template:
+                            # Replace template variables
+                            message = message_template.replace('{{player_name}}', player_char.get_display_name())
+                            message = message.replace('{{target}}', target_character.get('name', target_name))
+                            # Replace player property templates
+                            import re
+                            property_pattern = r'\{\{player_property:(\w+)\}\}'
+                            def replace_property(match):
+                                prop_name = match.group(1)
+                                return str(player_char.get_property(prop_name, 0))
+                            message = re.sub(property_pattern, replace_property, message)
+                            observers = effect.get('observers', ['room_characters'])
+                            events_generated.append(Event(
+                                message=message,
+                                event_type="action_event",
+                                source_room_id=player_char.current_room_id,
+                                timestamp=datetime.now().isoformat(),
+                                related_player_id=player_char.id,
+                                observers=observers
+                            ))
+        
+        # Generate the basic arrest event
+        event_message = f"{player_char.get_display_name()} arrests {target_character.get('name', target_name)}."
+        events_generated.append(Event(
+            message=event_message,
+            event_type="action_event",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["room_characters"]
+        ))
+    else:
+        feedback_messages.append(f"You don't see '{target_name}' here to arrest.")
+        events_generated.append(Event(
+            message=f"{player_char.get_display_name()} tried to arrest non-existent character '{target_name}'.",
+            event_type="player_action_failed",
+            source_room_id=player_char.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_player_id=player_char.id,
+            observers=["player", "game_master"]
+        ))
     
     return events_generated, feedback_messages
 

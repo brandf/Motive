@@ -2,8 +2,7 @@
 # This is the main v2 config file for the H&S edition
 
 includes:
-  - "../../fantasy.yaml"  # Inherit from fantasy theme (which includes core)
-  - "hearth_and_shadow_actions.yaml"  # H&S specific actions
+  - "hearth_and_shadow_actions.yaml"
   - "hearth_and_shadow_rooms.yaml"
   - "hearth_and_shadow_characters.yaml"
   - "hearth_and_shadow_objects.yaml"

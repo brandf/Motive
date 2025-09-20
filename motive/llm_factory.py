@@ -23,6 +23,7 @@ LLM_PROVIDER_MAP: dict[str, Type[BaseChatModel] | None] = {
     "openai": ChatOpenAI,
     "google": ChatGoogleGenerativeAI,
     "anthropic": ChatAnthropic,
+    "dummy": None,  # Special test provider that doesn't need real LLM
 }
 
 # Mapping of provider names to their typical API key environment variable names
@@ -31,6 +32,7 @@ PROVIDER_API_KEYS = {
     "openai": "OPENAI_API_KEY",
     "google": "GOOGLE_API_KEY",
     "anthropic": "ANTHROPIC_API_KEY",
+    "dummy": None,  # Dummy provider doesn't need API key
     # Add other provider API keys here
     # "cohere": "COHERE_API_KEY",
 }
@@ -42,6 +44,15 @@ def create_llm_client(provider: str, model: str) -> BaseChatModel:
     It checks if the required LangChain integration is available and attempts
     to instantiate the chat model.
     """
+    # Handle dummy provider for testing
+    if provider == "dummy":
+        from unittest.mock import MagicMock, AsyncMock
+        mock_llm = MagicMock()
+        mock_response = MagicMock()
+        mock_response.content = "> look"
+        mock_llm.ainvoke = AsyncMock(return_value=mock_response)
+        return mock_llm
+
     llm_class = LLM_PROVIDER_MAP.get(provider)
 
     if not llm_class:

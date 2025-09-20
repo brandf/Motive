@@ -152,6 +152,10 @@ class GameInitializer:
                     if 'action_aliases' in attributes:
                         config_data['action_aliases'] = attributes['action_aliases']
                     
+                    # Preserve interactions from attributes
+                    if 'interactions' in attributes:
+                        config_data['interactions'] = attributes['interactions']
+                    
                     # Copy other properties that might be relevant
                     for key, value in entity_data.items():
                         if key not in ['behaviors', 'types', 'properties']:
@@ -438,6 +442,10 @@ class GameInitializer:
                     if 'action_aliases' in attributes:
                         config_data['action_aliases'] = attributes['action_aliases']
                     
+                    # Preserve interactions from attributes
+                    if 'interactions' in attributes:
+                        config_data['interactions'] = attributes['interactions']
+                    
                     # Copy other properties that might be relevant
                     for key, value in entity_data.items():
                         if key not in ['behaviors', 'types', 'properties']:
@@ -686,6 +694,14 @@ class GameInitializer:
                         final_tags = set(obj_type_tags).union(obj_instance_cfg.get('tags', []))
                         final_properties = {**obj_type_properties, **obj_instance_cfg.get('properties', {})}
                         final_aliases = {**obj_type_aliases, **obj_instance_cfg.get('action_aliases', {})}
+                        
+                        # Extract interactions from entity definition
+                        obj_type_interactions = {}
+                        if hasattr(obj_type, 'interactions'):
+                            obj_type_interactions = obj_type.interactions
+                        elif hasattr(obj_type, 'attributes') and obj_type.attributes and 'interactions' in obj_type.attributes:
+                            obj_type_interactions = obj_type.attributes['interactions']
+                        final_interactions = {**obj_type_interactions, **obj_instance_cfg.get('interactions', {})}
 
                         game_obj = GameObject(
                             obj_id=obj_instance_cfg['id'],
@@ -694,7 +710,8 @@ class GameInitializer:
                             current_location_id=room.id,
                             tags=list(final_tags),
                             properties=final_properties,
-                            action_aliases=final_aliases
+                            action_aliases=final_aliases,
+                            interactions=final_interactions
                         )
                         room.add_object(game_obj)
                         self.game_objects[game_obj.id] = game_obj
@@ -1042,6 +1059,14 @@ class GameInitializer:
                         final_tags = set(obj_type_tags).union(obj_instance_cfg.get('tags', []))
                         final_properties = {**obj_type_properties, **obj_instance_cfg.get('properties', {})}
                         final_aliases = {**obj_type_aliases, **obj_instance_cfg.get('action_aliases', {})}
+                        
+                        # Extract interactions from entity definition
+                        obj_type_interactions = {}
+                        if hasattr(obj_type, 'interactions'):
+                            obj_type_interactions = obj_type.interactions
+                        elif hasattr(obj_type, 'attributes') and obj_type.attributes and 'interactions' in obj_type.attributes:
+                            obj_type_interactions = obj_type.attributes['interactions']
+                        final_interactions = {**obj_type_interactions, **obj_instance_cfg.get('interactions', {})}
 
                         game_obj = GameObject(
                             obj_id=obj_instance_cfg['id'],
@@ -1050,7 +1075,8 @@ class GameInitializer:
                             current_location_id=room.id,
                             tags=list(final_tags),
                             properties=final_properties,
-                            action_aliases=final_aliases
+                            action_aliases=final_aliases,
+                            interactions=final_interactions
                         )
                         room.add_object(game_obj)
                         self.game_objects[game_obj.id] = game_obj

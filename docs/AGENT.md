@@ -655,3 +655,116 @@ When issues are found in `motive` that should have been caught by tests, follow 
 - **Update workflow if needed**: Enhance the workflow itself based on new insights
 
 This workflow ensures that every real-world issue becomes a learning opportunity that strengthens the test suite and prevents future similar issues.
+
+---
+
+# 🎮 Game Content Design Guidelines
+
+## Action Design Principles
+
+**Actions should be verbs, parameters should be nouns**: Follow the pattern of `look inventory`, `pickup sword`, `move north` rather than creating overly specific actions like `investigate_evidence` or `talk_to_witness`.
+
+### Core Action Philosophy
+- **Generic actions are better than specific ones**: Create reusable actions that work across different contexts
+- **Use action aliases for thematic consistency**: Objects can define aliases (e.g., `investigate: look`, `read: look`) to provide intuitive interaction verbs
+- **Parameters make actions flexible**: Instead of `expose_cult`, create `expose` with a `target` parameter
+- **Interactions specialize effects**: Use object/character interactions to customize effects per target
+
+### Examples of Good vs. Bad Action Design
+
+**❌ BAD - Overly Specific Actions:**
+```yaml
+action_definitions:
+  investigate_evidence:
+    name: investigate evidence
+    description: Gather evidence for your investigation.
+    # Too specific - only works for evidence investigation
+```
+
+**✅ GOOD - Generic Actions with Parameters:**
+```yaml
+action_definitions:
+  look:
+    name: look
+    description: Examine something closely.
+    parameters:
+    - name: target
+      type: string
+      description: What to look at.
+      required: true
+```
+
+**✅ GOOD - Object Aliases for Thematic Consistency:**
+```yaml
+# In object definition
+action_aliases:
+  investigate: look
+  examine: look
+  read: look
+interactions:
+  look:
+    effects:
+    - type: increment_property
+      target: player
+      property: evidence_collected
+      increment_value: 1
+```
+
+### Action Categories
+- **Movement**: `move`, `enter`, `exit`
+- **Communication**: `say`, `whisper`, `shout`, `talk` (for NPCs)
+- **Investigation**: `look` (with aliases like `investigate`, `examine`, `read`)
+- **Manipulation**: `pickup`, `drop`, `use`, `give`, `throw`
+- **Social**: `talk` (with target parameter for NPCs)
+- **Authority**: `expose`, `arrest` (with target parameters)
+
+### Interaction System
+Objects and characters can define `interactions` that customize how generic actions affect them:
+
+```yaml
+# Character definition
+interactions:
+  expose:
+    effects:
+    - type: set_property
+      target: player
+      property: cult_exposed
+      value: true
+    - type: generate_event
+      message: '{{player_name}} exposes {{character_name}}!'
+      observers:
+      - room_characters
+```
+
+This approach ensures:
+- **Reusability**: Actions work across different contexts
+- **Flexibility**: Parameters and interactions customize behavior
+- **Maintainability**: Fewer actions to maintain and test
+- **Consistency**: Core action set remains stable while content provides variety
+
+## Content Design Best Practices
+
+### Object Purpose
+Every object should have a clear purpose:
+- **Investigation objects**: Provide clues, evidence, or information
+- **Tool objects**: Enable specific actions or unlock new capabilities
+- **Decorative objects**: Enhance atmosphere and world-building
+- **Interactive objects**: Respond to player actions with meaningful effects
+
+### Motive Chain Design
+- **Break complex motives into steps**: Use properties to track progress (`evidence_collected: 3`, `witnesses_interviewed: 2`)
+- **Provide multiple paths**: Different approaches should lead to the same goal
+- **Make progress observable**: Players should see their advancement through properties and events
+- **Ensure completability**: Every motive must be achievable regardless of random player/motive selection
+
+### Cross-Character Interactions
+- **Shared objectives**: Multiple characters can work toward the same goal
+- **Conflicting motives**: Characters with opposing goals create tension
+- **Information trading**: Characters can share clues and evidence
+- **Collaborative actions**: Some objectives require multiple characters working together
+
+### Testing Content
+- **Write integration tests**: Test motive chains with mocked LLM responses
+- **Validate with hints**: Use the hint system to guide players through new content
+- **Test edge cases**: Ensure content works with different character combinations
+- **Verify completability**: Every motive must be achievable in isolation

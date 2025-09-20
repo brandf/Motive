@@ -13,5 +13,35 @@ entity_definitions:
               property: found_clue
               value: true
           failure_conditions: []
+  
+  detective:
+    behaviors:
+      - character
+    attributes:
+      name: detective
+      backstory: Investigates mysteries.
+      motives:
+        - id: solve_case
+          description: Solve the case by setting case_solved=true.
+          success_conditions:
+            - type: character_has_property
+              property: case_solved
+              value: true
+          failure_conditions: []
+  
+  investigator:
+    behaviors:
+      - character
+    attributes:
+      name: investigator
+      backstory: Searches for truth.
+      motives:
+        - id: find_truth
+          description: Find the truth by setting truth_found=true.
+          success_conditions:
+            - type: character_has_property
+              property: truth_found
+              value: true
+          failure_conditions: []
 
 

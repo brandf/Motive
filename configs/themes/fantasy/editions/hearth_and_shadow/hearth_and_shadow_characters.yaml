@@ -2,9 +2,64 @@ entity_definitions:
   detective_thorne:
     behaviors:
     - character
-    properties: {}
+    properties:
+      evidence_collected: { type: number, default: 0 }
+      witnesses_interviewed: { type: number, default: 0 }
+      cult_exposed: { type: boolean, default: false }
+      justice_served: { type: boolean, default: false }
+      medicine_found: { type: boolean, default: false }
+      daughter_safe: { type: boolean, default: false }
+      partner_avenged: { type: boolean, default: false }
+      cult_destroyed: { type: boolean, default: false }
+      investigation_fatigue: { type: number, default: 0 }
+      cult_corruption: { type: number, default: 0 }
+      partner_memory: { type: boolean, default: false }
+    computed:
+      investigation_progress:
+        type: number
+        expr: "(evidence_collected * 25) + (witnesses_interviewed * 25) + (cult_exposed ? 25 : 0) + (justice_served ? 25 : 0)"
+      daughter_protection_level:
+        type: number
+        expr: "(medicine_found ? 50 : 0) + (daughter_safe ? 50 : 0)"
+      vengeance_progress:
+        type: number
+        expr: "(partner_avenged ? 50 : 0) + (cult_destroyed ? 50 : 0)"
+      overall_threat_level:
+        type: number
+        expr: "investigation_fatigue + cult_corruption"
+    triggers:
+      - when: "evidence_collected >= 3"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James has gathered enough evidence to piece together the cult's activities!"
+      - when: "witnesses_interviewed >= 2"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James has interviewed enough witnesses to understand the pattern of disappearances!"
+      - when: "cult_exposed == true"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James has exposed the cult! The truth is now public knowledge!"
+      - when: "justice_served == true"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James has brought the cult to justice! The investigation is complete!"
+      - when: "investigation_fatigue > 5"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James is showing signs of exhaustion from his relentless investigation."
+      - when: "cult_corruption > 3"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James is feeling the corrupting influence of the cult's dark magic."
     name: Detective James Thorne
-    short_name: Detective Thorne
+    short_name: James Thorne
     backstory: "A former city guard turned private investigator, James Thorne arrived\
       \ in Blackwater \nthree months ago to investigate the mysterious disappearances.\
       \ His sharp mind and \nkeen observational skills have made him a valuable asset\
@@ -21,10 +76,16 @@ entity_definitions:
       success_conditions:
       - operator: AND
       - type: character_has_property
-        property: found_mayor
-        value: true
+        property: evidence_collected
+        value: 3
+      - type: character_has_property
+        property: witnesses_interviewed
+        value: 2
       - type: character_has_property
         property: cult_exposed
+        value: true
+      - type: character_has_property
+        property: justice_served
         value: true
       failure_conditions:
       - operator: OR
@@ -800,3 +861,120 @@ entity_definitions:
     - broker
     - spy
     - informant
+
+  witness_old_tom:
+    behaviors:
+    - character
+    properties: {}
+    name: Old Tom
+    short_name: Tom
+    backstory: "An elderly fisherman who has lived in Blackwater for over 40 years. Tom spends most of his time at the docks, but he's seen things that would make younger men's blood run cold. He's reluctant to talk about what he knows, but the disappearance of the mayor has shaken him deeply. He carries a secret that could help solve the case."
+    motives: []
+    interactions:
+      talk:
+        effects:
+        - type: increment_property
+          target: player
+          property: witnesses_interviewed
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} talks to Old Tom and learns valuable information about the mayor''s disappearance! Witnesses interviewed: {{player_property:witnesses_interviewed}}/2'
+          observers:
+          - room_characters
+    aliases:
+    - tom
+    - fisherman
+    - old man
+
+  witness_sarah_chen:
+    behaviors:
+    - character
+    properties: {}
+    name: Sarah Chen
+    short_name: Sarah
+    backstory: "A local merchant whose daughter went missing shortly after the mayor disappeared. Sarah is desperate for answers and has been gathering information from other townsfolk. She's seen suspicious activity near the old church and knows more than she's willing to say publicly."
+    motives: []
+    interactions:
+      talk:
+        effects:
+        - type: increment_property
+          target: player
+          property: witnesses_interviewed
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} talks to Sarah Chen and learns crucial information about the cult''s activities! Witnesses interviewed: {{player_property:witnesses_interviewed}}/2'
+          observers:
+          - room_characters
+    aliases:
+    - sarah
+    - merchant
+    - mother
+
+  cult_leader_malachi:
+    behaviors:
+    - character
+    properties: {}
+    name: Malachi the Shadow
+    short_name: Malachi
+    backstory: "The mysterious leader of the Shadowed Hand cult. Malachi is a charismatic figure who has been orchestrating the disappearances and ritual activities in Blackwater. He's been hiding in the underground tunnels beneath the town, conducting dark ceremonies and recruiting new members. His true identity is unknown to most, but he's the key to solving the mayor's disappearance."
+    motives: []
+    interactions:
+      expose:
+        effects:
+        - type: set_property
+          target: player
+          property: cult_exposed
+          value: true
+        - type: generate_event
+          message: '{{player_name}} exposes Malachi as the cult leader! The Shadowed Hand''s activities are now public knowledge.'
+          observers:
+          - room_characters
+      arrest:
+        effects:
+        - type: set_property
+          target: player
+          property: justice_served
+          value: true
+        - type: generate_event
+          message: '{{player_name}} arrests Malachi and brings him to justice! The investigation is complete.'
+          observers:
+          - room_characters
+    aliases:
+    - malachi
+    - shadow
+    - cult leader
+    - leader
+
+  cult_member_thorn:
+    behaviors:
+    - character
+    properties: {}
+    name: Thorn the Enforcer
+    short_name: Thorn
+    backstory: "A brutal enforcer for the Shadowed Hand cult. Thorn is responsible for carrying out the cult's dirty work, including kidnappings and intimidation. He's been seen lurking around the town at night, and his presence is often a sign that something sinister is about to happen."
+    motives: []
+    interactions:
+      expose:
+        effects:
+        - type: set_property
+          target: player
+          property: cult_exposed
+          value: true
+        - type: generate_event
+          message: '{{player_name}} exposes Thorn as a cult member! The Shadowed Hand''s activities are now public knowledge.'
+          observers:
+          - room_characters
+      arrest:
+        effects:
+        - type: set_property
+          target: player
+          property: justice_served
+          value: true
+        - type: generate_event
+          message: '{{player_name}} arrests Thorn and brings him to justice! The investigation is complete.'
+          observers:
+          - room_characters
+    aliases:
+    - thorn
+    - enforcer
+    - cult member

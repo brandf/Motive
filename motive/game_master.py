@@ -770,6 +770,32 @@ class GameMaster:
                         action_name = action_config.get('name', 'unknown')
                     self.game_logger.warning(f"set_property effect missing target, property, or value for action '{action_name}'.")
 
+            elif effect_type == "increment_property":
+                # Handle both Pydantic objects and dictionaries from merged config
+                if hasattr(effect, 'property'):
+                    effect_property = effect.property
+                else:
+                    effect_property = effect.get('property', '')
+                    
+                if hasattr(effect, 'increment_value'):
+                    increment_value = effect.increment_value
+                else:
+                    increment_value = effect.get('increment_value', 1)
+                    
+                if target_instance and effect_property:
+                    # Get current value (default to 0 if not set)
+                    current_value = target_instance.get_property(effect_property, 0)
+                    new_value = current_value + increment_value
+                    target_instance.set_property(effect_property, new_value)
+                    feedback_messages.append(f"The {effect_target_type} '{target_instance.name}'s '{effect_property}' is now '{new_value}'.")
+                else:
+                    # Handle both Pydantic objects and dictionaries from merged config
+                    if hasattr(action_config, 'name'):
+                        action_name = action_config.name
+                    else:
+                        action_name = action_config.get('name', 'unknown')
+                    self.game_logger.warning(f"increment_property effect missing target or property for action '{action_name}'.")
+
             elif effect_type == "generate_event":
                 # Handle both Pydantic objects and dictionaries from merged config
                 if hasattr(effect, 'message'):

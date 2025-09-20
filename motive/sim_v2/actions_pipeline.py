@@ -3,7 +3,8 @@
 
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass
-from motive.sim_v2.effects import Effect, SetPropertyEffect, MoveEntityEffect
+from pydantic import field_validator
+from motive.sim_v2.effects import Effect, SetPropertyEffect, IncrementPropertyEffect, GenerateEventEffect, MoveEntityEffect
 from motive.sim_v2.conditions import ConditionAST, ConditionEvaluator
 from motive.sim_v2.relations import RelationsGraph
 
@@ -44,6 +45,39 @@ class ActionDefinition:
     requirements: List[ActionRequirement]
     effects: List[Effect]
     category: str = "general"
+    
+    @field_validator('effects', mode='before')
+    @classmethod
+    def parse_effects(cls, v):
+        """Parse effects from dict format to Effect objects."""
+        if isinstance(v, list):
+            result = []
+            for effect_data in v:
+                if isinstance(effect_data, dict):
+                    effect_type = effect_data.get('type')
+                    if effect_type == 'set_property':
+                        result.append(SetPropertyEffect(
+                            target_entity=effect_data.get('target', 'player'),
+                            property_name=effect_data.get('property'),
+                            value=effect_data.get('value')
+                        ))
+                    elif effect_type == 'increment_property':
+                        result.append(IncrementPropertyEffect(
+                            target_entity=effect_data.get('target', 'player'),
+                            property_name=effect_data.get('property'),
+                            increment_value=effect_data.get('increment_value', 1)
+                        ))
+                    elif effect_type == 'generate_event':
+                        result.append(GenerateEventEffect(
+                            message=effect_data.get('message'),
+                            observers=effect_data.get('observers')
+                        ))
+                    else:
+                        raise ValueError(f"Unknown effect type: {effect_type}")
+                else:
+                    result.append(effect_data)
+            return result
+        return v
 
 
 @dataclass

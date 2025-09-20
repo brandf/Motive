@@ -25,6 +25,17 @@ entity_definitions:
     action_aliases:
       read: look
       examine: look
+    interactions:
+      look:
+        effects:
+        - type: increment_property
+          target: player
+          property: evidence_collected
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} examines the notice board and finds important information! Evidence collected: {{player_property:evidence_collected}}/3'
+          observers:
+          - room_characters
   broken_fountain:
     behaviors:
     - object
@@ -43,15 +54,6 @@ entity_definitions:
     properties:
       immovable: true
       size: large
-  suspicious_character:
-    behaviors:
-    - object
-    attributes:
-      name: Suspicious Character
-      description: A figure who seems to be watching everything carefully.
-    properties:
-      immovable: true
-      size: medium
   quest_board:
     behaviors:
     - object
@@ -204,16 +206,6 @@ entity_definitions:
     properties:
       immovable: true
       size: large
-  suspicious_merchants:
-    behaviors:
-    - object
-    attributes:
-      name: Suspicious Merchants
-      description: Merchants who seem to be involved in more than just legitimate
-        trade.
-    properties:
-      immovable: true
-      size: medium
   hidden_alleyways:
     behaviors:
     - object
@@ -282,15 +274,6 @@ entity_definitions:
     properties:
       immovable: true
       size: medium
-  forest_watchers:
-    behaviors:
-    - object
-    attributes:
-      name: Forest Watchers
-      description: The forest itself seems to be watching and waiting.
-    properties:
-      immovable: true
-      size: medium
   mayors_journal:
     behaviors:
     - object
@@ -314,17 +297,86 @@ entity_definitions:
     - object
     attributes:
       name: Cult Ritual Book
-      description: A dark, leather-bound tome filled with ancient symbols and blood-stained
-        pages.
+      description: A dark, leather-bound tome filled with ancient symbols and blood-stained pages.
     properties:
       readable: true
       pickupable: true
       size: medium
-      text: 'The Shadowed Hand seeks to summon the Dark Lord through blood sacrifice.
-        The ritual requires seven pure souls, taken during the new moon. The mayor
-        was the first - his blood opened the gateway. The next six must be taken in
-        sequence: the priest, the warrior, the merchant, the child, the innocent,
-        and the betrayer.'
+      pages_read: { type: number, default: 0 }
+      ritual_understood: { type: boolean, default: false }
+      cult_members_identified: { type: boolean, default: false }
+      ritual_timing_known: { type: boolean, default: false }
+      dark_magic_exposure: { type: number, default: 0 }
+      text: 'The Shadowed Hand seeks to summon the Dark Lord through blood sacrifice. The ritual requires seven pure souls, taken during the new moon. The mayor was the first - his blood opened the gateway. The next six must be taken in sequence: the priest, the warrior, the merchant, the child, the innocent, and the betrayer.'
+    computed:
+      knowledge_level:
+        type: number
+        expr: "pages_read + (ritual_understood ? 2 : 0) + (cult_members_identified ? 2 : 0) + (ritual_timing_known ? 2 : 0)"
+      corruption_risk:
+        type: number
+        expr: "dark_magic_exposure + (pages_read * 0.5)"
+    affordances:
+      - action: read_carefully
+        requires:
+          expr: "prop.pages_read < 5"
+        effects:
+          - increment_property: { selector: this, key: pages_read, increment_value: 1 }
+          - increment_property: { selector: this, key: dark_magic_exposure, increment_value: 1 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} reads more of the cult ritual book, learning about their dark plans."
+      - action: study_ritual
+        requires:
+          expr: "prop.pages_read >= 3 && prop.ritual_understood == false"
+        effects:
+          - set_property: { selector: this, key: ritual_understood, value: true }
+          - increment_property: { selector: this, key: dark_magic_exposure, increment_value: 2 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} studies the ritual details and understands the cult's true plan!"
+      - action: identify_members
+        requires:
+          expr: "prop.pages_read >= 4 && prop.cult_members_identified == false"
+        effects:
+          - set_property: { selector: this, key: cult_members_identified, value: true }
+          - increment_property: { selector: this, key: dark_magic_exposure, increment_value: 1 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} identifies the cult members mentioned in the book!"
+      - action: learn_timing
+        requires:
+          expr: "prop.pages_read >= 5 && prop.ritual_timing_known == false"
+        effects:
+          - set_property: { selector: this, key: ritual_timing_known, value: true }
+          - increment_property: { selector: this, key: dark_magic_exposure, increment_value: 1 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} learns the exact timing of the cult's ritual!"
+    triggers:
+      - when: "ritual_understood == true"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James now understands the cult's ritual and can work to prevent it!"
+          - increment_property: { selector: player, key: evidence_collected, increment_value: 1 }
+      - when: "cult_members_identified == true"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James has identified the cult members and can expose them!"
+          - increment_property: { selector: player, key: evidence_collected, increment_value: 1 }
+      - when: "ritual_timing_known == true"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James knows when the cult will strike and can prepare accordingly!"
+          - increment_property: { selector: player, key: evidence_collected, increment_value: 1 }
+      - when: "corruption_risk > 5"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James is feeling the corrupting influence of the dark magic in the book."
+          - increment_property: { selector: player, key: cult_corruption, increment_value: 1 }
   missing_persons_effects:
     behaviors:
     - object
@@ -362,6 +414,11 @@ entity_definitions:
       readable: true
       pickupable: true
       size: medium
+      examined: { type: boolean, default: false }
+      investigation_level: { type: number, default: 0 }
+      blood_analyzed: { type: boolean, default: false }
+      symbols_decoded: { type: boolean, default: false }
+      footprints_traced: { type: boolean, default: false }
       text: |
         **CRIME SCENE EVIDENCE:**
         The earth has been recently disturbed in a circular pattern. Strange symbols are carved into the ground, still wet with what appears to be blood. The symbols appear to be some form of ritual marking.
@@ -371,10 +428,64 @@ entity_definitions:
         **BLOOD ANALYSIS:** The blood appears fresh (less than 24 hours old) and there's enough to suggest serious injury or worse.
         
         **RITUAL SYMBOLS:** The carved symbols match patterns seen in other parts of town, suggesting this is part of a larger cult ritual.
+    computed:
+      investigation_complete:
+        type: boolean
+        expr: "blood_analyzed && symbols_decoded && footprints_traced"
+      evidence_value:
+        type: number
+        expr: "investigation_level * 10"
     action_aliases:
       investigate: look
       examine: look
       read: look
+      analyze: use
+      decode: use
+      trace: use
+    affordances:
+      - action: investigate
+        requires:
+          expr: "prop.examined == false"
+        effects:
+          - set_property: { selector: this, key: examined, value: true }
+          - increment_property: { selector: this, key: investigation_level, increment_value: 1 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} begins investigating the crime scene evidence."
+      - action: analyze_blood
+        requires:
+          expr: "prop.examined == true && prop.blood_analyzed == false"
+        effects:
+          - set_property: { selector: this, key: blood_analyzed, value: true }
+          - increment_property: { selector: this, key: investigation_level, increment_value: 1 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} analyzes the blood samples and discovers they belong to the mayor!"
+      - action: decode_symbols
+        requires:
+          expr: "prop.examined == true && prop.symbols_decoded == false"
+        effects:
+          - set_property: { selector: this, key: symbols_decoded, value: true }
+          - increment_property: { selector: this, key: investigation_level, increment_value: 1 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} decodes the ritual symbols and learns they point to the underground chambers!"
+      - action: trace_footprints
+        requires:
+          expr: "prop.examined == true && prop.footprints_traced == false"
+        effects:
+          - set_property: { selector: this, key: footprints_traced, value: true }
+          - increment_property: { selector: this, key: investigation_level, increment_value: 1 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} traces the footprints and discovers they lead to the Old Forest Path!"
+    triggers:
+      - when: "investigation_complete == true"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "Detective James has completed a thorough investigation of the crime scene evidence!"
+          - increment_property: { selector: player, key: evidence_collected, increment_value: 1 }
   suspicious_sounds:
     behaviors:
     - object
@@ -460,12 +571,53 @@ entity_definitions:
     - object
     attributes:
       name: Investigation Kit
-      description: A small kit containing magnifying glass, tweezers, and evidence
-        bags.
+      description: A small kit containing magnifying glass, tweezers, and evidence bags.
     properties:
       pickupable: true
       size: small
       tool_type: investigation
+      uses_remaining: { type: number, default: 10 }
+      blood_analysis_enabled: { type: boolean, default: true }
+      fingerprint_analysis_enabled: { type: boolean, default: true }
+      evidence_collection_enabled: { type: boolean, default: true }
+    computed:
+      is_functional:
+        type: boolean
+        expr: "uses_remaining > 0"
+      analysis_capabilities:
+        type: number
+        expr: "(blood_analysis_enabled ? 1 : 0) + (fingerprint_analysis_enabled ? 1 : 0) + (evidence_collection_enabled ? 1 : 0)"
+    affordances:
+      - action: analyze_blood
+        requires:
+          expr: "prop.is_functional == true && prop.blood_analysis_enabled == true"
+        effects:
+          - increment_property: { selector: this, key: uses_remaining, increment_value: -1 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} uses the investigation kit to analyze blood samples."
+      - action: collect_fingerprints
+        requires:
+          expr: "prop.is_functional == true && prop.fingerprint_analysis_enabled == true"
+        effects:
+          - increment_property: { selector: this, key: uses_remaining, increment_value: -1 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} uses the investigation kit to collect fingerprint evidence."
+      - action: collect_evidence
+        requires:
+          expr: "prop.is_functional == true && prop.evidence_collection_enabled == true"
+        effects:
+          - increment_property: { selector: this, key: uses_remaining, increment_value: -1 }
+          - emit_event:
+              scope: room_characters
+              message: "{{player_name}} uses the investigation kit to collect physical evidence."
+    triggers:
+      - when: "uses_remaining <= 0"
+        then:
+          - emit_event:
+              scope: room_characters
+              message: "The investigation kit has run out of supplies and is no longer functional."
   crowbar:
     behaviors:
     - object
@@ -587,18 +739,6 @@ entity_definitions:
       size: medium
       communication: true
       private: true
-  town_crier:
-    behaviors:
-    - object
-    attributes:
-      name: Town Crier
-      description: A person who makes public announcements throughout the town.
-    properties:
-      readable: true
-      immovable: true
-      size: medium
-      communication: true
-      public: true
   burning_candle:
     behaviors:
     - object

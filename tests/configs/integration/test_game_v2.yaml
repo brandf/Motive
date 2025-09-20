@@ -1,0 +1,24 @@
+# Test game configuration with v2 format and dummy LLM provider for end-to-end tests
+# This prevents real API calls during testing
+
+includes:
+  - "../v2/minimal_motives/minimal_actions.yaml"
+  - "../v2/minimal_motives/minimal_rooms.yaml"
+  - "../v2/minimal_motives/minimal_characters.yaml"
+
+# Game settings
+game_settings:
+  num_rounds: 1
+  manual: "../docs/MANUAL.md"
+  initial_ap_per_turn: 30
+  log_path: "test/{game_id}"
+
+# Test players with dummy provider
+players:
+  - name: "TestPlayer1"
+    provider: "dummy"
+    model: "test"
+
+  - name: "TestPlayer2"
+    provider: "dummy"
+    model: "test"

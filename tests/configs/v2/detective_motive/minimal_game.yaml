@@ -1,0 +1,14 @@
+includes:
+  - "minimal_actions.yaml"
+  - "minimal_rooms.yaml"
+  - "minimal_characters.yaml"
+
+game_settings:
+  num_rounds: 1
+  initial_ap_per_turn: 10
+  manual: "../docs/MANUAL.md"
+
+players:
+  - name: "Detective_James"
+    provider: "dummy"
+    model: "test"

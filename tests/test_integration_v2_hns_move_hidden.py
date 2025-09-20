@@ -5,6 +5,8 @@ from motive.game_master import GameMaster
 from motive.sim_v2.v2_config_preprocessor import load_and_validate_v2_config
 from tests.utils.llm_mock import llm_script
 
+# H&S integration tests now have complete action set
+
 
 @pytest.mark.asyncio
 async def test_hns_move_hidden_exit_blocked(tmp_path):

@@ -93,9 +93,19 @@ def _parse_single_action_line(action_line: str, available_actions: Dict[str, Act
                (param_string.startswith("\"") and param_string.endswith("\"")):
                 params[param_name] = param_string[1:-1]
             else:
-                # For single parameters, treat the entire remaining string as the parameter
-                # This allows multi-word arguments without quotes for the last parameter
-                params[param_name] = param_string
+                # For single parameters, check if there are multiple quoted strings
+                # If so, concatenate them into a single parameter
+                import re
+                quoted_pattern = r'"[^"]*"|\'[^\']*\''
+                quoted_matches = re.findall(quoted_pattern, param_string)
+                if len(quoted_matches) > 1:
+                    # Multiple quoted strings - concatenate them
+                    concatenated = ' '.join([match[1:-1] for match in quoted_matches])
+                    params[param_name] = concatenated
+                else:
+                    # For single parameters, treat the entire remaining string as the parameter
+                    # This allows multi-word arguments without quotes for the last parameter
+                    params[param_name] = param_string
         else:
             # Handle multiple parameters - try to parse them intelligently
             if len(parameters) == 2 and all((p.get('type') if hasattr(p, 'get') else p.type) == "string" for p in parameters):

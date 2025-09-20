@@ -1,0 +1,52 @@
+entity_definitions:
+  town_square:
+    behaviors: ["room"]
+    attributes:
+      name: "Town Square"
+      description: "Central square with evidence and witnesses"
+    properties:
+      exits:
+        tavern:
+          id: "tavern"
+          name: "Tavern"
+          destination_room_id: "tavern"
+          aliases: ["tavern", "bar"]
+      objects:
+        fresh_evidence:
+          id: "fresh_evidence"
+          name: "Fresh Evidence"
+          object_type_id: "fresh_evidence"
+          current_room_id: "town_square"
+          description: "Bloodstains and strange markings"
+        notice_board:
+          id: "notice_board"
+          name: "Notice Board"
+          object_type_id: "notice_board"
+          current_room_id: "town_square"
+          description: "Missing person posters"
+        investigation_kit:
+          id: "investigation_kit"
+          name: "Investigation Kit"
+          object_type_id: "investigation_kit"
+          current_room_id: "town_square"
+          description: "Tools for examining evidence"
+  
+  tavern:
+    behaviors: ["room"]
+    attributes:
+      name: "Tavern"
+      description: "Local tavern with witnesses"
+    properties:
+      exits:
+        square:
+          id: "square"
+          name: "Town Square"
+          destination_room_id: "town_square"
+          aliases: ["square", "town"]
+      objects:
+        barkeep:
+          id: "barkeep"
+          name: "Barkeep"
+          object_type_id: "barkeep"
+          current_room_id: "tavern"
+          description: "Local tavern keeper who knows everyone"

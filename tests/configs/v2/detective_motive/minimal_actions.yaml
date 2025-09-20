@@ -1,0 +1,106 @@
+action_definitions:
+  look:
+    name: "Look"
+    cost: 1
+    description: "Look at objects or rooms"
+    category: "observation"
+    parameters:
+      - name: "target"
+        type: "string"
+        required: false
+        description: "Object or room to look at"
+    requirements: []
+    effects:
+      - type: "code_binding"
+        function_name: "look_at_target"
+        observers: ["player"]
+  
+  investigate:
+    name: "Investigate"
+    cost: 2
+    description: "Investigate evidence with investigation kit"
+    parameters:
+      - name: "target"
+        type: "string"
+        required: true
+        description: "Evidence to investigate"
+    requirements: []
+    effects:
+      - type: "code_binding"
+        function_name: "investigate_evidence"
+        observers: ["player"]
+  
+  talk:
+    name: "Talk"
+    cost: 1
+    description: "Talk to witnesses or NPCs"
+    parameters:
+      - name: "target"
+        type: "string"
+        required: true
+        description: "Person to talk to"
+    requirements: []
+    effects:
+      - type: "code_binding"
+        function_name: "talk_to_witness"
+        observers: ["player"]
+  
+  expose:
+    name: "Expose"
+    cost: 3
+    description: "Expose cult activities"
+    parameters: []
+    requirements: []
+    effects:
+      - type: "code_binding"
+        function_name: "expose_cult"
+        observers: ["player"]
+  
+  arrest:
+    name: "Arrest"
+    cost: 2
+    description: "Arrest cult members"
+    parameters: []
+    requirements: []
+    effects:
+      - type: "code_binding"
+        function_name: "arrest_cult_members"
+        observers: ["player"]
+  
+  pickup:
+    name: "Pickup"
+    cost: 1
+    description: "Pick up objects"
+    parameters:
+      - name: "target"
+        type: "string"
+        required: true
+        description: "Object to pick up"
+    requirements: []
+    effects:
+      - type: "code_binding"
+        function_name: "pickup_object"
+        observers: ["player"]
+  
+  move:
+    name: "Move"
+    cost: 1
+    description: "Move between rooms"
+    parameters:
+      - name: "direction"
+        type: "string"
+        required: true
+        description: "Direction to move"
+    requirements: []
+    effects:
+      - type: "code_binding"
+        function_name: "move_player"
+        observers: ["player"]
+  
+  pass:
+    name: "Pass"
+    cost: 0
+    description: "End turn without action"
+    parameters: []
+    requirements: []
+    effects: []

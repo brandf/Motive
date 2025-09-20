@@ -4,6 +4,8 @@ import pytest
 from motive.cli import run_game
 from tests.utils.llm_mock import llm_script
 
+# H&S integration tests now have complete action set
+
 
 @pytest.mark.asyncio
 async def test_hns_end_to_end_three_rounds(tmp_path):

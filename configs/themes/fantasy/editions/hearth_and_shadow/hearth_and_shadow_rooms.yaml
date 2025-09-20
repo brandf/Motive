@@ -95,6 +95,12 @@ entity_definitions:
         {''id'': ''pigeon_coop'', ''name'': ''Pigeon Coop'', ''object_type_id'': ''pigeon_coop'',
         ''current_room_id'': ''tavern'', ''description'': ''A small coop where carrier
         pigeons can be used to send private messages.''}}'
+      characters: '{''witness_old_tom'': {''id'': ''witness_old_tom'', ''name'': ''Old Tom'', ''character_type_id'':
+        ''witness_old_tom'', ''current_room_id'': ''tavern'', ''description'': ''An elderly fisherman
+        sitting at a corner table, nursing a drink and looking troubled.''}, ''witness_sarah_chen'':
+        {''id'': ''witness_sarah_chen'', ''name'': ''Sarah Chen'', ''character_type_id'':
+        ''witness_sarah_chen'', ''current_room_id'': ''tavern'', ''description'': ''A local merchant
+        who seems to be waiting for someone, her eyes darting nervously around the room.''}}'
   adventurer_guild:
     behaviors:
     - room
@@ -445,5 +451,11 @@ entity_definitions:
         ''object_type_id'': ''forest_watchers'', ''current_room_id'': ''old_forest_path'',
         ''description'': ''The forest itself seems to be watching and waiting. You
         can feel unseen eyes upon you.''}}'
+      characters: '{''cult_leader_malachi'': {''id'': ''cult_leader_malachi'', ''name'': ''Malachi the Shadow'', ''character_type_id'':
+        ''cult_leader_malachi'', ''current_room_id'': ''old_forest_path'', ''description'': ''A mysterious figure
+        in dark robes standing near the ancient altar, his presence radiating dark energy.''}, ''cult_member_thorn'':
+        {''id'': ''cult_member_thorn'', ''name'': ''Thorn the Enforcer'', ''character_type_id'':
+        ''cult_member_thorn'', ''current_room_id'': ''old_forest_path'', ''description'': ''A brutal-looking
+        figure lurking in the shadows, his eyes gleaming with malice.''}}'
       dark: true
       forest: true

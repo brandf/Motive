@@ -96,6 +96,7 @@ class ObjectTypeConfig(BaseModel):
     tags: List[str] = []
     properties: Dict[str, Any] = {}
     action_aliases: Dict[str, str] = Field(default_factory=dict, description="Action aliases for this object type.")
+    interactions: Dict[str, Any] = Field(default_factory=dict, description="Interactions for this object type.")
 
 class ObjectInstanceConfig(BaseModel):
     """Configuration for a specific instance of a game object."""

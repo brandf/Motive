@@ -1,0 +1,40 @@
+entity_definitions:
+  detective_james:
+    behaviors: ["character"]
+    attributes:
+      name: "Detective James Thorne"
+      short_name: "Detective Thorne"
+      backstory: "Former city guard turned investigator"
+    properties:
+      motives:
+        - id: "investigate_mayor"
+          description: "Uncover the truth behind the mayor's disappearance and bring the cult to justice"
+          success_conditions:
+            - operator: "AND"
+              conditions:
+                - type: "character_has_property"
+                  property: "evidence_collected"
+                  value: 3
+                - type: "character_has_property"
+                  property: "witnesses_interviewed"
+                  value: 2
+                - type: "character_has_property"
+                  property: "cult_exposed"
+                  value: true
+                - type: "character_has_property"
+                  property: "justice_served"
+                  value: true
+          failure_conditions:
+            - operator: "OR"
+              conditions:
+                - type: "character_has_property"
+                  property: "mayor_dead"
+                  value: true
+                - type: "character_has_property"
+                  property: "cult_succeeded"
+                  value: true
+      initial_rooms:
+        - room_id: "town_square"
+          chance: 100
+          reason: "Starting investigation"
+      aliases: ["james", "detective", "thorne"]
