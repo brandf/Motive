@@ -461,15 +461,60 @@ entity_definitions:
       name: Abandoned Warehouse
       description: "A large, dilapidated warehouse on the outskirts of town. The wooden walls are rotting, and the roof has several holes that let in shafts of dusty light. Crates and barrels are scattered throughout, some broken open and spilling their contents. This place was once used for storing goods, but now it serves as a meeting place for those who prefer to operate in the shadows. The air is thick with dust and the smell of decay.\n"
     properties:
-      exits: '{''market'': {''id'': ''market'', ''name'': ''Market District'', ''destination_room_id'':
-        ''market_district'', ''aliases'': [''market'', ''bazaar'', ''shops'']}, ''square'': {''id'': ''square'', ''name'': ''Town Square'', ''destination_room_id'':
-        ''town_square'', ''aliases'': [''square'', ''town'', ''main'']}}'
-      objects: '{''corruption_documents'': {''id'': ''corruption_documents'', ''name'': ''Corruption Documents'', ''object_type_id'':
-        ''corruption_documents'', ''current_room_id'': ''abandoned_warehouse'', ''description'': ''Secret financial records and correspondence revealing Captain O''Malley''s corruption.''}, ''hidden_safe'': {''id'': ''hidden_safe'', ''name'': ''Hidden Safe'', ''object_type_id'':
-        ''hidden_safe'', ''current_room_id'': ''abandoned_warehouse'', ''description'': ''A small safe hidden behind a loose board in the wall. It contains important documents.''}, ''meeting_table'': {''id'': ''meeting_table'', ''name'': ''Meeting Table'', ''object_type_id'':
-        ''meeting_table'', ''current_room_id'': ''abandoned_warehouse'', ''description'': ''A large wooden table with chairs around it. Maps and documents are spread across its surface.''}, ''ritual_components'': {''id'': ''ritual_components'', ''name'': ''Ritual Components'', ''object_type_id'':
-        ''ritual_components'', ''current_room_id'': ''abandoned_warehouse'', ''description'': ''A collection of strange ingredients: dried herbs, bone fragments, and a vial of dark liquid.''}, ''puzzle_box'': {''id'': ''puzzle_box'', ''name'': ''Puzzle Box'', ''object_type_id'':
-        ''puzzle_box'', ''current_room_id'': ''abandoned_warehouse'', ''description'': ''An intricate wooden box with multiple sliding panels and hidden compartments.''}, ''cult_roster'': {''id'': ''cult_roster'', ''name'': ''Cult Roster'', ''object_type_id'': ''cult_roster'', ''current_room_id'': ''abandoned_warehouse'', ''description'': ''A hidden list of cult members and their roles within the Shadowed Hand hierarchy.''}, ''cult_hideout_map'': {''id'': ''cult_hideout_map'', ''name'': ''Cult Hideout Map'', ''object_type_id'': ''cult_hideout_map'', ''current_room_id'': ''abandoned_warehouse'', ''description'': ''A detailed map showing all known cult meeting places and safe houses throughout the town.''}}'
+      exits:
+        market:
+          id: market
+          name: Market District
+          destination_room_id: market_district
+          aliases: [market, bazaar, shops]
+        square:
+          id: square
+          name: Town Square
+          destination_room_id: town_square
+          aliases: [square, town, main]
+      objects:
+        corruption_documents:
+          id: corruption_documents
+          name: Corruption Documents
+          object_type_id: corruption_documents
+          current_room_id: abandoned_warehouse
+          description: Secret financial records and correspondence revealing Captain O'Malley's corruption.
+        hidden_safe:
+          id: hidden_safe
+          name: Hidden Safe
+          object_type_id: hidden_safe
+          current_room_id: abandoned_warehouse
+          description: A small safe hidden behind a loose board in the wall. It contains important documents.
+        meeting_table:
+          id: meeting_table
+          name: Meeting Table
+          object_type_id: meeting_table
+          current_room_id: abandoned_warehouse
+          description: A large wooden table with chairs around it. Maps and documents are spread across its surface.
+        ritual_components:
+          id: ritual_components
+          name: Ritual Components
+          object_type_id: ritual_components
+          current_room_id: abandoned_warehouse
+          description: A collection of strange ingredients - dried herbs, bone fragments, and a vial of dark liquid.
+        puzzle_box:
+          id: puzzle_box
+          name: Puzzle Box
+          object_type_id: puzzle_box
+          current_room_id: abandoned_warehouse
+          description: An intricate wooden box with multiple sliding panels and hidden compartments.
+        cult_roster:
+          id: cult_roster
+          name: Cult Roster
+          object_type_id: cult_roster
+          current_room_id: abandoned_warehouse
+          description: A hidden list of cult members and their roles within the Shadowed Hand hierarchy.
+        cult_hideout_map:
+          id: cult_hideout_map
+          name: Cult Hideout Map
+          object_type_id: cult_hideout_map
+          current_room_id: abandoned_warehouse
+          description: A detailed map showing all known cult meeting places and safe houses throughout the town.
   old_library:
     behaviors:
     - room
@@ -477,15 +522,54 @@ entity_definitions:
       name: Old Library
       description: "A dusty, forgotten library filled with ancient tomes and crumbling manuscripts. Tall bookshelves line the walls, reaching toward a high ceiling lost in shadows. The air is thick with the smell of old paper and leather bindings. Many of the books are written in languages you don't recognize, and some seem to pulse with a strange energy. This place holds the town's forgotten knowledge, including secrets about the cult's origins and methods.\n"
     properties:
-      exits: '{''church'': {''id'': ''church'', ''name'': ''Sacred Heart Church'', ''destination_room_id'':
-        ''church'', ''aliases'': [''church'', ''temple'', ''sanctuary'']}, ''square'': {''id'': ''square'', ''name'': ''Town Square'', ''destination_room_id'':
-        ''town_square'', ''aliases'': [''square'', ''town'', ''main'']}}'
-      objects: '{''ancient_tome'': {''id'': ''ancient_tome'', ''name'': ''Ancient Tome'', ''object_type_id'':
-        ''ancient_tome'', ''current_room_id'': ''old_library'', ''description'': ''A massive leather-bound book written in an ancient language. It contains knowledge about the cult''s origins.''}, ''cult_history'': {''id'': ''cult_history'', ''name'': ''Cult History'', ''object_type_id'':
-        ''cult_history'', ''current_room_id'': ''old_library'', ''description'': ''A detailed account of the Shadowed Hand''s activities over the past century.''}, ''decoder_ring'': {''id'': ''decoder_ring'', ''name'': ''Decoder Ring'', ''object_type_id'':
-        ''decoder_ring'', ''current_room_id'': ''old_library'', ''description'': ''A mysterious ring that can be used to decode encrypted messages and symbols.''}, ''cult_key'': {''id'': ''cult_key'', ''name'': ''Cult Key'', ''object_type_id'':
-        ''cult_key'', ''current_room_id'': ''old_library'', ''description'': ''A dark iron key with strange symbols carved into its surface. It pulses with dark energy.''}, ''ancient_scroll'': {''id'': ''ancient_scroll'', ''name'': ''Ancient Scroll'', ''object_type_id'':
-        ''ancient_scroll'', ''current_room_id'': ''old_library'', ''description'': ''A crumbling scroll written in an ancient language. The text seems to shift and change.''}, ''ritual_mastery_tome'': {''id'': ''ritual_mastery_tome'', ''name'': ''Ritual Mastery Tome'', ''object_type_id'': ''ritual_mastery_tome'', ''current_room_id'': ''old_library'', ''description'': ''An ancient book containing detailed knowledge of the cult''s dark rituals and their purposes.''}}'
+      exits:
+        church:
+          id: church
+          name: Sacred Heart Church
+          destination_room_id: church
+          aliases: [church, temple, sanctuary]
+        square:
+          id: square
+          name: Town Square
+          destination_room_id: town_square
+          aliases: [square, town, main]
+      objects:
+        ancient_tome:
+          id: ancient_tome
+          name: Ancient Tome
+          object_type_id: ancient_tome
+          current_room_id: old_library
+          description: A massive leather-bound book written in an ancient language. It contains knowledge about the cult's origins.
+        cult_history:
+          id: cult_history
+          name: Cult History
+          object_type_id: cult_history
+          current_room_id: old_library
+          description: A detailed account of the Shadowed Hand's activities over the past century.
+        decoder_ring:
+          id: decoder_ring
+          name: Decoder Ring
+          object_type_id: decoder_ring
+          current_room_id: old_library
+          description: A mysterious ring that can be used to decode encrypted messages and symbols.
+        cult_key:
+          id: cult_key
+          name: Cult Key
+          object_type_id: cult_key
+          current_room_id: old_library
+          description: A dark iron key with strange symbols carved into its surface. It pulses with dark energy.
+        ancient_scroll:
+          id: ancient_scroll
+          name: Ancient Scroll
+          object_type_id: ancient_scroll
+          current_room_id: old_library
+          description: A crumbling scroll written in an ancient language. The text seems to shift and change.
+        ritual_mastery_tome:
+          id: ritual_mastery_tome
+          name: Ritual Mastery Tome
+          object_type_id: ritual_mastery_tome
+          current_room_id: old_library
+          description: An ancient book containing detailed knowledge of the cult's dark rituals and their purposes.
   hidden_observatory:
     behaviors:
     - room
@@ -493,11 +577,52 @@ entity_definitions:
       name: Hidden Observatory
       description: "A secret observatory hidden in the hills above the town. The building is small and unassuming from the outside, but inside it contains powerful telescopes and astronomical instruments. Star charts cover the walls, and ancient texts about celestial alignments are scattered on tables. This place was used by the town's original founders to study the stars, but it also holds clues about the cult's timing and rituals. The view of the night sky is breathtaking, but there's something ominous about the way the stars seem to align.\n"
     properties:
-      exits: '{''forest'': {''id'': ''forest'', ''name'': ''Old Forest Path'', ''destination_room_id'':
-        ''old_forest_path'', ''aliases'': [''forest'', ''woods'', ''path'']}}'
-      objects: '{''star_charts'': {''id'': ''star_charts'', ''name'': ''Star Charts'', ''object_type_id'':
-        ''star_charts'', ''current_room_id'': ''hidden_observatory'', ''description'': ''Detailed charts showing celestial alignments and their significance to the cult''s rituals.''}, ''ritual_timing'': {''id'': ''ritual_timing'', ''name'': ''Ritual Timing'', ''object_type_id'':
-        ''ritual_timing'', ''current_room_id'': ''hidden_observatory'', ''description'': ''A calendar showing when the cult''s most powerful rituals can be performed.''}, ''telescope'': {''id'': ''telescope'', ''name'': ''Telescope'', ''object_type_id'':
-        ''telescope'', ''current_room_id'': ''hidden_observatory'', ''description'': ''A powerful telescope that can be used to observe the stars and predict celestial events.''}, ''ritual_candle'': {''id'': ''ritual_candle'', ''name'': ''Ritual Candle'', ''object_type_id'':
-        ''ritual_candle'', ''current_room_id'': ''hidden_observatory'', ''description'': ''A black candle made from strange wax. When lit, it burns with an unnatural flame.''}, ''secret_map'': {''id'': ''secret_map'', ''name'': ''Secret Map'', ''object_type_id'':
-        ''secret_map'', ''current_room_id'': ''hidden_observatory'', ''description'': ''A detailed map showing hidden passages and secret rooms throughout the town.''}, ''celestial_calculator'': {''id'': ''celestial_calculator'', ''name'': ''Celestial Calculator'', ''object_type_id'': ''celestial_calculator'', ''current_room_id'': ''hidden_observatory'', ''description'': ''A complex device that calculates the optimal timing for dark rituals based on celestial alignments.''}, ''confrontation_planner'': {''id'': ''confrontation_planner'', ''name'': ''Confrontation Planner'', ''object_type_id'': ''confrontation_planner'', ''current_room_id'': ''hidden_observatory'', ''description'': ''A complex device that synthesizes all gathered knowledge to create a plan for the final confrontation with the cult.''}}'
+      exits:
+        forest:
+          id: forest
+          name: Old Forest Path
+          destination_room_id: old_forest_path
+          aliases: [forest, woods, path]
+      objects:
+        star_charts:
+          id: star_charts
+          name: Star Charts
+          object_type_id: star_charts
+          current_room_id: hidden_observatory
+          description: Detailed charts showing celestial alignments and their significance to the cult's rituals.
+        ritual_timing:
+          id: ritual_timing
+          name: Ritual Timing
+          object_type_id: ritual_timing
+          current_room_id: hidden_observatory
+          description: A calendar showing when the cult's most powerful rituals can be performed.
+        telescope:
+          id: telescope
+          name: Telescope
+          object_type_id: telescope
+          current_room_id: hidden_observatory
+          description: A powerful telescope that can be used to observe the stars and predict celestial events.
+        ritual_candle:
+          id: ritual_candle
+          name: Ritual Candle
+          object_type_id: ritual_candle
+          current_room_id: hidden_observatory
+          description: A black candle made from strange wax. When lit, it burns with an unnatural flame.
+        secret_map:
+          id: secret_map
+          name: Secret Map
+          object_type_id: secret_map
+          current_room_id: hidden_observatory
+          description: A detailed map showing hidden passages and secret rooms throughout the town.
+        celestial_calculator:
+          id: celestial_calculator
+          name: Celestial Calculator
+          object_type_id: celestial_calculator
+          current_room_id: hidden_observatory
+          description: A complex device that calculates the optimal timing for dark rituals based on celestial alignments.
+        confrontation_planner:
+          id: confrontation_planner
+          name: Confrontation Planner
+          object_type_id: confrontation_planner
+          current_room_id: hidden_observatory
+          description: A complex device that synthesizes all gathered knowledge to create a plan for the final confrontation with the cult.
