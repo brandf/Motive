@@ -93,6 +93,11 @@ entity_definitions:
     attributes:
       name: Tester
       description: A test character.
+      motives:
+        - id: test_motive
+          description: Test motive for exit requirements
+          success_conditions: []
+          failure_conditions: []
     properties: {}
 
   gate:

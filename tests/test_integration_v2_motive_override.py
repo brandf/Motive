@@ -37,13 +37,13 @@ async def test_minimal_v2_motive_override_assigns_selected_motive(tmp_path):
      attributes:
        name: Alpha
        description: First character type.
-     properties:
        motives:
          - id: test_motive
-           description: Complete a trivial condition
+           description: Complete a trivial condition                                        
            success_conditions:
              - type: player_in_room
                target_player_param: player
+     properties: {}
  action_definitions:
    pass:
      name: pass
