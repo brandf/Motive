@@ -5,14 +5,14 @@ entity_definitions:
     attributes:
       name: Thrower
       backstory: Throws rocks.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   receiver:
     behaviors:
       - character
     attributes:
       name: Receiver
       backstory: Hears throws.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   rock_type:
     behaviors:
       - object

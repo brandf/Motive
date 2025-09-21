@@ -4,7 +4,7 @@ import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 from motive.game_master import GameMaster
-from motive.config import GameConfig, GameSettings, PlayerConfig, CharacterConfig
+from motive.config import GameConfig, GameSettings, PlayerConfig, CharacterConfig, MotiveConfig
 from motive.character import Character
 from motive.room import Room
 from motive.game_object import GameObject
@@ -189,12 +189,20 @@ class TestMockLLMIntegration:
                 id="char1",
                 name="Arion",
                 backstory="A brave hero",
-                motive="Test motive"
+                motives=[MotiveConfig(
+                    id="test_motive",
+                    description="Test motive",
+                    success_conditions=[],
+                    failure_conditions=[]
+                )]
             )
         }
         
         # Mock the rooms
         initializer.game_rooms = {
+            "room1": Room(room_id="room1", name="Test Room", description="A test room", exits={})
+        }
+        initializer.rooms = {
             "room1": Room(room_id="room1", name="Test Room", description="A test room", exits={})
         }
         
@@ -211,14 +219,14 @@ class TestMockLLMIntegration:
         
         players = [mock_player1, mock_player2]
         
-        # This should log an error message about not enough characters and return early
+        # This should log a warning about more players than characters but still assign characters (with duplication)
         initializer._instantiate_player_characters(players)
         
-        # Verify that no characters were assigned due to the error
+        # Verify that characters were assigned (with duplication if needed)
         assigned_characters = 0
         for player in players:
             if hasattr(player, 'character') and player.character is not None:
                 assigned_characters += 1
         
-        # Should assign 0 characters since the function should return early on error
-        assert assigned_characters == 0
+        # Should assign characters to all players (with duplication if needed)
+        assert assigned_characters == len(players)

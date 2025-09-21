@@ -5,6 +5,6 @@ entity_definitions:
     attributes:
       name: Test Character
       backstory: Just here to test.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
 
 

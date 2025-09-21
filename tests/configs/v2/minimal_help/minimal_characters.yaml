@@ -5,6 +5,6 @@ entity_definitions:
     attributes:
       name: Helper
       backstory: Asks for help.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
 
 

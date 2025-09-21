@@ -5,14 +5,14 @@ entity_definitions:
     attributes:
       name: Sleuth
       backstory: Investigates objects.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   bystander:
     behaviors:
       - character
     attributes:
       name: Bystander
       backstory: Watches.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   statue_type:
     behaviors:
     - object

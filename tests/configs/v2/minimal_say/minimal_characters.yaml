@@ -5,13 +5,21 @@ entity_definitions:
     attributes:
       name: Talker One
       backstory: First speaker.
-      motives: []
+      motives:
+        - id: test_motive
+          description: Test motive for Talker One
+          success_conditions: []
+          failure_conditions: []
   talker_2:
     behaviors:
       - character
     attributes:
       name: Talker Two
       backstory: Second listener.
-      motives: []
+      motives:
+        - id: test_motive
+          description: Test motive for Talker Two
+          success_conditions: []
+          failure_conditions: []
 
 

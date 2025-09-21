@@ -1376,8 +1376,10 @@ class GameInitializer:
                 # Random assignment in normal mode
                 char_assignments = random.sample(available_character_ids, len(players))
             else:
-                # Deterministic assignment (first N characters in order)
-                char_assignments = available_character_ids[:len(players)]
+                # Deterministic assignment (cycle through characters if needed)
+                char_assignments = []
+                for i in range(len(players)):
+                    char_assignments.append(available_character_ids[i % len(available_character_ids)])
 
         for i, player in enumerate(players):
             char_id_to_assign = char_assignments[i]

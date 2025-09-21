@@ -5,6 +5,6 @@ entity_definitions:
     attributes:
       name: Test Walker
       backstory: Moves between two rooms.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
 
 

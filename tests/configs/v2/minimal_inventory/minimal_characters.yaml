@@ -5,6 +5,6 @@ entity_definitions:
     attributes:
       name: Inventory Tester
       backstory: Tests pickup and drop.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
 
 

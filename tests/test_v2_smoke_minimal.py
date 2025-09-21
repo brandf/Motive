@@ -50,13 +50,21 @@ entity_definitions:
     attributes:
       name: Alpha
       backstory: test
-      motives: []
+      motives:
+        - id: test_motive
+          description: Test motive for Alpha
+          success_conditions: []
+          failure_conditions: []
   c2:
     behaviors: [character]
     attributes:
       name: Beta
       backstory: test
-      motives: []
+      motives:
+        - id: test_motive
+          description: Test motive for Beta
+          success_conditions: []
+          failure_conditions: []
 """,
         encoding="utf-8",
     )

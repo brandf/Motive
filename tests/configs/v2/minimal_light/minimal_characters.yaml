@@ -5,14 +5,14 @@ entity_definitions:
     attributes:
       name: Lighter
       backstory: Lights things.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   watcher:
     behaviors:
       - character
     attributes:
       name: Watcher
       backstory: Watches things.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   torch_type:
     behaviors:
       - object

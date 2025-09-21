@@ -13,7 +13,7 @@ def _write_minimal_logging_config(tmp_path, log_path_template: str):
     base.mkdir(parents=True, exist_ok=True)
     (base / "minimal_actions.yaml").write_text("action_definitions: { pass: { name: pass, description: End, cost: -1, category: system, parameters: [], requirements: [], effects: [] } }", encoding="utf-8")
     (base / "minimal_rooms.yaml").write_text("entity_definitions: { room_a: { behaviors: [room], attributes: { name: A, description: X }, properties: { exits: {}, objects: {} } } }", encoding="utf-8")
-    (base / "minimal_characters.yaml").write_text("entity_definitions: { c1: { behaviors: [character], attributes: { name: P1, backstory: x, motives: [] } } }", encoding="utf-8")
+    (base / "minimal_characters.yaml").write_text("entity_definitions: { c1: { behaviors: [character], attributes: { name: P1, backstory: x, motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }] } } }", encoding="utf-8")
     game_yaml = f"""
 includes:
   - minimal_actions.yaml

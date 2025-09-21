@@ -5,14 +5,14 @@ entity_definitions:
     attributes:
       name: Reader
       backstory: Likes reading.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   onlooker:
     behaviors:
       - character
     attributes:
       name: Onlooker
       backstory: Watches others.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   note_type:
     behaviors:
       - object

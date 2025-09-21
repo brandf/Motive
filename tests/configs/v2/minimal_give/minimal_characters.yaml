@@ -5,14 +5,14 @@ entity_definitions:
     attributes:
       name: Giver
       backstory: Gives items.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   listener:
     behaviors:
       - character
     attributes:
       name: Listener
       backstory: Receives items.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   coin_type:
     behaviors:
       - object

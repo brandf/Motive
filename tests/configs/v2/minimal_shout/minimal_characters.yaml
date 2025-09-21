@@ -5,13 +5,13 @@ entity_definitions:
     attributes:
       name: Shouter
       backstory: Makes noise.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
   talker_2:
     behaviors:
       - character
     attributes:
       name: Listener
       backstory: Hears things.
-      motives: []
+      motives: [{ id: test_motive, description: Test motive, success_conditions: [], failure_conditions: [] }]
 
 
