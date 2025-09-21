@@ -752,7 +752,19 @@ def handle_read_action(game_master: Any, player_char: Character, action_config: 
         ))
         return events_generated, feedback_messages
 
-    obj_to_read = current_room.get_object(object_name)
+    # First check player's inventory for the object
+    obj_to_read = None
+    if hasattr(player_char, 'inventory') and player_char.inventory:
+        # Look for object in inventory by name (case-insensitive)
+        for obj_id, obj in player_char.inventory.items():
+            if obj.name.lower() == object_name.lower():
+                obj_to_read = obj
+                break
+    
+    # If not found in inventory, check the current room
+    if not obj_to_read:
+        obj_to_read = current_room.get_object(object_name)
+    
     if not obj_to_read:
         feedback_messages.append(f"You don't see any '{object_name}' here to read.")
         events_generated.append(Event(
