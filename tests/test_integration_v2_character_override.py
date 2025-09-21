@@ -41,12 +41,22 @@ async def test_minimal_v2_character_override_assigns_to_first_player(tmp_path):
      attributes:
        name: Alpha
        description: First character type.
+       motives:
+         - id: test_motive
+           description: Test motive for character override
+           success_conditions: []
+           failure_conditions: []
      properties: {}
    beta:
      behaviors: [character]
      attributes:
        name: Beta
        description: Second character type.
+       motives:
+         - id: test_motive
+           description: Test motive for character override
+           success_conditions: []
+           failure_conditions: []
      properties: {}
  action_definitions:
    pass:

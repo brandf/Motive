@@ -42,8 +42,8 @@ async def test_hns_end_to_end_minimal_realistic(tmp_path):
             "> read \"Quest Board\"\n"
             "> move market\n"
             "> move bank\n"
-            "> pickup \"Mayor's Journal\"\n"
-            "> read \"Mayor's Journal\"\n"
+            "> pickup \"Bank Ledgers\"\n"
+            "> read \"Bank Ledgers\"\n"
             "> pass"
         ),
         "Player_2": (

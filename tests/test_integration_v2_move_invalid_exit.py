@@ -41,12 +41,22 @@ entity_definitions:
     attributes:
       name: Mover
       description: Moves around.
+      motives:
+        - id: test_motive
+          description: Test motive for invalid exit movement
+          success_conditions: []
+          failure_conditions: []
     properties: {}
   listener:
     behaviors: [character]
     attributes:
       name: Listener
       description: Observes movement.
+      motives:
+        - id: test_motive
+          description: Test motive for invalid exit movement
+          success_conditions: []
+          failure_conditions: []
     properties: {}
 action_definitions:
   move:

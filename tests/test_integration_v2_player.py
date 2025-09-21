@@ -37,6 +37,11 @@ entity_definitions:
     attributes:
       name: Tester
       description: A testing character.
+      motives:
+        - id: test_motive
+          description: Test motive for player initialization
+          success_conditions: []
+          failure_conditions: []
     properties: {}
 action_definitions:
   pass:

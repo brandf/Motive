@@ -61,12 +61,22 @@ entity_definitions:
     attributes:
       name: Thrower
       description: Throws rocks.
+      motives:
+        - id: test_motive
+          description: Test motive for hidden exit throwing
+          success_conditions: []
+          failure_conditions: []
     properties: {}
   receiver:
     behaviors: [character]
     attributes:
       name: Receiver
       description: Listens in the other room.
+      motives:
+        - id: test_motive
+          description: Test motive for hidden exit throwing
+          success_conditions: []
+          failure_conditions: []
     properties: {}
   rock_type:
     behaviors: [object]

@@ -80,7 +80,11 @@ entity_definitions:
     attributes:
       name: Walker
       backstory: test
-      motives: []
+      motives:
+        - id: test_motive
+          description: Test motive for movement structure
+          success_conditions: []
+          failure_conditions: []
 """,
         encoding="utf-8",
     )

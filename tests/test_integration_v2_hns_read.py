@@ -21,7 +21,7 @@ async def test_hns_read_room_object_event(tmp_path):
         gm = GameMaster(config, game_id="hns_read", deterministic=True, log_dir=str(tmp_path), no_file_logging=True)
         assert len(gm.players) >= 2
         p1, p2 = gm.players[:2]
-        # Move both players to 'bank' where Mayor's Journal exists
+        # Move both players to 'bank' where Bank Ledgers exists
         old1 = p1.character.current_room_id
         old2 = p2.character.current_room_id
         if old1 in gm.rooms:

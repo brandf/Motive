@@ -62,8 +62,8 @@ class TestConfigMergingIntegration:
         preprocessor = V2ConfigPreprocessor("configs")
         config = preprocessor.load_config("game.yaml")
         
-        # Should have exactly 2 players (not duplicated from inheritance)
-        assert len(config["players"]) == 2
+        # Should have exactly 3 players (not duplicated from inheritance)
+        assert len(config["players"]) == 3
         
         # Should have proper player structure
         for player in config["players"]:
@@ -253,8 +253,8 @@ players:
         assert any("detective" in name.lower() or "thorn" in name.lower() for name in entity_names)
         
         # Should have game-specific overrides
-        assert config["game_settings"]["num_rounds"] == 2
-        assert config["game_settings"]["initial_ap_per_turn"] == 30
+        assert config["game_settings"]["num_rounds"] == 10
+        assert config["game_settings"]["initial_ap_per_turn"] == 40
 
     def test_config_loading_performance(self):
         """Test that config loading is reasonably fast."""

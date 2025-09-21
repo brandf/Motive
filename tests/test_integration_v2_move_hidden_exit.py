@@ -84,6 +84,11 @@ entity_definitions:
     attributes:
       name: Mover
       description: Moves around.
+      motives:
+        - id: test_motive
+          description: Test motive for hidden exit movement
+          success_conditions: []
+          failure_conditions: []
     properties: {}
 """,
         encoding="utf-8",
@@ -165,6 +170,11 @@ entity_definitions:
     attributes:
       name: Mover
       description: Moves around.
+      motives:
+        - id: test_motive
+          description: Test motive for hidden exit movement
+          success_conditions: []
+          failure_conditions: []
     properties: {}
 action_definitions:
   move:
