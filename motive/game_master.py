@@ -1603,8 +1603,8 @@ class GameMaster:
                 self.executed_hints[hint_id].add(player_name)
                 self.game_logger.info(f"Marked hint '{hint_id}' as executed by {player_name}")
 
-    def _get_example_actions(self) -> List[str]:
-        """Generate example actions dynamically from available actions."""
+    def _get_example_actions(self, player_char: Character = None) -> List[str]:
+        """Generate example actions dynamically from available actions and inventory objects."""
         if not self.game_actions:
             return ["look", "help"]  # Fallback if no actions loaded
         
@@ -1637,6 +1637,11 @@ class GameMaster:
                 # Take the first action from each priority category
                 example_actions.append(actions_by_category[category][0])
         
+        # Add inventory-specific actions if player has objects
+        if player_char and player_char.inventory:
+            inventory_actions = self._get_inventory_specific_actions(player_char)
+            example_actions.extend(inventory_actions)
+        
         # Add help action if available
         if "help" in self.game_actions:
             example_actions.append("help")
@@ -1658,12 +1663,26 @@ class GameMaster:
                 seen.add(action)
                 unique_actions.append(action)
         
-        return unique_actions[:5]  # Limit to 5 example actions
+        return unique_actions[:8]  # Increased limit to accommodate inventory actions
+
+    def _get_inventory_specific_actions(self, player_char: Character) -> List[str]:
+        """Get example actions specific to objects in the player's inventory."""
+        inventory_actions = []
+        
+        # If player has any inventory items, suggest common inventory actions
+        if player_char.inventory:
+            # Add common inventory actions that are likely to be useful
+            common_inventory_actions = ['read', 'examine', 'investigate', 'use']
+            for action in common_inventory_actions:
+                if action in self.game_actions and action not in inventory_actions:
+                    inventory_actions.append(action)
+        
+        return inventory_actions[:3]  # Limit to 3 inventory-specific actions
 
     def _get_action_display(self, player_char: Character, is_first_turn: bool = False, round_num: int = 1) -> str:
         """Get standardized action display text."""
         # Generate example actions dynamically
-        example_actions = self._get_example_actions()
+        example_actions = self._get_example_actions(player_char)
         
         # Create action display without AP info (AP will be shown separately)
         action_display = "⚔️ Example actions:\n"

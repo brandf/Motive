@@ -4,7 +4,7 @@ entity_definitions:
     - object
     attributes:
       name: Notice Board
-      description: A weathered wooden board covered with missing person posters and town announcements.
+      description: A weathered wooden board covered with missing person posters and town announcements. Recent postings suggest a pattern of disappearances that could be connected to your investigation. You can read or examine this board.
     properties:
       readable: true
       text: |
@@ -428,7 +428,7 @@ entity_definitions:
     - object
     attributes:
       name: Fresh Evidence
-      description: A disturbed patch of earth near the fountain with strange markings and bloodstains.
+      description: A disturbed patch of earth near the fountain with strange markings and bloodstains. Something important happened here recently - the evidence is still fresh and waiting to be examined. You can investigate, examine, read, analyze, decode, or trace this evidence.
     properties:
       readable: true
       pickupable: true
@@ -954,12 +954,16 @@ entity_definitions:
     - object
     attributes:
       name: Partner's Evidence
-      description: A bloodstained notebook and a broken badge - the remains of Detective Thorne's murdered partner.
+      description: A bloodstained notebook and a broken badge - the remains of Detective Thorne's murdered partner. The notebook contains crucial information that could break this case wide open. You can read, examine, or investigate this evidence.
     properties:
       pickupable: true
       size: small
       readable: true
-      text: |
+    action_aliases:
+      read: look
+      examine: look
+      investigate: look
+    text: |
         **PARTNER'S NOTEBOOK:**
         "Following leads on the Shadowed Hand cult. They're planning something big - a ritual that will change everything. Mayor Thompson knows too much. They're coming for him next. If I don't make it back, tell James... tell him I found the truth."
         
@@ -1176,7 +1180,7 @@ entity_definitions:
     - object
     attributes:
       name: Cult History
-      description: A detailed account of the Shadowed Hand's activities over the past century.
+      description: A detailed account of the Shadowed Hand's activities over the past century. This historical record could provide crucial evidence of the cult's long-term plans.
     properties:
       pickupable: true
       size: medium
@@ -1249,7 +1253,7 @@ entity_definitions:
     - object
     attributes:
       name: Ritual Timing
-      description: A calendar showing when the cult's most powerful rituals can be performed.
+      description: A calendar showing when the cult's most powerful rituals can be performed. This timing information could be critical evidence for understanding when the cult will strike.
     properties:
       pickupable: true
       size: small
@@ -1510,11 +1514,15 @@ entity_definitions:
     - object
     attributes:
       name: Cult Roster
-      description: A hidden list of cult members and their roles within the Shadowed Hand hierarchy.
+      description: A hidden list of cult members and their roles within the Shadowed Hand hierarchy. This document could expose the entire cult's organizational structure. You can read, examine, or investigate this roster.
     properties:
       pickupable: true
       size: small
       readable: true
+    action_aliases:
+      read: look
+      examine: look
+      investigate: look
     interactions:
       look:
         effects:
@@ -1532,7 +1540,7 @@ entity_definitions:
     - object
     attributes:
       name: Cult Hideout Map
-      description: A detailed map showing all known cult meeting places and safe houses throughout the town.
+      description: A detailed map showing all known cult meeting places and safe houses throughout the town. This intelligence could be the key to tracking down the cult's operations.
     properties:
       pickupable: true
       size: medium
@@ -1555,7 +1563,7 @@ entity_definitions:
     - object
     attributes:
       name: Ritual Mastery Tome
-      description: An ancient book containing detailed knowledge of the cult's dark rituals and their purposes.
+      description: An ancient book containing detailed knowledge of the cult's dark rituals and their purposes. Understanding these rituals could be crucial for stopping the cult's plans.
     properties:
       pickupable: true
       size: large
@@ -1578,7 +1586,7 @@ entity_definitions:
     - object
     attributes:
       name: Celestial Calculator
-      description: A complex device that calculates the optimal timing for dark rituals based on celestial alignments.
+      description: A complex device that calculates the optimal timing for dark rituals based on celestial alignments. Using this device could reveal when the cult plans to strike. You can use this device to understand the cult's timing.
     properties:
       pickupable: true
       size: medium
@@ -1601,7 +1609,7 @@ entity_definitions:
     - object
     attributes:
       name: Evidence Compiler
-      description: A device that can organize and compile evidence into a coherent case against the cult.
+      description: A device that can organize and compile evidence into a coherent case against the cult. Using this device could help you build an airtight case against the Shadowed Hand. You can use this device to compile your evidence chain.
     properties:
       pickupable: true
       size: medium
@@ -1623,7 +1631,7 @@ entity_definitions:
     - object
     attributes:
       name: Justice Weapon
-      description: A blessed weapon specifically designed to combat dark forces and bring cult members to justice.
+      description: A blessed weapon specifically designed to combat dark forces and bring cult members to justice. This weapon could be essential for the final confrontation with the cult. You can pickup this weapon to acquire justice tools.
     properties:
       pickupable: true
       size: medium
@@ -1646,7 +1654,7 @@ entity_definitions:
     - object
     attributes:
       name: Confrontation Planner
-      description: A complex device that synthesizes all gathered knowledge to create a plan for the final confrontation with the cult.
+      description: A complex device that synthesizes all gathered knowledge to create a plan for the final confrontation with the cult. This device could help you coordinate the final strike against the Shadowed Hand. You can use this device to prepare for the final confrontation.
     properties:
       pickupable: true
       size: large

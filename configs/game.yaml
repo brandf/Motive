@@ -11,6 +11,13 @@ game_settings:
 
 # hints: [] # No hints configured - clean state for production
 
+# Debug settings for motive development
+debug:
+  log_property_changes: true
+  log_object_interactions: true
+  log_motive_progress: true
+  log_action_parsing: true
+
 # List of AI players
 players:
   - name: "Player_1"
