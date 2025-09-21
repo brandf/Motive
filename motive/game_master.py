@@ -1445,7 +1445,7 @@ class GameMaster:
         self.game_logger.info(f"GM ⬅️ {player.name} (Turn End Response):\n{player_input}")
         player.logger.info(f"{player.name} ➡️ GM (Turn End Response):\n{player_input}")
         
-        # Parse the response for turn end actions (only accept actions with > prefix)
+        # Parse the response for turn end actions (STRICT: only accept actions with > prefix)
         if "> quit" in response.content:
             self.game_logger.info(f"🚪 Player {player.name} chose to quit the game.")
             player.logger.info(f"🚪 Player {player.name} chose to quit the game.")
@@ -1474,9 +1474,9 @@ class GameMaster:
             
             return True  # Player continues
         else:
-            # Default to continue if unclear response
-            self.game_logger.info(f"Player {player.name} gave unclear response, defaulting to continue.")
-            player.logger.info(f"Player {player.name} gave unclear response, defaulting to continue.")
+            # Default to continue if unclear response (but log it as unclear)
+            self.game_logger.info(f"Player {player.name} gave unclear response (no > prefix), defaulting to continue.")
+            player.logger.info(f"Player {player.name} gave unclear response (no > prefix), defaulting to continue.")
             return True  # Player continues
         
         self.game_logger.info(f"✅ === TURN END CONFIRMATION COMPLETE for {player.name} ===")

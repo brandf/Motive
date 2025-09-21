@@ -697,7 +697,8 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
         elif players > len(current_players):
             # Create additional players by duplicating existing ones
             original_players = current_players.copy()
-            additional_needed = players - len(current_players)
+            original_player_count = len(current_players)  # Store original count
+            additional_needed = players - original_player_count
             
             for i in range(additional_needed):
                 # Pick a random player to duplicate (or cycle through if deterministic)
@@ -707,9 +708,9 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
                     import random
                     source_player = random.choice(original_players)
                 
-                # Create a new player with modified name
+                # Create a new player with sequential numbering (Player_3, Player_4, etc.)
                 new_player = source_player.copy()
-                new_player.name = f"{source_player.name}_{i + 1}"
+                new_player.name = f"Player_{original_player_count + i + 1}"
                 game_config.players.append(new_player)
     
     # Initialize and run the game

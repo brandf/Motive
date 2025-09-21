@@ -11,7 +11,7 @@ import yaml
 from typing import Dict, Any, List, Set, Optional
 from pathlib import Path
 import logging
-from .list_merge_strategies import ListMerger, ListMergeStrategy, detect_list_merge_strategy
+from .config_merging import ConfigMerger
 
 
 class ConfigLoadError(Exception):

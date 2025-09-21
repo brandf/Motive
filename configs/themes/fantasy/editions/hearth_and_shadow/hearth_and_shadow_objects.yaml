@@ -45,6 +45,8 @@ entity_definitions:
     properties:
       immovable: true
       size: large
+    action_aliases:
+      examine: look
   bar:
     behaviors:
     - object
@@ -66,6 +68,7 @@ entity_definitions:
         recent disappearances.
     action_aliases:
       read: look
+      examine: look
   guild_master_desk:
     behaviors:
     - object
@@ -91,6 +94,8 @@ entity_definitions:
     properties:
       immovable: true
       size: large
+    action_aliases:
+      examine: look
   stolen_goods:
     behaviors:
     - object
@@ -110,6 +115,9 @@ entity_definitions:
       readable: true
       text: These documents contain information about the town's troubles and recent
         activities.
+    action_aliases:
+      read: look
+      examine: look
   raven_chair:
     behaviors:
     - object
@@ -228,6 +236,10 @@ entity_definitions:
       text: The symbols seem to pulse with dark energy. They appear to be some form
         of ancient writing, but the meaning is unclear. However, they all seem to
         point toward the same direction - deeper into the underground.
+    action_aliases:
+      read: look
+      examine: look
+      investigate: look
   evidence_activity:
     behaviors:
     - object
@@ -288,6 +300,7 @@ entity_definitions:
     action_aliases:
       read: look
       investigate: look
+      examine: look
     text: The cult's influence grows stronger each day. I fear they have infiltrated
       the town guard. Father Marcus seems troubled - I must speak with him. The
       disappearances are not random - they're targeting specific people. I've hidden

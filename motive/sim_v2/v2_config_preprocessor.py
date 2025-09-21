@@ -14,7 +14,7 @@ import yaml
 from typing import Dict, Any, List, Set, Optional
 from pathlib import Path
 import logging
-from motive.list_merge_strategies import ListMerger, ListMergeStrategy, detect_list_merge_strategy
+from ..config_merging import ConfigMerger
 
 
 class V2ConfigLoadError(Exception):
@@ -30,7 +30,7 @@ class V2ConfigPreprocessor:
         self.loaded_configs: Dict[str, Dict[str, Any]] = {}
         self.loading_stack: List[str] = []  # Track loading order for circular dependency detection
         self.logger = logging.getLogger(__name__)
-        self.list_merger = ListMerger()
+        self.config_merger = ConfigMerger()
     
     def load_config(self, config_path: str, base_path: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -131,7 +131,8 @@ class V2ConfigPreprocessor:
                 # Merge current config on top of included configs (current config overrides)
                 merged_config = self._merge_configs(merged_config, config_data)
             else:
-                merged_config = config_data
+                # Even with no includes, we need to process merge strategy markers
+                merged_config = self._merge_configs({}, config_data)
             
             # Enforce: entity-level 'config' dicts are not allowed in v2 YAML
             if 'entity_definitions' in merged_config and isinstance(merged_config['entity_definitions'], dict):
@@ -156,7 +157,7 @@ class V2ConfigPreprocessor:
     
     def _merge_configs(self, base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Merge two v2 configuration dictionaries with support for both simple and patch-based merging.
+        Merge two v2 configuration dictionaries using the unified merging system.
         
         Args:
             base: Base configuration (will be overridden)
@@ -165,89 +166,8 @@ class V2ConfigPreprocessor:
         Returns:
             Merged configuration dictionary
         """
-        result = base.copy()
-        
-        for key, value in override.items():
-            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-                # Recursively merge dictionaries
-                result[key] = self._merge_configs(result[key], value)
-            elif key in result and isinstance(result[key], list) and isinstance(value, list):
-                # Simple append strategy - most intuitive for users
-                result[key] = result[key] + value
-            elif key in result and isinstance(result[key], dict) and isinstance(value, list):
-                # Handle case where base is dict but override is list (advanced merging)
-                result[key] = self._apply_patch_list(list(result[key].values()), value)
-            elif self._is_patch_reference(value):
-                # Handle patch-based references
-                result[key] = self._apply_patch_reference(result.get(key, {}), value)
-            elif self._is_patch_list(value):
-                # Handle patch-based list operations
-                result[key] = self._apply_patch_list(result.get(key, []), value)
-            else:
-                # Simple override with new value
-                result[key] = value
-        
-        return result
+        return self.config_merger.merge_configs(base, override)
     
-    def _merge_lists_simple(self, base_list: List[Any], override_list: List[Any], key: str) -> List[Any]:
-        """
-        Simple list merging - just append by default.
-        
-        Args:
-            base_list: Base list
-            override_list: Override list
-            key: The configuration key (for future extensibility)
-            
-        Returns:
-            Merged list
-        """
-        # Simple append strategy - most intuitive for users
-        return base_list.copy() + override_list.copy()
-    
-    def _is_patch_reference(self, value: Any) -> bool:
-        """Check if a value is a patch reference."""
-        return (isinstance(value, dict) and 
-                '__patch_reference__' in value and 
-                'source' in value)
-    
-    def _is_patch_list(self, value: Any) -> bool:
-        """Check if a value is a patch list operation."""
-        return (isinstance(value, list) and 
-                len(value) > 0 and 
-                isinstance(value[0], dict) and 
-                '__patch_list__' in value[0])
-    
-    def _apply_patch_reference(self, base_value: Dict[str, Any], patch_value: Dict[str, Any]) -> Dict[str, Any]:
-        """Apply a patch reference to a base value."""
-        source_path = patch_value['source']
-        # For now, just return the base value (patch references not fully implemented)
-        return base_value
-    
-    def _apply_patch_list(self, base_list: List[Any], patch_list: List[Any]) -> List[Any]:
-        """Apply patch list operations to a base list."""
-        result = base_list.copy()
-        
-        for patch_item in patch_list:
-            if '__patch_list__' in patch_item:
-                operation = patch_item['__patch_list__']
-                
-                if operation == 'append':
-                    # Append new items
-                    new_items = patch_item.get('items', [])
-                    result.extend(new_items)
-                elif operation == 'prepend':
-                    # Prepend new items
-                    new_items = patch_item.get('items', [])
-                    result = new_items + result
-                elif operation == 'remove':
-                    # Remove items by value
-                    items_to_remove = patch_item.get('items', [])
-                    result = [item for item in result if item not in items_to_remove]
-                elif operation == 'replace':
-                    # Replace entire list
-                    result = patch_item.get('items', [])
-        
-        return result
 
 
 def load_v2_config(config_path: str = "game_v2.yaml", base_path: str = "configs") -> Dict[str, Any]:

@@ -277,22 +277,22 @@ class TestDetectiveJamesHnsInteractions:
             "Fresh Evidence", 
             "A disturbed patch of earth",
             {
-                "look": {
-                    "effects": [
-                        {
-                            "type": "increment_property",
-                            "target": "player",
-                            "property": "evidence_collected",
-                            "increment_value": 1
-                        },
-                        {
-                            "type": "generate_event",
-                            "message": "{{player_name}} investigates evidence and finds a crucial clue! Evidence collected: {{player_property:evidence_collected}}/3",
-                            "observers": ["room_characters"]
-                        }
-                    ]
-                }
+            "look": {
+                "effects": [
+                    {
+                        "type": "increment_property",
+                        "target": "player",
+                        "property": "evidence_collected",
+                        "increment_value": 1
+                    },
+                    {
+                        "type": "generate_event",
+                        "message": "{{player_name}} investigates evidence and finds a crucial clue! Evidence collected: {{player_property:evidence_collected}}/3",
+                        "observers": ["room_characters"]
+                    }
+                ]
             }
+        }
         )
         
         # Test that the object has the expected structure

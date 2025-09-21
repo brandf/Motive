@@ -84,16 +84,16 @@ class TestPlayersIntegration:
                     import random
                     source_player = random.choice(original_players)
                 
-                # Create a new player with modified name
+                # Create a new player with sequential numbering (Player3, Player4, etc.)
                 new_player = source_player.model_copy()
-                new_player.name = f"{source_player.name}_{i + 1}"
+                new_player.name = f"Player{len(original_players) + i + 1}"
                 config.players.append(new_player)
         
         assert len(config.players) == 4
         assert config.players[0].name == "Player1"
         assert config.players[1].name == "Player2"
-        assert config.players[2].name == "Player1_1"
-        assert config.players[3].name == "Player2_2"
+        assert config.players[2].name == "Player3"
+        assert config.players[3].name == "Player4"
     
     def test_players_more_than_characters_error(self):
         """Test error handling when more players than characters."""
@@ -119,9 +119,9 @@ class TestPlayersIntegration:
                     import random
                     source_player = random.choice(original_players)
                 
-                # Create a new player with modified name
+                # Create a new player with sequential numbering (Player3, Player4, etc.)
                 new_player = source_player.model_copy()
-                new_player.name = f"{source_player.name}_{i + 1}"
+                new_player.name = f"Player{len(original_players) + i + 1}"
                 config.players.append(new_player)
         
         # Now we have 3 players but only 2 characters available
@@ -133,7 +133,7 @@ class TestPlayersIntegration:
         # For now, just verify we have the right number of players
         assert config.players[0].name == "Player1"
         assert config.players[1].name == "Player2"
-        assert config.players[2].name == "Player1_1"
+        assert config.players[2].name == "Player3"
     
     def test_players_zero_integration(self):
         """Test zero players edge case."""

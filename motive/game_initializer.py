@@ -1159,8 +1159,8 @@ class GameInitializer:
         
         # Check if we have enough characters for all players
         if len(players) > len(available_character_ids):
-            self.game_logger.error(f"Not enough characters for all players. Need {len(players)} characters but only have {len(available_character_ids)} available.")
-            return
+            self.game_logger.warning(f"More players ({len(players)}) than characters ({len(available_character_ids)}). Will duplicate characters as needed.")
+            # Allow character duplication - we'll handle this in the assignment logic below
         
         # Find a suitable starting room (e.g., the first room defined in the merged config)
         default_start_room_id = next(iter(self.game_rooms.keys()), None)
@@ -1186,15 +1186,23 @@ class GameInitializer:
             remaining_characters.remove(self.character_override)
             self.game_logger.info(f"Assigned override character '{self.character_override}' to first player")
         
-        # Assign remaining characters to remaining players
+        # Assign remaining characters to remaining players (with duplication if needed)
         remaining_players = len(players) - len(char_assignments)
         if remaining_players > 0:
             if not self.deterministic:
-                # Random assignment for remaining characters
-                remaining_assignments = random.sample(remaining_characters, remaining_players)
+                # Random assignment for remaining characters (with duplication if needed)
+                if remaining_players <= len(remaining_characters):
+                    remaining_assignments = random.sample(remaining_characters, remaining_players)
+                else:
+                    # Need to duplicate characters
+                    remaining_assignments = []
+                    for i in range(remaining_players):
+                        remaining_assignments.append(random.choice(remaining_characters))
             else:
-                # Deterministic assignment (first N characters in order)
-                remaining_assignments = remaining_characters[:remaining_players]
+                # Deterministic assignment (cycle through characters if needed)
+                remaining_assignments = []
+                for i in range(remaining_players):
+                    remaining_assignments.append(remaining_characters[i % len(remaining_characters)])
             char_assignments.extend(remaining_assignments)
 
         for i, player in enumerate(players):

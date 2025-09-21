@@ -75,16 +75,16 @@ class TestPlayersCLI:
                     import random
                     source_player = random.choice(original_players)
                 
-                # Create a new player with modified name
+                # Create a new player with sequential numbering (Player3, Player4, etc.)
                 new_player = source_player.model_copy()
-                new_player.name = f"{source_player.name}_{i + 1}"
+                new_player.name = f"Player{len(original_players) + i + 1}"
                 config.players.append(new_player)
         
         assert len(config.players) == 4
         assert config.players[0].name == "Player1"
         assert config.players[1].name == "Player2"
-        assert config.players[2].name == "Player1_1"  # First duplicate (i=0)
-        assert config.players[3].name == "Player2_2"  # Second duplicate (i=1)
+        assert config.players[2].name == "Player3"  # First duplicate (i=0)
+        assert config.players[3].name == "Player4"  # Second duplicate (i=1)
     
     def test_players_more_than_config_random(self):
         """Test creating more players than config in random mode."""
@@ -115,17 +115,17 @@ class TestPlayersCLI:
                     else:
                         source_player = mock_choice()
                     
-                    # Create a new player with modified name
+                    # Create a new player with sequential numbering (Player3, Player4, etc.)
                     new_player = source_player.model_copy()
-                    new_player.name = f"{source_player.name}_{i + 1}"
+                    new_player.name = f"Player{len(original_players) + i + 1}"
                     config.players.append(new_player)
         
         assert len(config.players) == 5
         assert config.players[0].name == "Player1"
         assert config.players[1].name == "Player2"
-        assert config.players[2].name == "Player1_1"  # First duplicate (i=0)
-        assert config.players[3].name == "Player2_2"  # Second duplicate (i=1)
-        assert config.players[4].name == "Player1_3"  # Third duplicate (i=2)
+        assert config.players[2].name == "Player3"  # First duplicate (i=0)
+        assert config.players[3].name == "Player4"  # Second duplicate (i=1)
+        assert config.players[4].name == "Player5"  # Third duplicate (i=2)
     
     def test_players_zero(self):
         """Test edge case of zero players."""

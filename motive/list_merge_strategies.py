@@ -91,16 +91,22 @@ class ListMerger:
         return result
     
     def _remove_items_strategy(self, base_list: List[Any], override_list: List[Any], **kwargs) -> List[Any]:
-        """Remove items in override_list from base_list."""
-        items_to_remove = set(override_list)
-        return [item for item in base_list if item not in items_to_remove]
+        """Remove items specified in kwargs['items'] from base_list."""
+        items_to_remove = kwargs.get('items', override_list)
+        # For complex objects, we need to compare by value, not by reference
+        result = []
+        for item in base_list:
+            if item not in items_to_remove:
+                result.append(item)
+        return result
     
     def _insert_at_strategy(self, base_list: List[Any], override_list: List[Any], 
-                          position: int = 0, **kwargs) -> List[Any]:
+                          position: int = 0, index: int = None, **kwargs) -> List[Any]:
         """Insert items from override_list at a specific position."""
         result = base_list.copy()
+        insert_pos = index if index is not None else position
         for i, item in enumerate(override_list):
-            result.insert(position + i, item)
+            result.insert(insert_pos + i, item)
         return result
     
     def _smart_merge_strategy(self, base_list: List[Any], override_list: List[Any], **kwargs) -> List[Any]:
@@ -113,10 +119,11 @@ class ListMerger:
         if not base_list:
             return override_list.copy()
         
-        # If both lists contain dictionaries, use key-based merge
+        # If key is specified, use key-based merge
+        key_field = kwargs.get('key', 'id')
         if (isinstance(base_list[0], dict) and isinstance(override_list[0], dict) and
-            'id' in base_list[0] and 'id' in override_list[0]):
-            return self._key_based_merge_strategy(base_list, override_list, key_field='id')
+            key_field in base_list[0] and key_field in override_list[0]):
+            return self._key_based_merge_strategy(base_list, override_list, key_field=key_field)
         
         # If override list contains special markers, handle them
         if any(isinstance(item, str) and item.startswith('__') for item in override_list):
@@ -128,33 +135,38 @@ class ListMerger:
     def _key_based_merge_strategy(self, base_list: List[Any], override_list: List[Any], 
                                  key_field: str = 'id', **kwargs) -> List[Any]:
         """Merge lists based on a key field, updating existing items and adding new ones."""
+        # Use the key from kwargs if provided, otherwise use key_field parameter
+        actual_key_field = kwargs.get('key', key_field)
+        
         # If no items have the key field, fall back to append strategy
-        if not any(isinstance(item, dict) and key_field in item for item in base_list + override_list):
+        if not any(isinstance(item, dict) and actual_key_field in item for item in base_list + override_list):
             return self._append_strategy(base_list, override_list)
         
-        # Convert base list to dict for easy lookup
-        base_dict = {item[key_field]: item for item in base_list if isinstance(item, dict) and key_field in item}
+        # Start with base list
+        result = base_list.copy()
         
-        # Process override list
-        for item in override_list:
-            if isinstance(item, dict) and key_field in item:
-                base_dict[item[key_field]] = item
-        
-        # Convert back to list, preserving original order where possible
-        result = []
-        # Add items from base list in original order
-        for item in base_list:
-            if isinstance(item, dict) and key_field in item:
-                result.append(base_dict[item[key_field]])
+        # Process each override item
+        for override_item in override_list:
+            if not isinstance(override_item, dict) or actual_key_field not in override_item:
+                # Non-dict item or missing key field - append as-is
+                result.append(override_item)
+                continue
+            
+            # Find existing item with same key
+            found_index = None
+            for i, existing_item in enumerate(result):
+                if (isinstance(existing_item, dict) and 
+                    actual_key_field in existing_item and 
+                    existing_item[actual_key_field] == override_item[actual_key_field]):
+                    found_index = i
+                    break
+            
+            if found_index is not None:
+                # Update existing item
+                result[found_index] = override_item
             else:
-                result.append(item)
-        
-        # Add new items from override list
-        for item in override_list:
-            if isinstance(item, dict) and key_field in item:
-                if item[key_field] not in [existing.get(key_field) for existing in base_list 
-                                         if isinstance(existing, dict) and key_field in existing]:
-                    result.append(item)
+                # Add new item
+                result.append(override_item)
         
         return result
     

@@ -14,10 +14,4 @@ game_settings:
   manual: "../../../docs/MANUAL.md"
   log_path: "fantasy/hearth_and_shadow/{game_id}"
 
-players:
-  - name: "Player_1"
-    provider: "google"
-    model: "gemini-2.5-flash"
-  - name: "Player_2"
-    provider: "google"
-    model: "gemini-2.5-flash"
+# players: # Inherited from parent config (game.yaml)
