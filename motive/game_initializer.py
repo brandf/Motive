@@ -1153,8 +1153,35 @@ class GameInitializer:
         elif self.game_character_types:
             available_character_ids = list(self.game_character_types.keys())
         
+        # Filter out characters without motives - only characters with motives should be playable
+        playable_character_ids = []
+        for char_id in available_character_ids:
+            char_cfg = None
+            if hasattr(self, 'game_characters') and self.game_characters:
+                char_cfg = self.game_characters[char_id]
+            else:
+                char_cfg = self.game_character_types[char_id]
+            
+            # Check if character has motives
+            has_motives = False
+            if hasattr(char_cfg, 'motives') and char_cfg.motives and len(char_cfg.motives) > 0:
+                has_motives = True
+            elif isinstance(char_cfg, dict) and char_cfg.get('motives') and len(char_cfg.get('motives', [])) > 0:
+                has_motives = True
+            elif hasattr(char_cfg, 'motive') and char_cfg.motive:
+                has_motives = True
+            elif isinstance(char_cfg, dict) and char_cfg.get('motive'):
+                has_motives = True
+            
+            if has_motives:
+                playable_character_ids.append(char_id)
+            else:
+                self.game_logger.warning(f"Character '{char_id}' has no motives - excluding from playable characters")
+        
+        available_character_ids = playable_character_ids
+        
         if not available_character_ids:
-            self.game_logger.error("No characters defined in merged configuration. Cannot assign characters to players.")
+            self.game_logger.error("No playable characters (with motives) defined in merged configuration. Cannot assign characters to players.")
             return
         
         # Check if we have enough characters for all players

@@ -52,10 +52,7 @@ entity_definitions:
         brighter when hope is strong and dims when despair takes hold.'': None}, ''message_board'':
         {''id'': ''message_board'', ''name'': ''Message Board'', ''object_type_id'':
         ''message_board'', ''current_room_id'': ''town_square'', ''description'':
-        ''A wooden board where characters can leave messages for each other.''}, ''town_crier'':
-        {''id'': ''town_crier'', ''name'': ''Town Crier'', ''object_type_id'': ''town_crier'',
-        ''current_room_id'': ''town_square'', ''description'': ''A person who makes
-        public announcements throughout the town.''}}'
+        ''A wooden board where characters can leave messages for each other.''}}'
   tavern:
     behaviors:
     - room
@@ -84,11 +81,7 @@ entity_definitions:
         ''notice_board'': {''id'': ''tavern_notice_board'', ''name'': ''Job Board'',
         ''object_type_id'': ''notice_board'', ''current_room_id'': ''tavern'', ''description'':
         ''A board covered with job postings'', ''rumors'': None, ''and local news.
-        Some entries seem to have been recently added.'': None}, ''suspicious_character'':
-        {''id'': ''suspicious_character'', ''name'': ''Hooded Figure'', ''object_type_id'':
-        ''suspicious_character'', ''current_room_id'': ''tavern'', ''description'':
-        ''A figure in a dark hood sits alone in the corner'', ''watching everything
-        carefully. They seem to be waiting for something.'': None}, ''secret_drop_point'':
+        Some entries seem to have been recently added.'': None}, ''secret_drop_point'':
         {''id'': ''secret_drop_point'', ''name'': ''Secret Drop Point'', ''object_type_id'':
         ''secret_drop_point'', ''current_room_id'': ''tavern'', ''description'': ''A
         hidden location where anonymous messages can be left and retrieved.''}, ''pigeon_coop'':
@@ -317,11 +310,7 @@ entity_definitions:
       objects: '{''merchant_stalls'': {''id'': ''merchant_stalls'', ''name'': ''Merchant
         Stalls'', ''object_type_id'': ''merchant_stalls'', ''current_room_id'': ''market_district'',
         ''description'': ''Various stalls where merchants sell their wares. Many are
-        empty'', ''and the remaining merchants seem nervous.'': None}, ''suspicious_merchants'':
-        {''id'': ''suspicious_merchants'', ''name'': ''Suspicious Merchants'', ''object_type_id'':
-        ''suspicious_merchants'', ''current_room_id'': ''market_district'', ''description'':
-        ''Merchants who seem to be involved in more than just legitimate trade. They
-        often gather in hushed conversations.''}, ''hidden_alleyways'': {''id'': ''hidden_alleyways'',
+        empty'', ''and the remaining merchants seem nervous.'': None}, ''hidden_alleyways'': {''id'': ''hidden_alleyways'',
         ''name'': ''Hidden Alleyways'', ''object_type_id'': ''hidden_alleyways'',
         ''current_room_id'': ''market_district'', ''description'': ''Narrow passages
         between buildings that lead to secret meeting places and hidden entrances.''}}'
@@ -446,11 +435,7 @@ entity_definitions:
         The writing is faded and hard to read.''}, ''ancient_altar'': {''id'': ''ancient_altar'',
         ''name'': ''Ancient Altar'', ''object_type_id'': ''ancient_altar'', ''current_room_id'':
         ''old_forest_path'', ''description'': "A sacred altar that has been in this
-        place for centuries. It seems to be connected to the forest''s ancient magic."},
-        ''forest_watchers'': {''id'': ''forest_watchers'', ''name'': ''Forest Watchers'',
-        ''object_type_id'': ''forest_watchers'', ''current_room_id'': ''old_forest_path'',
-        ''description'': ''The forest itself seems to be watching and waiting. You
-        can feel unseen eyes upon you.''}}'
+        place for centuries. It seems to be connected to the forest''s ancient magic."}}'
       characters: '{''cult_leader_malachi'': {''id'': ''cult_leader_malachi'', ''name'': ''Malachi the Shadow'', ''character_type_id'':
         ''cult_leader_malachi'', ''current_room_id'': ''old_forest_path'', ''description'': ''A mysterious figure
         in dark robes standing near the ancient altar, his presence radiating dark energy.''}, ''cult_member_thorn'':

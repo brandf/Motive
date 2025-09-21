@@ -136,6 +136,9 @@ entity_definitions:
     properties:
       immovable: true
       size: medium
+    action_aliases:
+      examine: look
+      investigate: look
   crypt_entrance:
     behaviors:
     - object
@@ -145,6 +148,9 @@ entity_definitions:
     properties:
       immovable: true
       size: medium
+    action_aliases:
+      examine: look
+      investigate: look
   mausoleum:
     behaviors:
     - object
@@ -916,3 +922,30 @@ entity_definitions:
       size: medium
       resource: security
       reach: regional
+  altar:
+    behaviors:
+    - object
+    attributes:
+      name: Altar
+      description: A beautiful stone altar adorned with fresh flowers and candles.
+    properties:
+      immovable: true
+      size: large
+      sacred: true
+    action_aliases:
+      examine: look
+      investigate: look
+  wooden_sign:
+    behaviors:
+    - object
+    attributes:
+      name: Wooden Sign
+      description: A weathered wooden sign with faded writing.
+    properties:
+      immovable: true
+      size: medium
+      readable: true
+      text: The writing is too faded to read clearly, but appears to point toward deeper parts of the forest.
+    action_aliases:
+      read: look
+      examine: look

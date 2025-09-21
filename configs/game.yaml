@@ -4,9 +4,9 @@ includes:
 
 # Game settings
 game_settings:
-  num_rounds: 2
+  num_rounds: 5
   manual: "../docs/MANUAL.md"
-  initial_ap_per_turn: 30 # High AP for strategic gameplay
+  initial_ap_per_turn: 40 # High AP for strategic gameplay
   log_path: "fantasy/hearth_and_shadow/{game_id}" # Simple log path without theme/edition leakage
 
 # hints: [] # No hints configured - clean state for production
@@ -18,5 +18,9 @@ players:
     model: "gemini-2.5-flash"
 
   - name: "Player_2"
+    provider: "google"
+    model: "gemini-2.5-flash"
+
+  - name: "Player_3"
     provider: "google"
     model: "gemini-2.5-flash"

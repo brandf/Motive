@@ -111,6 +111,40 @@ class V2GameConfig(BaseModel):
                     result[action_id] = action_data
             return result
         return v
+    
+    @field_validator('entity_definitions', mode='after')
+    @classmethod
+    def validate_character_motives(cls, v):
+        """Validate that all characters have motives defined."""
+        characters_without_motives = []
+        
+        for entity_id, entity_def in v.items():
+            # Check if this is a character entity
+            if hasattr(entity_def, 'types') and 'character' in entity_def.types:
+                # Check if character has motives
+                has_motives = False
+                if hasattr(entity_def, 'attributes'):
+                    attributes = entity_def.attributes
+                    if isinstance(attributes, dict):
+                        # Check for motives (new format) or motive (legacy format)
+                        motives = attributes.get('motives', [])
+                        motive = attributes.get('motive')
+                        if motives and len(motives) > 0:
+                            has_motives = True
+                        elif motive:
+                            has_motives = True
+                
+                if not has_motives:
+                    characters_without_motives.append(entity_id)
+        
+        if characters_without_motives:
+            raise V2ConfigValidationError(
+                f"Characters without motives found: {characters_without_motives}. "
+                f"All characters must have motives defined. Characters without motives should be removed "
+                f"or moved to a separate NPCs configuration file."
+            )
+        
+        return v
 
 
 def validate_v2_config(config_data: Dict[str, Any]) -> V2GameConfig:
