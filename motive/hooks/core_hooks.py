@@ -725,7 +725,7 @@ def handle_read_action(game_master: Any, player_char: Character, action_config: 
     """Handles a player reading text from an object."""
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
-    object_name = params.get("object_name")
+    object_name = params.get("object")  # Changed from "object_name" to "object" to match H&S config
 
     if not object_name:
         feedback_messages.append("Read action requires an object name.")

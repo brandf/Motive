@@ -1628,42 +1628,94 @@ class GameMaster:
                 action_name = action_cfg.get('name', action_id)
             actions_by_category[category].append(action_name)
         
-        # Build example actions list prioritizing core categories
-        example_actions = []
+        # Build candidate actions list
+        candidate_actions = []
         
         # Add actions from priority categories first
         for category in priority_categories:
             if category in actions_by_category:
-                # Take the first action from each priority category
-                example_actions.append(actions_by_category[category][0])
+                candidate_actions.extend(actions_by_category[category])
         
         # Add inventory-specific actions if player has objects
         if player_char and player_char.inventory:
             inventory_actions = self._get_inventory_specific_actions(player_char)
-            example_actions.extend(inventory_actions)
+            candidate_actions.extend(inventory_actions)
         
-        # Add help action if available
-        if "help" in self.game_actions:
-            example_actions.append("help")
+        # Add remaining actions from other categories
+        for category, actions in actions_by_category.items():
+            if category not in priority_categories:
+                candidate_actions.extend(actions)
         
-        # Ensure we have at least a few actions
-        if len(example_actions) < 3:
-            # Add more actions from any category
-            for category, actions in actions_by_category.items():
-                if category not in priority_categories:
-                    example_actions.extend(actions[:2])  # Add up to 2 from each category
-                    if len(example_actions) >= 5:  # Limit to reasonable number
-                        break
-        
-        # Remove duplicates while preserving order
+        # Remove duplicates while preserving order, and filter out help (we'll add it separately)
         seen = set()
-        unique_actions = []
-        for action in example_actions:
-            if action not in seen:
+        unique_candidates = []
+        for action in candidate_actions:
+            if action not in seen and action != "help":  # Filter out help to avoid duplication
                 seen.add(action)
-                unique_actions.append(action)
+                unique_candidates.append(action)
         
-        return unique_actions[:8]  # Increased limit to accommodate inventory actions
+        # Rank and select top actions (excluding help)
+        ranked_actions = self._rank_actions_for_examples(unique_candidates, player_char)
+        
+        # Take top 4 actions (excluding help)
+        selected_actions = ranked_actions[:4]
+        
+        # Always add help as the last action
+        if "help" in self.game_actions and "help" not in selected_actions:
+            selected_actions.append("help")
+        
+        return selected_actions
+
+    def _rank_actions_for_examples(self, candidate_actions: List[str], player_char: Character = None) -> List[str]:
+        """Rank actions for example display, with cycling to avoid repetition."""
+        if not candidate_actions:
+            return []
+        
+        # Initialize recent actions tracking if not exists
+        if not hasattr(self, '_recent_example_actions'):
+            self._recent_example_actions = []
+        
+        # Define base scores for different action types
+        action_scores = {}
+        
+        for action in candidate_actions:
+            score = 0
+            
+            # Base score by category
+            if action in ["look", "move"]:
+                score += 100  # High priority for basic actions
+            elif action in ["say", "pickup"]:
+                score += 80   # Medium-high priority
+            elif action in ["read", "examine", "investigate"]:
+                score += 70   # Medium priority for investigation
+            elif action in ["use", "drop", "throw"]:
+                score += 60   # Medium priority for interaction
+            else:
+                score += 50   # Default score
+            
+            # Boost inventory-specific actions if player has items
+            if player_char and player_char.inventory and action in ["read", "examine", "investigate", "use"]:
+                score += 30
+            
+            # Penalty for recently shown actions (cycling)
+            if action in self._recent_example_actions:
+                penalty = len(self._recent_example_actions) - self._recent_example_actions.index(action)
+                score -= penalty * 10
+            
+            # Never show help in the main ranking (it's added separately)
+            if action == "help":
+                score = -1000
+            
+            action_scores[action] = score
+        
+        # Sort by score (highest first)
+        ranked_actions = sorted(action_scores.keys(), key=lambda x: action_scores[x], reverse=True)
+        
+        # Update recent actions list (keep last 8 actions)
+        self._recent_example_actions = ranked_actions[:4] + self._recent_example_actions
+        self._recent_example_actions = self._recent_example_actions[:8]
+        
+        return ranked_actions
 
     def _get_inventory_specific_actions(self, player_char: Character) -> List[str]:
         """Get example actions specific to objects in the player's inventory."""
@@ -1688,7 +1740,6 @@ class GameMaster:
         action_display = "⚔️ Example actions:\n"
         for action in example_actions:
             action_display += f"  > {action}\n"
-        action_display += "  > help (for more available actions)"
         
         # Add applicable hints
         player_name = None
