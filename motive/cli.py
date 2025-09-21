@@ -119,6 +119,12 @@ class ParallelGameRunner:
             cmd.extend(["--hint-character", self.game_args['hint_character']])
         if self.game_args.get('character'):
             cmd.extend(["--character", self.game_args['character']])
+        if self.game_args.get('characters'):
+            cmd.extend(["--characters"] + self.game_args['characters'])
+        if self.game_args.get('motives'):
+            cmd.extend(["--motives"] + self.game_args['motives'])
+        if self.game_args.get('character_motives'):
+            cmd.extend(["--character-motives"] + self.game_args['character_motives'])
         if self.game_args.get('deterministic'):
             cmd.append("--deterministic")
         if self.game_args.get('manual'):
@@ -525,7 +531,7 @@ def _is_hierarchical_v2_config(config_data: Dict[str, Any], base_path: str) -> b
     return False
 
 
-def load_config(config_path: str, validate: bool = True) -> 'V2GameConfig':
+def load_config(config_path: str, validate: bool = True):
     """Load game configuration from file with optional validation.
     Returns a V2GameConfig object - v1 is DEAD.
     """
@@ -582,8 +588,9 @@ def load_config(config_path: str, validate: bool = True) -> 'V2GameConfig':
 async def run_game(config_path: str, game_id: str = None, validate: bool = True,
                    rounds: int = None, ap: int = None, manual: str = None, hint: str = None,
                    hint_character: str = None, deterministic: bool = False, players: int = None,
-                   character: str = None, motive: str = None, worker: bool = False, log_dir: str = "logs", 
-                   no_file_logging: bool = False):
+                   character: str = None, motive: str = None, characters: List[str] = None, 
+                   motives: List[str] = None, character_motives: List[str] = None,
+                   worker: bool = False, log_dir: str = "logs", no_file_logging: bool = False):
     """Run a Motive game with the specified configuration."""
     # Load environment variables
     load_dotenv()
@@ -713,11 +720,14 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
                 new_player.name = f"Player_{original_player_count + i + 1}"
                 game_config.players.append(new_player)
     
+    # Character/motive assignment is handled by GameInitializer, not in config
+    # The overrides are passed to GameMaster which passes them to GameInitializer
+    
     # Initialize and run the game
     print(f"Initializing game with ID: {game_id}")
     
     # Create GameMaster with v2 config
-    game_master = GameMaster(game_config, game_id=game_id, deterministic=deterministic, log_dir=log_dir, no_file_logging=no_file_logging, character=character, motive=motive)
+    game_master = GameMaster(game_config, game_id=game_id, deterministic=deterministic, log_dir=log_dir, no_file_logging=no_file_logging, character=character, motive=motive, characters=characters, motives=motives, character_motives=character_motives)
     
     # Run the game
     try:
@@ -754,6 +764,9 @@ def main():
     parser.add_argument("--hint-character", help="Add a character-specific hint (format: character_id:hint_text)")
     parser.add_argument("--character", help="Character to play as")
     parser.add_argument("--motive", help="Motive to pursue")
+    parser.add_argument("--characters", nargs="+", help="List of characters to assign to players (e.g., --characters detective_thorne father_marcus captain_marcus_omalley)")
+    parser.add_argument("--motives", nargs="+", help="List of motives to assign to players (e.g., --motives avenge_partner seek_redemption seek_redemption)")
+    parser.add_argument("--character-motives", nargs="+", dest="character_motives", help="Character-motive pairs (e.g., --character-motives detective_thorne:avenge_partner father_marcus:seek_redemption)")
     
     # Game behavior
     parser.add_argument("--deterministic", action="store_true", 
@@ -791,6 +804,9 @@ def main():
             hint=args.hint,
             hint_character=args.hint_character,
             character=args.character,
+            characters=args.characters,
+            motives=args.motives,
+            character_motives=args.character_motives,
             deterministic=args.deterministic,
             no_validate=args.no_validate,
             log_dir=args.log_dir,
@@ -814,6 +830,9 @@ def main():
         players=args.players,
         character=args.character,
         motive=args.motive,
+        characters=args.characters,
+        motives=args.motives,
+        character_motives=args.character_motives,
         worker=args.worker,
         log_dir=args.log_dir,
         no_file_logging=args.no_file_logging

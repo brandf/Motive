@@ -25,7 +25,7 @@ from motive.character import Character
 from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError
 
 class GameInitializer:
-    def __init__(self, game_config, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20, deterministic: bool = False, character_override: str = None, motive_override: str = None):
+    def __init__(self, game_config, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20, deterministic: bool = False, character_override: str = None, motive_override: str = None, characters_override: List[str] = None, motives_override: List[str] = None, character_motives_override: List[str] = None):
         self.game_config = game_config # This is the overall GameConfig loaded from config.yaml
         self.game_id = game_id
         self.game_logger = game_logger
@@ -33,6 +33,9 @@ class GameInitializer:
         self.deterministic = deterministic # Store deterministic flag
         self.character_override = character_override # Store character override for first player
         self.motive_override = motive_override # Store motive override for character assignment
+        self.characters_override = characters_override # Store characters override for multiple players
+        self.motives_override = motives_override # Store motives override for multiple players
+        self.character_motives_override = character_motives_override # Store character-motives override
         # GameInitializer now works with v2 configs directly - no conversion needed
 
         self.rooms: Dict[str, Room] = {}
@@ -738,26 +741,91 @@ class GameInitializer:
             init_data['warnings'].append("No rooms defined in merged configuration. Cannot assign starting room for players.")
             return
 
-        # Randomly assign characters to players (no duplicates)
+        # Handle character assignment with override support
         import random
-        if not self.deterministic:
-            # Random assignment in normal mode
-            char_assignments = random.sample(available_character_ids, len(players))
+        
+        # Assign characters to players based on override parameters
+        char_assignments = []
+        
+        # Handle character-motives override (highest priority)
+        if self.character_motives_override:
+            self.game_logger.info(f"Using character-motives override: {self.character_motives_override}")
+            for pair in self.character_motives_override:
+                if ':' in pair:
+                    char_id, motive_id = pair.split(':', 1)
+                    char_id = char_id.strip()
+                    if char_id in available_character_ids:
+                        char_assignments.append(char_id)
+                        self.game_logger.info(f"Assigned character '{char_id}' with motive '{motive_id.strip()}'")
+                    else:
+                        self.game_logger.warning(f"Character '{char_id}' not found in available characters. Available: {available_character_ids}")
+                else:
+                    self.game_logger.warning(f"Invalid character-motive pair format '{pair}'. Expected 'character:motive'")
+        
+        # Handle separate characters and motives lists
+        elif self.characters_override and self.motives_override:
+            self.game_logger.info(f"Using characters override: {self.characters_override}")
+            self.game_logger.info(f"Using motives override: {self.motives_override}")
+            for char_id in self.characters_override:
+                if char_id in available_character_ids:
+                    char_assignments.append(char_id)
+                else:
+                    self.game_logger.warning(f"Character '{char_id}' not found in available characters. Available: {available_character_ids}")
+        
+        # Handle characters only override
+        elif self.characters_override:
+            self.game_logger.info(f"Using characters override: {self.characters_override}")
+            for char_id in self.characters_override:
+                if char_id in available_character_ids:
+                    char_assignments.append(char_id)
+                else:
+                    self.game_logger.warning(f"Character '{char_id}' not found in available characters. Available: {available_character_ids}")
+        
+        # Handle motives only override (assign random characters with specified motives)
+        elif self.motives_override:
+            self.game_logger.info(f"Using motives override: {self.motives_override}")
+            # For now, just assign random characters - motive assignment happens later
+            if not self.deterministic:
+                char_assignments = random.sample(available_character_ids, len(players))
+            else:
+                char_assignments = available_character_ids[:len(players)]
+        
+        # Handle single character override (legacy)
+        elif self.character_override:
+            if self.character_override in available_character_ids:
+                char_assignments.append(self.character_override)
+                # Fill remaining slots with random characters
+                remaining_characters = [c for c in available_character_ids if c != self.character_override]
+                if not self.deterministic:
+                    additional_chars = random.sample(remaining_characters, min(len(players) - 1, len(remaining_characters)))
+                else:
+                    additional_chars = remaining_characters[:len(players) - 1]
+                char_assignments.extend(additional_chars)
+                self.game_logger.info(f"Assigned override character '{self.character_override}' to first player")
+            else:
+                self.game_logger.warning(f"Character override '{self.character_override}' not found in available characters. Available: {available_character_ids}")
+                # Fall back to random assignment
+                if not self.deterministic:
+                    char_assignments = random.sample(available_character_ids, len(players))
+                else:
+                    char_assignments = available_character_ids[:len(players)]
+        
+        # Default random assignment if no overrides
         else:
-            # Deterministic assignment (first N characters in order)
-            char_assignments = available_character_ids[:len(players)]
+            if not self.deterministic:
+                # Random assignment in normal mode
+                char_assignments = random.sample(available_character_ids, len(players))
+            else:
+                # Deterministic assignment (first N characters in order)
+                char_assignments = available_character_ids[:len(players)]
 
         for i, player in enumerate(players):
-            # Apply character override for first player if specified
-            if i == 0 and self.character_override:
-                if self.character_override in available_character_ids:
-                    char_id_to_assign = self.character_override
-                    self.game_logger.info(f"Assigned override character '{self.character_override}' to Player_1")
-                else:
-                    self.game_logger.warning(f"Character override '{self.character_override}' not found in available characters. Available: {available_character_ids}")
-                    char_id_to_assign = char_assignments[i]
-            else:
+            # Use the character from char_assignments list
+            if i < len(char_assignments):
                 char_id_to_assign = char_assignments[i]
+            else:
+                # Fallback if we don't have enough characters assigned
+                char_id_to_assign = available_character_ids[i % len(available_character_ids)]
             # Use characters if available, otherwise fall back to character_types
             if hasattr(self, 'game_characters') and self.game_characters:
                 char_cfg = self.game_characters[char_id_to_assign]
@@ -834,24 +902,47 @@ class GameInitializer:
                         # Already a MotiveConfig object
                         converted_motives.append(motive_item)
                 
-                # Handle motive override
-                if self.motive_override:
+                # Handle motive override - check multiple override sources
+                motive_to_assign = None
+                
+                # Check character-motives override first
+                if self.character_motives_override and i < len(self.character_motives_override):
+                    pair = self.character_motives_override[i]
+                    if ':' in pair:
+                        _, motive_id = pair.split(':', 1)
+                        motive_to_assign = motive_id.strip()
+                
+                # Check motives list override
+                elif self.motives_override and i < len(self.motives_override):
+                    motive_to_assign = self.motives_override[i]
+                
+                # Check single motive override (legacy)
+                elif self.motive_override:
+                    motive_to_assign = self.motive_override
+                
+                # Apply the selected motive
+                if motive_to_assign:
                     # Find the specified motive
                     selected_motive = None
                     for motive in converted_motives:
-                        if motive.id == self.motive_override:
+                        if motive.id == motive_to_assign:
                             selected_motive = motive
                             break
                     
                     if selected_motive:
-                        self.game_logger.info(f"Assigned override motive '{self.motive_override}' to character '{char_name}'")
+                        self.game_logger.info(f"Assigned override motive '{motive_to_assign}' to character '{char_name}'")
                     else:
-                        self.game_logger.warning(f"Motive override '{self.motive_override}' not found in available motives for character '{char_name}'. Available: {[m.id for m in converted_motives]}")
-                        self.motive_override = None
-            elif self.motive_override:
-                # Character has no motives but motive override was requested
-                self.game_logger.warning(f"Motive override '{self.motive_override}' requested but character '{char_name}' has no motives defined")
-                self.motive_override = None
+                        self.game_logger.warning(f"Motive override '{motive_to_assign}' not found in available motives for character '{char_name}'. Available: {[m.id for m in converted_motives]}")
+                        # Don't clear the override here as it might be used for other players
+                else:
+                    # No motive override, select first available motive
+                    if converted_motives:
+                        selected_motive = converted_motives[0]
+                        self.game_logger.info(f"Assigned default motive '{selected_motive.id}' to character '{char_name}'")
+            else:
+                # Character has no motives
+                self.game_logger.warning(f"Character '{char_name}' has no motives defined")
+                selected_motive = None
 
             # Select initial room based on character configuration
             selected_room_id = self._select_initial_room(char_cfg, start_room_id)
@@ -1198,39 +1289,95 @@ class GameInitializer:
         # Handle character assignment with override support
         import random
         
-        # Check if character override is valid
-        if self.character_override and self.character_override not in available_character_ids:
-            self.game_logger.warning(f"Character override '{self.character_override}' not found in available characters. Available: {available_character_ids}")
-            self.character_override = None
-        
-        # Assign characters to players
+        # Assign characters to players based on override parameters
         char_assignments = []
-        remaining_characters = available_character_ids.copy()
         
-        # First player gets the override character if specified
-        if self.character_override and len(players) > 0:
-            char_assignments.append(self.character_override)
-            remaining_characters.remove(self.character_override)
-            self.game_logger.info(f"Assigned override character '{self.character_override}' to first player")
-        
-        # Assign remaining characters to remaining players (with duplication if needed)
-        remaining_players = len(players) - len(char_assignments)
-        if remaining_players > 0:
-            if not self.deterministic:
-                # Random assignment for remaining characters (with duplication if needed)
-                if remaining_players <= len(remaining_characters):
-                    remaining_assignments = random.sample(remaining_characters, remaining_players)
+        # Handle character-motives override (highest priority)
+        if self.character_motives_override:
+            self.game_logger.info(f"Using character-motives override: {self.character_motives_override}")
+            for pair in self.character_motives_override:
+                if ':' in pair:
+                    char_id, motive_id = pair.split(':', 1)
+                    char_id = char_id.strip()
+                    if char_id in available_character_ids:
+                        char_assignments.append(char_id)
+                        self.game_logger.info(f"Assigned character '{char_id}' with motive '{motive_id.strip()}'")
+                    else:
+                        self.game_logger.warning(f"Character '{char_id}' not found in available characters. Available: {available_character_ids}")
                 else:
-                    # Need to duplicate characters
-                    remaining_assignments = []
-                    for i in range(remaining_players):
-                        remaining_assignments.append(random.choice(remaining_characters))
+                    self.game_logger.warning(f"Invalid character-motive pair format '{pair}'. Expected 'character:motive'")
+        
+        # Handle separate characters and motives lists
+        elif self.characters_override and self.motives_override:
+            self.game_logger.info(f"Using characters override: {self.characters_override}")
+            self.game_logger.info(f"Using motives override: {self.motives_override}")
+            for char_id in self.characters_override:
+                if char_id in available_character_ids:
+                    char_assignments.append(char_id)
+                    self.game_logger.info(f"Assigned character '{char_id}'")
+                else:
+                    self.game_logger.warning(f"Character '{char_id}' not found in available characters. Available: {available_character_ids}")
+        
+        # Handle characters only override
+        elif self.characters_override:
+            self.game_logger.info(f"Using characters override: {self.characters_override}")
+            for char_id in self.characters_override:
+                if char_id in available_character_ids:
+                    char_assignments.append(char_id)
+                    self.game_logger.info(f"Assigned character '{char_id}'")
+                else:
+                    self.game_logger.warning(f"Character '{char_id}' not found in available characters. Available: {available_character_ids}")
+        
+        # Handle motives only override (assign random characters with specified motives)
+        elif self.motives_override:
+            self.game_logger.info(f"Using motives override: {self.motives_override}")
+            # For motives-only override, we'll assign random characters but the motive assignment will be handled later
+            remaining_characters = available_character_ids.copy()
+            for i in range(len(players)):
+                if remaining_characters:
+                    char_assignments.append(remaining_characters.pop(0))
+                else:
+                    # Duplicate characters if needed
+                    char_assignments.append(available_character_ids[i % len(available_character_ids)])
+        
+        # Handle single character override (legacy)
+        elif self.character_override:
+            if self.character_override in available_character_ids:
+                char_assignments.append(self.character_override)
+                remaining_characters = available_character_ids.copy()
+                remaining_characters.remove(self.character_override)
+                self.game_logger.info(f"Assigned override character '{self.character_override}' to first player")
+                
+                # Assign remaining characters to remaining players (with duplication if needed)
+                remaining_players = len(players) - len(char_assignments)
+                if remaining_players > 0:
+                    if not self.deterministic:
+                        # Random assignment for remaining characters (with duplication if needed)
+                        if remaining_players <= len(remaining_characters):
+                            remaining_assignments = random.sample(remaining_characters, remaining_players)
+                        else:
+                            # Need to duplicate characters
+                            remaining_assignments = []
+                            for i in range(remaining_players):
+                                remaining_assignments.append(random.choice(remaining_characters))
+                    else:
+                        # Deterministic assignment (cycle through characters if needed)
+                        remaining_assignments = []
+                        for i in range(remaining_players):
+                            remaining_assignments.append(remaining_characters[i % len(remaining_characters)])
+                    char_assignments.extend(remaining_assignments)
             else:
-                # Deterministic assignment (cycle through characters if needed)
-                remaining_assignments = []
-                for i in range(remaining_players):
-                    remaining_assignments.append(remaining_characters[i % len(remaining_characters)])
-            char_assignments.extend(remaining_assignments)
+                self.game_logger.warning(f"Character override '{self.character_override}' not found in available characters. Available: {available_character_ids}")
+                # Fall through to default assignment
+        
+        # Default assignment (no overrides)
+        if not char_assignments:
+            if not self.deterministic:
+                # Random assignment in normal mode
+                char_assignments = random.sample(available_character_ids, len(players))
+            else:
+                # Deterministic assignment (first N characters in order)
+                char_assignments = available_character_ids[:len(players)]
 
         for i, player in enumerate(players):
             char_id_to_assign = char_assignments[i]
@@ -1295,24 +1442,47 @@ class GameInitializer:
                         # Already a MotiveConfig object
                         converted_motives.append(motive_item)
                 
-                # Handle motive override
-                if self.motive_override:
+                # Handle motive override - check multiple override sources
+                motive_to_assign = None
+                
+                # Check character-motives override first
+                if self.character_motives_override and i < len(self.character_motives_override):
+                    pair = self.character_motives_override[i]
+                    if ':' in pair:
+                        _, motive_id = pair.split(':', 1)
+                        motive_to_assign = motive_id.strip()
+                
+                # Check motives list override
+                elif self.motives_override and i < len(self.motives_override):
+                    motive_to_assign = self.motives_override[i]
+                
+                # Check single motive override (legacy)
+                elif self.motive_override:
+                    motive_to_assign = self.motive_override
+                
+                # Apply the selected motive
+                if motive_to_assign:
                     # Find the specified motive
                     selected_motive = None
                     for motive in converted_motives:
-                        if motive.id == self.motive_override:
+                        if motive.id == motive_to_assign:
                             selected_motive = motive
                             break
                     
                     if selected_motive:
-                        self.game_logger.info(f"Assigned override motive '{self.motive_override}' to character '{char_name}'")
+                        self.game_logger.info(f"Assigned override motive '{motive_to_assign}' to character '{char_name}'")
                     else:
-                        self.game_logger.warning(f"Motive override '{self.motive_override}' not found in available motives for character '{char_name}'. Available: {[m.id for m in converted_motives]}")
-                        self.motive_override = None
-            elif self.motive_override:
-                # Character has no motives but motive override was requested
-                self.game_logger.warning(f"Motive override '{self.motive_override}' requested but character '{char_name}' has no motives defined")
-                self.motive_override = None
+                        self.game_logger.warning(f"Motive override '{motive_to_assign}' not found in available motives for character '{char_name}'. Available: {[m.id for m in converted_motives]}")
+                        # Don't clear the override here as it might be used for other players
+                else:
+                    # No motive override, select first available motive
+                    if converted_motives:
+                        selected_motive = converted_motives[0]
+                        self.game_logger.info(f"Assigned default motive '{selected_motive.id}' to character '{char_name}'")
+            else:
+                # Character has no motives
+                self.game_logger.warning(f"Character '{char_name}' has no motives defined")
+                selected_motive = None
 
             # Select initial room based on character configuration
             selected_room_id = self._select_initial_room(char_cfg, default_start_room_id)

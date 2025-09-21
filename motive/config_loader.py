@@ -12,6 +12,7 @@ from typing import Dict, Any, List, Set, Optional
 from pathlib import Path
 import logging
 from .config_merging import ConfigMerger
+from .list_merge_strategies import ListMerger
 
 
 class ConfigLoadError(Exception):

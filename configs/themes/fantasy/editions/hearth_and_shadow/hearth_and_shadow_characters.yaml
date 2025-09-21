@@ -3,17 +3,23 @@ entity_definitions:
     behaviors:
     - character
     properties:
-      evidence_collected: { type: number, default: 0 }
-      witnesses_interviewed: { type: number, default: 0 }
-      cult_exposed: { type: boolean, default: false }
-      justice_served: { type: boolean, default: false }
-      medicine_found: { type: boolean, default: false }
-      daughter_safe: { type: boolean, default: false }
-      partner_avenged: { type: boolean, default: false }
-      cult_destroyed: { type: boolean, default: false }
-      investigation_fatigue: { type: number, default: 0 }
-      cult_corruption: { type: number, default: 0 }
-      partner_memory: { type: boolean, default: false }
+      # Phase 1: Initial Evidence Gathering
+      evidence_found: { type: number, default: 0 }
+      # Branch A: Cult Structure Investigation
+      cult_hierarchy_discovered: { type: boolean, default: false }
+      cult_locations_mapped: { type: boolean, default: false }
+      # Branch B: Ritual Knowledge Investigation
+      ritual_knowledge_mastered: { type: boolean, default: false }
+      cult_timing_understood: { type: boolean, default: false }
+      # Branch C: Justice Preparation
+      justice_tools_acquired: { type: boolean, default: false }
+      evidence_chain_complete: { type: boolean, default: false }
+      # Final Synthesis
+      final_confrontation_ready: { type: boolean, default: false }
+      # Failure conditions
+      evidence_destroyed: { type: boolean, default: false }
+      cult_escaped: { type: boolean, default: false }
+      dark_power_channeled: { type: boolean, default: false }
     computed:
       investigation_progress:
         type: number
@@ -70,68 +76,49 @@ entity_definitions:
       \ and he has a sick daughter who \nneeds expensive medicine - creating a dangerous\
       \ vulnerability that the cult could exploit.\n"
     motives:
-    - id: investigate_mayor
-      description: Uncover the truth behind the mayor's disappearance and bring the
-        cult to justice. Protect the remaining townsfolk from further harm.
-      success_conditions:
-      - operator: AND
-      - type: character_has_property
-        property: evidence_collected
-        value: 3
-      - type: character_has_property
-        property: witnesses_interviewed
-        value: 2
-      - type: character_has_property
-        property: cult_exposed
-        value: true
-      - type: character_has_property
-        property: justice_served
-        value: true
-      failure_conditions:
-      - operator: OR
-      - type: character_has_property
-        property: mayor_dead
-        value: true
-      - type: character_has_property
-        property: cult_succeeded
-        value: true
-    - id: protect_daughter
-      description: Protect your sick daughter by finding the medicine she needs and
-        keeping her safe from the cult.
-      success_conditions:
-      - operator: AND
-      - type: character_has_property
-        property: medicine_found
-        value: true
-      - type: character_has_property
-        property: daughter_safe
-        value: true
-      failure_conditions:
-      - operator: OR
-      - type: character_has_property
-        property: daughter_taken
-        value: true
-      - type: character_has_property
-        property: daughter_dead
-        value: true
     - id: avenge_partner
-      description: Avenge your murdered partner by destroying the cult and bringing
-        their killers to justice.
+      description: Avenge your murdered partner through a complex investigation that requires uncovering the cult's structure, understanding their rituals, and gathering the tools needed to bring them to justice. This is a multi-faceted investigation with branching paths that must be synthesized into a final confrontation.
       success_conditions:
       - operator: AND
+      # Phase 1: Initial Evidence Gathering (Foundation)
       - type: character_has_property
-        property: partner_avenged
+        property: evidence_found
+        value: 3
+      # Branch A: Cult Structure Investigation
+      - type: character_has_property
+        property: cult_hierarchy_discovered
         value: true
       - type: character_has_property
-        property: cult_destroyed
+        property: cult_locations_mapped
+        value: true
+      # Branch B: Ritual Knowledge Investigation  
+      - type: character_has_property
+        property: ritual_knowledge_mastered
+        value: true
+      - type: character_has_property
+        property: cult_timing_understood
+        value: true
+      # Branch C: Justice Preparation
+      - type: character_has_property
+        property: justice_tools_acquired
+        value: true
+      - type: character_has_property
+        property: evidence_chain_complete
+        value: true
+      # Final Synthesis: Combine all branches
+      - type: character_has_property
+        property: final_confrontation_ready
         value: true
       failure_conditions:
       - operator: OR
+      - type: character_has_property
+        property: evidence_destroyed
+        value: true
       - type: character_has_property
         property: cult_escaped
         value: true
       - type: character_has_property
-        property: partner_forgotten
+        property: dark_power_channeled
         value: true
     initial_rooms:
     - room_id: town_square
@@ -162,7 +149,23 @@ entity_definitions:
   father_marcus:
     behaviors:
     - character
-    properties: {}
+    properties:
+      # Phase 1: Spiritual Foundation
+      spiritual_doubts_confronted: { type: boolean, default: false }
+      divine_mysteries_uncovered: { type: number, default: 0 }
+      # Branch A: Courage and Protection Path
+      courage_found: { type: boolean, default: false }
+      congregation_protected: { type: boolean, default: false }
+      # Branch B: Divine Knowledge Path
+      ritual_knowledge_gained: { type: boolean, default: false }
+      divine_protection_gained: { type: boolean, default: false }
+      # Branch C: Sacred Power Path
+      binding_power_acquired: { type: boolean, default: false }
+      sacred_artifacts_blessed: { type: boolean, default: false }
+      # Final Synthesis
+      divine_connection_restored: { type: boolean, default: false }
+      # Failure conditions
+      faith_lost: { type: boolean, default: false }
     name: Father Marcus
     backstory: "The priest of Sacred Heart Church, Father Marcus has served the community\
       \ for over \ntwenty years. Recently, he has become increasingly troubled and\
@@ -173,37 +176,48 @@ entity_definitions:
       \ his congregation if he refused. \nNow he knows their plans but revealing them\
       \ would endanger everyone he loves. \nHis internal struggle between duty and\
       \ fear, truth and protection, drives his \nevery action. He prays for divine\
-      \ guidance but fears he has already damned himself.\n"
+      \ guidance but fears he has already damned himself. \nHe was once a young idealistic\
+      \ priest who dreamed of bringing light to \nthe darkest corners of the world,\
+      \ but the cult's corruption has left him \nquestioning everything he once believed.\
+      \ His congregation looks to him for \nspiritual guidance, but he feels like\
+      \ a fraud, knowing the dark secret he \ncarries. The weight of his failure to\
+      \ protect his flock from the cult's \ninfluence haunts his every waking moment.\n"
     motives:
-    - id: protect_flock
-      description: Protect your congregation from the growing darkness and keep them
-        safe from the cult's influence.
+    - id: restore_divine_connection
+      description: Rebuild your shattered faith through a spiritual journey that requires confronting your doubts, uncovering divine mysteries, and proving your worthiness through acts of courage and protection. This is a multi-faceted spiritual quest with branching paths that must be synthesized into divine restoration.
       success_conditions:
       - operator: AND
+      # Phase 1: Spiritual Foundation (Confronting Doubts)
       - type: character_has_property
-        property: congregation_safe
+        property: spiritual_doubts_confronted
         value: true
       - type: character_has_property
-        property: church_protected
-        value: true
-      failure_conditions:
-      - operator: OR
+        property: divine_mysteries_uncovered
+        value: 2
+      # Branch A: Courage and Protection Path
       - type: character_has_property
-        property: congregation_corrupted
-        value: true
-      - type: character_has_property
-        property: church_desecrated
-        value: true
-    - id: seek_redemption
-      description: Seek redemption for your past failures and find the strength to
-        confront the evil that threatens your town.
-      success_conditions:
-      - operator: AND
-      - type: character_has_property
-        property: redemption_found
+        property: courage_found
         value: true
       - type: character_has_property
-        property: faith_restored
+        property: congregation_protected
+        value: true
+      # Branch B: Divine Knowledge Path
+      - type: character_has_property
+        property: ritual_knowledge_gained
+        value: true
+      - type: character_has_property
+        property: divine_protection_gained
+        value: true
+      # Branch C: Sacred Power Path
+      - type: character_has_property
+        property: binding_power_acquired
+        value: true
+      - type: character_has_property
+        property: sacred_artifacts_blessed
+        value: true
+      # Final Synthesis: Divine Restoration
+      - type: character_has_property
+        property: divine_connection_restored
         value: true
       failure_conditions:
       - operator: OR
@@ -211,26 +225,10 @@ entity_definitions:
         property: faith_lost
         value: true
       - type: character_has_property
-        property: damned_forever
-        value: true
-    - id: expose_cult_safely
-      description: Expose the cult's activities without endangering innocent lives,
-        revealing their plans to the right people.
-      success_conditions:
-      - operator: AND
-      - type: character_has_property
-        property: cult_exposed_safely
+        property: courage_failed
         value: true
       - type: character_has_property
-        property: innocents_protected
-        value: true
-      failure_conditions:
-      - operator: OR
-      - type: character_has_property
-        property: innocents_harmed
-        value: true
-      - type: character_has_property
-        property: cult_warned
+        property: congregation_harmed
         value: true
     initial_rooms:
     - room_id: church
@@ -544,7 +542,24 @@ entity_definitions:
   captain_marcus_omalley:
     behaviors:
     - character
-    properties: {}
+    properties:
+      # Phase 1: Evidence Gathering
+      corruption_evidence: { type: number, default: 0 }
+      # Branch A: Family Protection Path
+      family_protected: { type: boolean, default: false }
+      family_safe_house_secured: { type: boolean, default: false }
+      # Branch B: Information Warfare Path
+      secrets_exposed: { type: boolean, default: false }
+      cult_communications_intercepted: { type: boolean, default: false }
+      # Branch C: Tactical Preparation Path
+      ritual_materials_gathered: { type: boolean, default: false }
+      secret_passages_discovered: { type: boolean, default: false }
+      # Final Synthesis
+      redemption_earned: { type: boolean, default: false }
+      # Failure conditions
+      corruption_exposed: { type: boolean, default: false }
+      cult_stronger: { type: boolean, default: false }
+      family_harmed: { type: boolean, default: false }
     name: Captain Marcus "Ironjaw" O'Malley
     short_name: Captain O'Malley
     backstory: "The town's guard captain who has been secretly working with the cult\
@@ -555,16 +570,38 @@ entity_definitions:
       \ to back out. His position gives him \naccess to the town's defenses and security\
       \ information, making him valuable to both sides.\n"
     motives:
-    - id: maintain_power
-      description: Keep his position and the wealth the cult provides while avoiding
-        detection by the town's defenders.
+    - id: break_free_from_cult
+      description: Escape the cult's control through a complex redemption journey that requires gathering evidence of their corruption, protecting your family, and proving your worthiness for redemption. This is a multi-faceted path to freedom with branching strategies that must be synthesized into a final confrontation.
       success_conditions:
       - operator: AND
+      # Phase 1: Evidence Gathering (Foundation)
       - type: character_has_property
-        property: position_secured
+        property: corruption_evidence
+        value: 2
+      # Branch A: Family Protection Path
+      - type: character_has_property
+        property: family_protected
         value: true
       - type: character_has_property
-        property: wealth_preserved
+        property: family_safe_house_secured
+        value: true
+      # Branch B: Information Warfare Path
+      - type: character_has_property
+        property: secrets_exposed
+        value: true
+      - type: character_has_property
+        property: cult_communications_intercepted
+        value: true
+      # Branch C: Tactical Preparation Path
+      - type: character_has_property
+        property: ritual_materials_gathered
+        value: true
+      - type: character_has_property
+        property: secret_passages_discovered
+        value: true
+      # Final Synthesis: Redemption and Justice
+      - type: character_has_property
+        property: redemption_earned
         value: true
       failure_conditions:
       - operator: OR
@@ -572,45 +609,10 @@ entity_definitions:
         property: corruption_exposed
         value: true
       - type: character_has_property
-        property: cult_abandons_him
-        value: true
-    - id: protect_family
-      description: Shield his family from the cult's wrath if he tries to back out
-        of their arrangement.
-      success_conditions:
-      - operator: AND
-      - type: character_has_property
-        property: family_safe
-        value: true
-      - type: character_has_property
-        property: cult_threat_eliminated
-        value: true
-      failure_conditions:
-      - operator: OR
-      - type: character_has_property
-        property: family_harmed
-        value: true
-      - type: character_has_property
-        property: cult_retaliation
-        value: true
-    - id: seek_redemption
-      description: Break free from the cult's control and help bring them down, despite
-        the personal cost.
-      success_conditions:
-      - operator: AND
-      - type: character_has_property
-        property: cult_control_broken
-        value: true
-      - type: character_has_property
-        property: justice_served
-        value: true
-      failure_conditions:
-      - operator: OR
-      - type: character_has_property
         property: cult_stronger
         value: true
       - type: character_has_property
-        property: redemption_failed
+        property: family_harmed
         value: true
     initial_rooms:
     - room_id: town_square
@@ -861,4 +863,5 @@ entity_definitions:
     - broker
     - spy
     - informant
+
 

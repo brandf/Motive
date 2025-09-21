@@ -30,10 +30,10 @@ entity_definitions:
         effects:
         - type: increment_property
           target: player
-          property: evidence_collected
+          property: evidence_found
           increment_value: 1
         - type: generate_event
-          message: '{{player_name}} examines the notice board and finds important information! Evidence collected: {{player_property:evidence_collected}}/3'
+          message: '{{player_name}} examines the notice board and finds important information! Evidence found: {{player_property:evidence_found}}/3'
           observers:
           - room_characters
   broken_fountain:
@@ -949,3 +949,717 @@ entity_definitions:
     action_aliases:
       read: look
       examine: look
+  partner_evidence:
+    behaviors:
+    - object
+    attributes:
+      name: Partner's Evidence
+      description: A bloodstained notebook and a broken badge - the remains of Detective Thorne's murdered partner.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+      text: |
+        **PARTNER'S NOTEBOOK:**
+        "Following leads on the Shadowed Hand cult. They're planning something big - a ritual that will change everything. Mayor Thompson knows too much. They're coming for him next. If I don't make it back, tell James... tell him I found the truth."
+        
+        **BROKEN BADGE:**
+        The badge shows signs of struggle. Blood stains suggest the partner fought bravely before being overwhelmed.
+    interactions:
+      look:
+        effects:
+        - type: increment_property
+          target: player
+          property: evidence_found
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} examines the partner''s evidence and finds crucial clues! Evidence found: {{player_property:evidence_found}}/3'
+          observers:
+          - room_characters
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: mystery_solved
+          value: true
+        - type: generate_event
+          message: '{{player_name}} pieces together the evidence and solves the mystery of their partner''s death! The truth is revealed!'
+          observers:
+          - room_characters
+  corruption_documents:
+    behaviors:
+    - object
+    attributes:
+      name: Corruption Documents
+      description: Secret financial records and correspondence revealing Captain O'Malley's corruption.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+      text: |
+        **SECRET CORRESPONDENCE:**
+        "Captain O'Malley, your monthly payment has been deposited. Continue providing security information. The mayor's disappearance was well-executed. Next target: Father Marcus."
+        
+        **FINANCIAL RECORDS:**
+        Large sums of money transferred to Captain O'Malley's account from unknown sources. Dates correspond to recent disappearances.
+    interactions:
+      look:
+        effects:
+        - type: increment_property
+          target: player
+          property: corruption_evidence
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} discovers evidence of corruption! Corruption evidence: {{player_property:corruption_evidence}}/2'
+          observers:
+          - room_characters
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: secrets_exposed
+          value: true
+        - type: generate_event
+          message: '{{player_name}} exposes the corruption secrets! The truth is revealed!'
+          observers:
+          - room_characters
+  cult_confession:
+    behaviors:
+    - object
+    attributes:
+      name: Cult Confession
+      description: A detailed confession from a former cult member revealing their plans and methods.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+      text: |
+        **CULT MEMBER'S CONFESSION:**
+        "I was forced to join the Shadowed Hand. They threatened my family. The cult is planning something big - a ritual that will change everything. They have people in high places. I can't say more, but the mayor knows too much. They're coming for him next."
+    interactions:
+      look:
+        effects:
+        - type: increment_property
+          target: player
+          property: secrets_uncovered
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} uncovers cult secrets! Secrets uncovered: {{player_property:secrets_uncovered}}/2'
+          observers:
+          - room_characters
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: courage_found
+          value: true
+        - type: generate_event
+          message: '{{player_name}} finds the courage to confront evil! Their faith is strengthened!'
+          observers:
+          - room_characters
+  justice_scales:
+    behaviors:
+    - object
+    attributes:
+      name: Scales of Justice
+      description: Ancient scales that can be used to bring justice to the guilty.
+    properties:
+      immovable: true
+      size: medium
+      usable: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: justice_served
+          value: true
+        - type: generate_event
+          message: '{{player_name}} uses the Scales of Justice to bring the guilty to account! Justice is served!'
+          observers:
+          - room_characters
+  faith_restoration:
+    behaviors:
+    - object
+    attributes:
+      name: Sacred Relic
+      description: A holy relic that can restore faith and provide spiritual strength.
+    properties:
+      immovable: true
+      size: small
+      usable: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: faith_restored
+          value: true
+        - type: generate_event
+          message: '{{player_name}} uses the Sacred Relic and feels their faith restored! Divine strength flows through them!'
+          observers:
+          - room_characters
+  hidden_safe:
+    behaviors:
+    - object
+    attributes:
+      name: Hidden Safe
+      description: A small safe hidden behind a loose board in the wall. It contains important documents.
+    properties:
+      immovable: true
+      size: small
+      locked: true
+    interactions:
+      use:
+        effects:
+        - type: increment_property
+          target: player
+          property: corruption_evidence
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} opens the hidden safe and finds incriminating documents! Corruption evidence: {{player_property:corruption_evidence}}/2'
+          observers:
+          - room_characters
+  meeting_table:
+    behaviors:
+    - object
+    attributes:
+      name: Meeting Table
+      description: A large wooden table with chairs around it. Maps and documents are spread across its surface.
+    properties:
+      immovable: true
+      size: large
+      readable: true
+      text: |
+        **MEETING NOTES:**
+        "Captain O'Malley's monthly report: Security patrols adjusted. Mayor's disappearance successful. Next target: Father Marcus. Payment deposited."
+        
+        **MAPS:**
+        Detailed maps showing the town's layout, guard patrols, and escape routes.
+    interactions:
+      look:
+        effects:
+        - type: increment_property
+          target: player
+          property: corruption_evidence
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} examines the meeting table and finds evidence of corruption! Corruption evidence: {{player_property:corruption_evidence}}/2'
+          observers:
+          - room_characters
+  ancient_tome:
+    behaviors:
+    - object
+    attributes:
+      name: Ancient Tome
+      description: A massive leather-bound book written in an ancient language. It contains knowledge about the cult's origins.
+    properties:
+      immovable: true
+      size: large
+      readable: true
+      text: |
+        **THE SHADOWED HAND - ORIGINS:**
+        "Founded three centuries ago by Malachi the First, the Shadowed Hand seeks to bring about the return of the Dark Lord through blood sacrifice and ritual magic. Their power grows with each victim, and they have infiltrated every level of society."
+    interactions:
+      look:
+        effects:
+        - type: increment_property
+          target: player
+          property: secrets_uncovered
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} reads the ancient tome and uncovers cult secrets! Secrets uncovered: {{player_property:secrets_uncovered}}/2'
+          observers:
+          - room_characters
+  cult_history:
+    behaviors:
+    - object
+    attributes:
+      name: Cult History
+      description: A detailed account of the Shadowed Hand's activities over the past century.
+    properties:
+      pickupable: true
+      size: medium
+      readable: true
+      text: |
+        **CULT ACTIVITIES TIMELINE:**
+        "1895: First ritual performed in Blackwater
+        1923: Mayor Blackwater's great-grandfather disappeared
+        1951: Church desecration incident
+        1987: Mass disappearance of 12 townsfolk
+        2024: Current mayor's disappearance - ritual preparation"
+    interactions:
+      look:
+        effects:
+        - type: increment_property
+          target: player
+          property: evidence_found
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} studies the cult history and finds important evidence! Evidence found: {{player_property:evidence_found}}/3'
+          observers:
+          - room_characters
+  decoder_ring:
+    behaviors:
+    - object
+    attributes:
+      name: Decoder Ring
+      description: A mysterious ring that can be used to decode encrypted messages and symbols.
+    properties:
+      pickupable: true
+      size: small
+      usable: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: mystery_solved
+          value: true
+        - type: generate_event
+          message: '{{player_name}} uses the decoder ring and solves the mystery! The encrypted messages are revealed!'
+          observers:
+          - room_characters
+  star_charts:
+    behaviors:
+    - object
+    attributes:
+      name: Star Charts
+      description: Detailed charts showing celestial alignments and their significance to the cult's rituals.
+    properties:
+      immovable: true
+      size: large
+      readable: true
+      text: |
+        **CELESTIAL ALIGNMENTS:**
+        "The cult's most powerful rituals can only be performed during specific celestial alignments. The next alignment occurs in 3 days - when the moon is full and the stars form the Shadow Hand constellation."
+    interactions:
+      look:
+        effects:
+        - type: increment_property
+          target: player
+          property: secrets_uncovered
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} studies the star charts and uncovers cult timing secrets! Secrets uncovered: {{player_property:secrets_uncovered}}/2'
+          observers:
+          - room_characters
+  ritual_timing:
+    behaviors:
+    - object
+    attributes:
+      name: Ritual Timing
+      description: A calendar showing when the cult's most powerful rituals can be performed.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+      text: |
+        **RITUAL CALENDAR:**
+        "Day 1: Preparation begins
+        Day 2: Gathering of materials
+        Day 3: Final ritual - moon full, stars aligned
+        Day 4: Consequences begin"
+    interactions:
+      look:
+        effects:
+        - type: increment_property
+          target: player
+          property: evidence_found
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} examines the ritual timing and finds crucial evidence! Evidence found: {{player_property:evidence_found}}/3'
+          observers:
+          - room_characters
+  telescope:
+    behaviors:
+    - object
+    attributes:
+      name: Telescope
+      description: A powerful telescope that can be used to observe the stars and predict celestial events.
+    properties:
+      immovable: true
+      size: large
+      usable: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: courage_found
+          value: true
+        - type: generate_event
+          message: '{{player_name}} uses the telescope and gains courage from understanding the cosmic forces! Their resolve is strengthened!'
+          observers:
+          - room_characters
+  cult_key:
+    behaviors:
+    - object
+    attributes:
+      name: Cult Key
+      description: A dark iron key with strange symbols carved into its surface. It pulses with dark energy and feels warm to the touch.
+    properties:
+      pickupable: true
+      size: small
+      usable: true
+      key_for: secret_cult_chamber
+    interactions:
+      use:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} uses the Cult Key! The dark symbols glow briefly, and you feel a connection to hidden places.'
+          observers:
+          - room_characters
+  ritual_candle:
+    behaviors:
+    - object
+    attributes:
+      name: Ritual Candle
+      description: A black candle made from strange wax. When lit, it burns with an unnatural flame that never flickers.
+    properties:
+      pickupable: true
+      size: small
+      usable: true
+      consumable: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: ritual_materials_gathered
+          value: true
+        - type: generate_event
+          message: '{{player_name}} lights the Ritual Candle! The flame burns steady and unnatural, marking them as prepared for dark rituals.'
+          observers:
+          - room_characters
+  ancient_scroll:
+    behaviors:
+    - object
+    attributes:
+      name: Ancient Scroll
+      description: A crumbling scroll written in an ancient language. The text seems to shift and change when you're not looking directly at it.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+      text: |
+        **RITUAL OF SHADOWS:**
+        "To unlock the hidden chamber, three items must be gathered:
+        1. The Key of Shadows (found in the old library)
+        2. The Candle of Eternal Flame (found in the church)
+        3. The Scroll of Binding (found in the observatory)
+        
+        When all three are brought to the crypt entrance, the way will be revealed."
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: ritual_knowledge_gained
+          value: true
+        - type: generate_event
+          message: '{{player_name}} reads the Ancient Scroll and learns the ritual requirements! Knowledge gained!'
+          observers:
+          - room_characters
+  shadow_crystal:
+    behaviors:
+    - object
+    attributes:
+      name: Shadow Crystal
+      description: A dark crystal that seems to absorb light and warmth, pulsing with malevolent energy.
+    properties:
+      pickupable: true
+      size: small
+      usable: true
+      fragile: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: dark_power_channeled
+          value: true
+        - type: generate_event
+          message: '{{player_name}} channels power through the Shadow Crystal! Dark energy flows through them!'
+          observers:
+          - room_characters
+  holy_symbol:
+    behaviors:
+    - object
+    attributes:
+      name: Holy Symbol
+      description: A blessed symbol that glows with divine light. It feels warm and comforting to hold.
+    properties:
+      pickupable: true
+      size: small
+      usable: true
+      blessed: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: divine_protection_gained
+          value: true
+        - type: set_property
+          target: player
+          property: family_protected
+          value: true
+        - type: generate_event
+          message: '{{player_name}} activates the Holy Symbol! Divine protection surrounds them and their loved ones!'
+          observers:
+          - room_characters
+  puzzle_box:
+    behaviors:
+    - object
+    attributes:
+      name: Puzzle Box
+      description: An intricate wooden box with multiple sliding panels and hidden compartments. It requires careful manipulation to open.
+    properties:
+      immovable: true
+      size: medium
+      locked: true
+      puzzle_complexity: high
+    interactions:
+      use:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} attempts to solve the Puzzle Box! The panels shift and click, but it remains closed. Perhaps more clues are needed.'
+          observers:
+          - room_characters
+  ritual_components:
+    behaviors:
+    - object
+    attributes:
+      name: Ritual Components
+      description: A collection of strange ingredients - dried herbs, bone fragments, and a vial of dark liquid.
+    properties:
+      pickupable: true
+      size: medium
+      usable: true
+      consumable: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: ritual_materials_gathered
+          value: true
+        - type: generate_event
+          message: '{{player_name}} gathers the Ritual Components! They now have the materials needed for dark rituals.'
+          observers:
+          - room_characters
+  secret_map:
+    behaviors:
+    - object
+    attributes:
+      name: Secret Map
+      description: A detailed map showing hidden passages and secret rooms throughout the town. Some locations are marked with strange symbols.
+    properties:
+      pickupable: true
+      size: medium
+      readable: true
+      text: |
+        **SECRET PASSAGES:**
+        "The map reveals hidden connections between rooms:
+        - Library connects to Church via secret passage
+        - Observatory connects to Forest via hidden path
+        - Bank connects to Underground Tunnels via trapdoor
+        - Warehouse connects to Market via underground tunnel"
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: secret_passages_discovered
+          value: true
+        - type: generate_event
+          message: '{{player_name}} studies the Secret Map and discovers hidden passages! New routes are revealed!'
+          observers:
+          - room_characters
+  binding_chain:
+    behaviors:
+    - object
+    attributes:
+      name: Binding Chain
+      description: A heavy iron chain covered in ancient runes. It feels cold and heavy, as if it carries the weight of centuries.
+    properties:
+      pickupable: true
+      size: medium
+      usable: true
+      heavy: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: binding_power_acquired
+          value: true
+        - type: set_property
+          target: player
+          property: congregation_protected
+          value: true
+        - type: generate_event
+          message: '{{player_name}} wields the Binding Chain! The runes glow with power, ready to bind dark forces and protect the innocent!'
+          observers:
+          - room_characters
+
+  # Branch A: Cult Structure Investigation Objects
+  cult_roster:
+    behaviors:
+    - object
+    attributes:
+      name: Cult Roster
+      description: A hidden list of cult members and their roles within the Shadowed Hand hierarchy.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: cult_hierarchy_discovered
+          value: true
+        - type: generate_event
+          message: '{{player_name}} discovers the cult hierarchy! The Shadowed Hand''s structure is revealed!'
+          observers:
+          - room_characters
+
+  cult_hideout_map:
+    behaviors:
+    - object
+    attributes:
+      name: Cult Hideout Map
+      description: A detailed map showing all known cult meeting places and safe houses throughout the town.
+    properties:
+      pickupable: true
+      size: medium
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: cult_locations_mapped
+          value: true
+        - type: generate_event
+          message: '{{player_name}} maps all cult locations! Their hideouts are now known!'
+          observers:
+          - room_characters
+
+  # Branch B: Ritual Knowledge Investigation Objects
+  ritual_mastery_tome:
+    behaviors:
+    - object
+    attributes:
+      name: Ritual Mastery Tome
+      description: An ancient book containing detailed knowledge of the cult's dark rituals and their purposes.
+    properties:
+      pickupable: true
+      size: large
+      readable: true
+      heavy: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: ritual_knowledge_mastered
+          value: true
+        - type: generate_event
+          message: '{{player_name}} masters the ritual knowledge! The cult''s dark practices are understood!'
+          observers:
+          - room_characters
+
+  celestial_calculator:
+    behaviors:
+    - object
+    attributes:
+      name: Celestial Calculator
+      description: A complex device that calculates the optimal timing for dark rituals based on celestial alignments.
+    properties:
+      pickupable: true
+      size: medium
+      usable: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: '{{player_name}} understands the cult''s timing! Their ritual schedule is revealed!'
+          observers:
+          - room_characters
+
+  # Branch C: Justice Preparation Objects
+  evidence_compiler:
+    behaviors:
+    - object
+    attributes:
+      name: Evidence Compiler
+      description: A device that can organize and compile evidence into a coherent case against the cult.
+    properties:
+      pickupable: true
+      size: medium
+      usable: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: evidence_chain_complete
+          value: true
+        - type: generate_event
+          message: '{{player_name}} compiles the evidence chain! The case against the cult is complete!'
+          observers:
+          - room_characters
+
+  justice_weapon:
+    behaviors:
+    - object
+    attributes:
+      name: Justice Weapon
+      description: A blessed weapon specifically designed to combat dark forces and bring cult members to justice.
+    properties:
+      pickupable: true
+      size: medium
+      usable: true
+    interactions:
+      pickup:
+        effects:
+        - type: set_property
+          target: player
+          property: justice_tools_acquired
+          value: true
+        - type: generate_event
+          message: '{{player_name}} acquires the Justice Weapon! They are now armed for the final confrontation!'
+          observers:
+          - room_characters
+
+  # Final Synthesis Object
+  confrontation_planner:
+    behaviors:
+    - object
+    attributes:
+      name: Confrontation Planner
+      description: A complex device that synthesizes all gathered knowledge to create a plan for the final confrontation with the cult.
+    properties:
+      pickupable: true
+      size: large
+      usable: true
+      heavy: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: final_confrontation_ready
+          value: true
+        - type: generate_event
+          message: '{{player_name}} synthesizes all knowledge! The final confrontation plan is ready! Justice will be served!'
+          observers:
+          - room_characters
