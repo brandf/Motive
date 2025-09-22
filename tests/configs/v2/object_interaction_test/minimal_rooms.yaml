@@ -1,0 +1,17 @@
+entity_definitions:
+  abandoned_warehouse:
+    behaviors:
+      - room
+    attributes:
+      name: Abandoned Warehouse
+      description: A dusty, abandoned warehouse with broken windows and scattered debris.
+      exits:
+        town_square:
+          id: town_square
+          name: town_square
+          description: Exit to town square
+      objects:
+        cult_roster:
+          object_type_id: cult_roster
+          id: cult_roster
+          description: A hidden list of cult members

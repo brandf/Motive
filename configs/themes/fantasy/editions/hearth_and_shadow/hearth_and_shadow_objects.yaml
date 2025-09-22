@@ -572,7 +572,7 @@ entity_definitions:
           property: is_lit
           toggle: true
         - type: generate_event
-          message: '{player_name} uses {object_name}.'
+          message: "{player_name} uses {object_name}."
           observers:
           - room_characters
   rope:

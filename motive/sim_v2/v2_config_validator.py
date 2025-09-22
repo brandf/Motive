@@ -49,6 +49,26 @@ class V2GameConfig(BaseModel):
     
     # No theme/edition metadata needed - config includes handle organization
     
+    @field_validator('entity_definitions')
+    @classmethod
+    def validate_no_string_encoded_yaml(cls, v):
+        """Validate that no entity definitions contain string-encoded YAML structures."""
+        import re
+        
+        for entity_id, entity_def in v.items():
+            if hasattr(entity_def, 'properties') and entity_def.properties:
+                props_str = str(entity_def.properties)
+                # Check for string-encoded patterns (dictionaries/lists stored as strings)
+                # This catches patterns like: exits: '{''north'': {...}}' or objects: '{''key'': {...}}'
+                # But NOT message templates like: message: '{{player_name}} uses {object_name}.'
+                if re.search(r":\s*'\{.*''.*\}", props_str) and not re.search(r":\s*'\{\{", props_str):
+                    raise V2ConfigValidationError(
+                        f"String-encoded YAML detected in entity '{entity_id}'. "
+                        f"Use proper YAML structure instead of string encoding. "
+                        f"See AGENT.md for proper YAML formatting guidelines."
+                    )
+        return v
+    
     # Allow extra fields for backward compatibility (Pydantic v2 style)
     model_config = ConfigDict(extra="allow")
     

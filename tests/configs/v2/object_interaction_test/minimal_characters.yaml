@@ -1,0 +1,16 @@
+entity_definitions:
+  detective_thorne:
+    behaviors:
+      - character
+    attributes:
+      name: Detective James Thorne
+      description: A seasoned detective investigating mysterious disappearances
+      backstory: A veteran detective with years of experience solving complex cases
+      motives:
+        - id: avenge_partner
+          description: Seek justice for your murdered partner
+          success_conditions:
+          - type: character_has_property
+            property: cult_hierarchy_discovered
+            value: true
+          failure_conditions: []

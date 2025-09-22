@@ -91,11 +91,11 @@ def show_summary(config) -> None:
         
         # Count entities by type
         room_count = sum(1 for entity in config.entity_definitions.values() 
-                        if hasattr(entity, 'behaviors') and 'room' in entity.behaviors)
+                        if hasattr(entity, 'types') and 'room' in entity.types)
         object_count = sum(1 for entity in config.entity_definitions.values() 
-                         if hasattr(entity, 'behaviors') and 'object' in entity.behaviors)
+                         if hasattr(entity, 'types') and 'object' in entity.types)
         character_count = sum(1 for entity in config.entity_definitions.values() 
-                             if hasattr(entity, 'behaviors') and 'character' in entity.behaviors)
+                             if hasattr(entity, 'types') and 'character' in entity.types)
         
         print(f"Actions: {action_count}")
         print(f"Entities: {entity_count}")

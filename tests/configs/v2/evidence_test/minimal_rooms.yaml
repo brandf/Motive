@@ -1,0 +1,91 @@
+entity_definitions:
+  fresh_evidence:
+    behaviors:
+      - object
+    attributes:
+      name: Fresh Evidence
+      description: A disturbed patch of earth near the fountain with strange markings and bloodstains.
+      interactions:
+        pickup:
+          effects:
+          - type: increment_property
+            target_type: player
+            property: evidence_found
+            increment_value: 1
+  partner_evidence:
+    behaviors:
+      - object
+    attributes:
+      name: Partner's Evidence
+      description: A bloodstained notebook and a broken badge - the remains of Detective Thorne's murdered partner.
+      interactions:
+        pickup:
+          effects:
+          - type: increment_property
+            target_type: player
+            property: evidence_found
+            increment_value: 1
+  notice_board:
+    behaviors:
+      - object
+    attributes:
+      name: Notice Board
+      description: A weathered wooden board covered with missing person posters and town announcements.
+      interactions:
+        look:
+          effects:
+          - type: increment_property
+            target_type: player
+            property: evidence_found
+            increment_value: 1
+  town_square:
+    id: town_square
+    name: Town Square
+    types: [room]
+    attributes:
+      description: The heart of Blackwater, once bustling with merchants and travelers, now feels empty and foreboding.
+      exits:
+        tavern:
+          id: tavern
+          name: Rusty Anchor Tavern
+          destination_room_id: tavern
+      objects:
+        fresh_evidence:
+          id: fresh_evidence
+          name: Fresh Evidence
+          object_type_id: fresh_evidence
+          current_room_id: town_square
+          description: A disturbed patch of earth near the fountain with strange markings and bloodstains.
+          interactions:
+            pickup:
+              effects:
+              - type: increment_property
+                target_type: player
+                property: evidence_found
+                increment_value: 1
+        partner_evidence:
+          id: partner_evidence
+          name: Partner's Evidence
+          object_type_id: partner_evidence
+          current_room_id: town_square
+          description: A bloodstained notebook and a broken badge - the remains of Detective Thorne's murdered partner.
+          interactions:
+            pickup:
+              effects:
+              - type: increment_property
+                target_type: player
+                property: evidence_found
+                increment_value: 1
+        notice_board:
+          id: notice_board
+          name: Notice Board
+          object_type_id: notice_board
+          current_room_id: town_square
+          description: A weathered wooden board covered with missing person posters and town announcements.
+          interactions:
+            look:
+              effects:
+              - type: increment_property
+                target_type: player
+                property: evidence_found
+                increment_value: 1

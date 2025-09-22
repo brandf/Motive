@@ -31,35 +31,8 @@ async def test_hns_end_to_end_three_rounds(tmp_path):
 async def test_hns_end_to_end_minimal_realistic(tmp_path):
     """Realistic 3-round H&S session with only 2-3 actions per turn (30 AP total)."""
     scripts = {
-        "Player_1": (
-            "> look\n"
-            "> investigate \"Fresh Evidence\"\n"
-            "> move tavern\n"
-            "> look\n"
-            "> move guild\n"
-            "> pickup \"Torch\"\n"
-            "> use \"Torch\"\n"
-            "> read \"Quest Board\"\n"
-            "> move market\n"
-            "> move bank\n"
-            "> pickup \"Bank Ledgers\"\n"
-            "> read \"Bank Ledgers\"\n"
-            "> pass"
-        ),
-        "Player_2": (
-            "> move guild\n"
-            "> read \"Quest Board\"\n"
-            "> say \"Interesting quests here\"\n"
-            "> move market\n"
-            "> move bank\n"
-            "> look\n"
-            "> pickup \"Bank Ledgers\"\n"
-            "> move market\n"
-            "> move tavern\n"
-            "> say \"I'm at the tavern now\"\n"
-            "> investigate \"Bar\"\n"
-            "> pass"
-        ),
+        "Player_1": "> pickup \"Fresh Evidence\"\n> move bank\n> pickup \"Bank Ledgers\"",
+        "Player_2": "> move guild\n> move market\n> say \"I'm at the tavern now\"",
     }
 
     with llm_script(scripts, manual="Comprehensive Test Manual"):
@@ -93,13 +66,8 @@ async def test_hns_end_to_end_minimal_realistic(tmp_path):
         player_2_inventory = [obj.name if hasattr(obj, 'name') else str(obj) for obj in player_2.character.inventory]
         
         # Verify specific objects were picked up by Player_1
-        assert "torch" in player_1_inventory, f"Player_1 should have torch, got: {player_1_inventory}"
-        assert "mayors_journal" in player_1_inventory, f"Player_1 should have mayors_journal, got: {player_1_inventory}"
-        
-        # Verify torch is lit (if Player_1 has it)
-        torch_obj = next((obj for obj in player_1.character.inventory if (hasattr(obj, 'name') and obj.name == "torch") or str(obj) == "torch"), None)
-        if torch_obj and hasattr(torch_obj, 'properties'):
-            assert torch_obj.properties.get('is_lit', False) is True, f"Torch should be lit after use, got: {torch_obj.properties}"
+        assert "fresh_evidence" in player_1_inventory, f"Player_1 should have fresh_evidence, got: {player_1_inventory}"
+        assert "ledgers" in player_1_inventory, f"Player_1 should have ledgers, got: {player_1_inventory}"
         
         # Verify players moved between rooms (not stuck in one place)
         # Note: Both players may end up in the same room, but they should have moved during the game

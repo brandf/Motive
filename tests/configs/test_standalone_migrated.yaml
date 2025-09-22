@@ -6,9 +6,13 @@ entity_definitions:
       name: Test Room
       description: A simple test room
     properties:
-      exits: '{''north'': ''test_room_2''}'
-      objects: '{''test_object_1'': {''object_type_id'': ''test_object'', ''name'':
-        ''Test Object 1'', ''description'': ''First test object''}}'
+      exits:
+        north: test_room_2
+      objects:
+        test_object_1:
+          object_type_id: test_object
+          name: Test Object 1
+          description: First test object
       temperature: room_temperature
       test: true
   test_room_2:
@@ -18,8 +22,9 @@ entity_definitions:
       name: Test Room 2
       description: Another test room
     properties:
-      exits: '{''south'': ''test_room''}'
-      objects: '{}'
+      exits:
+        south: test_room
+      objects: {}
       temperature: cool
       test: true
   test_object:

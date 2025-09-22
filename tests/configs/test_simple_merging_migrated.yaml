@@ -6,8 +6,8 @@ entity_definitions:
       name: New Room
       description: A new room added by simple merging
     properties:
-      exits: '{}'
-      objects: '{}'
+      exits: {}
+      objects: {}
       temperature: warm
       new: true
   base_room:
@@ -17,8 +17,8 @@ entity_definitions:
       name: Base Room
       description: A room from the base config
     properties:
-      exits: '{}'
-      objects: '{}'
+      exits: {}
+      objects: {}
       temperature: cool
       base: true
   new_object:

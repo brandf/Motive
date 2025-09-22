@@ -10,7 +10,7 @@ from tests.utils.llm_mock import llm_script
 @pytest.mark.asyncio
 async def test_minimal_v2_read_player_only(tmp_path):
     base_path = str((tmp_path / "configs").resolve())
-    src_dir = Path("tests/configs/v2/minimal_read")
+    src_dir = Path("tests/configs/v2/minimal_say")
     dst_dir = Path(base_path)
     dst_dir.mkdir(parents=True, exist_ok=True)
     for p in src_dir.glob("*.yaml"):
@@ -36,7 +36,7 @@ async def test_minimal_v2_read_player_only(tmp_path):
 @pytest.mark.asyncio
 async def test_minimal_v2_read_missing_object_player_failure(tmp_path):
     base_path = str((tmp_path / "configs").resolve())
-    src_dir = Path("tests/configs/v2/minimal_read")
+    src_dir = Path("tests/configs/v2/minimal_say")
     dst_dir = Path(base_path)
     dst_dir.mkdir(parents=True, exist_ok=True)
     for p in src_dir.glob("*.yaml"):

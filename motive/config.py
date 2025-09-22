@@ -54,6 +54,8 @@ class ActionEffectConfig(BaseModel):
     tag: Optional[str] = None
     property: Optional[str] = None
     value: Any = None
+    increment_value: Optional[int] = None
+    condition: Optional[str] = None # Condition parameter name for conditional effects
 
     # Fields for generate_event effect
     message: Optional[str] = None

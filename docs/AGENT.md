@@ -91,6 +91,8 @@ This file contains essential guidance for AI agents working on the Motive projec
 
 ## Never Encode Complex Structures as Strings in YAML
 
+**🚨 CRITICAL: This is a recurring issue that breaks the entire system. Read this carefully.**
+
 **Use YAML's native structure syntax**:
 ```yaml
 # ✅ CORRECT - Native YAML structure
@@ -103,15 +105,53 @@ motives:
         value: true
 ```
 
-**NOT string encoding**:
+**NEVER use string encoding**:
 ```yaml
-# ❌ WRONG - String encoding
+# ❌ WRONG - String encoding (breaks everything)
 properties:
-  motives:
-    default: "[{'id': 'investigate_mayor', 'description': 'Uncover...'}]"
+  motives: "[{'id': 'investigate_mayor', 'description': 'Uncover...'}]"
+  exits: "{'north': {'id': 'north', 'name': 'North Exit'}}"
+  objects: "{'key': {'id': 'key', 'name': 'Golden Key'}}"
 ```
 
-**If you find yourself using `ast.literal_eval()`, you're doing it wrong.**
+**Common string encoding patterns to avoid**:
+- `exits: '{'north': {...}}'` → Use proper YAML dict structure
+- `objects: '{'key': {...}}'` → Use proper YAML dict structure  
+- `motives: "[{...}]"` → Use proper YAML list structure
+- Any structure with `''` (double single quotes) → This is string encoding!
+
+**If you find yourself using `ast.literal_eval()` or see `''` in YAML, you're doing it wrong.**
+
+**When migrating string-encoded YAML**:
+1. **Always create a backup first**: `cp file.yaml file.yaml.backup`
+2. **Test your migration script on a copy**: Don't modify the original until verified
+3. **Verify content preservation**: Count objects/exits before and after
+4. **Validate YAML syntax**: `python -c "import yaml; yaml.safe_load(open('file.yaml'))"`
+5. **Clean up**: Remove backup only after confirming everything works
+
+**🚨 IMPORTANT: Distinguish String-Encoded YAML from Message Templates**
+
+**❌ String-encoded YAML (BAD - fix these)**:
+```yaml
+# Complex data structures stored as strings
+exits: '{''north'': {''id'': ''north'', ''name'': ''North Exit''}}'
+objects: '{''key'': {''id'': ''key'', ''name'': ''Golden Key''}}'
+motives: "[{'id': 'investigate_mayor', 'description': 'Uncover...'}]"
+```
+
+**✅ Message templates (GOOD - leave these alone)**:
+```yaml
+# Simple string templates with placeholders
+message: '{{player_name}} uses {object_name}.'
+description: "A {{adjective}} {{item_type}} that {{action}}."
+feedback: 'You found {{count}} items!'
+```
+
+**Key differences**:
+- **String-encoded YAML**: Complex data structures (dicts/lists) stored as single strings with `''` escaping
+- **Message templates**: Simple strings with `{{}}` or `{}` placeholders for dynamic content
+- **Validation should catch**: String-encoded data structures, NOT message templates
+- **Never "fix"**: Message templates - they are legitimate and necessary
 
 ---
 

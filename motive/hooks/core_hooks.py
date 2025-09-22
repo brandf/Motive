@@ -123,8 +123,31 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
                     if has_light:
                         break
             if is_dark and not has_light:
-                # Too dark to see; private feedback and player-scoped event
+                # Too dark to see objects, but show exits for navigation
                 feedback_messages.append("It's too dark to see anything here.")
+                
+                # Still show exits so players can navigate out, but only to lit rooms
+                if current_room.exits:
+                    visible_exits = []
+                    for exit_id, exit_data in current_room.exits.items():
+                        if exit_data.get('is_hidden', False):
+                            continue
+                        
+                        # Check if destination room is lit
+                        dest_room_id = exit_data.get('destination_room_id')
+                        if dest_room_id:
+                            dest_room = game_master.rooms.get(dest_room_id)
+                            if dest_room:
+                                dest_is_dark = bool(getattr(dest_room, 'properties', {}) and dest_room.properties.get('dark', False))
+                                if not dest_is_dark:
+                                    # Destination is lit, so we can see this exit
+                                    visible_exits.append(exit_data['name'])
+                    
+                    if visible_exits:
+                        feedback_messages.append(f"\n\n**🚪 Exits:**")
+                        for exit_name in visible_exits:
+                            feedback_messages.append(f"\n  • {exit_name}")
+                
                 events_generated.append(Event(
                     message=f"{player_char.name} struggles to see in the darkness.",
                     event_type="player_action_failed",
@@ -134,8 +157,25 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
                     observers=["room_characters"]
                 ))
                 return events_generated, feedback_messages
-            # Visible: show formatted description
-            feedback_messages.append(current_room.get_formatted_description())
+            # Visible: show formatted description with proper exit visibility
+            room_description_parts = [current_room.description]
+            
+            if current_room.objects:
+                object_names = [obj.name for obj in current_room.objects.values()]
+                room_description_parts.append(f"\n\n**📦 Objects in the room:**")
+                for obj_name in object_names:
+                    room_description_parts.append(f"\n  • {obj_name}")
+            
+            if current_room.exits:
+                # Show exits based on lighting: from lit rooms, show all exits
+                # From dark rooms, only show exits to lit rooms (handled above)
+                exit_names = [exit_data['name'] for exit_data in current_room.exits.values() if not exit_data.get('is_hidden', False)]
+                if exit_names:
+                    room_description_parts.append(f"\n\n**🚪 Exits:**")
+                    for exit_name in exit_names:
+                        room_description_parts.append(f"\n  • {exit_name}")
+            
+            feedback_messages.append("".join(room_description_parts))
             event_message = f"{player_char.name} looks around the room."
             events_generated.append(Event(
                 message=event_message,
@@ -188,6 +228,11 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
             current_room = game_master.rooms.get(player_char.current_room_id)
             if current_room:
                 target_object = current_room.get_object(target_name)
+                # Debug logging
+                print(f"DEBUG: Looking for '{target_name}' in room '{player_char.current_room_id}'")
+                print(f"DEBUG: Found target_object: {target_object}")
+                if target_object:
+                    print(f"DEBUG: Target object interactions: {getattr(target_object, 'interactions', 'NO INTERACTIONS')}")
         
         if target_object:
             obj_description = f"You look at the {target_object.name}. {target_object.description}"
@@ -208,6 +253,12 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
                                     new_value = current_value + increment_value
                                     player_char.set_property(property_name, new_value)
                                     feedback_messages.append(f"You found important information! {property_name.replace('_', ' ').title()}: {new_value}")
+                            elif effect.get('type') == 'set_property':
+                                property_name = effect.get('property')
+                                property_value = effect.get('value')
+                                if property_name:
+                                    player_char.set_property(property_name, property_value)
+                                    feedback_messages.append(f"You discovered crucial information! {property_name.replace('_', ' ').title()}: {property_value}")
                             elif effect.get('type') == 'generate_event':
                                 message_template = effect.get('message', '')
                                 if message_template:
@@ -778,6 +829,13 @@ def handle_read_action(game_master: Any, player_char: Character, action_config: 
         ))
         return events_generated, feedback_messages
 
+    # Check if the object has a read action alias that redirects to look
+    if hasattr(obj_to_read, 'action_aliases') and obj_to_read.action_aliases and 'read' in obj_to_read.action_aliases:
+        read_alias = obj_to_read.action_aliases['read']
+        if read_alias == 'look':
+            # Redirect to look action
+            return look_at_target(game_master, player_char, action_config, {"target": object_name})
+    
     # Check if the object has readable text
     if "text" in obj_to_read.properties:
         text_content = obj_to_read.properties["text"]
@@ -1028,6 +1086,19 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
     # Generate events
     events = []
     feedback_messages = []
+    
+    # Process object pickup interaction if it exists
+    if hasattr(target_object, 'interactions') and target_object.interactions and 'pickup' in target_object.interactions:
+        pickup_interaction = target_object.interactions['pickup']
+        if 'effects' in pickup_interaction:
+            for effect in pickup_interaction['effects']:
+                if effect.get('type') == 'increment_property':
+                    property_name = effect.get('property')
+                    increment_value = effect.get('increment_value', 1)
+                    if property_name:
+                        current_value = player_char.properties.get(property_name, 0)
+                        player_char.set_property(property_name, current_value + increment_value)
+                        feedback_messages.append(f"You discovered crucial information! {property_name.replace('_', ' ').title()}: {current_value + increment_value}")
     
     # Generate timestamp
     from datetime import datetime
@@ -1446,7 +1517,14 @@ def handle_investigate_action(game_master: Any, player_char: Character, action_c
     if not target_object:
         feedback_messages.append(f"You don't see '{target}' in the current room.")
         return events_generated, feedback_messages
-    
+
+    # Check if the object has an investigate action alias that redirects to look
+    if hasattr(target_object, 'action_aliases') and target_object.action_aliases and 'investigate' in target_object.action_aliases:
+        investigate_alias = target_object.action_aliases['investigate']
+        if investigate_alias == 'look':
+            # Redirect to look action
+            return look_at_target(game_master, player_char, action_config, {"target": target})
+
     # Generate investigation description
     investigation_desc = f"You carefully investigate the {target_object.name}."
     

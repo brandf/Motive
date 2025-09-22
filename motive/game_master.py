@@ -691,6 +691,14 @@ class GameMaster:
             target_instance = None
             target_id_from_param = params.get(target_id_param) if target_id_param else None
             target_id = target_id or target_id_from_param
+            
+            # Format target_id with parameters if it contains placeholders
+            if target_id and isinstance(target_id, str) and '{' in target_id:
+                try:
+                    target_id = target_id.format(**params, player_name=player_char.name)
+                except KeyError as e:
+                    self.game_logger.warning(f"Missing parameter {e} for target_id formatting: {target_id}")
+                    target_id = None
 
             if target_type == "player":
                 # For player target, the instance is always the current player_char
@@ -784,14 +792,27 @@ class GameMaster:
                 if hasattr(effect, 'increment_value'):
                     increment_value = effect.increment_value
                 else:
-                    increment_value = effect.get('increment_value', 1)
+                    increment_value = effect.get('increment_value', 1) if hasattr(effect, 'get') else 1
+                
+                # Default to 1 if increment_value is None
+                if increment_value is None:
+                    increment_value = 1
+                
+                # Check if effect has a condition
+                condition_met = True
+                if hasattr(effect, 'condition') and effect.condition:
+                    condition_param = effect.condition
+                    condition_met = params.get(condition_param, False)
                     
-                if target_instance and effect_property:
+                if condition_met and target_instance and effect_property:
                     # Get current value (default to 0 if not set)
                     current_value = target_instance.get_property(effect_property, 0)
                     new_value = current_value + increment_value
                     target_instance.set_property(effect_property, new_value)
                     feedback_messages.append(f"The {effect_target_type} '{target_instance.name}'s '{effect_property}' is now '{new_value}'.")
+                elif not condition_met:
+                    # Condition not met, skip this effect
+                    pass
                 else:
                     # Handle both Pydantic objects and dictionaries from merged config
                     if hasattr(action_config, 'name'):
@@ -799,6 +820,43 @@ class GameMaster:
                     else:
                         action_name = action_config.get('name', 'unknown')
                     self.game_logger.warning(f"increment_property effect missing target or property for action '{action_name}'.")
+
+            elif effect_type == "pickup_object":
+                # Handle object pickup effect
+                pickup_successful = False
+                if target_instance:
+                    # Move object from room to player inventory
+                    current_room = self.rooms.get(player_char.current_room_id)
+                    if current_room and current_room.get_object(target_instance.id):
+                        # Remove from room
+                        current_room.remove_object(target_instance.id)
+                        # Add to player inventory
+                        player_char.add_item_to_inventory(target_instance)
+                        feedback_messages.append(f"You pick up the {target_instance.name}.")
+                        pickup_successful = True
+                        
+                        # Generate pickup event
+                        events_generated.append(Event(
+                            message=f"{player_char.name} picks up the {target_instance.name}.",
+                            event_type="item_pickup",
+                            source_room_id=player_char.current_room_id,
+                            timestamp=datetime.now().isoformat(),
+                            related_player_id=player_char.id,
+                            related_object_id=target_instance.id,
+                            observers=["player", "game_master"]
+                        ))
+                    else:
+                        feedback_messages.append(f"The {target_instance.name} is not available to pick up.")
+                else:
+                    # Handle both Pydantic objects and dictionaries from merged config
+                    if hasattr(action_config, 'name'):
+                        action_name = action_config.name
+                    else:
+                        action_name = action_config.get('name', 'unknown')
+                    self.game_logger.warning(f"pickup_object effect missing target for action '{action_name}'.")
+                
+                # Store pickup success for conditional effects
+                params['pickup_successful'] = pickup_successful
 
             elif effect_type == "generate_event":
                 # Handle both Pydantic objects and dictionaries from merged config
@@ -1044,9 +1102,13 @@ class GameMaster:
         player_char = player.character
         if not player_char:
             self.game_logger.error(f"Player {player.name} has no assigned character. Skipping turn.")
-            return
+            return [], []
 
         self.game_logger.info(f"🎮 >>> It is {player.name}'s turn. (Round {round_num}) - AP: {player_char.action_points}")
+
+        # Collect all events and feedback from this turn
+        all_events = []
+        all_feedback = []
 
         turn_in_progress = True
         while turn_in_progress and player_char.action_points > 0:
@@ -1174,6 +1236,8 @@ class GameMaster:
                 room_objects = current_room.objects
             
             parsed_actions, invalid_actions = parse_player_response(response.content, self.game_actions, room_objects)
+            print(f"DEBUG: Parsed actions: {parsed_actions}")
+            print(f"DEBUG: Invalid actions: {invalid_actions}")
 
             if not parsed_actions and not invalid_actions:
                 # Penalty for not providing any actions at all
@@ -1289,6 +1353,10 @@ class GameMaster:
                             action_events, action_specific_feedback_list = self._execute_effects(player_char, action_config, params)
                             action_specific_feedback.extend(action_specific_feedback_list)
                             
+                            # Collect events and feedback for return value
+                            all_events.extend(action_events)
+                            all_feedback.extend(action_specific_feedback_list)
+                            
                             # Track if help action was performed     
                             if action_name == "help":
                                 help_action_performed = True
@@ -1403,6 +1471,8 @@ class GameMaster:
                     continue
 
         self.game_logger.info(f"End of action processing for {player.name}. Remaining AP: {player_char.action_points}")
+        
+        return all_events, all_feedback
 
     async def _execute_player_turn_worker(self, player: Player, round_num: int):
         """Worker version of _execute_player_turn that automatically handles turn end confirmations."""

@@ -1,0 +1,18 @@
+includes:
+  - "../../../../configs/core.yaml"
+  - "minimal_objects.yaml"
+  - "minimal_rooms.yaml"
+  - "minimal_characters.yaml"
+
+game_settings:
+  theme: fantasy
+  edition: hearth_and_shadow
+  num_rounds: 2
+  initial_ap_per_turn: 30
+  manual: ../docs/MANUAL.md
+  log_path: logs/fantasy/hearth_and_shadow/{game_id}
+
+players:
+  - name: Player_1
+    provider: dummy
+    model: test-model

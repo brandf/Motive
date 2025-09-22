@@ -193,7 +193,7 @@ class TestRealCodeIntegration:
         class MockActionConfig:
             pass
         action_config = MockActionConfig()
-        events, feedback = handle_read_action(game_master, player_char, action_config, {"object_name": "wooden sign"})
+        events, feedback = handle_read_action(game_master, player_char, action_config, {"object": "wooden sign"})
         
         # Verify it works correctly
         assert len(events) == 1
@@ -239,7 +239,7 @@ class TestRealCodeIntegration:
         action_config = MockActionConfig()
         
         # Call the REAL handle_read_action function
-        events, feedback = handle_read_action(game_master, player_char, action_config, {"object_name": "rock"})
+        events, feedback = handle_read_action(game_master, player_char, action_config, {"object": "rock"})
         
         # Verify it handles the no-text case
         assert len(events) == 1

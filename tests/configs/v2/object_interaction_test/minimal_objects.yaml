@@ -1,0 +1,14 @@
+entity_definitions:
+  cult_roster:
+    behaviors:
+      - object
+    attributes:
+      name: Cult Roster
+      description: A hidden list of cult members and their roles within the Shadowed Hand hierarchy. This document could expose the entire cult's organizational structure.
+      interactions:
+        look:
+          effects:
+          - type: set_property
+            target_type: player
+            property: cult_hierarchy_discovered
+            value: true

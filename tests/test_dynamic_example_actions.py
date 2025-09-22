@@ -82,6 +82,9 @@ class TestDynamicExampleActions:
         
         game_master.game_actions = mock_actions
         
+        # Mock the ranking method to return a simple list
+        game_master._rank_actions_for_examples = lambda actions, player_char=None: ["look", "move", "say", "pickup"]
+        
         # Test the dynamic example actions generation
         example_actions = GameMaster._get_example_actions(game_master)
         
@@ -140,6 +143,9 @@ class TestDynamicExampleActions:
         
         game_master.game_actions = mock_actions
         
+        # Mock the ranking method to return a simple list
+        game_master._rank_actions_for_examples = lambda actions, player_char=None: ["look", "move", "say", "pickup"]
+
         example_actions = GameMaster._get_example_actions(game_master)
         
         # Core categories should be prioritized
