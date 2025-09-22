@@ -108,24 +108,35 @@ Detective James Thorne's motive "avenge_partner" requires completing 8 success c
 
 ---
 
-## Complete Progression Path
+## Complete Progression Paths
 
-### Optimal Route (Minimal Travel):
+### Path A: Town Square Start (Original Route)
 1. **Town Square** → Complete Phase 1 (3 evidence objects)
-2. **Abandoned Warehouse** → Complete Branch A (2 objects)
-3. **Old Library** → Complete Branch B part 1 (1 object)
-4. **Hidden Observatory** → Complete Branch B part 2 + Final Synthesis (2 objects)
+2. **Market District** → **Abandoned Warehouse** → Complete Branch A (2 objects)
+3. **Church** → **Old Library** → Complete Branch B part 1 (1 object)
+4. **Old Forest Path** → **Hidden Observatory** → Complete Branch B part 2 + Final Synthesis (2 objects)
 5. **Church** → Complete Branch C (2 objects)
 
-### Total Rooms to Visit: 5
+### Path B: Church Start (Alternative Route)
+1. **Church** → Complete Phase 1 (3 evidence objects: Church Records, Witness Testimony, +1 more)
+2. **Church** → Complete Branch A (2 objects: Priest's Diary, Sacred Map)
+3. **Church** → Complete Branch B (2 objects: Ritual Texts, Celestial Almanac)
+4. **Church** → Complete Branch C (2 objects: Justice Weapon, Evidence Compiler)
+5. **Church** → Complete Final Synthesis (1 object: Confrontation Manual)
+
+### Path Comparison:
+- **Path A**: 5 rooms, 8 objects, 10-15 rounds
+- **Path B**: 1 room, 8 objects, 8-12 rounds (more efficient!)
+
+### Total Rooms to Visit: 1-5 (depending on path)
 ### Total Objects to Interact With: 8
-### Estimated Rounds: 10-15 (depending on AP usage and exploration)
+### Estimated Rounds: 8-15 (depending on path and AP usage)
 
 ## Room Connections
 - **Town Square** → connects to all other areas
-- **Abandoned Warehouse** → accessible from Town Square
-- **Old Library** → accessible from Town Square
-- **Hidden Observatory** → accessible from Town Square
+- **Abandoned Warehouse** → accessible from Market District (via warehouse exit)
+- **Old Library** → accessible from Church (via library exit)
+- **Hidden Observatory** → accessible from Old Forest Path (via observatory exit, hidden)
 - **Church** → accessible from Town Square
 
 ## Key Success Factors

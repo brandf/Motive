@@ -25,7 +25,7 @@ from motive.character import Character
 from motive.exceptions import ConfigNotFoundError, ConfigParseError, ConfigValidationError
 
 class GameInitializer:
-    def __init__(self, game_config, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20, deterministic: bool = False, character_override: str = None, motive_override: str = None, characters_override: List[str] = None, motives_override: List[str] = None, character_motives_override: List[str] = None):
+    def __init__(self, game_config, game_id: str, game_logger: logging.Logger, initial_ap_per_turn: int = 20, deterministic: bool = False, character_override: str = None, motive_override: str = None, characters_override: List[str] = None, motives_override: List[str] = None, character_motives_override: List[str] = None, starting_rooms_override: List[str] = None):
         self.game_config = game_config # This is the overall GameConfig loaded from config.yaml
         self.game_id = game_id
         self.game_logger = game_logger
@@ -36,6 +36,7 @@ class GameInitializer:
         self.characters_override = characters_override # Store characters override for multiple players
         self.motives_override = motives_override # Store motives override for multiple players
         self.character_motives_override = character_motives_override # Store character-motives override
+        self.starting_rooms_override = starting_rooms_override # Store starting-rooms override
         # GameInitializer now works with v2 configs directly - no conversion needed
 
         self.rooms: Dict[str, Room] = {}
@@ -945,7 +946,7 @@ class GameInitializer:
                 selected_motive = None
 
             # Select initial room based on character configuration
-            selected_room_id = self._select_initial_room(char_cfg, start_room_id)
+            selected_room_id = self._select_initial_room(char_cfg, start_room_id, char_id_to_assign)
             
             # Find the reason for the selected room
             initial_room_reason = None
@@ -1177,9 +1178,18 @@ class GameInitializer:
         
         self.game_logger.info(f"Created {rooms_created} rooms and placed {objects_placed} objects.")
 
-    def _select_initial_room(self, char_config, default_room_id: str) -> str:
+    def _select_initial_room(self, char_config, default_room_id: str, char_id: str = None) -> str:
         """Select an initial room for a character based on their configuration."""
         import random
+        
+        # Check for CLI override first
+        if self.starting_rooms_override and char_id:
+            for override in self.starting_rooms_override:
+                if ':' in override:
+                    override_char, override_room = override.split(':', 1)
+                    if override_char == char_id:
+                        self.game_logger.info(f"Using CLI override: {char_id} starts in {override_room}")
+                        return override_room
         
         # Check if character has initial_rooms configured
         initial_rooms = None
@@ -1487,7 +1497,7 @@ class GameInitializer:
                 selected_motive = None
 
             # Select initial room based on character configuration
-            selected_room_id = self._select_initial_room(char_cfg, default_start_room_id)
+            selected_room_id = self._select_initial_room(char_cfg, default_start_room_id, char_id_to_assign)
             
             # Find the reason for the selected room
             initial_room_reason = None

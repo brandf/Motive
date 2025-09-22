@@ -125,6 +125,8 @@ class ParallelGameRunner:
             cmd.extend(["--motives"] + self.game_args['motives'])
         if self.game_args.get('character_motives'):
             cmd.extend(["--character-motives"] + self.game_args['character_motives'])
+        if self.game_args.get('starting_rooms'):
+            cmd.extend(["--starting-rooms"] + self.game_args['starting_rooms'])
         if self.game_args.get('deterministic'):
             cmd.append("--deterministic")
         if self.game_args.get('manual'):
@@ -590,7 +592,7 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
                    hint_character: str = None, deterministic: bool = False, players: int = None,
                    character: str = None, motive: str = None, characters: List[str] = None, 
                    motives: List[str] = None, character_motives: List[str] = None,
-                   worker: bool = False, log_dir: str = "logs", no_file_logging: bool = False):
+                   starting_rooms: List[str] = None, worker: bool = False, log_dir: str = "logs", no_file_logging: bool = False):
     """Run a Motive game with the specified configuration."""
     # Load environment variables
     load_dotenv()
@@ -727,7 +729,7 @@ async def run_game(config_path: str, game_id: str = None, validate: bool = True,
     print(f"Initializing game with ID: {game_id}")
     
     # Create GameMaster with v2 config
-    game_master = GameMaster(game_config, game_id=game_id, deterministic=deterministic, log_dir=log_dir, no_file_logging=no_file_logging, character=character, motive=motive, characters=characters, motives=motives, character_motives=character_motives)
+    game_master = GameMaster(game_config, game_id=game_id, deterministic=deterministic, log_dir=log_dir, no_file_logging=no_file_logging, character=character, motive=motive, characters=characters, motives=motives, character_motives=character_motives, starting_rooms=starting_rooms)
     
     # Run the game
     try:
@@ -767,6 +769,7 @@ def main():
     parser.add_argument("--characters", nargs="+", help="List of characters to assign to players (e.g., --characters detective_thorne father_marcus captain_marcus_omalley)")
     parser.add_argument("--motives", nargs="+", help="List of motives to assign to players (e.g., --motives avenge_partner seek_redemption seek_redemption)")
     parser.add_argument("--character-motives", nargs="+", dest="character_motives", help="Character-motive pairs (e.g., --character-motives detective_thorne:avenge_partner father_marcus:seek_redemption)")
+    parser.add_argument("--starting-rooms", nargs="+", dest="starting_rooms", help="Character-starting room pairs (e.g., --starting-rooms detective_thorne:church father_marcus:town_square)")
     
     # Game behavior
     parser.add_argument("--deterministic", action="store_true", 
@@ -807,6 +810,7 @@ def main():
             characters=args.characters,
             motives=args.motives,
             character_motives=args.character_motives,
+            starting_rooms=args.starting_rooms,
             deterministic=args.deterministic,
             no_validate=args.no_validate,
             log_dir=args.log_dir,
@@ -833,6 +837,7 @@ def main():
         characters=args.characters,
         motives=args.motives,
         character_motives=args.character_motives,
+        starting_rooms=args.starting_rooms,
         worker=args.worker,
         log_dir=args.log_dir,
         no_file_logging=args.no_file_logging

@@ -38,13 +38,15 @@ class GameMaster:
     # Accept a pre-validated GameConfig or V2GameConfig object directly
     def __init__(self, game_config, game_id: str, deterministic: bool = False, 
                  log_dir: str = "logs", no_file_logging: bool = False, character: str = None, motive: str = None,
-                 characters: List[str] = None, motives: List[str] = None, character_motives: List[str] = None):
+                 characters: List[str] = None, motives: List[str] = None, character_motives: List[str] = None,
+                 starting_rooms: List[str] = None):
         self.players = []
         self.character_override = character  # Store character override for GameInitializer
         self.motive_override = motive  # Store motive override for GameInitializer
         self.characters_override = characters  # Store characters override for GameInitializer
         self.motives_override = motives  # Store motives override for GameInitializer
         self.character_motives_override = character_motives  # Store character-motives override for GameInitializer
+        self.starting_rooms_override = starting_rooms  # Store starting-rooms override for GameInitializer
         
         # Resolve manual path relative to the configs directory (where game.yaml is located)
         import os
@@ -94,7 +96,7 @@ class GameMaster:
         # Pass v2 config directly to GameInitializer - no conversion needed
         # GameInitializer will be updated to work with v2 structures directly
         
-        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger, initial_ap, self.deterministic, self.character_override, self.motive_override, self.characters_override, self.motives_override, self.character_motives_override)
+        self.game_initializer = GameInitializer(game_config, game_id, self.game_logger, initial_ap, self.deterministic, self.character_override, self.motive_override, self.characters_override, self.motives_override, self.character_motives_override, self.starting_rooms_override)
 
         # Load configurations from merged config
         self.game_initializer._load_configurations()

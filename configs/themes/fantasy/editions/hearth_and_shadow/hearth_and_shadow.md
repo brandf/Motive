@@ -27,11 +27,11 @@
 ## Town Layout Map
 
 ```
-                    [Old Forest Path] ←→ [Town Square] ←→ [Bank]
-                           ↓                    ↓
-                    [Cemetery] ←→ [Church] ←→ [Tavern] ←→ [Adventurer's Guild]
-                           ↓                    ↓                    ↓
-                    [Underground Tunnels] ←→ [Thieves' Den] ←→ [Market District]
+                    [Hidden Observatory] ←→ [Old Forest Path] ←→ [Town Square] ←→ [Bank]
+                           ↑                    ↓                    ↓
+                    [Old Library] ←→ [Church] ←→ [Tavern] ←→ [Adventurer's Guild]
+                           ↑                    ↓                    ↓
+                    [Cemetery] ←→ [Underground Tunnels] ←→ [Thieves' Den] ←→ [Market District] ←→ [Abandoned Warehouse]
                            ↓
                     [Secret Cult Chamber]
 ```
@@ -40,13 +40,16 @@
 
 **Surface Level (Primary Connections):**
 - **Town Square** (Central Hub) connects to: Tavern, Guild, Church, Bank, Market, Forest
-- **Market District** connects to: Bank, Guild, Thieves' Den, Tavern, Town Square
+- **Market District** connects to: Bank, Guild, Thieves' Den, Tavern, Town Square, Abandoned Warehouse
 - **Tavern** connects to: Town Square, Guild, Thieves' Den (hidden)
 - **Adventurer's Guild** connects to: Town Square, Tavern, Market
-- **Church** connects to: Town Square, Cemetery, Underground Tunnels (hidden)
+- **Church** connects to: Town Square, Cemetery, Underground Tunnels (hidden), Old Library
 - **Bank** connects to: Town Square, Market, Underground Tunnels (hidden)
 - **Cemetery** connects to: Forest, Church, Underground Tunnels, Thieves' Den (hidden)
-- **Old Forest Path** connects to: Town Square, Cemetery, Secret Cult Chamber (hidden)
+- **Old Forest Path** connects to: Town Square, Cemetery, Secret Cult Chamber (hidden), Hidden Observatory (hidden)
+- **Abandoned Warehouse** connects to: Market District, Town Square
+- **Old Library** connects to: Church, Town Square
+- **Hidden Observatory** connects to: Old Forest Path (hidden)
 
 **Underground Level (Hidden Connections):**
 - **Underground Tunnels** connects to: Cemetery, Church (hidden), Thieves' Den, Secret Cult Chamber (hidden)
@@ -61,6 +64,7 @@
 - Underground Tunnels → Secret Cult Chamber (hidden)
 - Secret Cult Chamber → Forest (hidden escape)
 - Forest → Secret Cult Chamber (hidden)
+- Old Forest Path → Hidden Observatory (hidden)
 
 ## Room Descriptions and Connections
 
@@ -68,11 +72,14 @@
 - **Town Square**: Central hub connecting all major surface locations
 - **Rusty Anchor Tavern**: Social hub with hidden access to Thieves' Den
 - **Adventurer's Guild Hall**: Quest center and information hub
-- **Sacred Heart Church**: Spiritual center with hidden crypt access
+- **Sacred Heart Church**: Spiritual center with hidden crypt access and library connection
 - **Blackwater Bank**: Financial center with suspicious activity
-- **Market District**: Commercial area with multiple connections
+- **Market District**: Commercial area with multiple connections including warehouse access
 - **Blackwater Cemetery**: Resting place with underground access
-- **Old Forest Path**: Border area with escape routes
+- **Old Forest Path**: Border area with escape routes and hidden observatory access
+- **Abandoned Warehouse**: Storage facility containing cult intelligence and maps
+- **Old Library**: Ancient repository of knowledge and ritual texts
+- **Hidden Observatory**: Secret astronomical facility for cult timing calculations
 
 ### Underground Level
 - **Underground Tunnels**: Hidden network connecting various locations
@@ -140,11 +147,11 @@
 ## Design Notes for Edition Creators
 
 ### Room Balance
-- **Surface Level**: 8 rooms with clear connections
+- **Surface Level**: 11 rooms with clear connections
 - **Underground Level**: 3 rooms with hidden access
-- **Total Rooms**: 11 rooms
-- **Total Connections**: 39+ exits with multiple paths between locations
-- **Hidden Passages**: 7 secret connections for exploration and discovery
+- **Total Rooms**: 14 rooms
+- **Total Connections**: 45+ exits with multiple paths between locations
+- **Hidden Passages**: 8 secret connections for exploration and discovery
 
 ### Story Progression
 - **Information Gathering**: Notice boards, quest boards, secret documents

@@ -1099,6 +1099,12 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
                         current_value = player_char.properties.get(property_name, 0)
                         player_char.set_property(property_name, current_value + increment_value)
                         feedback_messages.append(f"You discovered crucial information! {property_name.replace('_', ' ').title()}: {current_value + increment_value}")
+                elif effect.get('type') == 'set_property':
+                    property_name = effect.get('property')
+                    property_value = effect.get('value')
+                    if property_name:
+                        player_char.set_property(property_name, property_value)
+                        feedback_messages.append(f"You discovered crucial information! {property_name.replace('_', ' ').title()}: {property_value}")
     
     # Generate timestamp
     from datetime import datetime

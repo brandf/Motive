@@ -316,6 +316,11 @@ entity_definitions:
           destination_room_id: underground_tunnels
           aliases: [tunnels, underground, passages]
           is_hidden: true
+        library:
+          id: library
+          name: Old Library
+          destination_room_id: old_library
+          aliases: [library, books, archive]
       objects:
         altar:
           id: altar
@@ -395,6 +400,155 @@ entity_definitions:
           object_type_id: justice_weapon
           current_room_id: church
           description: A blessed weapon specifically designed to combat dark forces and bring cult members to justice.
+        # Alternative evidence objects for Church-start path
+        church_records:
+          id: church_records
+          name: Church Records
+          object_type_id: church_records
+          current_room_id: church
+          description: Detailed church records documenting recent disappearances and suspicious activities. Contains crucial evidence about the cult's activities.
+          properties:
+            readable: true
+            pickupable: true
+            size: medium
+          interactions:
+            look:
+              effects:
+              - type: increment_property
+                target: player
+                property: evidence_found
+                increment_value: 1
+              - type: generate_event
+                message: '{{player_name}} examines the church records and finds crucial evidence! Evidence found: {{player_property:evidence_found}}/3'
+                observers:
+                - room_characters
+        priest_diary:
+          id: priest_diary
+          name: Priest's Diary
+          object_type_id: priest_diary
+          current_room_id: church
+          description: Father Marcus's personal diary containing his observations about the cult's activities and their plans. This could be the key to understanding their hierarchy.
+          properties:
+            readable: true
+            pickupable: true
+            size: small
+          interactions:
+            look:
+              effects:
+              - type: set_property
+                target: player
+                property: cult_hierarchy_discovered
+                value: true
+              - type: generate_event
+                message: '{{player_name}} discovers the cult hierarchy in the priest''s diary! The Shadowed Hand''s structure is revealed!'
+                observers:
+                - room_characters
+        sacred_map:
+          id: sacred_map
+          name: Sacred Map
+          object_type_id: sacred_map
+          current_room_id: church
+          description: An ancient map showing all the sacred sites and hidden locations where the cult has been active. This intelligence could reveal their hideouts.
+          properties:
+            readable: true
+            pickupable: true
+            size: medium
+          interactions:
+            look:
+              effects:
+              - type: set_property
+                target: player
+                property: cult_locations_mapped
+                value: true
+              - type: generate_event
+                message: '{{player_name}} maps all cult locations using the sacred map! Their hideouts are now known!'
+                observers:
+                - room_characters
+        ritual_texts:
+          id: ritual_texts
+          name: Ritual Texts
+          object_type_id: ritual_texts
+          current_room_id: church
+          description: Ancient texts containing knowledge about the cult's dark rituals and their purposes. Understanding these could be crucial for stopping their plans.
+          properties:
+            readable: true
+            pickupable: true
+            size: large
+            heavy: true
+          interactions:
+            look:
+              effects:
+              - type: set_property
+                target: player
+                property: ritual_knowledge_mastered
+                value: true
+              - type: generate_event
+                message: '{{player_name}} masters the ritual knowledge from the ancient texts! They now understand the cult''s dark methods!'
+                observers:
+                - room_characters
+        celestial_almanac:
+          id: celestial_almanac
+          name: Celestial Almanac
+          object_type_id: celestial_almanac
+          current_room_id: church
+          description: A detailed almanac showing celestial alignments and their significance to the cult's timing. This could reveal when they plan their rituals.
+          properties:
+            readable: true
+            pickupable: true
+            size: medium
+          interactions:
+            use:
+              effects:
+              - type: set_property
+                target: player
+                property: cult_timing_understood
+                value: true
+              - type: generate_event
+                message: '{{player_name}} understands the cult''s timing using the celestial almanac! They now know when the rituals will occur!'
+                observers:
+                - room_characters
+        confrontation_manual:
+          id: confrontation_manual
+          name: Confrontation Manual
+          object_type_id: confrontation_manual
+          current_room_id: church
+          description: A manual that synthesizes all gathered knowledge to create a plan for the final confrontation with the cult. This could be the key to bringing them to justice.
+          properties:
+            readable: true
+            pickupable: true
+            size: medium
+          interactions:
+            use:
+              effects:
+              - type: set_property
+                target: player
+                property: final_confrontation_ready
+                value: true
+              - type: generate_event
+                message: '{{player_name}} creates the final confrontation plan using the manual! They are ready to bring the cult to justice!'
+                observers:
+                - room_characters
+        witness_testimony:
+          id: witness_testimony
+          name: Witness Testimony
+          object_type_id: witness_testimony
+          current_room_id: church
+          description: Written testimony from witnesses who have seen cult activities. This evidence could be crucial for building a case against them.
+          properties:
+            readable: true
+            pickupable: true
+            size: small
+          interactions:
+            look:
+              effects:
+              - type: increment_property
+                target: player
+                property: evidence_found
+                increment_value: 1
+              - type: generate_event
+                message: '{{player_name}} examines the witness testimony and finds crucial evidence! Evidence found: {{player_property:evidence_found}}/3'
+                observers:
+                - room_characters
   cemetery:
     behaviors:
     - room
@@ -562,6 +716,11 @@ entity_definitions:
           name: Town Square
           destination_room_id: town_square
           aliases: [square, town, main]
+        warehouse:
+          id: warehouse
+          name: Abandoned Warehouse
+          destination_room_id: abandoned_warehouse
+          aliases: [warehouse, abandoned, storage]
       objects:
         merchant_stalls:
           id: merchant_stalls
@@ -756,6 +915,12 @@ entity_definitions:
           name: Cult Escape Route
           destination_room_id: secret_cult_chamber
           aliases: [cult, chamber, secret]
+          is_hidden: true
+        observatory:
+          id: observatory
+          name: Hidden Observatory
+          destination_room_id: hidden_observatory
+          aliases: [observatory, telescope, stars]
           is_hidden: true
       objects:
         wooden_sign:

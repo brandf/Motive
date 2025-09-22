@@ -447,6 +447,17 @@ entity_definitions:
         **BLOOD ANALYSIS:** The blood appears fresh (less than 24 hours old) and there's enough to suggest serious injury or worse.
         
         **RITUAL SYMBOLS:** The carved symbols match patterns seen in other parts of town, suggesting this is part of a larger cult ritual.
+    interactions:
+      pickup:
+        effects:
+        - type: increment_property
+          target: player
+          property: evidence_found
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} collects fresh evidence from the crime scene! Evidence found: {{player_property:evidence_found}}/3'
+          observers:
+          - room_characters
     computed:
       investigation_complete:
         type: boolean
@@ -978,6 +989,16 @@ entity_definitions:
           increment_value: 1
         - type: generate_event
           message: '{{player_name}} examines the partner''s evidence and finds crucial clues! Evidence found: {{player_property:evidence_found}}/3'
+          observers:
+          - room_characters
+      pickup:
+        effects:
+        - type: increment_property
+          target: player
+          property: evidence_found
+          increment_value: 1
+        - type: generate_event
+          message: '{{player_name}} collects the partner''s evidence! Evidence found: {{player_property:evidence_found}}/3'
           observers:
           - room_characters
       use:
