@@ -102,24 +102,18 @@ entity_definitions:
         town_statue:
           object_type_id: town_statue
         cult_symbols:
-          id: cult_symbols
           name: Cult Symbols
           object_type_id: cult_symbols
           description: Dark, unsettling symbols painted on the walls. They seem to
             pulse with dark energy.
         fresh_evidence:
-          id: fresh_evidence
-          name: Fresh Evidence
           object_type_id: fresh_evidence
           description: Recently disturbed earth and strange markings near the fountain.
         eternal_flame:
-          id: eternal_flame
           object_type_id: eternal_flame
         flame_of_hope:
-          id: flame_of_hope
           object_type_id: flame_of_hope
         message_board:
-          id: message_board
           object_type_id: message_board
         partner_evidence:
           object_type_id: partner_evidence
@@ -173,8 +167,6 @@ entity_definitions:
           is_hidden: true
       objects:
         bar:
-          id: bar
-          name: Bar
           object_type_id: bar
           description: A long wooden bar where drinks are served. The barkeep seems
             to know everyone's business.
@@ -185,10 +177,8 @@ entity_definitions:
           description: A board covered with job postings, rumors, and local news.
             Some entries seem to have been recently added.
         secret_drop_point:
-          id: secret_drop_point
           object_type_id: secret_drop_point
         pigeon_coop:
-          id: pigeon_coop
           object_type_id: pigeon_coop
       characters:
         witness_old_tom:
@@ -244,31 +234,22 @@ entity_definitions:
           - shops
       objects:
         quest_board:
-          id: quest_board
-          name: Quest Board
           object_type_id: quest_board
           description: A large board covered with various quests, bounties, and missions.
             Some seem to be related to the recent disappearances.
         guild_master_desk:
-          id: guild_master_desk
-          name: Guild Master's Desk
           object_type_id: guild_master_desk
           description: A massive oak desk covered with reports, maps, and correspondence.
             The guild master seems to be working on something important.
         weapon_rack:
-          id: weapon_rack
-          name: Weapon Rack
           object_type_id: weapon_rack
           description: A rack displaying various weapons and armor. Some items seem
             to have been recently used.
         lockpicks:
-          id: lockpicks
           object_type_id: lockpicks
         torch:
-          id: torch
           object_type_id: torch
         investigation_kit:
-          id: investigation_kit
           object_type_id: investigation_kit
   thieves_den:
     behaviors:
@@ -311,20 +292,14 @@ entity_definitions:
           - passages
       objects:
         stolen_goods:
-          id: stolen_goods
-          name: Stolen Goods
           object_type_id: stolen_goods
           description: Various stolen items and contraband are scattered around the
             room. Some seem to be recently acquired.
         secret_documents:
-          id: secret_documents
-          name: Secret Documents
           object_type_id: secret_documents
           description: A collection of documents and maps that might contain valuable
             information about the town's troubles.
         raven_chair:
-          id: raven_chair
-          name: The Raven's Chair
           object_type_id: raven_chair
           description: A high-backed chair where the leader of the thieves' guild
             sits. It seems to be the center of power in this hidden world.
@@ -392,195 +367,62 @@ entity_definitions:
           - archive
       objects:
         altar:
-          id: altar
-          name: Altar
           object_type_id: altar
           description: A beautiful stone altar adorned with fresh flowers and candles.
             It seems to be the center of the church's spiritual life.
         confession_booth:
-          id: confession_booth
-          name: Confession Booth
           object_type_id: confession_booth
           description: A wooden booth where the faithful come to confess their sins.
             The priest seems to be spending a lot of time here recently.
         crypt_entrance:
-          id: crypt_entrance
-          name: Crypt Entrance
           object_type_id: crypt_entrance
           description: A hidden entrance to the underground crypt. The door seems
             to have been recently used.
         cult_members_confession:
-          id: cult_members_confession
           object_type_id: cult_members_confession
         holy_water:
-          id: holy_water
           object_type_id: holy_water
         hearth_stone:
-          id: hearth_stone
           object_type_id: hearth_stone
         cult_confession:
-          id: cult_confession
           object_type_id: cult_confession
         faith_restoration:
-          id: faith_restoration
           object_type_id: faith_restoration
         holy_symbol:
-          id: holy_symbol
-          name: Holy Symbol
           object_type_id: holy_symbol
-          description: A blessed symbol that glows with divine light.
         binding_chain:
-          id: binding_chain
-          name: Binding Chain
           object_type_id: binding_chain
-          description: A heavy iron chain covered in ancient runes.
         justice_scales:
-          id: justice_scales
-          name: Scales of Justice
           object_type_id: justice_scales
           description: Ancient scales that can weigh truth against lies and bring
             justice to the guilty.
         evidence_compiler:
-          id: evidence_compiler
-          name: Evidence Compiler
           object_type_id: evidence_compiler
-          description: A device that can organize and compile evidence into a coherent
-            case against the cult.
         justice_weapon:
-          id: justice_weapon
-          name: Justice Weapon
           object_type_id: justice_weapon
-          description: A blessed weapon specifically designed to combat dark forces
-            and bring cult members to justice.
         church_records:
-          id: church_records
-          name: Church Records
           object_type_id: church_records
-          description: Detailed church records documenting recent disappearances and
-            suspicious activities. Contains crucial evidence about the cult's activities.
-          properties:
-            readable: true
-            pickupable: true
-            size: medium
-          interactions:
-            look:
-              effects:
-              - type: set_property
-                target: player
-                property: church_records_found
-                value: true
-              - type: generate_event
-                message: '{{player_name}} examines the church records and finds crucial
-                  evidence!'
-                observers:
-                - room_characters
         priest_diary:
-          id: priest_diary
-          name: Priest's Diary
           object_type_id: priest_diary
-          description: Father Marcus's personal diary containing his observations
-            about the cult's activities and their plans. This could be the key to
-            understanding their hierarchy.
-          properties:
-            readable: true
-            pickupable: true
-            size: small
-          interactions:
-            look:
-              effects:
-              - type: set_property
-                target: player
-                property: priest_diary_found
-                value: true
-              - type: set_property
-                target: player
-                property: cult_hierarchy_discovered
-                value: true
-              - type: generate_event
-                message: '{{player_name}} discovers the cult hierarchy in the priest''s
-                  diary! The Shadowed Hand''s structure is revealed!'
-                observers:
-                - room_characters
         sacred_map:
-          id: sacred_map
           object_type_id: sacred_map
-          interactions:
-            look:
-              effects:
-              - type: set_property
-                target: player
-                property: sacred_map_found
-                value: true
-              - type: set_property
-                target: player
-                property: cult_locations_mapped
-                value: true
-              - type: generate_event
-                message: '{{player_name}} maps all cult locations using the sacred
-                  map! Their hideouts are now known!'
-                observers:
-                - room_characters
         ritual_texts:
-          id: ritual_texts
           object_type_id: ritual_texts
-          interactions:
-            look:
-              effects:
-              - type: set_property
-                target: player
-                property: ritual_texts_found
-                value: true
-              - type: set_property
-                target: player
-                property: ritual_knowledge_mastered
-                value: true
-              - type: generate_event
-                message: '{{player_name}} masters the ritual knowledge from the ancient
-                  texts! They now understand the cult''s dark methods!'
-                observers:
-                - room_characters
         celestial_almanac:
-          id: celestial_almanac
           object_type_id: celestial_almanac
           properties:
             readable: true
             pickupable: true
             size: medium
             pickup_action: use
-          interactions:
-            use:
-              effects:
-              - type: set_property
-                target: player
-                property: cult_timing_understood
-                value: true
-              - type: generate_event
-                message: '{{player_name}} understands the cult''s timing using the
-                  celestial almanac! They now know when the rituals will occur!'
-                observers:
-                - room_characters
         confrontation_manual:
-          id: confrontation_manual
           object_type_id: confrontation_manual
           properties:
             readable: true
             pickupable: true
             size: medium
             pickup_action: use
-          interactions:
-            use:
-              effects:
-              - type: set_property
-                target: player
-                property: final_confrontation_ready
-                value: true
-              - type: generate_event
-                message: '{{player_name}} creates the final confrontation plan using
-                  the manual! They are ready to bring the cult to justice!'
-                observers:
-                - room_characters
         witness_testimony:
-          id: witness_testimony
           object_type_id: witness_testimony
           interactions:
             look:
@@ -662,41 +504,21 @@ entity_definitions:
           is_hidden: true
       objects:
         fresh_graves:
-          id: fresh_graves
-          name: Fresh Graves
           object_type_id: fresh_graves
           description: Several graves that appear to have been recently dug. The earth
             is still loose and unsettled.
         suspicious_footprints:
-          id: suspicious_footprints
-          name: Suspicious Footprints
           object_type_id: suspicious_footprints
           description: Footprints in the soft earth that don't seem to belong to any
             normal visitor. They lead toward the mausoleum.
         fresh_footprints:
-          id: fresh_footprints
-          name: Fresh Footprints
           object_type_id: fresh_footprints
           description: Fresh footprints in the dust. They appear to be recent and
             will fade soon.
         disturbed_earth:
-          id: disturbed_earth
           object_type_id: disturbed_earth
         graveyard_epitaphs:
-          id: graveyard_epitaphs
           object_type_id: graveyard_epitaphs
-          interactions:
-            look:
-              effects:
-              - type: set_property
-                target: player
-                property: graveyard_epitaphs_found
-                value: true
-              - type: generate_event
-                message: '{{player_name}} examines the graveyard epitaphs and finds
-                  crucial evidence!'
-                observers:
-                - room_characters
       dark: true
       spooky: true
   bank:
@@ -740,32 +562,22 @@ entity_definitions:
           is_hidden: true
       objects:
         vault:
-          id: vault
-          name: Vault
           object_type_id: vault
           description: A massive steel vault that seems to be open more often than
             it should be. The door mechanism appears to have been tampered with.
         ledgers:
-          id: ledgers
-          name: Bank Ledgers
           object_type_id: ledgers
           description: Financial records that might contain clues about the mysterious
             withdrawals and suspicious transactions.
         guard_post:
-          id: guard_post
-          name: Guard Post
           object_type_id: guard_post
           description: A security station that seems to be unmanned more often than
             not. The guard appears to be frequently absent.
         mayors_journal:
-          id: mayors_journal
-          name: Mayor's Journal
           object_type_id: mayors_journal
           description: A leather-bound journal belonging to the missing mayor, hidden
             in the vault.
         missing_items:
-          id: missing_items
-          name: Missing Items
           object_type_id: missing_items
           description: Empty spaces where items once sat, suggesting a systematic
             search.
@@ -832,14 +644,10 @@ entity_definitions:
           - storage
       objects:
         merchant_stalls:
-          id: merchant_stalls
-          name: Merchant Stalls
           object_type_id: merchant_stalls
           description: Various stalls where merchants sell their wares. Many are empty,
             and the remaining merchants seem nervous.
         hidden_alleyways:
-          id: hidden_alleyways
-          name: Hidden Alleyways
           object_type_id: hidden_alleyways
           description: Narrow passages between buildings that lead to secret meeting
             places and hidden entrances.
@@ -891,28 +699,31 @@ entity_definitions:
           - chamber
           - secret
           is_hidden: true
+        warehouse:
+          id: warehouse
+          name: Abandoned Warehouse
+          destination_room_id: abandoned_warehouse
+          aliases:
+          - warehouse
+          - abandoned
+          - storage
+          - hidden_passage
+          is_hidden: true
       objects:
         cult_symbols:
-          id: cult_symbols
           name: Cult Symbols
           object_type_id: cult_symbols
           description: Strange symbols carved into the walls that seem to pulse with
             an otherworldly energy. They make you feel uneasy.
         evidence_activity:
-          id: evidence_activity
-          name: Evidence of Recent Activity
           object_type_id: evidence_activity
           description: Signs that someone has been using these tunnels recently. Footprints,
             dropped items, and other traces of recent passage.
         secret_doors:
-          id: secret_doors
-          name: Secret Doors
           object_type_id: secret_doors
           description: Hidden entrances and exits that lead to various parts of the
             town. Some seem to have been recently used.
         shadow_crystal:
-          id: shadow_crystal
-          name: Shadow Crystal
           object_type_id: shadow_crystal
           description: A dark crystal that seems to absorb light and warmth.
       hidden: true
@@ -954,43 +765,30 @@ entity_definitions:
           is_hidden: true
       objects:
         cult_altar:
-          id: cult_altar
-          name: Cult Altar
           object_type_id: cult_altar
           description: A dark altar covered with cult artifacts and evidence of recent
             rituals. The air around it feels wrong.
         prisoner_cells:
-          id: prisoner_cells
-          name: Prisoner Cells
           object_type_id: prisoner_cells
           description: Cells where the cult keeps their prisoners. Some appear to
             have been recently occupied.
         cult_artifacts:
-          id: cult_artifacts
-          name: Cult Artifacts
           object_type_id: cult_artifacts
           description: Various dark objects and artifacts used in the cult's rituals.
             They seem to pulse with an otherworldly energy.
         cult_ritual_book:
-          id: cult_ritual_book
           object_type_id: cult_ritual_book
         suspicious_sounds:
-          id: suspicious_sounds
-          name: Suspicious Sounds
           object_type_id: suspicious_sounds
           description: Low, chanting voices echo through the chamber. The ritual is
             about to begin.
         shadow_crystal:
-          id: shadow_crystal
           object_type_id: shadow_crystal
         shadow_mirror:
-          id: shadow_mirror
           object_type_id: shadow_mirror
         ritual_preparations:
-          id: ritual_preparations
           object_type_id: ritual_preparations
         burning_candle:
-          id: burning_candle
           object_type_id: burning_candle
       hidden: true
       underground: true
@@ -1053,17 +851,11 @@ entity_definitions:
           is_hidden: true
       objects:
         wooden_sign:
-          id: wooden_sign
-          name: Wooden Sign
           object_type_id: wooden_sign
           description: A weathered wooden sign pointing deeper into the forest. The
             writing is faded and hard to read.
         ancient_altar:
-          id: ancient_altar
-          name: Ancient Altar
           object_type_id: ancient_altar
-          description: A sacred altar that has been in this place for centuries. It
-            seems to be connected to the forest's ancient magic.
       characters:
         cult_leader_malachi:
           id: cult_leader_malachi
@@ -1112,37 +904,31 @@ entity_definitions:
           - square
           - town
           - main
+        tunnels:
+          id: tunnels
+          name: Underground Tunnels
+          destination_room_id: underground_tunnels
+          aliases:
+          - tunnels
+          - underground
+          - passages
+          - hidden_passage
+          is_hidden: true
       objects:
         corruption_documents:
-          id: corruption_documents
           object_type_id: corruption_documents
         hidden_safe:
-          id: hidden_safe
           object_type_id: hidden_safe
         meeting_table:
-          id: meeting_table
           object_type_id: meeting_table
         ritual_components:
-          id: ritual_components
           object_type_id: ritual_components
         puzzle_box:
-          id: puzzle_box
-          name: Puzzle Box
           object_type_id: puzzle_box
-          description: An intricate wooden box with multiple sliding panels and hidden
-            compartments.
         cult_roster:
-          id: cult_roster
-          name: Cult Roster
           object_type_id: cult_roster
-          description: A hidden list of cult members and their roles within the Shadowed
-            Hand hierarchy.
         cult_hideout_map:
-          id: cult_hideout_map
-          name: Cult Hideout Map
           object_type_id: cult_hideout_map
-          description: A detailed map showing all known cult meeting places and safe
-            houses throughout the town.
   old_library:
     behaviors:
     - room
@@ -1176,35 +962,17 @@ entity_definitions:
           - main
       objects:
         ancient_tome:
-          id: ancient_tome
           object_type_id: ancient_tome
         cult_history:
-          id: cult_history
-          name: Cult History
           object_type_id: cult_history
-          description: A detailed account of the Shadowed Hand's activities over the
-            past century.
         decoder_ring:
-          id: decoder_ring
           object_type_id: decoder_ring
         cult_key:
-          id: cult_key
-          name: Cult Key
           object_type_id: cult_key
-          description: A dark iron key with strange symbols carved into its surface.
-            It pulses with dark energy.
         ancient_scroll:
-          id: ancient_scroll
-          name: Ancient Scroll
           object_type_id: ancient_scroll
-          description: A crumbling scroll written in an ancient language. The text
-            seems to shift and change.
         ritual_mastery_tome:
-          id: ritual_mastery_tome
-          name: Ritual Mastery Tome
           object_type_id: ritual_mastery_tome
-          description: An ancient book containing detailed knowledge of the cult's
-            dark rituals and their purposes.
   hidden_observatory:
     behaviors:
     - room
@@ -1232,41 +1000,19 @@ entity_definitions:
           - path
       objects:
         star_charts:
-          id: star_charts
           object_type_id: star_charts
         ritual_timing:
-          id: ritual_timing
-          name: Ritual Timing
           object_type_id: ritual_timing
-          description: A calendar showing when the cult's most powerful rituals can
-            be performed.
         telescope:
-          id: telescope
           object_type_id: telescope
         ritual_candle:
-          id: ritual_candle
-          name: Ritual Candle
           object_type_id: ritual_candle
-          description: A black candle made from strange wax. When lit, it burns with
-            an unnatural flame.
         secret_map:
-          id: secret_map
-          name: Secret Map
           object_type_id: secret_map
-          description: A detailed map showing hidden passages and secret rooms throughout
-            the town.
         celestial_calculator:
-          id: celestial_calculator
-          name: Celestial Calculator
           object_type_id: celestial_calculator
-          description: A complex device that calculates the optimal timing for dark
-            rituals based on celestial alignments.
         confrontation_planner:
-          id: confrontation_planner
-          name: Confrontation Planner
           object_type_id: confrontation_planner
-          description: A complex device that synthesizes all gathered knowledge to
-            create a plan for the final confrontation with the cult.
   town_hall:
     behaviors:
     - room
@@ -1309,47 +1055,13 @@ entity_definitions:
           - tombs
       objects:
         town_records:
-          id: town_records
           object_type_id: town_records
-          interactions:
-            look:
-              effects:
-              - type: set_property
-                target: player
-                property: town_records_found
-                value: true
-              - type: generate_event
-                message: '{{player_name}} examines the town records and finds crucial
-                  evidence!'
-                observers:
-                - room_characters
         missing_persons_log:
-          id: missing_persons_log
           object_type_id: missing_persons_log
-          interactions:
-            look:
-              effects:
-              - type: set_property
-                target: player
-                property: missing_persons_log_found
-                value: true
-              - type: generate_event
-                message: '{{player_name}} examines the missing persons log and finds
-                  crucial evidence!'
-                observers:
-                - room_characters
         mayors_desk:
-          id: mayors_desk
-          name: Mayor's Desk
           object_type_id: mayors_desk
-          description: The mayor's desk, covered with documents and correspondence.
-            Some papers seem to have been recently disturbed.
         official_seal:
-          id: official_seal
-          name: Official Seal
           object_type_id: official_seal
-          description: The town's official seal, used to authenticate documents and
-            legal papers.
   newspaper_office:
     behaviors:
     - room
@@ -1384,47 +1096,13 @@ entity_definitions:
           - shops
       objects:
         local_newspaper:
-          id: local_newspaper
           object_type_id: local_newspaper
-          interactions:
-            look:
-              effects:
-              - type: set_property
-                target: player
-                property: local_newspaper_found
-                value: true
-              - type: generate_event
-                message: '{{player_name}} examines the local newspaper and finds crucial
-                  evidence!'
-                observers:
-                - room_characters
         editor_notes:
-          id: editor_notes
           object_type_id: editor_notes
-          interactions:
-            look:
-              effects:
-              - type: set_property
-                target: player
-                property: editor_notes_found
-                value: true
-              - type: generate_event
-                message: '{{player_name}} examines the editor''s notes and finds crucial
-                  evidence!'
-                observers:
-                - room_characters
         printing_press:
-          id: printing_press
-          name: Printing Press
           object_type_id: printing_press
-          description: An old printing press used to produce the newspaper. It's been
-            recently used to print something.
         reporter_desk:
-          id: reporter_desk
-          name: Reporter's Desk
           object_type_id: reporter_desk
-          description: A desk covered with notes, photographs, and drafts of articles
-            about the recent troubles.
   astronomer_study:
     behaviors:
     - room
@@ -1459,16 +1137,7 @@ entity_definitions:
           - path
       objects:
         astronomers_notes:
-          id: astronomers_notes
-          name: Astronomer's Notes
           object_type_id: astronomers_notes
-          description: Detailed notes from the town's astronomer about celestial alignments
-            and their significance to the cult's timing.
-          properties:
-            readable: true
-            pickupable: true
-            size: medium
-            pickup_action: use
           interactions:
             use:
               effects:
@@ -1482,7 +1151,6 @@ entity_definitions:
                 observers:
                 - room_characters
         ancient_calendar:
-          id: ancient_calendar
           object_type_id: ancient_calendar
           interactions:
             use:
@@ -1497,7 +1165,6 @@ entity_definitions:
                 observers:
                 - room_characters
         ritual_schedule:
-          id: ritual_schedule
           object_type_id: ritual_schedule
           interactions:
             use:
@@ -1512,17 +1179,9 @@ entity_definitions:
                 observers:
                 - room_characters
         celestial_instruments:
-          id: celestial_instruments
-          name: Celestial Instruments
           object_type_id: celestial_instruments
-          description: Various instruments used to observe and calculate celestial
-            events.
         star_atlas:
-          id: star_atlas
-          name: Star Atlas
           object_type_id: star_atlas
-          description: A comprehensive atlas of the night sky with detailed information
-            about stars and constellations.
   mausoleum:
     behaviors:
     - room
@@ -1558,8 +1217,6 @@ entity_definitions:
           - tombs
       objects:
         ancient_sarcophagi:
-          id: ancient_sarcophagi
           object_type_id: ancient_sarcophagi
         ritual_candles:
-          id: ritual_candles
           object_type_id: ritual_candles

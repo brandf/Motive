@@ -1681,8 +1681,7 @@ entity_definitions:
     - object
     attributes:
       name: Ritual Candle
-      description: A black candle made from strange wax. When lit, it burns with an
-        unnatural flame that never flickers.
+      description: A black candle made from strange wax. When lit, it burns with an unnatural flame.
     properties:
       pickupable: true
       size: small

@@ -42,6 +42,7 @@ class ActionRequirementConfig(BaseModel):
     value: Optional[Any] = None # For object_property_equals
     target_player_param: Optional[str] = None # For player_in_room, player_has_tag
     direction_param: Optional[str] = None # For exit_exists
+    operator: Optional[str] = None # For numeric comparisons (==, >=, <=, >, <)
 
 class ActionEffectConfig(BaseModel):
     """Base model for action effects."""

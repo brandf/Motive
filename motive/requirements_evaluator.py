@@ -53,10 +53,30 @@ def evaluate_requirement(player_char, game_master, req: Any, params: Dict[str, A
         target = _resolve_target_instance(player_char, game_master, req)
         property_name = getattr(req, 'property', None) if hasattr(req, 'property') else req.get('property', '')
         expected_value = getattr(req, 'value', None) if hasattr(req, 'value') else req.get('value', True)
+        operator = getattr(req, 'operator', None) if hasattr(req, 'operator') else req.get('operator', '==')
         if not target or not property_name:
             return True, False, f"Missing target or property for entity_has_property."
         actual_value = target.get_property(property_name, None)
-        return True, (actual_value == expected_value), (None if actual_value == expected_value else f"Property '{property_name}' is {actual_value}, expected {expected_value}.")
+        
+        # Handle different operators for numeric comparisons
+        if operator == '>=' and isinstance(actual_value, (int, float)) and isinstance(expected_value, (int, float)):
+            passed = actual_value >= expected_value
+            error_msg = None if passed else f"Property '{property_name}' is {actual_value}, expected >= {expected_value}."
+        elif operator == '<=' and isinstance(actual_value, (int, float)) and isinstance(expected_value, (int, float)):
+            passed = actual_value <= expected_value
+            error_msg = None if passed else f"Property '{property_name}' is {actual_value}, expected <= {expected_value}."
+        elif operator == '>' and isinstance(actual_value, (int, float)) and isinstance(expected_value, (int, float)):
+            passed = actual_value > expected_value
+            error_msg = None if passed else f"Property '{property_name}' is {actual_value}, expected > {expected_value}."
+        elif operator == '<' and isinstance(actual_value, (int, float)) and isinstance(expected_value, (int, float)):
+            passed = actual_value < expected_value
+            error_msg = None if passed else f"Property '{property_name}' is {actual_value}, expected < {expected_value}."
+        else:
+            # Default to equality comparison
+            passed = actual_value == expected_value
+            error_msg = None if passed else f"Property '{property_name}' is {actual_value}, expected {expected_value}."
+        
+        return True, passed, error_msg
 
     # get_entity_attribute (read-only attributes like name, description)
     if req_type == "get_entity_attribute":
@@ -73,8 +93,28 @@ def evaluate_requirement(player_char, game_master, req: Any, params: Dict[str, A
         # Synthesize an entity_has_property check
         property_name = getattr(req, 'property', None) if hasattr(req, 'property') else req.get('property', '')
         expected_value = getattr(req, 'value', None) if hasattr(req, 'value') else req.get('value', True)
+        operator = getattr(req, 'operator', None) if hasattr(req, 'operator') else req.get('operator', '==')
         actual_value = player_char.get_property(property_name, None)
-        return True, (actual_value == expected_value), (None if actual_value == expected_value else f"Character property '{property_name}' is {actual_value}, expected {expected_value}.")
+        
+        # Handle different operators for numeric comparisons
+        if operator == '>=' and isinstance(actual_value, (int, float)) and isinstance(expected_value, (int, float)):
+            passed = actual_value >= expected_value
+            error_msg = None if passed else f"Character property '{property_name}' is {actual_value}, expected >= {expected_value}."
+        elif operator == '<=' and isinstance(actual_value, (int, float)) and isinstance(expected_value, (int, float)):
+            passed = actual_value <= expected_value
+            error_msg = None if passed else f"Character property '{property_name}' is {actual_value}, expected <= {expected_value}."
+        elif operator == '>' and isinstance(actual_value, (int, float)) and isinstance(expected_value, (int, float)):
+            passed = actual_value > expected_value
+            error_msg = None if passed else f"Character property '{property_name}' is {actual_value}, expected > {expected_value}."
+        elif operator == '<' and isinstance(actual_value, (int, float)) and isinstance(expected_value, (int, float)):
+            passed = actual_value < expected_value
+            error_msg = None if passed else f"Character property '{property_name}' is {actual_value}, expected < {expected_value}."
+        else:
+            # Default to equality comparison
+            passed = actual_value == expected_value
+            error_msg = None if passed else f"Character property '{property_name}' is {actual_value}, expected {expected_value}."
+        
+        return True, passed, error_msg
 
     # object_in_room by name parameter
     if req_type == "object_in_room":

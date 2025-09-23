@@ -87,6 +87,7 @@ entity_definitions:
       - type: character_has_property
         property: evidence_found
         value: 2
+        operator: ">="
       # Branch A: Cult Structure Investigation
       - type: character_has_property
         property: cult_hierarchy_discovered
