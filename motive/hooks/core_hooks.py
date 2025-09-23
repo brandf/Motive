@@ -1625,15 +1625,30 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
         feedback_messages.append("You need to specify an object to use.")
         return events_generated, feedback_messages
 
-    # Check if player has the object in inventory (by name match)
+    # Check if player has the object in inventory first (prioritize inventory)
     inv_object = None
     for obj in player_char.inventory.values():
         if obj.name.lower() == object_name.lower():
             inv_object = obj
             break
+    
+    # If not found in inventory, check room objects
+    room_object = None
     if not inv_object:
-        feedback_messages.append(f"You don't have '{object_name}' in your inventory.")
+        current_room = game_master.rooms.get(player_char.current_room_id)
+        if current_room:
+            for obj in current_room.objects.values():
+                if obj.name.lower() == object_name.lower():
+                    room_object = obj
+                    break
+    
+    # If neither inventory nor room object found, return error
+    if not inv_object and not room_object:
+        feedback_messages.append(f"You don't see '{object_name}' anywhere nearby.")
         return events_generated, feedback_messages
+    
+    # Use inventory object if available, otherwise use room object
+    use_object = inv_object if inv_object else room_object
 
     # Helper: get entity interactions dict
     def _get_interactions(entity: Any) -> Dict[str, Any]:
@@ -1700,7 +1715,7 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
             value = eff.get('value')
             target_entity = None
             if target_ref in ('self', 'object', 'inventory_object'):
-                target_entity = context.get('inv_object')
+                target_entity = context.get('inv_object') or context.get('use_object')
             elif target_ref in ('target', 'target_object'):
                 target_entity = context.get('target_object')
             elif target_ref == 'room':
@@ -1812,14 +1827,15 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
     # Compose common context for interactions
     context = {
         'player_char': player_char,
-        'inv_object': inv_object,
+        'inv_object': inv_object,  # Keep for backward compatibility
+        'use_object': use_object,  # The actual object being used
         'target_object': target_object,
         'room': current_room,
     }
 
-    # Try interactions on inventory object, then target object, then room, then character (any entity can host interactions)
+    # Try interactions on use object, then target object, then room, then character (any entity can host interactions)
     applied = False
-    for entity in (inv_object, target_object, current_room, player_char):
+    for entity in (use_object, target_object, current_room, player_char):
         interactions = _get_interactions(entity)
         if isinstance(interactions, dict) and 'use' in interactions:
             applied = _process_interactions(interactions['use'], context) or applied
@@ -1827,39 +1843,39 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
     if applied:
         # Provide generic feedback based on lit state if present (common UX)
         try:
-            is_lit_val = inv_object.get_property('is_lit', None)
+            is_lit_val = use_object.get_property('is_lit', None)
         except Exception:
-            is_lit_val = getattr(inv_object, 'properties', {}).get('is_lit', None)
+            is_lit_val = getattr(use_object, 'properties', {}).get('is_lit', None)
         if is_lit_val is True:
-            feedback_messages.append(f"You light the {inv_object.name}.")
+            feedback_messages.append(f"You light the {use_object.name}.")
         elif is_lit_val is False:
             # If explicitly false after a toggle, assume extinguished
-            feedback_messages.append(f"You extinguish the {inv_object.name}.")
+            feedback_messages.append(f"You extinguish the {use_object.name}.")
         else:
             if target_object:
-                feedback_messages.append(f"You use the {inv_object.name} on the {target_object.name}.")
+                feedback_messages.append(f"You use the {use_object.name} on the {target_object.name}.")
             else:
-                feedback_messages.append(f"You use the {inv_object.name}.")
+                feedback_messages.append(f"You use the {use_object.name}.")
         return events_generated, feedback_messages
 
     # If no interactions, and no explicit target provided and the item is a tool, perform default behavior
-    tool_type = inv_object.get_property('tool_type', None)
+    tool_type = use_object.get_property('tool_type', None)
     if not target and tool_type == 'lighting':
         # Toggle is_lit property
-        currently_lit = bool(inv_object.get_property('is_lit', False))
+        currently_lit = bool(use_object.get_property('is_lit', False))
         new_state = not currently_lit
         try:
-            inv_object.set_property('is_lit', new_state)
+            use_object.set_property('is_lit', new_state)
         except Exception:
             # Fallback: ensure properties dict exists
-            if getattr(inv_object, 'properties', None) is None:
-                inv_object.properties = {}
-            inv_object.properties['is_lit'] = new_state
+            if getattr(use_object, 'properties', None) is None:
+                use_object.properties = {}
+            use_object.properties['is_lit'] = new_state
         action_word = "light" if new_state else "extinguish"
         # Feedback and events
-        feedback_messages.append(f"You {action_word} the {inv_object.name}.")
+        feedback_messages.append(f"You {action_word} the {use_object.name}.")
         events_generated.append(Event(
-            message=f"{player_char.name} {action_word}s the {inv_object.name}.",
+            message=f"{player_char.name} {action_word}s the {use_object.name}.",
             event_type="player_action",
             source_room_id=player_char.current_room_id,
             timestamp=datetime.now().isoformat(),
