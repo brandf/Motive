@@ -853,6 +853,7 @@ entity_definitions:
           - upward
           - hills
           - trail
+          - up
       objects:
         wooden_sign:
           object_type_id: wooden_sign
@@ -1002,6 +1003,8 @@ entity_definitions:
           - forest
           - woods
           - path
+          - down
+          - back
       objects:
         star_charts:
           object_type_id: star_charts

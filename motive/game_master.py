@@ -1702,10 +1702,13 @@ class GameMaster:
         if not self.game_actions:
             return ["look", "help"]  # Fallback if no actions loaded
         
+        # Get player's current AP for filtering
+        current_ap = player_char.action_points if player_char else 20  # Default to 20 if no player
+        
         # Define priority categories for example actions
         priority_categories = ["observation", "movement", "communication", "inventory", "interaction"]
         
-        # Collect actions by category
+        # Collect actions by category, filtering by AP cost
         actions_by_category = {}
         for action_id, action_cfg in self.game_actions.items():      
             # Handle both Pydantic objects and dictionaries from merged config
@@ -1713,6 +1716,21 @@ class GameMaster:
                 category = action_cfg.category or "other"
             else:
                 category = action_cfg.get('category', 'other')
+            
+            # Get action cost for filtering
+            if hasattr(action_cfg, 'cost'):
+                cost = action_cfg.cost
+            else:
+                cost = action_cfg.get('cost', 0)
+            
+            # Handle cost (can be int or dict with value)
+            if isinstance(cost, dict):
+                cost = cost.get('value', cost.get('cost', 0))
+            
+            # Filter out actions that exceed current AP (except help which is always shown)
+            if action_id != "help" and cost > current_ap:
+                continue
+                
             if category not in actions_by_category:
                 actions_by_category[category] = []
             # Handle both Pydantic objects and dictionaries from merged config
@@ -1757,6 +1775,10 @@ class GameMaster:
         # Always add help as the last action
         if "help" in self.game_actions and "help" not in selected_actions:
             selected_actions.append("help")
+        
+        # If no actions are affordable, at least show help
+        if not selected_actions and "help" in self.game_actions:
+            selected_actions = ["help"]
         
         return selected_actions
 
@@ -1830,10 +1852,24 @@ class GameMaster:
         # Generate example actions dynamically
         example_actions = self._get_example_actions(player_char)
         
-        # Create action display without AP info (AP will be shown separately)
+        # Create action display with AP costs
         action_display = "⚔️ Example actions:\n"
         for action in example_actions:
-            action_display += f"  > {action}\n"
+            # Get action cost for display
+            action_cfg = self.game_actions.get(action)
+            if action_cfg:
+                if hasattr(action_cfg, 'cost'):
+                    cost = action_cfg.cost
+                else:
+                    cost = action_cfg.get('cost', 0)
+                
+                # Handle cost (can be int or dict with value)
+                if isinstance(cost, dict):
+                    cost = cost.get('value', cost.get('cost', 0))
+                
+                action_display += f"  > {action} ({cost} AP)\n"
+            else:
+                action_display += f"  > {action}\n"
         
         # Add applicable hints
         player_name = None
