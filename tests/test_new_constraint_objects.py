@@ -29,8 +29,7 @@ def test_tiny_gem_pickup():
         name="Tiny Gem",
         description="A small, precious gem that sparkles in the light.",
         current_location_id="test_room",
-        properties={"required_size": "tiny"},
-        tags=["requires_size"]
+        properties={"required_size": "tiny", "requires_size": True}
     )
     
     # Create small player
@@ -85,8 +84,7 @@ def test_large_sword_size_constraint():
         name="Large Sword",
         description="A massive two-handed sword that requires great strength to wield.",
         current_location_id="test_room",
-        properties={"required_size": "large"},
-        tags=["requires_size"]
+        properties={"required_size": "large", "requires_size": True}
     )
     
     # Create small player (should fail)
@@ -159,8 +157,7 @@ def test_warrior_armor_class_constraint():
         name="Warrior's Armor",
         description="Heavy plate armor that only warriors can wear.",
         current_location_id="test_room",
-        properties={"required_class": "warrior"},
-        tags=["requires_class"]
+        properties={"required_class": "warrior", "requires_class": True}
     )
     
     # Create mage player (should fail)
@@ -233,8 +230,7 @@ def test_legendary_sword_level_constraint():
         name="Legendary Sword",
         description="A sword of immense power that only high-level heroes can wield.",
         current_location_id="test_room",
-        properties={"required_level": 15},
-        tags=["requires_level"]
+        properties={"required_level": 15, "requires_level": True}
     )
     
     # Create low-level player (should fail)
@@ -307,8 +303,7 @@ def test_paladin_sword_multi_constraint():
         name="Paladin's Sword",
         description="A holy sword that requires both warrior class and high level.",
         current_location_id="test_room",
-        properties={"required_class": "warrior", "required_level": 10},
-        tags=["requires_class", "requires_level"]
+        properties={"required_class": "warrior", "required_level": 10, "requires_class": True, "requires_level": True}
     )
     
     # Create mage player (should fail on class)
@@ -405,8 +400,7 @@ def test_elven_artifact_custom_constraints():
                 {"type": "race", "value": "elf"},
                 {"type": "alignment", "value": "good"}
             ]
-        },
-        tags=[]
+        }
     )
     
     # Create human player (should fail on race)
@@ -498,8 +492,7 @@ def test_immovable_objects():
         name="Ancient Altar",
         description="A sacred altar that has been in this place for centuries.",
         current_location_id="test_room",
-        properties={},
-        tags=["immovable", "magically_bound"]
+        properties={"immovable": True, "magically_bound": True}
     )
     
     # Create town statue (immovable + too heavy)
@@ -508,8 +501,7 @@ def test_immovable_objects():
         name="Town Statue",
         description="A large statue of the town's founder, too heavy to move.",
         current_location_id="test_room",
-        properties={},
-        tags=["immovable", "too_heavy"]
+        properties={"immovable": True, "too_heavy": True}
     )
     
     # Create any player

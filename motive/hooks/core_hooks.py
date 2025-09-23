@@ -1083,6 +1083,10 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
     current_room.remove_object(target_object.id)
     player_char.add_item_to_inventory(target_object)
     
+    # Generate timestamp
+    from datetime import datetime
+    timestamp = datetime.now().isoformat()
+    
     # Generate events
     events = []
     feedback_messages = []
@@ -1106,9 +1110,53 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
                         player_char.set_property(property_name, property_value)
                         feedback_messages.append(f"You discovered crucial information! {property_name.replace('_', ' ').title()}: {property_value}")
     
-    # Generate timestamp
-    from datetime import datetime
-    timestamp = datetime.now().isoformat()
+    # Automatically trigger pickup_action interaction when picking up an object
+    # Default to 'look' if no pickup_action is specified
+    pickup_action = 'look'  # Default behavior
+    if hasattr(target_object, 'properties') and target_object.properties:
+        pickup_action = target_object.properties.get('pickup_action', 'look')
+    
+    # Process the pickup_action interaction
+    if hasattr(target_object, 'interactions') and target_object.interactions and pickup_action in target_object.interactions:
+        action_interaction = target_object.interactions[pickup_action]
+        if 'effects' in action_interaction:
+            for effect in action_interaction['effects']:
+                if effect.get('type') == 'increment_property':
+                    property_name = effect.get('property')
+                    increment_value = effect.get('increment_value', 1)
+                    if property_name:
+                        current_value = player_char.properties.get(property_name, 0)
+                        player_char.set_property(property_name, current_value + increment_value)
+                        feedback_messages.append(f"You discovered crucial information! {property_name.replace('_', ' ').title()}: {current_value + increment_value}")
+                elif effect.get('type') == 'set_property':
+                    property_name = effect.get('property')
+                    property_value = effect.get('value')
+                    if property_name:
+                        player_char.set_property(property_name, property_value)
+                        feedback_messages.append(f"You discovered crucial information! {property_name.replace('_', ' ').title()}: {property_value}")
+                elif effect.get('type') == 'generate_event':
+                    # Generate the event from the pickup_action interaction
+                    message = effect.get('message', '').replace('{{player_name}}', player_char.get_display_name())
+                    # Replace player property placeholders
+                    if '{{player_property:' in message:
+                        import re
+                        def replace_property(match):
+                            prop_name = match.group(1)
+                            prop_value = player_char.properties.get(prop_name, 0)
+                            return str(prop_value)
+                        message = re.sub(r'\{\{player_property:([^}]+)\}\}', replace_property, message)
+                    
+                    observers = effect.get('observers', ['room_characters'])
+                    action_event = Event(
+                        message=message,
+                        event_type="action_event",
+                        source_room_id=player_char.current_room_id,
+                        timestamp=timestamp,
+                        related_object_id=target_object.id,
+                        related_player_id=player_char.id,
+                        observers=observers
+                    )
+                    events.append(action_event)
     
     # Event for the player who picked up the item
     pickup_event = Event(

@@ -122,7 +122,8 @@ rooms:
         name: Test Object
         description: A simple test object
         current_room_id: test_room
-    tags: ["test"]
+    properties:
+      test: true
     properties: {}
 
   test_room_2:
@@ -132,7 +133,8 @@ rooms:
     exits:
       south: test_room
     objects: {}
-    tags: ["test"]
+    properties:
+      test: true
     properties: {}
 
 # Define object types directly
@@ -141,8 +143,9 @@ object_types:
     id: test_object
     name: Test Object
     description: A simple test object
-    tags: ["portable", "test"]
     properties:
+      portable: true
+      test: true
       value: 42
 
 # Define character types directly
@@ -153,7 +156,8 @@ character_types:
     description: A brave adventurer
     backstory: "A brave adventurer for testing"
     motive: "Defeat evil and test the system"
-    tags: ["test"]
+    properties:
+      test: true
     properties:
       level: 1
       health: 100

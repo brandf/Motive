@@ -14,8 +14,7 @@ def test_immovable_constraint():
         name="Fountain",
         description="A stone fountain",
         current_location_id="test_room",
-        properties={},
-        tags=["immovable"]
+        properties={"immovable": True}
     )
     
     # Create test player
@@ -46,8 +45,7 @@ def test_size_constraint():
         name="Massive Boulder",
         description="A massive boulder",
         current_location_id="test_room",
-        properties={"required_size": "large"},
-        tags=["requires_size"]
+        properties={"required_size": "large", "requires_size": True}
     )
     
     # Create small player
@@ -97,8 +95,7 @@ def test_class_constraint():
         name="Warrior's Blade",
         description="A sword for warriors only",
         current_location_id="test_room",
-        properties={"required_class": "warrior"},
-        tags=["requires_class"]
+        properties={"required_class": "warrior", "requires_class": True}
     )
     
     # Create mage player
@@ -148,8 +145,7 @@ def test_level_constraint():
         name="Legendary Artifact",
         description="A powerful artifact",
         current_location_id="test_room",
-        properties={"required_level": 10},
-        tags=["requires_level"]
+        properties={"required_level": 10, "requires_level": True}
     )
     
     # Create low-level player
@@ -204,8 +200,7 @@ def test_custom_constraints():
                 {"type": "alignment", "value": "good"},
                 {"type": "race", "value": "elf"}
             ]
-        },
-        tags=[]
+        }
     )
     
     # Create player meeting requirements
@@ -258,9 +253,11 @@ def test_multiple_constraints():
         properties={
             "required_size": "large",
             "required_class": "warrior",
-            "required_level": 5
-        },
-        tags=["requires_size", "requires_class", "requires_level"]
+            "required_level": 5,
+            "requires_size": True,
+            "requires_class": True,
+            "requires_level": True
+        }
     )
     
     # Create player meeting all requirements
@@ -310,8 +307,7 @@ def test_inventory_transfer_validation():
         name="Constrained Item",
         description="An item with constraints",
         current_location_id="test_room",
-        properties={"required_size": "medium"},
-        tags=["requires_size"]
+        properties={"required_size": "medium", "requires_size": True}
     )
     
     # Create players
@@ -371,8 +367,7 @@ def test_size_hierarchy():
             name=f"{size_name.title()} Object",
             description=f"An object requiring {size_name} size",
             current_location_id="test_room",
-            properties={"required_size": size_name},
-            tags=["requires_size"]
+            properties={"required_size": size_name, "requires_size": True}
         )
         
         # Test with each player size

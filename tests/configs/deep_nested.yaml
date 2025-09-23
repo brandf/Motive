@@ -11,7 +11,9 @@ character_types:
     name: Deep Character
     description: A character from a deeply nested config
     backstory: A character created for testing deep nesting
-    tags: ["deep", "nested", "test"]
     properties:
+      deep: true
+      nested: true
+      test: true
       depth: 3
 

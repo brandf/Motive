@@ -2,6 +2,9 @@ entity_definitions:
   detective_thorne:
     behaviors:
     - character
+    attributes:
+      name: Detective James Thorne
+      description: A seasoned detective with a sharp mind and unwavering determination. Detective Thorne is driven by the need to avenge his murdered partner and bring the Shadowed Hand cult to justice. His investigative skills are unmatched, and he approaches each case with methodical precision and deep personal investment.
     properties:
       # Phase 1: Initial Evidence Gathering
       evidence_found: { type: number, default: 0 }
@@ -83,7 +86,7 @@ entity_definitions:
       # Phase 1: Initial Evidence Gathering (Foundation)
       - type: character_has_property
         property: evidence_found
-        value: 3
+        value: 2
       # Branch A: Cult Structure Investigation
       - type: character_has_property
         property: cult_hierarchy_discovered
@@ -149,6 +152,9 @@ entity_definitions:
   father_marcus:
     behaviors:
     - character
+    attributes:
+      name: Father Marcus
+      description: A devoted priest who has been secretly investigating the cult's activities. Father Marcus is torn between his faith and the growing darkness in Blackwater. He has been studying celestial alignments and developing confrontation strategies to combat the Shadowed Hand cult.
     properties:
       # Phase 1: Spiritual Foundation
       spiritual_doubts_confronted: { type: boolean, default: false }
@@ -256,8 +262,10 @@ entity_definitions:
   guild_master_elena:
     behaviors:
     - character
+    attributes:
+      name: Guild Master Elena
+      description: A seasoned adventurer who retired to become the leader of Blackwater's Adventurer's Guild. Elena is known for her tactical expertise and protective nature. She has been coordinating efforts to investigate the recent disappearances and cult activity in the town.
     properties: {}
-    name: Guild Master Elena
     backstory: "A seasoned adventurer who retired to become the leader of Blackwater's\
       \ Adventurer's \nGuild, Elena has seen her share of battles and knows the value\
       \ of information. \nHer desk is covered with reports and correspondence, and\
@@ -349,8 +357,10 @@ entity_definitions:
   mayor_victoria_blackwater:
     behaviors:
     - character
+    attributes:
+      name: Mayor Victoria Blackwater
+      description: The charismatic mayor who disappeared three months ago, leaving the town in chaos. Victoria was known for her strong leadership and dedication to Blackwater's prosperity. Her disappearance marked the beginning of the town's decline into darkness and cult activity.
     properties: {}
-    name: Mayor Victoria Blackwater
     backstory: "The charismatic mayor who disappeared three months ago, leaving the\
       \ town in chaos. \nShe was secretly investigating the cult's infiltration of\
       \ her own administration and \nwas close to exposing them when she vanished.\
@@ -444,8 +454,10 @@ entity_definitions:
   dr_sarah_chen:
     behaviors:
     - character
+    attributes:
+      name: Dr. Sarah Chen
+      description: A skilled physician who arrived in Blackwater six months ago, ostensibly to provide medical care to the town. Dr. Chen is actually a cult infiltrator who has been using her position to gather information and manipulate the townspeople. She maintains a facade of helpfulness while secretly advancing the cult's agenda.
     properties: {}
-    name: Dr. Sarah Chen
     backstory: "A skilled physician who arrived in Blackwater six months ago, ostensibly\
       \ to help \nwith the town's medical needs. She's actually a former cult member\
       \ who defected \nand is now trying to atone by healing the sick and injured.\
@@ -542,6 +554,9 @@ entity_definitions:
   captain_marcus_omalley:
     behaviors:
     - character
+    attributes:
+      name: Captain Marcus O'Malley
+      description: The captain of Blackwater's town guard, responsible for maintaining order and investigating crimes. Captain O'Malley is a dedicated law enforcement officer who has been working to uncover the truth behind the recent disappearances and cult activity. He maintains a guard post at the bank and coordinates with other investigators.
     properties:
       # Phase 1: Evidence Gathering
       corruption_evidence: { type: number, default: 0 }
@@ -643,8 +658,10 @@ entity_definitions:
   lysander_the_wanderer:
     behaviors:
     - character
+    attributes:
+      name: Lysander the Wanderer
+      description: A traveling scholar and former member of a secret order that opposes dark cults. Lysander has extensive knowledge of ancient texts, celestial phenomena, and cult practices. He arrived in Blackwater to investigate the Shadowed Hand cult and has been studying their methods and timing.
     properties: {}
-    name: Lysander the Wanderer
     backstory: "A traveling scholar and former member of a secret order that opposes\
       \ dark cults. \nHe arrived in Blackwater just before the disappearances began,\
       \ claiming to be \nresearching local folklore. He has ancient knowledge about\
@@ -742,8 +759,10 @@ entity_definitions:
   bella_whisper_nightshade:
     behaviors:
     - character
+    attributes:
+      name: Bella "Whisper" Nightshade
+      description: A former thief and current information broker who runs a network of informants throughout Blackwater. Bella has her finger on the pulse of the town's underground activities and knows many secrets about the cult's operations. She operates from the Thieves' Den and provides valuable intelligence to those who can afford her services.
     properties: {}
-    name: Bella "Whisper" Nightshade
     backstory: "A former thief and current information broker who runs a network of\
       \ spies throughout \nthe region. She knows everyone's secrets and sells information\
       \ to the highest bidder. \nShe's been playing both sides - selling information\

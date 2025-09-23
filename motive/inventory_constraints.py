@@ -33,7 +33,7 @@ def check_inventory_constraints(
     """
     
     # Check basic immovable constraints
-    if "immovable" in object_to_add.tags:
+    if object_to_add.properties.get('immovable', False):
         error_msg = f"Cannot perform '{action_name}': Cannot add '{object_to_add.name}' to inventory - it is immovable."
         error_event = Event(
             message=f"{target_player.name} attempts to add the {object_to_add.name} to their inventory, but it is immovable.",
@@ -47,7 +47,7 @@ def check_inventory_constraints(
         return False, error_msg, error_event
     
     # Check weight constraints
-    if "too_heavy" in object_to_add.tags:
+    if object_to_add.properties.get('too_heavy', False):
         error_msg = f"Cannot perform '{action_name}': Cannot add '{object_to_add.name}' to inventory - it is too heavy."
         error_event = Event(
             message=f"{target_player.name} attempts to add the {object_to_add.name} to their inventory, but it is too heavy.",
@@ -61,7 +61,7 @@ def check_inventory_constraints(
         return False, error_msg, error_event
     
     # Check magical binding constraints
-    if "magically_bound" in object_to_add.tags:
+    if object_to_add.properties.get('magically_bound', False):
         error_msg = f"Cannot perform '{action_name}': Cannot add '{object_to_add.name}' to inventory - it is magically bound to its location."
         error_event = Event(
             message=f"{target_player.name} attempts to add the {object_to_add.name} to their inventory, but it is magically bound to this location.",
@@ -75,7 +75,7 @@ def check_inventory_constraints(
         return False, error_msg, error_event
     
     # Check size-based constraints
-    if "requires_size" in object_to_add.tags:
+    if object_to_add.properties.get('requires_size', False):
         required_size = object_to_add.properties.get("required_size", "medium")
         player_size = target_player.properties.get("size", "medium")
         
@@ -106,7 +106,7 @@ def check_inventory_constraints(
             return False, error_msg, error_event
     
     # Check class-based constraints
-    if "requires_class" in object_to_add.tags:
+    if object_to_add.properties.get('requires_class', False):
         required_class = object_to_add.properties.get("required_class", "")
         player_class = target_player.properties.get("class", "")
         
@@ -124,7 +124,7 @@ def check_inventory_constraints(
             return False, error_msg, error_event
     
     # Check level-based constraints
-    if "requires_level" in object_to_add.tags:
+    if object_to_add.properties.get('requires_level', False):
         required_level = object_to_add.properties.get("required_level", 1)
         player_level = target_player.properties.get("level", 1)
         

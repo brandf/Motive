@@ -34,6 +34,9 @@ class Character:
         self.aliases = aliases if aliases else []
         self.short_name = short_name
         
+        # Initialize evidence system properties
+        self._initialize_evidence_properties()
+        
         # Handle motive assignment - prioritize selected_motive, then motives, then legacy motive
         if selected_motive:
             self.selected_motive = selected_motive
@@ -105,7 +108,18 @@ class Character:
         self.properties[key] = value
 
     def get_property(self, key: str, default: Any = None) -> Any:
-        return self.properties.get(key, default)
+        # First check the properties dictionary
+        if key in self.properties:
+            return self.properties[key]
+        
+        # Then check if it's a computed property (class attribute with @property decorator)
+        if hasattr(self.__class__, key):
+            attr = getattr(self.__class__, key)
+            if hasattr(attr, 'fget'):  # This indicates it's a property
+                return getattr(self, key)
+        
+        # Fall back to default
+        return default
 
     def get_introduction_message(self) -> str:
         """Generate a character introduction message for the player."""
@@ -285,6 +299,62 @@ class Character:
             return f"✅ **MOTIVE STATUS**: Your motive '{self.selected_motive.id}' is currently SUCCEEDING and not failing. Keep it up!"
         
         return None  # Neither succeeding nor failing - no status update needed
+
+    def _initialize_evidence_properties(self):
+        """Initialize evidence system properties with unique flags for each piece of evidence."""
+        # Individual evidence flags - each piece of evidence gets its own unique flag
+        evidence_flags = [
+            'notice_board_found',
+            'fresh_evidence_found',
+            'partner_evidence_found',
+            'cult_history_found',
+            'ritual_timing_found',
+            'church_records_found',
+            'witness_testimony_found',
+            'town_records_found',
+            'missing_persons_log_found',
+            'local_newspaper_found',
+            'editor_notes_found',
+            'graveyard_epitaphs_found',
+            'priest_diary_found',
+            'sacred_map_found',
+            'ritual_texts_found',
+            'astronomers_notes_found',
+            'ancient_calendar_found',
+            'ritual_schedule_found'
+        ]
+        
+        # Initialize all evidence flags to False if not already set
+        for flag in evidence_flags:
+            if flag not in self.properties:
+                self.properties[flag] = False
+
+    @property
+    def evidence_found(self) -> int:
+        """Computed property that counts the number of unique evidence pieces found.
+        This prevents 'cheesing' by looking at the same evidence multiple times."""
+        evidence_flags = [
+            'notice_board_found',
+            'fresh_evidence_found',
+            'partner_evidence_found',
+            'cult_history_found',
+            'ritual_timing_found',
+            'church_records_found',
+            'witness_testimony_found',
+            'town_records_found',
+            'missing_persons_log_found',
+            'local_newspaper_found',
+            'editor_notes_found',
+            'graveyard_epitaphs_found',
+            'priest_diary_found',
+            'sacred_map_found',
+            'ritual_texts_found',
+            'astronomers_notes_found',
+            'ancient_calendar_found',
+            'ritual_schedule_found'
+        ]
+        
+        return sum(1 for flag in evidence_flags if self.properties.get(flag, False))
 
     def __repr__(self):
         return f"Character(id='{self.id}', name='{self.name}', room='{self.current_room_id}', ap={self.action_points})"

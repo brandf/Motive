@@ -165,6 +165,7 @@ Each workflow has: purpose, when to use, required inputs, confidence gate, steps
 - **Inputs**: Failing test name/path, error message/trace, recent changes (if any)
 - **Confidence gate**: Proceed to run `motive` only at 9–10/10 confidence; otherwise stick to tests
 - **Steps**:
+  - **Check both game.log AND player logs**: When debugging game run issues, always check the player chat logs (`logs/*/Player_*_chat.log`) to confirm what players actually saw. The game.log shows system events, but player logs show the actual information delivered to AI players. This is critical for debugging narrative guidance, room descriptions, and object interactions.
   1. Reproduce with `pytest` targeted tests
   2. Add/adjust a failing test to capture the defect precisely
   3. Implement minimal fix; re-run targeted tests, then full suite
@@ -403,6 +404,7 @@ def test_whisper_parsing_edge_case():
 - **Actions should be verbs, parameters should be nouns**: Follow the pattern of `look inventory`, `pickup sword`, `move north` rather than `inventory`, `pickup sword`, `move north`
 - **Consistent naming conventions**: Use clear, descriptive names that follow established patterns
 - **Extend existing actions over creating new ones**: When possible, extend existing actions (like `look inventory`) rather than creating redundant actions
+- **Objects vs Rooms distinction**: Objects are things you can **pick up** (torch, sword, book). Rooms are places you can **enter** (mausoleum, church, library). Never make a building/structure an object - it should be a room with exits.
 
 ## Motive-Specific Policies
 - **Observation delivery and clearing**: Present queued observations in the player prompt and clear them only after the message is constructed/sent

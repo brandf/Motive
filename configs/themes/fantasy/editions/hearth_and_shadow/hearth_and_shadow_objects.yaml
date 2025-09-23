@@ -4,36 +4,61 @@ entity_definitions:
     - object
     attributes:
       name: Notice Board
-      description: A weathered wooden board covered with missing person posters and town announcements. Recent postings suggest a pattern of disappearances that could be connected to your investigation. You can read or examine this board.
+      description: A weathered wooden board covered with missing person posters and
+        town announcements. Recent postings suggest a pattern of disappearances that
+        could be connected to your investigation. The notices mention that Father
+        Marcus at the church has been investigating these disappearances and that
+        there are rumors of cult activity in hidden locations around town. One notice
+        specifically mentions that the cult's rituals are timed to celestial events.
+        You can read or examine this board.
     properties:
       readable: true
-      text: |
-        **MISSING PERSONS:**
-        • Mayor Thompson - Last seen 3 days ago near the Old Forest Path. Reward: 100 gold coins for information.
-        • Sarah Chen's daughter - Missing since the mayor's disappearance. Desperate mother seeking help.
-        • Three townsfolk from Market District - Vanished without trace. Pattern suggests cult activity.
+      text: '**MISSING PERSONS:**
+
+        • Mayor Thompson - Last seen 3 days ago near the Old Forest Path. Reward:
+        100 gold coins for information.
+
+        • Sarah Chen''s daughter - Missing since the mayor''s disappearance. Desperate
+        mother seeking help.
+
+        • Three townsfolk from Market District - Vanished without trace. Pattern suggests
+        cult activity.
+
         
         **TOWN ANNOUNCEMENTS:**
-        • Guard Captain O'Malley requests all citizens report suspicious activities to the bank guard post.
-        • Adventurer's Guild offering protection services - contact Guild Master Elena at the tavern.
-        • Church services suspended due to "unforeseen circumstances" - Father Marcus unavailable.
+
+        • Guard Captain O''Malley requests all citizens report suspicious activities
+        to the bank guard post.
+
+        • Adventurer''s Guild offering protection services - contact Guild Master
+        Elena at the tavern.
+
+        • Church services suspended due to "unforeseen circumstances" - Father Marcus
+        unavailable.
+
         
         **REWARD POSTERS:**
+
         • Information about cult symbols: 50 gold coins
+
         • Location of underground tunnels: 75 gold coins
+
         • Evidence of recent ritual activity: 100 gold coins
+
+        '
     action_aliases:
       read: look
       examine: look
     interactions:
       look:
         effects:
-        - type: increment_property
+        - type: set_property
           target: player
-          property: evidence_found
-          increment_value: 1
+          property: notice_board_found
+          value: true
         - type: generate_event
-          message: '{{player_name}} examines the notice board and finds important information! Evidence found: {{player_property:evidence_found}}/3'
+          message: '{{player_name}} examines the notice board and finds important
+            information!'
           observers:
           - room_characters
   broken_fountain:
@@ -47,6 +72,13 @@ entity_definitions:
       size: large
     action_aliases:
       examine: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the broken fountain.'
+          observers:
+          - room_characters
   bar:
     behaviors:
     - object
@@ -69,6 +101,13 @@ entity_definitions:
     action_aliases:
       read: look
       examine: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the quest board.'
+          observers:
+          - room_characters
   guild_master_desk:
     behaviors:
     - object
@@ -85,6 +124,13 @@ entity_definitions:
       investigate: look
       examine: look
       read: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the guild master''s desk.'
+          observers:
+          - room_characters
   weapon_rack:
     behaviors:
     - object
@@ -96,6 +142,13 @@ entity_definitions:
       size: large
     action_aliases:
       examine: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Weapon Rack.'
+          observers:
+          - room_characters
   stolen_goods:
     behaviors:
     - object
@@ -118,6 +171,13 @@ entity_definitions:
     action_aliases:
       read: look
       examine: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Secret Documents.'
+          observers:
+          - room_characters
   raven_chair:
     behaviors:
     - object
@@ -139,6 +199,13 @@ entity_definitions:
     action_aliases:
       examine: look
       investigate: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Confession Booth.'
+          observers:
+          - room_characters
   crypt_entrance:
     behaviors:
     - object
@@ -151,15 +218,13 @@ entity_definitions:
     action_aliases:
       examine: look
       investigate: look
-  mausoleum:
-    behaviors:
-    - object
-    attributes:
-      name: Mausoleum
-      description: A large stone mausoleum with doors that seem to be slightly ajar.
-    properties:
-      immovable: true
-      size: huge
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Crypt Entrance.'
+          observers:
+          - room_characters
   fresh_graves:
     behaviors:
     - object
@@ -202,6 +267,13 @@ entity_definitions:
     action_aliases:
       read: look
       investigate: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Bank Ledgers.'
+          observers:
+          - room_characters
   guard_post:
     behaviors:
     - object
@@ -246,6 +318,13 @@ entity_definitions:
       read: look
       examine: look
       investigate: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Cult Symbols.'
+          observers:
+          - room_characters
   evidence_activity:
     behaviors:
     - object
@@ -308,94 +387,159 @@ entity_definitions:
       investigate: look
       examine: look
     text: The cult's influence grows stronger each day. I fear they have infiltrated
-      the town guard. Father Marcus seems troubled - I must speak with him. The
-      disappearances are not random - they're targeting specific people. I've hidden
-      evidence in the bank vault. If something happens to me, find Detective Thorne.
+      the town guard. Father Marcus seems troubled - I must speak with him. The disappearances
+      are not random - they're targeting specific people. I've hidden evidence in
+      the bank vault. If something happens to me, find Detective Thorne.
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Mayor''s Journal.'
+          observers:
+          - room_characters
   cult_ritual_book:
     behaviors:
     - object
     attributes:
       name: Cult Ritual Book
-      description: A dark, leather-bound tome filled with ancient symbols and blood-stained pages.
+      description: A dark, leather-bound tome filled with ancient symbols and blood-stained
+        pages.
     properties:
       readable: true
       pickupable: true
       size: medium
-      pages_read: { type: number, default: 0 }
-      ritual_understood: { type: boolean, default: false }
-      cult_members_identified: { type: boolean, default: false }
-      ritual_timing_known: { type: boolean, default: false }
-      dark_magic_exposure: { type: number, default: 0 }
-      text: 'The Shadowed Hand seeks to summon the Dark Lord through blood sacrifice. The ritual requires seven pure souls, taken during the new moon. The mayor was the first - his blood opened the gateway. The next six must be taken in sequence: the priest, the warrior, the merchant, the child, the innocent, and the betrayer.'
+      pages_read:
+        type: number
+        default: 0
+      ritual_understood:
+        type: boolean
+        default: false
+      cult_members_identified:
+        type: boolean
+        default: false
+      ritual_timing_known:
+        type: boolean
+        default: false
+      dark_magic_exposure:
+        type: number
+        default: 0
+      text: 'The Shadowed Hand seeks to summon the Dark Lord through blood sacrifice.
+        The ritual requires seven pure souls, taken during the new moon. The mayor
+        was the first - his blood opened the gateway. The next six must be taken in
+        sequence: the priest, the warrior, the merchant, the child, the innocent,
+        and the betrayer.'
     computed:
       knowledge_level:
         type: number
-        expr: "pages_read + (ritual_understood ? 2 : 0) + (cult_members_identified ? 2 : 0) + (ritual_timing_known ? 2 : 0)"
+        expr: 'pages_read + (ritual_understood ? 2 : 0) + (cult_members_identified
+          ? 2 : 0) + (ritual_timing_known ? 2 : 0)'
       corruption_risk:
         type: number
-        expr: "dark_magic_exposure + (pages_read * 0.5)"
+        expr: dark_magic_exposure + (pages_read * 0.5)
     affordances:
       - action: read_carefully
         requires:
-          expr: "prop.pages_read < 5"
+        expr: prop.pages_read < 5
         effects:
-          - increment_property: { selector: this, key: pages_read, increment_value: 1 }
-          - increment_property: { selector: this, key: dark_magic_exposure, increment_value: 1 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} reads more of the cult ritual book, learning about their dark plans."
+      - increment_property:
+          selector: this
+          key: pages_read
+          increment_value: 1
+      - increment_property:
+          selector: this
+          key: dark_magic_exposure
+          increment_value: 1
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} reads more of the cult ritual book, learning about
+            their dark plans.'
       - action: study_ritual
         requires:
-          expr: "prop.pages_read >= 3 && prop.ritual_understood == false"
+        expr: prop.pages_read >= 3 && prop.ritual_understood == false
         effects:
-          - set_property: { selector: this, key: ritual_understood, value: true }
-          - increment_property: { selector: this, key: dark_magic_exposure, increment_value: 2 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} studies the ritual details and understands the cult's true plan!"
+      - set_property:
+          selector: this
+          key: ritual_understood
+          value: true
+      - increment_property:
+          selector: this
+          key: dark_magic_exposure
+          increment_value: 2
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} studies the ritual details and understands the
+            cult''s true plan!'
       - action: identify_members
         requires:
-          expr: "prop.pages_read >= 4 && prop.cult_members_identified == false"
+        expr: prop.pages_read >= 4 && prop.cult_members_identified == false
         effects:
-          - set_property: { selector: this, key: cult_members_identified, value: true }
-          - increment_property: { selector: this, key: dark_magic_exposure, increment_value: 1 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} identifies the cult members mentioned in the book!"
+      - set_property:
+          selector: this
+          key: cult_members_identified
+          value: true
+      - increment_property:
+          selector: this
+          key: dark_magic_exposure
+          increment_value: 1
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} identifies the cult members mentioned in the book!'
       - action: learn_timing
         requires:
-          expr: "prop.pages_read >= 5 && prop.ritual_timing_known == false"
+        expr: prop.pages_read >= 5 && prop.ritual_timing_known == false
         effects:
-          - set_property: { selector: this, key: ritual_timing_known, value: true }
-          - increment_property: { selector: this, key: dark_magic_exposure, increment_value: 1 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} learns the exact timing of the cult's ritual!"
+      - set_property:
+          selector: this
+          key: ritual_timing_known
+          value: true
+      - increment_property:
+          selector: this
+          key: dark_magic_exposure
+          increment_value: 1
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} learns the exact timing of the cult''s ritual!'
     triggers:
-      - when: "ritual_understood == true"
-        then:
-          - emit_event:
-              scope: room_characters
-              message: "Detective James now understands the cult's ritual and can work to prevent it!"
-          - increment_property: { selector: player, key: evidence_collected, increment_value: 1 }
-      - when: "cult_members_identified == true"
-        then:
-          - emit_event:
-              scope: room_characters
-              message: "Detective James has identified the cult members and can expose them!"
-          - increment_property: { selector: player, key: evidence_collected, increment_value: 1 }
-      - when: "ritual_timing_known == true"
-        then:
-          - emit_event:
-              scope: room_characters
-              message: "Detective James knows when the cult will strike and can prepare accordingly!"
-          - increment_property: { selector: player, key: evidence_collected, increment_value: 1 }
-      - when: "corruption_risk > 5"
-        then:
-          - emit_event:
-              scope: room_characters
-              message: "Detective James is feeling the corrupting influence of the dark magic in the book."
-          - increment_property: { selector: player, key: cult_corruption, increment_value: 1 }
+    - when: ritual_understood == true
+      then:
+        - emit_event:
+            scope: room_characters
+            message: Detective James now understands the cult's ritual and can work
+              to prevent it!
+        - increment_property:
+            selector: player
+            key: evidence_collected
+            increment_value: 1
+    - when: cult_members_identified == true
+      then:
+        - emit_event:
+            scope: room_characters
+            message: Detective James has identified the cult members and can expose
+              them!
+        - increment_property:
+            selector: player
+            key: evidence_collected
+            increment_value: 1
+    - when: ritual_timing_known == true
+      then:
+        - emit_event:
+            scope: room_characters
+            message: Detective James knows when the cult will strike and can prepare
+              accordingly!
+        - increment_property:
+            selector: player
+            key: evidence_collected
+            increment_value: 1
+    - when: corruption_risk > 5
+      then:
+        - emit_event:
+            scope: room_characters
+            message: Detective James is feeling the corrupting influence of the dark
+              magic in the book.
+        - increment_property:
+            selector: player
+            key: cult_corruption
+            increment_value: 1
   missing_persons_effects:
     behaviors:
     - object
@@ -428,43 +572,86 @@ entity_definitions:
     - object
     attributes:
       name: Fresh Evidence
-      description: A disturbed patch of earth near the fountain with strange markings and bloodstains. Something important happened here recently - the evidence is still fresh and waiting to be examined. You can investigate, examine, read, analyze, decode, or trace this evidence.
+      description: A disturbed patch of earth near the fountain with strange markings
+        and bloodstains. Something important happened here recently - the evidence
+        is still fresh and waiting to be examined. Among the evidence are notes mentioning
+        that the cult operates from multiple locations including an abandoned warehouse
+        and an old library. The notes also reference celestial timing for their rituals
+        and mention that Father Marcus has been developing confrontation strategies.
+        You can investigate, examine, read, analyze, decode, or trace this evidence.
     properties:
       readable: true
       pickupable: true
       size: medium
-      examined: { type: boolean, default: false }
-      investigation_level: { type: number, default: 0 }
-      blood_analyzed: { type: boolean, default: false }
-      symbols_decoded: { type: boolean, default: false }
-      footprints_traced: { type: boolean, default: false }
-      text: |
-        **CRIME SCENE EVIDENCE:**
-        The earth has been recently disturbed in a circular pattern. Strange symbols are carved into the ground, still wet with what appears to be blood. The symbols appear to be some form of ritual marking.
-        
-        **FOOTPRINTS:** Multiple sets of footprints lead away from the site toward the Old Forest Path. The prints suggest 2-3 people were here recently, and one set appears to be dragging something heavy.
-        
-        **BLOOD ANALYSIS:** The blood appears fresh (less than 24 hours old) and there's enough to suggest serious injury or worse.
-        
-        **RITUAL SYMBOLS:** The carved symbols match patterns seen in other parts of town, suggesting this is part of a larger cult ritual.
+      examined:
+        type: boolean
+        default: false
+      investigation_level:
+        type: number
+        default: 0
+      blood_analyzed:
+        type: boolean
+        default: false
+      symbols_decoded:
+        type: boolean
+        default: false
+      footprints_traced:
+        type: boolean
+        default: false
+      text: '**CRIME SCENE EVIDENCE:**
+
+        The earth has been recently disturbed in a circular pattern. Strange symbols
+        are carved into the ground, still wet with what appears to be blood. The symbols
+        appear to be some form of ritual marking.
+
+
+        **FOOTPRINTS:** Multiple sets of footprints lead away from the site toward
+        the Old Forest Path. The prints suggest 2-3 people were here recently, and
+        one set appears to be dragging something heavy.
+
+
+        **BLOOD ANALYSIS:** The blood appears fresh (less than 24 hours old) and there''s
+        enough to suggest serious injury or worse.
+
+
+        **RITUAL SYMBOLS:** The carved symbols match patterns seen in other parts
+        of town, suggesting this is part of a larger cult ritual.
+
+        '
     interactions:
       pickup:
         effects:
-        - type: increment_property
+        - type: set_property
           target: player
-          property: evidence_found
-          increment_value: 1
+          property: fresh_evidence_found
+          value: true
         - type: generate_event
-          message: '{{player_name}} collects fresh evidence from the crime scene! Evidence found: {{player_property:evidence_found}}/3'
+          message: '{{player_name}} collects fresh evidence from the crime scene!'
+          observers:
+          - room_characters
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Fresh Evidence.'
+          observers:
+          - room_characters
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: fresh_evidence_found
+          value: true
+        - type: generate_event
+          message: '{{player_name}} analyzes the fresh evidence and finds crucial clues!'
           observers:
           - room_characters
     computed:
       investigation_complete:
         type: boolean
-        expr: "blood_analyzed && symbols_decoded && footprints_traced"
+        expr: blood_analyzed && symbols_decoded && footprints_traced
       evidence_value:
         type: number
-        expr: "investigation_level * 10"
+        expr: investigation_level * 10
     action_aliases:
       investigate: look
       examine: look
@@ -475,47 +662,78 @@ entity_definitions:
     affordances:
       - action: investigate
         requires:
-          expr: "prop.examined == false"
+        expr: prop.examined == false
         effects:
-          - set_property: { selector: this, key: examined, value: true }
-          - increment_property: { selector: this, key: investigation_level, increment_value: 1 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} begins investigating the crime scene evidence."
+      - set_property:
+          selector: this
+          key: examined
+          value: true
+      - increment_property:
+          selector: this
+          key: investigation_level
+          increment_value: 1
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} begins investigating the crime scene evidence.'
       - action: analyze_blood
         requires:
-          expr: "prop.examined == true && prop.blood_analyzed == false"
+        expr: prop.examined == true && prop.blood_analyzed == false
         effects:
-          - set_property: { selector: this, key: blood_analyzed, value: true }
-          - increment_property: { selector: this, key: investigation_level, increment_value: 1 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} analyzes the blood samples and discovers they belong to the mayor!"
+      - set_property:
+          selector: this
+          key: blood_analyzed
+          value: true
+      - increment_property:
+          selector: this
+          key: investigation_level
+          increment_value: 1
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} analyzes the blood samples and discovers they
+            belong to the mayor!'
       - action: decode_symbols
         requires:
-          expr: "prop.examined == true && prop.symbols_decoded == false"
+        expr: prop.examined == true && prop.symbols_decoded == false
         effects:
-          - set_property: { selector: this, key: symbols_decoded, value: true }
-          - increment_property: { selector: this, key: investigation_level, increment_value: 1 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} decodes the ritual symbols and learns they point to the underground chambers!"
+      - set_property:
+          selector: this
+          key: symbols_decoded
+          value: true
+      - increment_property:
+          selector: this
+          key: investigation_level
+          increment_value: 1
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} decodes the ritual symbols and learns they point
+            to the underground chambers!'
       - action: trace_footprints
         requires:
-          expr: "prop.examined == true && prop.footprints_traced == false"
+        expr: prop.examined == true && prop.footprints_traced == false
         effects:
-          - set_property: { selector: this, key: footprints_traced, value: true }
-          - increment_property: { selector: this, key: investigation_level, increment_value: 1 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} traces the footprints and discovers they lead to the Old Forest Path!"
+      - set_property:
+          selector: this
+          key: footprints_traced
+          value: true
+      - increment_property:
+          selector: this
+          key: investigation_level
+          increment_value: 1
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} traces the footprints and discovers they lead
+            to the Old Forest Path!'
     triggers:
-      - when: "investigation_complete == true"
-        then:
-          - emit_event:
-              scope: room_characters
-              message: "Detective James has completed a thorough investigation of the crime scene evidence!"
-          - increment_property: { selector: player, key: evidence_collected, increment_value: 1 }
+    - when: investigation_complete == true
+      then:
+        - emit_event:
+            scope: room_characters
+            message: Detective James has completed a thorough investigation of the crime
+              scene evidence!
+        - increment_property:
+            selector: player
+            key: evidence_collected
+            increment_value: 1
   suspicious_sounds:
     behaviors:
     - object
@@ -583,7 +801,7 @@ entity_definitions:
           property: is_lit
           toggle: true
         - type: generate_event
-          message: "{player_name} uses {object_name}."
+          message: '{player_name} uses {object_name}.'
           observers:
           - room_characters
   rope:
@@ -601,53 +819,75 @@ entity_definitions:
     - object
     attributes:
       name: Investigation Kit
-      description: A small kit containing magnifying glass, tweezers, and evidence bags.
+      description: A small kit containing magnifying glass, tweezers, and evidence
+        bags.
     properties:
       pickupable: true
       size: small
       tool_type: investigation
-      uses_remaining: { type: number, default: 10 }
-      blood_analysis_enabled: { type: boolean, default: true }
-      fingerprint_analysis_enabled: { type: boolean, default: true }
-      evidence_collection_enabled: { type: boolean, default: true }
+      uses_remaining:
+        type: number
+        default: 10
+      blood_analysis_enabled:
+        type: boolean
+        default: true
+      fingerprint_analysis_enabled:
+        type: boolean
+        default: true
+      evidence_collection_enabled:
+        type: boolean
+        default: true
     computed:
       is_functional:
         type: boolean
-        expr: "uses_remaining > 0"
+        expr: uses_remaining > 0
       analysis_capabilities:
         type: number
-        expr: "(blood_analysis_enabled ? 1 : 0) + (fingerprint_analysis_enabled ? 1 : 0) + (evidence_collection_enabled ? 1 : 0)"
+        expr: '(blood_analysis_enabled ? 1 : 0) + (fingerprint_analysis_enabled ?
+          1 : 0) + (evidence_collection_enabled ? 1 : 0)'
     affordances:
       - action: analyze_blood
         requires:
-          expr: "prop.is_functional == true && prop.blood_analysis_enabled == true"
+        expr: prop.is_functional == true && prop.blood_analysis_enabled == true
         effects:
-          - increment_property: { selector: this, key: uses_remaining, increment_value: -1 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} uses the investigation kit to analyze blood samples."
+      - increment_property:
+          selector: this
+          key: uses_remaining
+          increment_value: -1
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} uses the investigation kit to analyze blood samples.'
       - action: collect_fingerprints
         requires:
-          expr: "prop.is_functional == true && prop.fingerprint_analysis_enabled == true"
+        expr: prop.is_functional == true && prop.fingerprint_analysis_enabled == true
         effects:
-          - increment_property: { selector: this, key: uses_remaining, increment_value: -1 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} uses the investigation kit to collect fingerprint evidence."
+      - increment_property:
+          selector: this
+          key: uses_remaining
+          increment_value: -1
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} uses the investigation kit to collect fingerprint
+            evidence.'
       - action: collect_evidence
         requires:
-          expr: "prop.is_functional == true && prop.evidence_collection_enabled == true"
+        expr: prop.is_functional == true && prop.evidence_collection_enabled == true
         effects:
-          - increment_property: { selector: this, key: uses_remaining, increment_value: -1 }
-          - emit_event:
-              scope: room_characters
-              message: "{{player_name}} uses the investigation kit to collect physical evidence."
+      - increment_property:
+          selector: this
+          key: uses_remaining
+          increment_value: -1
+      - emit_event:
+          scope: room_characters
+          message: '{{player_name}} uses the investigation kit to collect physical
+            evidence.'
     triggers:
-      - when: "uses_remaining <= 0"
-        then:
-          - emit_event:
-              scope: room_characters
-              message: "The investigation kit has run out of supplies and is no longer functional."
+    - when: uses_remaining <= 0
+      then:
+        - emit_event:
+            scope: room_characters
+            message: The investigation kit has run out of supplies and is no longer
+              functional.
   crowbar:
     behaviors:
     - object
@@ -691,8 +931,20 @@ entity_definitions:
     properties:
       pickupable: true
       size: small
-      magical: true
-      shadow_symbol: true
+      usable: true
+      fragile: true
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: dark_power_channeled
+          value: true
+        - type: generate_event
+          message: '{{player_name}} channels power through the Shadow Crystal! Dark
+            energy flows through them!'
+          observers:
+          - room_characters
   hearth_stone:
     behaviors:
     - object
@@ -946,6 +1198,13 @@ entity_definitions:
     action_aliases:
       examine: look
       investigate: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Altar.'
+          observers:
+          - room_characters
   wooden_sign:
     behaviors:
     - object
@@ -956,16 +1215,27 @@ entity_definitions:
       immovable: true
       size: medium
       readable: true
-      text: The writing is too faded to read clearly, but appears to point toward deeper parts of the forest.
+      text: The writing is too faded to read clearly, but appears to point toward
+        deeper parts of the forest.
     action_aliases:
       read: look
       examine: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Wooden Sign.'
+          observers:
+          - room_characters
   partner_evidence:
     behaviors:
     - object
     attributes:
       name: Partner's Evidence
-      description: A bloodstained notebook and a broken badge - the remains of Detective Thorne's murdered partner. The notebook contains crucial information that could break this case wide open. You can read, examine, or investigate this evidence.
+      description: A bloodstained notebook and a broken badge - the remains of Detective
+        Thorne's murdered partner. The notebook contains crucial information that
+        could break this case wide open. You can read, examine, or investigate this
+        evidence.
     properties:
       pickupable: true
       size: small
@@ -974,31 +1244,40 @@ entity_definitions:
       read: look
       examine: look
       investigate: look
-    text: |
-        **PARTNER'S NOTEBOOK:**
-        "Following leads on the Shadowed Hand cult. They're planning something big - a ritual that will change everything. Mayor Thompson knows too much. They're coming for him next. If I don't make it back, tell James... tell him I found the truth."
-        
-        **BROKEN BADGE:**
-        The badge shows signs of struggle. Blood stains suggest the partner fought bravely before being overwhelmed.
+    text: '**PARTNER''S NOTEBOOK:**
+
+      "Following leads on the Shadowed Hand cult. They''re planning something big
+      - a ritual that will change everything. Mayor Thompson knows too much. They''re
+      coming for him next. If I don''t make it back, tell James... tell him I found
+      the truth."
+
+
+      **BROKEN BADGE:**
+
+      The badge shows signs of struggle. Blood stains suggest the partner fought bravely
+      before being overwhelmed.
+
+      '
     interactions:
       look:
         effects:
-        - type: increment_property
+        - type: set_property
           target: player
-          property: evidence_found
-          increment_value: 1
+          property: partner_evidence_found
+          value: true
         - type: generate_event
-          message: '{{player_name}} examines the partner''s evidence and finds crucial clues! Evidence found: {{player_property:evidence_found}}/3'
+          message: '{{player_name}} examines the partner''s evidence and finds crucial
+            clues!'
           observers:
           - room_characters
       pickup:
         effects:
-        - type: increment_property
+        - type: set_property
           target: player
-          property: evidence_found
-          increment_value: 1
+          property: partner_evidence_found
+          value: true
         - type: generate_event
-          message: '{{player_name}} collects the partner''s evidence! Evidence found: {{player_property:evidence_found}}/3'
+          message: '{{player_name}} collects the partner''s evidence!'
           observers:
           - room_characters
       use:
@@ -1008,7 +1287,8 @@ entity_definitions:
           property: mystery_solved
           value: true
         - type: generate_event
-          message: '{{player_name}} pieces together the evidence and solves the mystery of their partner''s death! The truth is revealed!'
+          message: '{{player_name}} pieces together the evidence and solves the mystery
+            of their partner''s death! The truth is revealed!'
           observers:
           - room_characters
   corruption_documents:
@@ -1016,17 +1296,25 @@ entity_definitions:
     - object
     attributes:
       name: Corruption Documents
-      description: Secret financial records and correspondence revealing Captain O'Malley's corruption.
+      description: Secret financial records and correspondence revealing Captain O'Malley's
+        corruption.
     properties:
       pickupable: true
       size: small
       readable: true
-      text: |
-        **SECRET CORRESPONDENCE:**
-        "Captain O'Malley, your monthly payment has been deposited. Continue providing security information. The mayor's disappearance was well-executed. Next target: Father Marcus."
-        
+      text: '**SECRET CORRESPONDENCE:**
+
+        "Captain O''Malley, your monthly payment has been deposited. Continue providing
+        security information. The mayor''s disappearance was well-executed. Next target:
+        Father Marcus."
+
+
         **FINANCIAL RECORDS:**
-        Large sums of money transferred to Captain O'Malley's account from unknown sources. Dates correspond to recent disappearances.
+
+        Large sums of money transferred to Captain O''Malley''s account from unknown
+        sources. Dates correspond to recent disappearances.
+
+        '
     interactions:
       look:
         effects:
@@ -1035,7 +1323,8 @@ entity_definitions:
           property: corruption_evidence
           increment_value: 1
         - type: generate_event
-          message: '{{player_name}} discovers evidence of corruption! Corruption evidence: {{player_property:corruption_evidence}}/2'
+          message: '{{player_name}} discovers evidence of corruption! Corruption evidence:
+            {{player_property:corruption_evidence}}/2'
           observers:
           - room_characters
       use:
@@ -1053,14 +1342,20 @@ entity_definitions:
     - object
     attributes:
       name: Cult Confession
-      description: A detailed confession from a former cult member revealing their plans and methods.
+      description: A detailed confession from a former cult member revealing their
+        plans and methods.
     properties:
       pickupable: true
       size: small
       readable: true
-      text: |
-        **CULT MEMBER'S CONFESSION:**
-        "I was forced to join the Shadowed Hand. They threatened my family. The cult is planning something big - a ritual that will change everything. They have people in high places. I can't say more, but the mayor knows too much. They're coming for him next."
+      text: '**CULT MEMBER''S CONFESSION:**
+
+        "I was forced to join the Shadowed Hand. They threatened my family. The cult
+        is planning something big - a ritual that will change everything. They have
+        people in high places. I can''t say more, but the mayor knows too much. They''re
+        coming for him next."
+
+        '
     interactions:
       look:
         effects:
@@ -1079,7 +1374,8 @@ entity_definitions:
           property: courage_found
           value: true
         - type: generate_event
-          message: '{{player_name}} finds the courage to confront evil! Their faith is strengthened!'
+          message: '{{player_name}} finds the courage to confront evil! Their faith
+            is strengthened!'
           observers:
           - room_characters
   justice_scales:
@@ -1100,7 +1396,8 @@ entity_definitions:
           property: justice_served
           value: true
         - type: generate_event
-          message: '{{player_name}} uses the Scales of Justice to bring the guilty to account! Justice is served!'
+          message: '{{player_name}} uses the Scales of Justice to bring the guilty
+            to account! Justice is served!'
           observers:
           - room_characters
   faith_restoration:
@@ -1121,7 +1418,8 @@ entity_definitions:
           property: faith_restored
           value: true
         - type: generate_event
-          message: '{{player_name}} uses the Sacred Relic and feels their faith restored! Divine strength flows through them!'
+          message: '{{player_name}} uses the Sacred Relic and feels their faith restored!
+            Divine strength flows through them!'
           observers:
           - room_characters
   hidden_safe:
@@ -1129,7 +1427,8 @@ entity_definitions:
     - object
     attributes:
       name: Hidden Safe
-      description: A small safe hidden behind a loose board in the wall. It contains important documents.
+      description: A small safe hidden behind a loose board in the wall. It contains
+        important documents.
     properties:
       immovable: true
       size: small
@@ -1142,7 +1441,8 @@ entity_definitions:
           property: corruption_evidence
           increment_value: 1
         - type: generate_event
-          message: '{{player_name}} opens the hidden safe and finds incriminating documents! Corruption evidence: {{player_property:corruption_evidence}}/2'
+          message: '{{player_name}} opens the hidden safe and finds incriminating
+            documents! Corruption evidence: {{player_property:corruption_evidence}}/2'
           observers:
           - room_characters
   meeting_table:
@@ -1150,17 +1450,23 @@ entity_definitions:
     - object
     attributes:
       name: Meeting Table
-      description: A large wooden table with chairs around it. Maps and documents are spread across its surface.
+      description: A large wooden table with chairs around it. Maps and documents
+        are spread across its surface.
     properties:
       immovable: true
       size: large
       readable: true
-      text: |
-        **MEETING NOTES:**
-        "Captain O'Malley's monthly report: Security patrols adjusted. Mayor's disappearance successful. Next target: Father Marcus. Payment deposited."
-        
+      text: '**MEETING NOTES:**
+
+        "Captain O''Malley''s monthly report: Security patrols adjusted. Mayor''s
+        disappearance successful. Next target: Father Marcus. Payment deposited."
+
+
         **MAPS:**
-        Detailed maps showing the town's layout, guard patrols, and escape routes.
+
+        Detailed maps showing the town''s layout, guard patrols, and escape routes.
+
+        '
     interactions:
       look:
         effects:
@@ -1169,7 +1475,8 @@ entity_definitions:
           property: corruption_evidence
           increment_value: 1
         - type: generate_event
-          message: '{{player_name}} examines the meeting table and finds evidence of corruption! Corruption evidence: {{player_property:corruption_evidence}}/2'
+          message: '{{player_name}} examines the meeting table and finds evidence
+            of corruption! Corruption evidence: {{player_property:corruption_evidence}}/2'
           observers:
           - room_characters
   ancient_tome:
@@ -1177,14 +1484,20 @@ entity_definitions:
     - object
     attributes:
       name: Ancient Tome
-      description: A massive leather-bound book written in an ancient language. It contains knowledge about the cult's origins.
+      description: A massive leather-bound book written in an ancient language. It
+        contains knowledge about the cult's origins.
     properties:
       immovable: true
       size: large
       readable: true
-      text: |
-        **THE SHADOWED HAND - ORIGINS:**
-        "Founded three centuries ago by Malachi the First, the Shadowed Hand seeks to bring about the return of the Dark Lord through blood sacrifice and ritual magic. Their power grows with each victim, and they have infiltrated every level of society."
+      text: '**THE SHADOWED HAND - ORIGINS:**
+
+        "Founded three centuries ago by Malachi the First, the Shadowed Hand seeks
+        to bring about the return of the Dark Lord through blood sacrifice and ritual
+        magic. Their power grows with each victim, and they have infiltrated every
+        level of society."
+
+        '
     interactions:
       look:
         effects:
@@ -1193,7 +1506,8 @@ entity_definitions:
           property: secrets_uncovered
           increment_value: 1
         - type: generate_event
-          message: '{{player_name}} reads the ancient tome and uncovers cult secrets! Secrets uncovered: {{player_property:secrets_uncovered}}/2'
+          message: '{{player_name}} reads the ancient tome and uncovers cult secrets!
+            Secrets uncovered: {{player_property:secrets_uncovered}}/2'
           observers:
           - room_characters
   cult_history:
@@ -1201,27 +1515,35 @@ entity_definitions:
     - object
     attributes:
       name: Cult History
-      description: A detailed account of the Shadowed Hand's activities over the past century. This historical record could provide crucial evidence of the cult's long-term plans.
+      description: A detailed account of the Shadowed Hand's activities over the past
+        century. This historical record could provide crucial evidence of the cult's
+        long-term plans.
     properties:
       pickupable: true
       size: medium
       readable: true
-      text: |
-        **CULT ACTIVITIES TIMELINE:**
+      text: '**CULT ACTIVITIES TIMELINE:**
+
         "1895: First ritual performed in Blackwater
-        1923: Mayor Blackwater's great-grandfather disappeared
+
+        1923: Mayor Blackwater''s great-grandfather disappeared
+
         1951: Church desecration incident
+
         1987: Mass disappearance of 12 townsfolk
-        2024: Current mayor's disappearance - ritual preparation"
+
+        2024: Current mayor''s disappearance - ritual preparation"
+
+        '
     interactions:
       look:
         effects:
-        - type: increment_property
+        - type: set_property
           target: player
-          property: evidence_found
-          increment_value: 1
+          property: cult_history_found
+          value: true
         - type: generate_event
-          message: '{{player_name}} studies the cult history and finds important evidence! Evidence found: {{player_property:evidence_found}}/3'
+          message: '{{player_name}} studies the cult history and finds important evidence!'
           observers:
           - room_characters
   decoder_ring:
@@ -1229,7 +1551,8 @@ entity_definitions:
     - object
     attributes:
       name: Decoder Ring
-      description: A mysterious ring that can be used to decode encrypted messages and symbols.
+      description: A mysterious ring that can be used to decode encrypted messages
+        and symbols.
     properties:
       pickupable: true
       size: small
@@ -1242,7 +1565,8 @@ entity_definitions:
           property: mystery_solved
           value: true
         - type: generate_event
-          message: '{{player_name}} uses the decoder ring and solves the mystery! The encrypted messages are revealed!'
+          message: '{{player_name}} uses the decoder ring and solves the mystery!
+            The encrypted messages are revealed!'
           observers:
           - room_characters
   star_charts:
@@ -1250,14 +1574,19 @@ entity_definitions:
     - object
     attributes:
       name: Star Charts
-      description: Detailed charts showing celestial alignments and their significance to the cult's rituals.
+      description: Detailed charts showing celestial alignments and their significance
+        to the cult's rituals.
     properties:
       immovable: true
       size: large
       readable: true
-      text: |
-        **CELESTIAL ALIGNMENTS:**
-        "The cult's most powerful rituals can only be performed during specific celestial alignments. The next alignment occurs in 3 days - when the moon is full and the stars form the Shadow Hand constellation."
+      text: '**CELESTIAL ALIGNMENTS:**
+
+        "The cult''s most powerful rituals can only be performed during specific celestial
+        alignments. The next alignment occurs in 3 days - when the moon is full and
+        the stars form the Shadow Hand constellation."
+
+        '
     interactions:
       look:
         effects:
@@ -1266,7 +1595,8 @@ entity_definitions:
           property: secrets_uncovered
           increment_value: 1
         - type: generate_event
-          message: '{{player_name}} studies the star charts and uncovers cult timing secrets! Secrets uncovered: {{player_property:secrets_uncovered}}/2'
+          message: '{{player_name}} studies the star charts and uncovers cult timing
+            secrets! Secrets uncovered: {{player_property:secrets_uncovered}}/2'
           observers:
           - room_characters
   ritual_timing:
@@ -1274,26 +1604,33 @@ entity_definitions:
     - object
     attributes:
       name: Ritual Timing
-      description: A calendar showing when the cult's most powerful rituals can be performed. This timing information could be critical evidence for understanding when the cult will strike.
+      description: A calendar showing when the cult's most powerful rituals can be
+        performed. This timing information could be critical evidence for understanding
+        when the cult will strike.
     properties:
       pickupable: true
       size: small
       readable: true
-      text: |
-        **RITUAL CALENDAR:**
+      text: '**RITUAL CALENDAR:**
+
         "Day 1: Preparation begins
+
         Day 2: Gathering of materials
+
         Day 3: Final ritual - moon full, stars aligned
+
         Day 4: Consequences begin"
+
+        '
     interactions:
       look:
         effects:
-        - type: increment_property
+        - type: set_property
           target: player
-          property: evidence_found
-          increment_value: 1
+          property: ritual_timing_found
+          value: true
         - type: generate_event
-          message: '{{player_name}} examines the ritual timing and finds crucial evidence! Evidence found: {{player_property:evidence_found}}/3'
+          message: '{{player_name}} examines the ritual timing and finds crucial evidence!'
           observers:
           - room_characters
   telescope:
@@ -1301,7 +1638,8 @@ entity_definitions:
     - object
     attributes:
       name: Telescope
-      description: A powerful telescope that can be used to observe the stars and predict celestial events.
+      description: A powerful telescope that can be used to observe the stars and
+        predict celestial events.
     properties:
       immovable: true
       size: large
@@ -1314,7 +1652,8 @@ entity_definitions:
           property: courage_found
           value: true
         - type: generate_event
-          message: '{{player_name}} uses the telescope and gains courage from understanding the cosmic forces! Their resolve is strengthened!'
+          message: '{{player_name}} uses the telescope and gains courage from understanding
+            the cosmic forces! Their resolve is strengthened!'
           observers:
           - room_characters
   cult_key:
@@ -1322,7 +1661,8 @@ entity_definitions:
     - object
     attributes:
       name: Cult Key
-      description: A dark iron key with strange symbols carved into its surface. It pulses with dark energy and feels warm to the touch.
+      description: A dark iron key with strange symbols carved into its surface. It
+        pulses with dark energy and feels warm to the touch.
     properties:
       pickupable: true
       size: small
@@ -1332,7 +1672,8 @@ entity_definitions:
       use:
         effects:
         - type: generate_event
-          message: '{{player_name}} uses the Cult Key! The dark symbols glow briefly, and you feel a connection to hidden places.'
+          message: '{{player_name}} uses the Cult Key! The dark symbols glow briefly,
+            and you feel a connection to hidden places.'
           observers:
           - room_characters
   ritual_candle:
@@ -1340,7 +1681,8 @@ entity_definitions:
     - object
     attributes:
       name: Ritual Candle
-      description: A black candle made from strange wax. When lit, it burns with an unnatural flame that never flickers.
+      description: A black candle made from strange wax. When lit, it burns with an
+        unnatural flame that never flickers.
     properties:
       pickupable: true
       size: small
@@ -1354,7 +1696,8 @@ entity_definitions:
           property: ritual_materials_gathered
           value: true
         - type: generate_event
-          message: '{{player_name}} lights the Ritual Candle! The flame burns steady and unnatural, marking them as prepared for dark rituals.'
+          message: '{{player_name}} lights the Ritual Candle! The flame burns steady
+            and unnatural, marking them as prepared for dark rituals.'
           observers:
           - room_characters
   ancient_scroll:
@@ -1362,19 +1705,26 @@ entity_definitions:
     - object
     attributes:
       name: Ancient Scroll
-      description: A crumbling scroll written in an ancient language. The text seems to shift and change when you're not looking directly at it.
+      description: A crumbling scroll written in an ancient language. The text seems
+        to shift and change when you're not looking directly at it.
     properties:
       pickupable: true
       size: small
       readable: true
-      text: |
-        **RITUAL OF SHADOWS:**
+      text: '**RITUAL OF SHADOWS:**
+
         "To unlock the hidden chamber, three items must be gathered:
+
         1. The Key of Shadows (found in the old library)
+
         2. The Candle of Eternal Flame (found in the church)
+
         3. The Scroll of Binding (found in the observatory)
-        
+
+
         When all three are brought to the crypt entrance, the way will be revealed."
+
+        '
     interactions:
       look:
         effects:
@@ -1383,29 +1733,8 @@ entity_definitions:
           property: ritual_knowledge_gained
           value: true
         - type: generate_event
-          message: '{{player_name}} reads the Ancient Scroll and learns the ritual requirements! Knowledge gained!'
-          observers:
-          - room_characters
-  shadow_crystal:
-    behaviors:
-    - object
-    attributes:
-      name: Shadow Crystal
-      description: A dark crystal that seems to absorb light and warmth, pulsing with malevolent energy.
-    properties:
-      pickupable: true
-      size: small
-      usable: true
-      fragile: true
-    interactions:
-      use:
-        effects:
-        - type: set_property
-          target: player
-          property: dark_power_channeled
-          value: true
-        - type: generate_event
-          message: '{{player_name}} channels power through the Shadow Crystal! Dark energy flows through them!'
+          message: '{{player_name}} reads the Ancient Scroll and learns the ritual
+            requirements! Knowledge gained!'
           observers:
           - room_characters
   holy_symbol:
@@ -1413,7 +1742,8 @@ entity_definitions:
     - object
     attributes:
       name: Holy Symbol
-      description: A blessed symbol that glows with divine light. It feels warm and comforting to hold.
+      description: A blessed symbol that glows with divine light. It feels warm and
+        comforting to hold.
     properties:
       pickupable: true
       size: small
@@ -1431,7 +1761,8 @@ entity_definitions:
           property: family_protected
           value: true
         - type: generate_event
-          message: '{{player_name}} activates the Holy Symbol! Divine protection surrounds them and their loved ones!'
+          message: '{{player_name}} activates the Holy Symbol! Divine protection surrounds
+            them and their loved ones!'
           observers:
           - room_characters
   puzzle_box:
@@ -1439,7 +1770,8 @@ entity_definitions:
     - object
     attributes:
       name: Puzzle Box
-      description: An intricate wooden box with multiple sliding panels and hidden compartments. It requires careful manipulation to open.
+      description: An intricate wooden box with multiple sliding panels and hidden
+        compartments. It requires careful manipulation to open.
     properties:
       immovable: true
       size: medium
@@ -1449,7 +1781,8 @@ entity_definitions:
       use:
         effects:
         - type: generate_event
-          message: '{{player_name}} attempts to solve the Puzzle Box! The panels shift and click, but it remains closed. Perhaps more clues are needed.'
+          message: '{{player_name}} attempts to solve the Puzzle Box! The panels shift
+            and click, but it remains closed. Perhaps more clues are needed.'
           observers:
           - room_characters
   ritual_components:
@@ -1457,7 +1790,8 @@ entity_definitions:
     - object
     attributes:
       name: Ritual Components
-      description: A collection of strange ingredients - dried herbs, bone fragments, and a vial of dark liquid.
+      description: A collection of strange ingredients - dried herbs, bone fragments,
+        and a vial of dark liquid.
     properties:
       pickupable: true
       size: medium
@@ -1471,7 +1805,8 @@ entity_definitions:
           property: ritual_materials_gathered
           value: true
         - type: generate_event
-          message: '{{player_name}} gathers the Ritual Components! They now have the materials needed for dark rituals.'
+          message: '{{player_name}} gathers the Ritual Components! They now have the
+            materials needed for dark rituals.'
           observers:
           - room_characters
   secret_map:
@@ -1479,18 +1814,25 @@ entity_definitions:
     - object
     attributes:
       name: Secret Map
-      description: A detailed map showing hidden passages and secret rooms throughout the town. Some locations are marked with strange symbols.
+      description: A detailed map showing hidden passages and secret rooms throughout
+        the town. Some locations are marked with strange symbols.
     properties:
       pickupable: true
       size: medium
       readable: true
-      text: |
-        **SECRET PASSAGES:**
+      text: '**SECRET PASSAGES:**
+
         "The map reveals hidden connections between rooms:
+
         - Library connects to Church via secret passage
+
         - Observatory connects to Forest via hidden path
+
         - Bank connects to Underground Tunnels via trapdoor
+
         - Warehouse connects to Market via underground tunnel"
+
+        '
     interactions:
       look:
         effects:
@@ -1499,7 +1841,8 @@ entity_definitions:
           property: secret_passages_discovered
           value: true
         - type: generate_event
-          message: '{{player_name}} studies the Secret Map and discovers hidden passages! New routes are revealed!'
+          message: '{{player_name}} studies the Secret Map and discovers hidden passages!
+            New routes are revealed!'
           observers:
           - room_characters
   binding_chain:
@@ -1507,7 +1850,8 @@ entity_definitions:
     - object
     attributes:
       name: Binding Chain
-      description: A heavy iron chain covered in ancient runes. It feels cold and heavy, as if it carries the weight of centuries.
+      description: A heavy iron chain covered in ancient runes. It feels cold and
+        heavy, as if it carries the weight of centuries.
     properties:
       pickupable: true
       size: medium
@@ -1525,17 +1869,18 @@ entity_definitions:
           property: congregation_protected
           value: true
         - type: generate_event
-          message: '{{player_name}} wields the Binding Chain! The runes glow with power, ready to bind dark forces and protect the innocent!'
+          message: '{{player_name}} wields the Binding Chain! The runes glow with
+            power, ready to bind dark forces and protect the innocent!'
           observers:
           - room_characters
-
-  # Branch A: Cult Structure Investigation Objects
   cult_roster:
     behaviors:
     - object
     attributes:
       name: Cult Roster
-      description: A hidden list of cult members and their roles within the Shadowed Hand hierarchy. This document could expose the entire cult's organizational structure. You can read, examine, or investigate this roster.
+      description: A hidden list of cult members and their roles within the Shadowed
+        Hand hierarchy. This document could expose the entire cult's organizational
+        structure. You can read, examine, or investigate this roster.
     properties:
       pickupable: true
       size: small
@@ -1552,16 +1897,18 @@ entity_definitions:
           property: cult_hierarchy_discovered
           value: true
         - type: generate_event
-          message: '{{player_name}} discovers the cult hierarchy! The Shadowed Hand''s structure is revealed!'
+          message: '{{player_name}} discovers the cult hierarchy! The Shadowed Hand''s
+            structure is revealed!'
           observers:
           - room_characters
-
   cult_hideout_map:
     behaviors:
     - object
     attributes:
       name: Cult Hideout Map
-      description: A detailed map showing all known cult meeting places and safe houses throughout the town. This intelligence could be the key to tracking down the cult's operations.
+      description: A detailed map showing all known cult meeting places and safe houses
+        throughout the town. This intelligence could be the key to tracking down the
+        cult's operations.
     properties:
       pickupable: true
       size: medium
@@ -1574,17 +1921,18 @@ entity_definitions:
           property: cult_locations_mapped
           value: true
         - type: generate_event
-          message: '{{player_name}} maps all cult locations! Their hideouts are now known!'
+          message: '{{player_name}} maps all cult locations! Their hideouts are now
+            known!'
           observers:
           - room_characters
-
-  # Branch B: Ritual Knowledge Investigation Objects
   ritual_mastery_tome:
     behaviors:
     - object
     attributes:
       name: Ritual Mastery Tome
-      description: An ancient book containing detailed knowledge of the cult's dark rituals and their purposes. Understanding these rituals could be crucial for stopping the cult's plans.
+      description: An ancient book containing detailed knowledge of the cult's dark
+        rituals and their purposes. Understanding these rituals could be crucial for
+        stopping the cult's plans.
     properties:
       pickupable: true
       size: large
@@ -1598,16 +1946,18 @@ entity_definitions:
           property: ritual_knowledge_mastered
           value: true
         - type: generate_event
-          message: '{{player_name}} masters the ritual knowledge! The cult''s dark practices are understood!'
+          message: '{{player_name}} masters the ritual knowledge! The cult''s dark
+            practices are understood!'
           observers:
           - room_characters
-
   celestial_calculator:
     behaviors:
     - object
     attributes:
       name: Celestial Calculator
-      description: A complex device that calculates the optimal timing for dark rituals based on celestial alignments. Using this device could reveal when the cult plans to strike. You can use this device to understand the cult's timing.
+      description: A complex device that calculates the optimal timing for dark rituals
+        based on celestial alignments. Using this device could reveal when the cult
+        plans to strike. You can use this device to understand the cult's timing.
     properties:
       pickupable: true
       size: medium
@@ -1620,21 +1970,96 @@ entity_definitions:
           property: cult_timing_understood
           value: true
         - type: generate_event
-          message: '{{player_name}} understands the cult''s timing! Their ritual schedule is revealed!'
+          message: '{{player_name}} understands the cult''s timing! Their ritual schedule
+            is revealed!'
           observers:
           - room_characters
-
-  # Branch C: Justice Preparation Objects
+  celestial_almanac:
+    behaviors:
+    - object
+    attributes:
+      name: Celestial Almanac
+      description: A detailed almanac showing celestial alignments and their significance
+        to the cult's timing. The book contains complex astronomical calculations
+        and star charts that reveal when the cult plans their rituals. The almanac
+        is essential for understanding the cult's timing - you must use it to unlock
+        this knowledge and prepare for their next move.
+    properties:
+      pickupable: true
+      size: medium
+      readable: true
+      usable: true
+      pickup_action: use
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: '{{player_name}} understands the cult''s timing using the celestial
+            almanac! They now know when the rituals will occur!'
+          observers:
+          - room_characters
+    action_aliases:
+      almanac: use
+      celestial: use
+      timing: use
+      stars: use
+      astronomy: use
+  confrontation_manual:
+    behaviors:
+    - object
+    attributes:
+      name: Confrontation Manual
+      description: A comprehensive manual that synthesizes all gathered knowledge
+        to create a plan for the final confrontation with the cult. The book contains
+        detailed strategies, tactical information, and step-by-step instructions for
+        bringing the cult to justice. This manual is the key to preparing for the
+        final confrontation - you must use it to synthesize all your knowledge and
+        create a plan for the ultimate showdown.
+    properties:
+      pickupable: true
+      size: medium
+      readable: true
+      usable: true
+      pickup_action: use
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: final_confrontation_ready
+          value: true
+        - type: generate_event
+          message: '{{player_name}} creates the final confrontation plan using the
+            manual! They are ready to bring the cult to justice!'
+          observers:
+          - room_characters
+    action_aliases:
+      manual: use
+      confrontation: use
+      plan: use
+      strategy: use
+      tactics: use
   evidence_compiler:
     behaviors:
     - object
     attributes:
       name: Evidence Compiler
-      description: A device that can organize and compile evidence into a coherent case against the cult. Using this device could help you build an airtight case against the Shadowed Hand. You can use this device to compile your evidence chain.
+      description: A complex mechanical device that can organize and compile evidence
+        into a coherent case against the cult. The device has multiple dials, levers,
+        and compartments for organizing different types of evidence. When activated,
+        it processes all gathered information and creates a comprehensive case file.
+        This device is essential for building an airtight case against the Shadowed
+        Hand - you must use it to compile your evidence chain and prepare for the
+        final confrontation.
     properties:
       pickupable: true
       size: medium
       usable: true
+      pickup_action: use
     interactions:
       use:
         effects:
@@ -1643,20 +2068,33 @@ entity_definitions:
           property: evidence_chain_complete
           value: true
         - type: generate_event
-          message: '{{player_name}} compiles the evidence chain! The case against the cult is complete!'
+          message: '{{player_name}} compiles the evidence chain! The case against
+            the cult is complete!'
           observers:
           - room_characters
-
+    action_aliases:
+      compiler: use
+      evidence: use
+      device: use
+      machine: use
+      organize: use
   justice_weapon:
     behaviors:
     - object
     attributes:
       name: Justice Weapon
-      description: A blessed weapon specifically designed to combat dark forces and bring cult members to justice. This weapon could be essential for the final confrontation with the cult. You can pickup this weapon to acquire justice tools.
+      description: A blessed weapon specifically designed to combat dark forces and
+        bring cult members to justice. The weapon glows with a faint holy light and
+        is inscribed with ancient symbols of justice and retribution. This weapon
+        is essential for the final confrontation with the cult - you must pick it
+        up to acquire the tools needed for justice. The weapon feels warm to the touch
+        and seems to pulse with righteous energy, ready to strike down those who have
+        committed evil deeds.
     properties:
       pickupable: true
       size: medium
       usable: true
+      pickup_action: pickup
     interactions:
       pickup:
         effects:
@@ -1665,17 +2103,25 @@ entity_definitions:
           property: justice_tools_acquired
           value: true
         - type: generate_event
-          message: '{{player_name}} acquires the Justice Weapon! They are now armed for the final confrontation!'
+          message: '{{player_name}} acquires the Justice Weapon! They are now armed
+            for the final confrontation!'
           observers:
           - room_characters
-
-  # Final Synthesis Object
+    action_aliases:
+      weapon: pickup
+      sword: pickup
+      blade: pickup
+      justice: pickup
+      blessed: pickup
   confrontation_planner:
     behaviors:
     - object
     attributes:
       name: Confrontation Planner
-      description: A complex device that synthesizes all gathered knowledge to create a plan for the final confrontation with the cult. This device could help you coordinate the final strike against the Shadowed Hand. You can use this device to prepare for the final confrontation.
+      description: A complex device that synthesizes all gathered knowledge to create
+        a plan for the final confrontation with the cult. This device could help you
+        coordinate the final strike against the Shadowed Hand. You can use this device
+        to prepare for the final confrontation.
     properties:
       pickupable: true
       size: large
@@ -1689,6 +2135,543 @@ entity_definitions:
           property: final_confrontation_ready
           value: true
         - type: generate_event
-          message: '{{player_name}} synthesizes all knowledge! The final confrontation plan is ready! Justice will be served!'
+          message: '{{player_name}} synthesizes all knowledge! The final confrontation
+            plan is ready! Justice will be served!'
+          observers:
+          - room_characters
+  church_records:
+    behaviors:
+    - object
+    attributes:
+      name: Church Records
+      description: Detailed church records documenting recent disappearances and suspicious
+        activities. Contains crucial evidence about the cult's activities. The records
+        mention that Father Marcus has been studying celestial alignments and that
+        the cult's rituals are timed to specific astronomical events. There are also
+        references to a confrontation plan being developed in the church's hidden
+        chambers. The records contain notes about "the observatory in the hills" where
+        the town's founders studied the stars, and mention that this place holds the
+        key to understanding the cult's timing.
+    properties:
+      pickupable: true
+      size: medium
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: church_records_found
+          value: true
+        - type: generate_event
+          message: '{{player_name}} examines the church records and finds crucial
+            evidence!'
+          observers:
+          - room_characters
+  priest_diary:
+    behaviors:
+    - object
+    attributes:
+      name: Priest's Diary
+      description: Father Marcus's personal diary containing his observations about
+        the cult's activities and their plans. This could be the key to understanding
+        their hierarchy. The diary mentions that the cult operates in hidden locations
+        throughout the town, including an abandoned warehouse and an old library.
+        It also notes that the cult's timing is based on celestial events and that
+        Father Marcus has been developing tools to combat them. The diary contains
+        cryptic references to "the old place in the hills where the stars align" and
+        mentions that the town's founders built something there to study celestial
+        phenomena.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: priest_diary_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_hierarchy_discovered
+          value: true
+        - type: generate_event
+          message: '{{player_name}} discovers the cult hierarchy in the priest''s
+            diary! The Shadowed Hand''s structure is revealed!'
+          observers:
+          - room_characters
+  sacred_map:
+    behaviors:
+    - object
+    attributes:
+      name: Sacred Map
+      description: An ancient map showing all the sacred sites and hidden locations
+        where the cult has been active. This intelligence could reveal their hideouts.
+    properties:
+      pickupable: true
+      size: medium
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: sacred_map_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_locations_mapped
+          value: true
+        - type: generate_event
+          message: '{{player_name}} maps all cult locations using the sacred map!
+            Their hideouts are now known!'
+          observers:
+          - room_characters
+  ritual_texts:
+    behaviors:
+    - object
+    attributes:
+      name: Ritual Texts
+      description: Ancient texts containing knowledge about the cult's dark rituals
+        and their purposes. Understanding these could be crucial for stopping their
+        plans.
+    properties:
+      pickupable: true
+      size: large
+      readable: true
+      heavy: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: ritual_texts_found
+          value: true
+        - type: set_property
+          target: player
+          property: ritual_knowledge_mastered
+          value: true
+        - type: generate_event
+          message: '{{player_name}} masters the ritual knowledge from the ancient
+            texts! They now understand the cult''s dark methods!'
+          observers:
+          - room_characters
+  witness_testimony:
+    behaviors:
+    - object
+    attributes:
+      name: Witness Testimony
+      description: Written testimony from witnesses who have seen cult activities.
+        This evidence could be crucial for building a case against them.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: witness_testimony_found
+          value: true
+        - type: generate_event
+          message: '{{player_name}} reviews the witness testimony and finds crucial
+            evidence!'
+          observers:
+          - room_characters
+  town_records:
+    behaviors:
+    - object
+    attributes:
+      name: Town Records
+      description: Official town records documenting recent disappearances and suspicious
+        activities. Contains crucial evidence about the cult's activities.
+    properties:
+      pickupable: true
+      size: medium
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: town_records_found
+          value: true
+        - type: generate_event
+          message: '{{player_name}} examines the town records and finds crucial evidence!'
+          observers:
+          - room_characters
+  missing_persons_log:
+    behaviors:
+    - object
+    attributes:
+      name: Missing Persons Log
+      description: A detailed log of all missing persons in Blackwater, with patterns
+        that suggest cult involvement.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: missing_persons_log_found
+          value: true
+        - type: generate_event
+          message: '{{player_name}} examines the missing persons log and finds crucial
+            evidence!'
+          observers:
+          - room_characters
+  local_newspaper:
+    behaviors:
+    - object
+    attributes:
+      name: Local Newspaper
+      description: Recent editions of the Blackwater Gazette containing eyewitness
+        accounts and investigative reports about the disappearances.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: local_newspaper_found
+          value: true
+        - type: generate_event
+          message: '{{player_name}} examines the local newspaper and finds crucial
+            evidence!'
+          observers:
+          - room_characters
+  editor_notes:
+    behaviors:
+    - object
+    attributes:
+      name: Editor's Notes
+      description: Personal notes from the newspaper editor about the recent disappearances
+        and suspicious activities.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: editor_notes_found
+          value: true
+        - type: generate_event
+          message: '{{player_name}} examines the editor''s notes and finds crucial
+            evidence!'
+          observers:
+          - room_characters
+  astronomers_notes:
+    behaviors:
+    - object
+    attributes:
+      name: Astronomer's Notes
+      description: Detailed notes from the town's astronomer about celestial alignments
+        and their significance to the cult's timing. The notes mention that the astronomer
+        worked from a hidden observatory in the hills above town, where he could study
+        the stars without interference. The notes contain references to "the old path
+        through the forest" that leads to this secret location, and mention that the
+        observatory contains powerful instruments for calculating celestial events.
+    properties:
+      pickupable: true
+      size: medium
+      readable: true
+      pickup_action: use
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: astronomers_notes_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: '{{player_name}} understands the cult''s timing using the astronomer''s
+            notes! They now know when the rituals will occur!'
+          observers:
+          - room_characters
+  ancient_calendar:
+    behaviors:
+    - object
+    attributes:
+      name: Ancient Calendar
+      description: An ancient calendar showing the optimal timing for various rituals
+        based on celestial alignments.
+    properties:
+      pickupable: true
+      size: medium
+      readable: true
+      pickup_action: use
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: ancient_calendar_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: '{{player_name}} understands the cult''s timing using the ancient
+            calendar! They now know when the rituals will occur!'
+          observers:
+          - room_characters
+  ritual_schedule:
+    behaviors:
+    - object
+    attributes:
+      name: Ritual Schedule
+      description: A detailed schedule showing when the cult's most powerful rituals
+        can be performed.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+      pickup_action: use
+    interactions:
+      use:
+        effects:
+        - type: set_property
+          target: player
+          property: ritual_schedule_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: '{{player_name}} understands the cult''s timing using the ritual
+            schedule! They now know when the rituals will occur!'
+          observers:
+          - room_characters
+  graveyard_epitaphs:
+    behaviors:
+    - object
+    attributes:
+      name: Graveyard Epitaphs
+      description: Ancient gravestone epitaphs that tell stories of the missing townsfolk.
+        Each one could be a potential clue in your investigation.
+    properties:
+      pickupable: true
+      size: small
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: graveyard_epitaphs_found
+          value: true
+        - type: generate_event
+          message: '{{player_name}} examines the graveyard epitaphs and finds crucial
+            evidence!'
+          observers:
+          - room_characters
+  ancient_sarcophagi:
+    behaviors:
+    - object
+    attributes:
+      name: Ancient Sarcophagi
+      description: Ornate stone sarcophagi containing the remains of the town's founding
+        families. The carvings tell stories of their lives and achievements.
+    properties:
+      immovable: true
+      size: huge
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the ancient sarcophagi and learns about
+            the town''s founding families.'
+          observers:
+          - room_characters
+  ritual_candles:
+    behaviors:
+    - object
+    attributes:
+      name: Ritual Candles
+      description: Flickering candles arranged in a ritual pattern. The wax is still
+        warm, suggesting recent use.
+    properties:
+      immovable: true
+      size: small
+      lightable: true
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the ritual candles and notices they were
+            recently lit.'
+          observers:
+          - room_characters
+  town_statue:
+    behaviors:
+    - object
+    attributes:
+      name: Town Statue
+      description: A large statue of the town's founder, too heavy to move. It seems to be watching over the square with a troubled expression.
+    properties:
+      immovable: true
+      size: huge
+    action_aliases:
+      examine: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Town Statue.'
+          observers:
+          - room_characters
+  ancient_altar:
+    behaviors:
+    - object
+    attributes:
+      name: Ancient Altar
+      description: A sacred altar that has been in this place for centuries. It seems to be connected to the forest's ancient magic.
+    properties:
+      immovable: true
+      size: large
+      sacred: true
+    action_aliases:
+      examine: look
+      investigate: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Ancient Altar.'
+          observers:
+          - room_characters
+  mayors_desk:
+    behaviors:
+    - object
+    attributes:
+      name: Mayor's Desk
+      description: The mayor's desk, covered with documents and correspondence. Some papers seem to have been recently disturbed.
+    properties:
+      immovable: true
+      size: large
+      readable: true
+      text: The desk contains various documents and correspondence that might contain valuable information.
+    action_aliases:
+      investigate: look
+      examine: look
+      read: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Mayor''s Desk.'
+          observers:
+          - room_characters
+  official_seal:
+    behaviors:
+    - object
+    attributes:
+      name: Official Seal
+      description: The town's official seal, used to authenticate documents and legal papers.
+    properties:
+      pickupable: true
+      size: small
+      official: true
+    interactions:
+      use:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} uses the Official Seal to authenticate documents.'
+          observers:
+          - room_characters
+  printing_press:
+    behaviors:
+    - object
+    attributes:
+      name: Printing Press
+      description: An old printing press used to produce the newspaper. It's been recently used to print something.
+    properties:
+      immovable: true
+      size: large
+      usable: true
+    interactions:
+      use:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} uses the Printing Press.'
+          observers:
+          - room_characters
+  reporter_desk:
+    behaviors:
+    - object
+    attributes:
+      name: Reporter's Desk
+      description: A desk covered with notes, photographs, and drafts of articles about the recent troubles.
+    properties:
+      immovable: true
+      size: medium
+      readable: true
+      text: The desk contains notes, photographs, and drafts of articles about the recent troubles.
+    action_aliases:
+      investigate: look
+      examine: look
+      read: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Reporter''s Desk.'
+          observers:
+          - room_characters
+  celestial_instruments:
+    behaviors:
+    - object
+    attributes:
+      name: Celestial Instruments
+      description: Various instruments used to observe and calculate celestial events.
+    properties:
+      immovable: true
+      size: medium
+      usable: true
+    interactions:
+      use:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} uses the Celestial Instruments.'
+          observers:
+          - room_characters
+  star_atlas:
+    behaviors:
+    - object
+    attributes:
+      name: Star Atlas
+      description: A comprehensive atlas of the night sky with detailed information about stars and constellations.
+    properties:
+      immovable: true
+      size: large
+      readable: true
+      text: The atlas contains detailed information about stars and constellations, including their significance to ancient rituals.
+    action_aliases:
+      read: look
+      examine: look
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: '{{player_name}} examines the Star Atlas.'
           observers:
           - room_characters

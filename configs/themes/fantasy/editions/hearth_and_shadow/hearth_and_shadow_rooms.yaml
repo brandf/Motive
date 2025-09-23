@@ -12,94 +12,124 @@ entity_definitions:
         \ your vision, and the few remaining \ntownsfolk hurry past with worried expressions.\
         \ Yet in the center of the square, a small hearth \nstill burns - a symbol\
         \ of the town's stubborn hope that refuses to be extinguished by the growing\
-        \ darkness.\n"
+        \ darkness.\n\nThe Town Hall stands imposing to the north, its doors slightly\
+        \ ajar. To the east, the Blackwater Gazette office shows signs of recent activity\
+        \ - journalists have been documenting the recent troubles. A small study to\
+        \ the west belongs to the town's former astronomer, who was known for predicting\
+        \ celestial events. Fresh evidence near the fountain suggests a recent struggle,\
+        \ with bloodstains and strange markings that point to cult activity. The notice\
+        \ board is covered with missing person posters, each one a potential lead\
+        \ in your investigation.\n"
     properties:
       exits:
         tavern:
           id: tavern
           name: Rusty Anchor Tavern
           destination_room_id: tavern
-          aliases: [tavern, bar, inn]
+          aliases:
+          - tavern
+          - bar
+          - inn
         guild:
           id: guild
-          name: "Adventurer's Guild Hall"
+          name: Adventurer's Guild Hall
           destination_room_id: adventurer_guild
-          aliases: [guild, hall, adventurers]
+          aliases:
+          - guild
+          - hall
+          - adventurers
         church:
           id: church
           name: Sacred Heart Church
           destination_room_id: church
-          aliases: [church, temple, sanctuary]
+          aliases:
+          - church
+          - temple
+          - sanctuary
         bank:
           id: bank
           name: Blackwater Bank
           destination_room_id: bank
-          aliases: [bank, vault, treasury]
+          aliases:
+          - bank
+          - vault
+          - treasury
         market:
           id: market
           name: Market District
           destination_room_id: market_district
-          aliases: [market, bazaar, shops]
+          aliases:
+          - market
+          - bazaar
+          - shops
         forest:
           id: forest
           name: Old Forest Path
           destination_room_id: old_forest_path
-          aliases: [forest, woods, path]
+          aliases:
+          - forest
+          - woods
+          - path
+        town_hall:
+          id: town_hall
+          name: Blackwater Town Hall
+          destination_room_id: town_hall
+          aliases:
+          - town_hall
+          - hall
+          - government
+        newspaper:
+          id: newspaper
+          name: Blackwater Gazette Office
+          destination_room_id: newspaper_office
+          aliases:
+          - newspaper
+          - gazette
+          - office
+        astronomer:
+          id: astronomer
+          name: Astronomer's Study
+          destination_room_id: astronomer_study
+          aliases:
+          - astronomer
+          - study
+          - stars
       objects:
         notice_board:
-          id: notice_board
-          name: Notice Board
           object_type_id: notice_board
-          current_room_id: town_square
-          description: A weathered wooden board covered with missing person posters and town announcements.
         broken_fountain:
-          id: broken_fountain
-          name: Broken Fountain
           object_type_id: broken_fountain
-          current_room_id: town_square
-          description: A once-beautiful stone fountain, now cracked and dry. The water that remains is murky and still.
         town_statue:
-          id: town_statue
-          name: Town Statue
           object_type_id: town_statue
-          current_room_id: town_square
-          description: A large statue of the town's founder, too heavy to move. It seems to be watching over the square with a troubled expression.
         cult_symbols:
           id: cult_symbols
           name: Cult Symbols
           object_type_id: cult_symbols
-          current_room_id: town_square
-          description: Dark, unsettling symbols painted on the walls. They seem to pulse with dark energy.
+          description: Dark, unsettling symbols painted on the walls. They seem to
+            pulse with dark energy.
         fresh_evidence:
           id: fresh_evidence
           name: Fresh Evidence
           object_type_id: fresh_evidence
-          current_room_id: town_square
           description: Recently disturbed earth and strange markings near the fountain.
         eternal_flame:
           id: eternal_flame
-          name: Eternal Flame
           object_type_id: eternal_flame
-          current_room_id: town_square
-          description: A small, magical flame that never goes out, symbolizing the town's unbreakable spirit.
         flame_of_hope:
           id: flame_of_hope
-          name: Flame of Hope
           object_type_id: flame_of_hope
-          current_room_id: town_square
-          description: A small, flickering flame that grows brighter when hope is strong and dims when despair takes hold.
         message_board:
           id: message_board
-          name: Message Board
           object_type_id: message_board
-          current_room_id: town_square
-          description: A wooden board where characters can leave messages for each other.
         partner_evidence:
-          id: partner_evidence
-          name: Partner's Evidence
           object_type_id: partner_evidence
-          current_room_id: town_square
-          description: A bloodstained notebook and a broken badge - the remains of Detective Thorne's murdered partner.
+          interactions:
+            look:
+              effects:
+              - type: set_property
+                target: player
+                property: partner_evidence_found
+                value: true
   tavern:
     behaviors:
     - room
@@ -120,56 +150,61 @@ entity_definitions:
           id: square
           name: Town Square
           destination_room_id: town_square
-          aliases: [square, town, main]
+          aliases:
+          - square
+          - town
+          - main
         guild:
           id: guild
-          name: "Adventurer's Guild Hall"
+          name: Adventurer's Guild Hall
           destination_room_id: adventurer_guild
-          aliases: [guild, hall, adventurers]
+          aliases:
+          - guild
+          - hall
+          - adventurers
         thieves:
           id: thieves
-          name: "Thieves' Den"
+          name: Thieves' Den
           destination_room_id: thieves_den
-          aliases: [thieves, den, underground]
+          aliases:
+          - thieves
+          - den
+          - underground
           is_hidden: true
       objects:
         bar:
           id: bar
           name: Bar
           object_type_id: bar
-          current_room_id: tavern
-          description: A long wooden bar where drinks are served. The barkeep seems to know everyone's business.
+          description: A long wooden bar where drinks are served. The barkeep seems
+            to know everyone's business.
         notice_board:
           id: tavern_notice_board
           name: Job Board
           object_type_id: notice_board
-          current_room_id: tavern
-          description: A board covered with job postings, rumors, and local news. Some entries seem to have been recently added.
+          description: A board covered with job postings, rumors, and local news.
+            Some entries seem to have been recently added.
         secret_drop_point:
           id: secret_drop_point
-          name: Secret Drop Point
           object_type_id: secret_drop_point
-          current_room_id: tavern
-          description: A hidden location where anonymous messages can be left and retrieved.
         pigeon_coop:
           id: pigeon_coop
-          name: Pigeon Coop
           object_type_id: pigeon_coop
-          current_room_id: tavern
-          description: A small coop where carrier pigeons can be used to send private messages.
       characters:
         witness_old_tom:
           id: witness_old_tom
           name: Old Tom
           character_type_id: witness_old_tom
           current_room_id: tavern
-          description: An elderly fisherman sitting at a corner table, nursing a drink and looking troubled.
+          description: An elderly fisherman sitting at a corner table, nursing a drink
+            and looking troubled.
         witness_sarah_chen:
           id: witness_sarah_chen
           name: Sarah Chen
           character_type_id: witness_sarah_chen
           current_room_id: tavern
-          description: A local merchant who seems to be waiting for someone, her eyes darting nervously around the room.
+          description: A local merchant who seems to be waiting for someone, her eyes
+            darting nervously around the room.
   adventurer_guild:
     behaviors:
     - room
@@ -187,54 +222,54 @@ entity_definitions:
           id: square
           name: Town Square
           destination_room_id: town_square
-          aliases: [square, town, main]
+          aliases:
+          - square
+          - town
+          - main
         tavern:
           id: tavern
           name: Rusty Anchor Tavern
           destination_room_id: tavern
-          aliases: [tavern, bar, inn]
+          aliases:
+          - tavern
+          - bar
+          - inn
         market:
           id: market
           name: Market District
           destination_room_id: market_district
-          aliases: [market, bazaar, shops]
+          aliases:
+          - market
+          - bazaar
+          - shops
       objects:
         quest_board:
           id: quest_board
           name: Quest Board
           object_type_id: quest_board
-          current_room_id: adventurer_guild
-          description: A large board covered with various quests, bounties, and missions. Some seem to be related to the recent disappearances.
+          description: A large board covered with various quests, bounties, and missions.
+            Some seem to be related to the recent disappearances.
         guild_master_desk:
           id: guild_master_desk
-          name: "Guild Master's Desk"
+          name: Guild Master's Desk
           object_type_id: guild_master_desk
-          current_room_id: adventurer_guild
-          description: A massive oak desk covered with reports, maps, and correspondence. The guild master seems to be working on something important.
+          description: A massive oak desk covered with reports, maps, and correspondence.
+            The guild master seems to be working on something important.
         weapon_rack:
           id: weapon_rack
           name: Weapon Rack
           object_type_id: weapon_rack
-          current_room_id: adventurer_guild
-          description: A rack displaying various weapons and armor. Some items seem to have been recently used.
+          description: A rack displaying various weapons and armor. Some items seem
+            to have been recently used.
         lockpicks:
           id: lockpicks
-          name: Lockpicks
           object_type_id: lockpicks
-          current_room_id: adventurer_guild
-          description: A set of fine metal tools for opening locks.
         torch:
           id: torch
-          name: Torch
           object_type_id: torch
-          current_room_id: adventurer_guild
-          description: A wooden torch that can be lit to provide light in dark areas.
         investigation_kit:
           id: investigation_kit
-          name: Investigation Kit
           object_type_id: investigation_kit
-          current_room_id: adventurer_guild
-          description: A small kit containing magnifying glass, tweezers, and evidence bags.
   thieves_den:
     behaviors:
     - room
@@ -253,37 +288,46 @@ entity_definitions:
           id: tavern
           name: Rusty Anchor Tavern
           destination_room_id: tavern
-          aliases: [tavern, bar, inn]
+          aliases:
+          - tavern
+          - bar
+          - inn
           is_hidden: true
         market:
           id: market
           name: Market District
           destination_room_id: market_district
-          aliases: [market, bazaar, shops]
+          aliases:
+          - market
+          - bazaar
+          - shops
         tunnels:
           id: tunnels
           name: Underground Tunnels
           destination_room_id: underground_tunnels
-          aliases: [tunnels, underground, passages]
+          aliases:
+          - tunnels
+          - underground
+          - passages
       objects:
         stolen_goods:
           id: stolen_goods
           name: Stolen Goods
           object_type_id: stolen_goods
-          current_room_id: thieves_den
-          description: Various stolen items and contraband are scattered around the room. Some seem to be recently acquired.
+          description: Various stolen items and contraband are scattered around the
+            room. Some seem to be recently acquired.
         secret_documents:
           id: secret_documents
           name: Secret Documents
           object_type_id: secret_documents
-          current_room_id: thieves_den
-          description: A collection of documents and maps that might contain valuable information about the town's troubles.
+          description: A collection of documents and maps that might contain valuable
+            information about the town's troubles.
         raven_chair:
           id: raven_chair
-          name: "The Raven's Chair"
+          name: The Raven's Chair
           object_type_id: raven_chair
-          current_room_id: thieves_den
-          description: A high-backed chair where the leader of the thieves' guild sits. It seems to be the center of power in this hidden world.
+          description: A high-backed chair where the leader of the thieves' guild
+            sits. It seems to be the center of power in this hidden world.
       hidden: true
       underground: true
   church:
@@ -297,116 +341,123 @@ entity_definitions:
         \ seems troubled and distracted, often looking toward the crypt entrance.\
         \ The \naltar is adorned with fresh flowers, but there's an underlying sense\
         \ of unease. The church \nserves as both a place of worship and a refuge for\
-        \ those seeking sanctuary from the town's \ntroubles.\n"
+        \ those seeking sanctuary from the town's \ntroubles.\n\n**EXITS:** You can\
+        \ see paths leading to the **cemetery** (graveyard), **square** (town square),\
+        \ and **library** (old library).\n\nChurch records are scattered on a nearby\
+        \ table, documenting recent disappearances and suspicious activities. Father\
+        \ Marcus's personal diary lies open on the altar, containing his observations\
+        \ about the cult's activities. An ancient sacred map hangs on the wall, showing\
+        \ all the sacred sites where the cult has been active. Ritual texts are stacked\
+        \ near the confession booth, containing knowledge about the cult's dark practices.\
+        \ A celestial almanac sits on a reading stand, showing celestial alignments\
+        \ that could reveal when the cult strikes. A confrontation manual lies open,\
+        \ synthesizing all gathered knowledge for the final confrontation. Witness\
+        \ testimony is filed in the church archives, containing crucial evidence about\
+        \ cult activities. Father Marcus has been studying celestial timing and developing\
+        \ confrontation strategies against the cult.\n"
     properties:
       exits:
         square:
           id: square
           name: Town Square
           destination_room_id: town_square
-          aliases: [square, town, main]
+          aliases:
+          - square
+          - town
+          - main
         cemetery:
           id: cemetery
           name: Blackwater Cemetery
           destination_room_id: cemetery
-          aliases: [cemetery, graveyard, tombs]
+          aliases:
+          - cemetery
+          - graveyard
+          - tombs
         tunnels:
           id: tunnels
           name: Underground Tunnels
           destination_room_id: underground_tunnels
-          aliases: [tunnels, underground, passages]
+          aliases:
+          - tunnels
+          - underground
+          - passages
           is_hidden: true
         library:
           id: library
           name: Old Library
           destination_room_id: old_library
-          aliases: [library, books, archive]
+          aliases:
+          - library
+          - books
+          - archive
       objects:
         altar:
           id: altar
           name: Altar
           object_type_id: altar
-          current_room_id: church
-          description: A beautiful stone altar adorned with fresh flowers and candles. It seems to be the center of the church's spiritual life.
+          description: A beautiful stone altar adorned with fresh flowers and candles.
+            It seems to be the center of the church's spiritual life.
         confession_booth:
           id: confession_booth
           name: Confession Booth
           object_type_id: confession_booth
-          current_room_id: church
-          description: A wooden booth where the faithful come to confess their sins. The priest seems to be spending a lot of time here recently.
+          description: A wooden booth where the faithful come to confess their sins.
+            The priest seems to be spending a lot of time here recently.
         crypt_entrance:
           id: crypt_entrance
           name: Crypt Entrance
           object_type_id: crypt_entrance
-          current_room_id: church
-          description: A hidden entrance to the underground crypt. The door seems to have been recently used.
+          description: A hidden entrance to the underground crypt. The door seems
+            to have been recently used.
         cult_members_confession:
           id: cult_members_confession
-          name: "Cult Member's Confession"
           object_type_id: cult_members_confession
-          current_room_id: church
-          description: A handwritten confession found in the church records.
         holy_water:
           id: holy_water
-          name: Holy Water
           object_type_id: holy_water
-          current_room_id: church
-          description: A small vial of blessed water from the church.
         hearth_stone:
           id: hearth_stone
-          name: Hearth Stone
           object_type_id: hearth_stone
-          current_room_id: church
-          description: A warm stone that radiates comfort and hope, said to protect against dark magic.
         cult_confession:
           id: cult_confession
-          name: Cult Confession
           object_type_id: cult_confession
-          current_room_id: church
-          description: A detailed confession from a former cult member revealing their plans and methods.
         faith_restoration:
           id: faith_restoration
-          name: Sacred Relic
           object_type_id: faith_restoration
-          current_room_id: church
-          description: A holy relic that can restore faith and provide spiritual strength.
         holy_symbol:
           id: holy_symbol
           name: Holy Symbol
           object_type_id: holy_symbol
-          current_room_id: church
           description: A blessed symbol that glows with divine light.
         binding_chain:
           id: binding_chain
           name: Binding Chain
           object_type_id: binding_chain
-          current_room_id: church
           description: A heavy iron chain covered in ancient runes.
         justice_scales:
           id: justice_scales
           name: Scales of Justice
           object_type_id: justice_scales
-          current_room_id: church
-          description: Ancient scales that can weigh truth against lies and bring justice to the guilty.
+          description: Ancient scales that can weigh truth against lies and bring
+            justice to the guilty.
         evidence_compiler:
           id: evidence_compiler
           name: Evidence Compiler
           object_type_id: evidence_compiler
-          current_room_id: church
-          description: A device that can organize and compile evidence into a coherent case against the cult.
+          description: A device that can organize and compile evidence into a coherent
+            case against the cult.
         justice_weapon:
           id: justice_weapon
           name: Justice Weapon
           object_type_id: justice_weapon
-          current_room_id: church
-          description: A blessed weapon specifically designed to combat dark forces and bring cult members to justice.
-        # Alternative evidence objects for Church-start path
+          description: A blessed weapon specifically designed to combat dark forces
+            and bring cult members to justice.
         church_records:
           id: church_records
           name: Church Records
           object_type_id: church_records
-          current_room_id: church
-          description: Detailed church records documenting recent disappearances and suspicious activities. Contains crucial evidence about the cult's activities.
+          description: Detailed church records documenting recent disappearances and
+            suspicious activities. Contains crucial evidence about the cult's activities.
           properties:
             readable: true
             pickupable: true
@@ -414,20 +465,22 @@ entity_definitions:
           interactions:
             look:
               effects:
-              - type: increment_property
+              - type: set_property
                 target: player
-                property: evidence_found
-                increment_value: 1
+                property: church_records_found
+                value: true
               - type: generate_event
-                message: '{{player_name}} examines the church records and finds crucial evidence! Evidence found: {{player_property:evidence_found}}/3'
+                message: '{{player_name}} examines the church records and finds crucial
+                  evidence!'
                 observers:
                 - room_characters
         priest_diary:
           id: priest_diary
           name: Priest's Diary
           object_type_id: priest_diary
-          current_room_id: church
-          description: Father Marcus's personal diary containing his observations about the cult's activities and their plans. This could be the key to understanding their hierarchy.
+          description: Father Marcus's personal diary containing his observations
+            about the cult's activities and their plans. This could be the key to
+            understanding their hierarchy.
           properties:
             readable: true
             pickupable: true
@@ -437,65 +490,63 @@ entity_definitions:
               effects:
               - type: set_property
                 target: player
+                property: priest_diary_found
+                value: true
+              - type: set_property
+                target: player
                 property: cult_hierarchy_discovered
                 value: true
               - type: generate_event
-                message: '{{player_name}} discovers the cult hierarchy in the priest''s diary! The Shadowed Hand''s structure is revealed!'
+                message: '{{player_name}} discovers the cult hierarchy in the priest''s
+                  diary! The Shadowed Hand''s structure is revealed!'
                 observers:
                 - room_characters
         sacred_map:
           id: sacred_map
-          name: Sacred Map
           object_type_id: sacred_map
-          current_room_id: church
-          description: An ancient map showing all the sacred sites and hidden locations where the cult has been active. This intelligence could reveal their hideouts.
-          properties:
-            readable: true
-            pickupable: true
-            size: medium
           interactions:
             look:
               effects:
+              - type: set_property
+                target: player
+                property: sacred_map_found
+                value: true
               - type: set_property
                 target: player
                 property: cult_locations_mapped
                 value: true
               - type: generate_event
-                message: '{{player_name}} maps all cult locations using the sacred map! Their hideouts are now known!'
+                message: '{{player_name}} maps all cult locations using the sacred
+                  map! Their hideouts are now known!'
                 observers:
                 - room_characters
         ritual_texts:
           id: ritual_texts
-          name: Ritual Texts
           object_type_id: ritual_texts
-          current_room_id: church
-          description: Ancient texts containing knowledge about the cult's dark rituals and their purposes. Understanding these could be crucial for stopping their plans.
-          properties:
-            readable: true
-            pickupable: true
-            size: large
-            heavy: true
           interactions:
             look:
               effects:
               - type: set_property
                 target: player
+                property: ritual_texts_found
+                value: true
+              - type: set_property
+                target: player
                 property: ritual_knowledge_mastered
                 value: true
               - type: generate_event
-                message: '{{player_name}} masters the ritual knowledge from the ancient texts! They now understand the cult''s dark methods!'
+                message: '{{player_name}} masters the ritual knowledge from the ancient
+                  texts! They now understand the cult''s dark methods!'
                 observers:
                 - room_characters
         celestial_almanac:
           id: celestial_almanac
-          name: Celestial Almanac
           object_type_id: celestial_almanac
-          current_room_id: church
-          description: A detailed almanac showing celestial alignments and their significance to the cult's timing. This could reveal when they plan their rituals.
           properties:
             readable: true
             pickupable: true
             size: medium
+            pickup_action: use
           interactions:
             use:
               effects:
@@ -504,19 +555,18 @@ entity_definitions:
                 property: cult_timing_understood
                 value: true
               - type: generate_event
-                message: '{{player_name}} understands the cult''s timing using the celestial almanac! They now know when the rituals will occur!'
+                message: '{{player_name}} understands the cult''s timing using the
+                  celestial almanac! They now know when the rituals will occur!'
                 observers:
                 - room_characters
         confrontation_manual:
           id: confrontation_manual
-          name: Confrontation Manual
           object_type_id: confrontation_manual
-          current_room_id: church
-          description: A manual that synthesizes all gathered knowledge to create a plan for the final confrontation with the cult. This could be the key to bringing them to justice.
           properties:
             readable: true
             pickupable: true
             size: medium
+            pickup_action: use
           interactions:
             use:
               effects:
@@ -525,28 +575,23 @@ entity_definitions:
                 property: final_confrontation_ready
                 value: true
               - type: generate_event
-                message: '{{player_name}} creates the final confrontation plan using the manual! They are ready to bring the cult to justice!'
+                message: '{{player_name}} creates the final confrontation plan using
+                  the manual! They are ready to bring the cult to justice!'
                 observers:
                 - room_characters
         witness_testimony:
           id: witness_testimony
-          name: Witness Testimony
           object_type_id: witness_testimony
-          current_room_id: church
-          description: Written testimony from witnesses who have seen cult activities. This evidence could be crucial for building a case against them.
-          properties:
-            readable: true
-            pickupable: true
-            size: small
           interactions:
             look:
               effects:
-              - type: increment_property
+              - type: set_property
                 target: player
-                property: evidence_found
-                increment_value: 1
+                property: witness_testimony_found
+                value: true
               - type: generate_event
-                message: '{{player_name}} examines the witness testimony and finds crucial evidence! Evidence found: {{player_property:evidence_found}}/3'
+                message: '{{player_name}} examines the witness testimony and finds
+                  crucial evidence!'
                 observers:
                 - room_characters
   cemetery:
@@ -560,61 +605,98 @@ entity_definitions:
         \ disturbed, and fresh earth has been turned. The mausoleum \nin the center\
         \ is particularly imposing, its doors slightly ajar. The cemetery serves as\
         \ both \na resting place for the dead and a gateway to the underground world\
-        \ beneath the town.\n"
+        \ beneath the town.\n\n**EXITS:** You can see paths leading in several directions:\
+        \ to the **forest** (old forest path), to the **church** (Sacred Heart Church),\
+        \ to the **tunnels** (underground passages), to the **mausoleum** (large stone\
+        \ tomb), and a **secret passage** hidden behind the mausoleum.\n\nFresh graves\
+        \ show signs of recent activity - the earth is still loose and unsettled.\
+        \ Suspicious footprints lead toward the mausoleum, suggesting recent cult\
+        \ activity. Gravestone epitaphs tell stories of the missing townsfolk, each\
+        \ one a potential clue. The mausoleum doors are slightly ajar, revealing evidence\
+        \ of recent ritual activity. Disturbed earth patterns suggest systematic grave\
+        \ robbing or ritual preparation. The church path leads to Sacred Heart Church\
+        \ where Father Marcus has been studying the cult's methods. The forest path\
+        \ leads to hidden locations where the cult has been active.\n"
     properties:
       exits:
         forest:
           id: forest
           name: Old Forest Path
           destination_room_id: old_forest_path
-          aliases: [forest, woods, path]
+          aliases:
+          - forest
+          - woods
+          - path
         church:
           id: church
           name: Sacred Heart Church
           destination_room_id: church
-          aliases: [church, temple, sanctuary]
+          aliases:
+          - church
+          - temple
+          - sanctuary
         tunnels:
           id: tunnels
           name: Underground Tunnels
           destination_room_id: underground_tunnels
-          aliases: [tunnels, underground, passages]
+          aliases:
+          - tunnels
+          - underground
+          - passages
+        mausoleum:
+          id: mausoleum
+          name: Mausoleum
+          destination_room_id: mausoleum
+          aliases:
+          - mausoleum
+          - tomb
+          - crypt
         secret_passage:
           id: secret_passage
           name: Secret Passage
           destination_room_id: thieves_den
-          aliases: [secret, passage, hidden]
+          aliases:
+          - secret
+          - passage
+          - hidden
           is_hidden: true
       objects:
-        mausoleum:
-          id: mausoleum
-          name: Mausoleum
-          object_type_id: mausoleum
-          current_room_id: cemetery
-          description: A large stone mausoleum with doors that seem to be slightly ajar. The air around it feels colder than the rest of the cemetery.
         fresh_graves:
           id: fresh_graves
           name: Fresh Graves
           object_type_id: fresh_graves
-          current_room_id: cemetery
-          description: Several graves that appear to have been recently dug. The earth is still loose and unsettled.
+          description: Several graves that appear to have been recently dug. The earth
+            is still loose and unsettled.
         suspicious_footprints:
           id: suspicious_footprints
           name: Suspicious Footprints
           object_type_id: suspicious_footprints
-          current_room_id: cemetery
-          description: Footprints in the soft earth that don't seem to belong to any normal visitor. They lead toward the mausoleum.
+          description: Footprints in the soft earth that don't seem to belong to any
+            normal visitor. They lead toward the mausoleum.
         fresh_footprints:
           id: fresh_footprints
           name: Fresh Footprints
           object_type_id: fresh_footprints
-          current_room_id: cemetery
-          description: Fresh footprints in the dust. They appear to be recent and will fade soon.
+          description: Fresh footprints in the dust. They appear to be recent and
+            will fade soon.
         disturbed_earth:
           id: disturbed_earth
-          name: Disturbed Earth
           object_type_id: disturbed_earth
-          current_room_id: cemetery
-          description: Recently disturbed earth that will settle over time.
+        graveyard_epitaphs:
+          id: graveyard_epitaphs
+          object_type_id: graveyard_epitaphs
+          interactions:
+            look:
+              effects:
+              - type: set_property
+                target: player
+                property: graveyard_epitaphs_found
+                value: true
+              - type: generate_event
+                message: '{{player_name}} examines the graveyard epitaphs and finds
+                  crucial evidence!'
+                observers:
+                - room_characters
       dark: true
       spooky: true
   bank:
@@ -635,49 +717,58 @@ entity_definitions:
           id: square
           name: Town Square
           destination_room_id: town_square
-          aliases: [square, town, main]
+          aliases:
+          - square
+          - town
+          - main
         market:
           id: market
           name: Market District
           destination_room_id: market_district
-          aliases: [market, bazaar, shops]
+          aliases:
+          - market
+          - bazaar
+          - shops
         vault_tunnel:
           id: vault_tunnel
           name: Secret Vault Passage
           destination_room_id: underground_tunnels
-          aliases: [vault, tunnel, secret]
+          aliases:
+          - vault
+          - tunnel
+          - secret
           is_hidden: true
       objects:
         vault:
           id: vault
           name: Vault
           object_type_id: vault
-          current_room_id: bank
-          description: A massive steel vault that seems to be open more often than it should be. The door mechanism appears to have been tampered with.
+          description: A massive steel vault that seems to be open more often than
+            it should be. The door mechanism appears to have been tampered with.
         ledgers:
           id: ledgers
           name: Bank Ledgers
           object_type_id: ledgers
-          current_room_id: bank
-          description: Financial records that might contain clues about the mysterious withdrawals and suspicious transactions.
+          description: Financial records that might contain clues about the mysterious
+            withdrawals and suspicious transactions.
         guard_post:
           id: guard_post
           name: Guard Post
           object_type_id: guard_post
-          current_room_id: bank
-          description: A security station that seems to be unmanned more often than not. The guard appears to be frequently absent.
+          description: A security station that seems to be unmanned more often than
+            not. The guard appears to be frequently absent.
         mayors_journal:
           id: mayors_journal
-          name: "Mayor's Journal"
+          name: Mayor's Journal
           object_type_id: mayors_journal
-          current_room_id: bank
-          description: A leather-bound journal belonging to the missing mayor, hidden in the vault.
+          description: A leather-bound journal belonging to the missing mayor, hidden
+            in the vault.
         missing_items:
           id: missing_items
           name: Missing Items
           object_type_id: missing_items
-          current_room_id: bank
-          description: Empty spaces where items once sat, suggesting a systematic search.
+          description: Empty spaces where items once sat, suggesting a systematic
+            search.
   market_district:
     behaviors:
     - room
@@ -695,45 +786,63 @@ entity_definitions:
           id: bank
           name: Blackwater Bank
           destination_room_id: bank
-          aliases: [bank, vault, treasury]
+          aliases:
+          - bank
+          - vault
+          - treasury
         guild:
           id: guild
           name: Adventurer's Guild Hall
           destination_room_id: adventurer_guild
-          aliases: [guild, hall, adventurers]
+          aliases:
+          - guild
+          - hall
+          - adventurers
         thieves:
           id: thieves
           name: Thieves' Den
           destination_room_id: thieves_den
-          aliases: [thieves, den, underground]
+          aliases:
+          - thieves
+          - den
+          - underground
         tavern:
           id: tavern
           name: Rusty Anchor Tavern
           destination_room_id: tavern
-          aliases: [tavern, bar, inn]
+          aliases:
+          - tavern
+          - bar
+          - inn
         square:
           id: square
           name: Town Square
           destination_room_id: town_square
-          aliases: [square, town, main]
+          aliases:
+          - square
+          - town
+          - main
         warehouse:
           id: warehouse
           name: Abandoned Warehouse
           destination_room_id: abandoned_warehouse
-          aliases: [warehouse, abandoned, storage]
+          aliases:
+          - warehouse
+          - abandoned
+          - storage
       objects:
         merchant_stalls:
           id: merchant_stalls
           name: Merchant Stalls
           object_type_id: merchant_stalls
-          current_room_id: market_district
-          description: Various stalls where merchants sell their wares. Many are empty, and the remaining merchants seem nervous.
+          description: Various stalls where merchants sell their wares. Many are empty,
+            and the remaining merchants seem nervous.
         hidden_alleyways:
           id: hidden_alleyways
           name: Hidden Alleyways
           object_type_id: hidden_alleyways
-          current_room_id: market_district
-          description: Narrow passages between buildings that lead to secret meeting places and hidden entrances.
+          description: Narrow passages between buildings that lead to secret meeting
+            places and hidden entrances.
   underground_tunnels:
     behaviors:
     - room
@@ -752,48 +861,59 @@ entity_definitions:
           id: cemetery
           name: Blackwater Cemetery
           destination_room_id: cemetery
-          aliases: [cemetery, graveyard, tombs]
+          aliases:
+          - cemetery
+          - graveyard
+          - tombs
         church:
           id: church
           name: Sacred Heart Church
           destination_room_id: church
-          aliases: [church, temple, sanctuary]
+          aliases:
+          - church
+          - temple
+          - sanctuary
           is_hidden: true
         thieves:
           id: thieves
           name: Thieves' Den
           destination_room_id: thieves_den
-          aliases: [thieves, den, underground]
+          aliases:
+          - thieves
+          - den
+          - underground
         cult_chamber:
           id: cult_chamber
           name: Secret Cult Chamber
           destination_room_id: secret_cult_chamber
-          aliases: [cult, chamber, secret]
+          aliases:
+          - cult
+          - chamber
+          - secret
           is_hidden: true
       objects:
         cult_symbols:
           id: cult_symbols
           name: Cult Symbols
           object_type_id: cult_symbols
-          current_room_id: underground_tunnels
-          description: Strange symbols carved into the walls that seem to pulse with an otherworldly energy. They make you feel uneasy.
+          description: Strange symbols carved into the walls that seem to pulse with
+            an otherworldly energy. They make you feel uneasy.
         evidence_activity:
           id: evidence_activity
           name: Evidence of Recent Activity
           object_type_id: evidence_activity
-          current_room_id: underground_tunnels
-          description: Signs that someone has been using these tunnels recently. Footprints, dropped items, and other traces of recent passage.
+          description: Signs that someone has been using these tunnels recently. Footprints,
+            dropped items, and other traces of recent passage.
         secret_doors:
           id: secret_doors
           name: Secret Doors
           object_type_id: secret_doors
-          current_room_id: underground_tunnels
-          description: Hidden entrances and exits that lead to various parts of the town. Some seem to have been recently used.
+          description: Hidden entrances and exits that lead to various parts of the
+            town. Some seem to have been recently used.
         shadow_crystal:
           id: shadow_crystal
           name: Shadow Crystal
           object_type_id: shadow_crystal
-          current_room_id: underground_tunnels
           description: A dark crystal that seems to absorb light and warmth.
       hidden: true
       underground: true
@@ -819,68 +939,59 @@ entity_definitions:
           id: tunnels
           name: Underground Tunnels
           destination_room_id: underground_tunnels
-          aliases: [tunnels, underground, passages]
+          aliases:
+          - tunnels
+          - underground
+          - passages
         forest_escape:
           id: forest_escape
           name: Forest Escape Route
           destination_room_id: old_forest_path
-          aliases: [forest, escape, exit]
+          aliases:
+          - forest
+          - escape
+          - exit
           is_hidden: true
       objects:
         cult_altar:
           id: cult_altar
           name: Cult Altar
           object_type_id: cult_altar
-          current_room_id: secret_cult_chamber
-          description: A dark altar covered with cult artifacts and evidence of recent rituals. The air around it feels wrong.
+          description: A dark altar covered with cult artifacts and evidence of recent
+            rituals. The air around it feels wrong.
         prisoner_cells:
           id: prisoner_cells
           name: Prisoner Cells
           object_type_id: prisoner_cells
-          current_room_id: secret_cult_chamber
-          description: Cells where the cult keeps their prisoners. Some appear to have been recently occupied.
+          description: Cells where the cult keeps their prisoners. Some appear to
+            have been recently occupied.
         cult_artifacts:
           id: cult_artifacts
           name: Cult Artifacts
           object_type_id: cult_artifacts
-          current_room_id: secret_cult_chamber
-          description: Various dark objects and artifacts used in the cult's rituals. They seem to pulse with an otherworldly energy.
+          description: Various dark objects and artifacts used in the cult's rituals.
+            They seem to pulse with an otherworldly energy.
         cult_ritual_book:
           id: cult_ritual_book
-          name: Cult Ritual Book
           object_type_id: cult_ritual_book
-          current_room_id: secret_cult_chamber
-          description: A dark, leather-bound tome filled with ancient symbols and blood-stained pages.
         suspicious_sounds:
           id: suspicious_sounds
           name: Suspicious Sounds
           object_type_id: suspicious_sounds
-          current_room_id: secret_cult_chamber
-          description: Low, chanting voices echo through the chamber. The ritual is about to begin.
+          description: Low, chanting voices echo through the chamber. The ritual is
+            about to begin.
         shadow_crystal:
           id: shadow_crystal
-          name: Shadow Crystal
           object_type_id: shadow_crystal
-          current_room_id: secret_cult_chamber
-          description: A dark crystal that seems to absorb light and warmth, pulsing with malevolent energy.
         shadow_mirror:
           id: shadow_mirror
-          name: Shadow Mirror
           object_type_id: shadow_mirror
-          current_room_id: secret_cult_chamber
-          description: A dark mirror that shows not your reflection, but the shadows of your fears and doubts.
         ritual_preparations:
           id: ritual_preparations
-          name: Ritual Preparations
           object_type_id: ritual_preparations
-          current_room_id: secret_cult_chamber
-          description: Evidence of ongoing ritual preparations that will be completed soon.
         burning_candle:
           id: burning_candle
-          name: Burning Candle
           object_type_id: burning_candle
-          current_room_id: secret_cult_chamber
-          description: A candle that burns down over time, creating urgency.
       hidden: true
       underground: true
       dark: true
@@ -897,57 +1008,77 @@ entity_definitions:
         \ animal calls fills the silence. The path serves as both an escape route\
         \ from the \ntown and a gateway to the deeper mysteries of the forest. There\
         \ are signs that someone has \nbeen using this path recently, and the forest\
-        \ seems to be watching and waiting.\n"
+        \ seems to be watching and waiting. \n\nA weathered wooden sign points deeper\
+        \ into the forest, its faded writing barely legible. Among the twisted branches,\
+        \ you notice a narrow trail that seems to lead upward toward the hills. The\
+        \ path appears to have been used recently, and there's something about the\
+        \ way the trees seem to part that suggests a hidden destination beyond. The\
+        \ forest holds many secrets, and those who know where to look might find places\
+        \ that others have forgotten.\n"
     properties:
       exits:
         square:
           id: square
           name: Town Square
           destination_room_id: town_square
-          aliases: [square, town, main]
+          aliases:
+          - square
+          - town
+          - main
         cemetery:
           id: cemetery
           name: Blackwater Cemetery
           destination_room_id: cemetery
-          aliases: [cemetery, graveyard, tombs]
+          aliases:
+          - cemetery
+          - graveyard
+          - tombs
         cult_escape:
           id: cult_escape
           name: Cult Escape Route
           destination_room_id: secret_cult_chamber
-          aliases: [cult, chamber, secret]
+          aliases:
+          - cult
+          - chamber
+          - secret
           is_hidden: true
         observatory:
           id: observatory
           name: Hidden Observatory
           destination_room_id: hidden_observatory
-          aliases: [observatory, telescope, stars]
+          aliases:
+          - observatory
+          - telescope
+          - stars
           is_hidden: true
       objects:
         wooden_sign:
           id: wooden_sign
           name: Wooden Sign
           object_type_id: wooden_sign
-          current_room_id: old_forest_path
-          description: A weathered wooden sign pointing deeper into the forest. The writing is faded and hard to read.
+          description: A weathered wooden sign pointing deeper into the forest. The
+            writing is faded and hard to read.
         ancient_altar:
           id: ancient_altar
           name: Ancient Altar
           object_type_id: ancient_altar
-          current_room_id: old_forest_path
-          description: A sacred altar that has been in this place for centuries. It seems to be connected to the forest's ancient magic.
+          description: A sacred altar that has been in this place for centuries. It
+            seems to be connected to the forest's ancient magic.
       characters:
         cult_leader_malachi:
           id: cult_leader_malachi
           name: Malachi the Shadow
           character_type_id: cult_leader_malachi
           current_room_id: old_forest_path
-          description: A mysterious figure in dark robes standing near the ancient altar, his presence radiating dark energy.
+          description: A mysterious figure in dark robes standing near the ancient
+            altar, his presence radiating dark energy.
         cult_member_thorn:
           id: cult_member_thorn
           name: Thorn the Enforcer
           character_type_id: cult_member_thorn
           current_room_id: old_forest_path
-          description: A brutal-looking figure lurking in the shadows, his eyes gleaming with malice.
+          description: A brutal-looking figure lurking in the shadows, his eyes gleaming
+            with malice.
       dark: true
       forest: true
   abandoned_warehouse:
@@ -955,170 +1086,480 @@ entity_definitions:
     - room
     attributes:
       name: Abandoned Warehouse
-      description: "A large, dilapidated warehouse on the outskirts of town. The wooden walls are rotting, and the roof has several holes that let in shafts of dusty light. Crates and barrels are scattered throughout, some broken open and spilling their contents. This place was once used for storing goods, but now it serves as a meeting place for those who prefer to operate in the shadows. The air is thick with dust and the smell of decay.\n"
+      description: 'A large, dilapidated warehouse on the outskirts of town. The wooden
+        walls are rotting, and the roof has several holes that let in shafts of dusty
+        light. Crates and barrels are scattered throughout, some broken open and spilling
+        their contents. This place was once used for storing goods, but now it serves
+        as a meeting place for those who prefer to operate in the shadows. The air
+        is thick with dust and the smell of decay.
+
+        '
     properties:
       exits:
         market:
           id: market
           name: Market District
           destination_room_id: market_district
-          aliases: [market, bazaar, shops]
+          aliases:
+          - market
+          - bazaar
+          - shops
         square:
           id: square
           name: Town Square
           destination_room_id: town_square
-          aliases: [square, town, main]
+          aliases:
+          - square
+          - town
+          - main
       objects:
         corruption_documents:
           id: corruption_documents
-          name: Corruption Documents
           object_type_id: corruption_documents
-          current_room_id: abandoned_warehouse
-          description: Secret financial records and correspondence revealing Captain O'Malley's corruption.
         hidden_safe:
           id: hidden_safe
-          name: Hidden Safe
           object_type_id: hidden_safe
-          current_room_id: abandoned_warehouse
-          description: A small safe hidden behind a loose board in the wall. It contains important documents.
         meeting_table:
           id: meeting_table
-          name: Meeting Table
           object_type_id: meeting_table
-          current_room_id: abandoned_warehouse
-          description: A large wooden table with chairs around it. Maps and documents are spread across its surface.
         ritual_components:
           id: ritual_components
-          name: Ritual Components
           object_type_id: ritual_components
-          current_room_id: abandoned_warehouse
-          description: A collection of strange ingredients - dried herbs, bone fragments, and a vial of dark liquid.
         puzzle_box:
           id: puzzle_box
           name: Puzzle Box
           object_type_id: puzzle_box
-          current_room_id: abandoned_warehouse
-          description: An intricate wooden box with multiple sliding panels and hidden compartments.
+          description: An intricate wooden box with multiple sliding panels and hidden
+            compartments.
         cult_roster:
           id: cult_roster
           name: Cult Roster
           object_type_id: cult_roster
-          current_room_id: abandoned_warehouse
-          description: A hidden list of cult members and their roles within the Shadowed Hand hierarchy.
+          description: A hidden list of cult members and their roles within the Shadowed
+            Hand hierarchy.
         cult_hideout_map:
           id: cult_hideout_map
           name: Cult Hideout Map
           object_type_id: cult_hideout_map
-          current_room_id: abandoned_warehouse
-          description: A detailed map showing all known cult meeting places and safe houses throughout the town.
+          description: A detailed map showing all known cult meeting places and safe
+            houses throughout the town.
   old_library:
     behaviors:
     - room
     attributes:
       name: Old Library
-      description: "A dusty, forgotten library filled with ancient tomes and crumbling manuscripts. Tall bookshelves line the walls, reaching toward a high ceiling lost in shadows. The air is thick with the smell of old paper and leather bindings. Many of the books are written in languages you don't recognize, and some seem to pulse with a strange energy. This place holds the town's forgotten knowledge, including secrets about the cult's origins and methods.\n"
+      description: 'A dusty, forgotten library filled with ancient tomes and crumbling
+        manuscripts. Tall bookshelves line the walls, reaching toward a high ceiling
+        lost in shadows. The air is thick with the smell of old paper and leather
+        bindings. Many of the books are written in languages you don''t recognize,
+        and some seem to pulse with a strange energy. This place holds the town''s
+        forgotten knowledge, including secrets about the cult''s origins and methods.
+
+        '
     properties:
       exits:
         church:
           id: church
           name: Sacred Heart Church
           destination_room_id: church
-          aliases: [church, temple, sanctuary]
+          aliases:
+          - church
+          - temple
+          - sanctuary
         square:
           id: square
           name: Town Square
           destination_room_id: town_square
-          aliases: [square, town, main]
+          aliases:
+          - square
+          - town
+          - main
       objects:
         ancient_tome:
           id: ancient_tome
-          name: Ancient Tome
           object_type_id: ancient_tome
-          current_room_id: old_library
-          description: A massive leather-bound book written in an ancient language. It contains knowledge about the cult's origins.
         cult_history:
           id: cult_history
           name: Cult History
           object_type_id: cult_history
-          current_room_id: old_library
-          description: A detailed account of the Shadowed Hand's activities over the past century.
+          description: A detailed account of the Shadowed Hand's activities over the
+            past century.
         decoder_ring:
           id: decoder_ring
-          name: Decoder Ring
           object_type_id: decoder_ring
-          current_room_id: old_library
-          description: A mysterious ring that can be used to decode encrypted messages and symbols.
         cult_key:
           id: cult_key
           name: Cult Key
           object_type_id: cult_key
-          current_room_id: old_library
-          description: A dark iron key with strange symbols carved into its surface. It pulses with dark energy.
+          description: A dark iron key with strange symbols carved into its surface.
+            It pulses with dark energy.
         ancient_scroll:
           id: ancient_scroll
           name: Ancient Scroll
           object_type_id: ancient_scroll
-          current_room_id: old_library
-          description: A crumbling scroll written in an ancient language. The text seems to shift and change.
+          description: A crumbling scroll written in an ancient language. The text
+            seems to shift and change.
         ritual_mastery_tome:
           id: ritual_mastery_tome
           name: Ritual Mastery Tome
           object_type_id: ritual_mastery_tome
-          current_room_id: old_library
-          description: An ancient book containing detailed knowledge of the cult's dark rituals and their purposes.
+          description: An ancient book containing detailed knowledge of the cult's
+            dark rituals and their purposes.
   hidden_observatory:
     behaviors:
     - room
     attributes:
       name: Hidden Observatory
-      description: "A secret observatory hidden in the hills above the town. The building is small and unassuming from the outside, but inside it contains powerful telescopes and astronomical instruments. Star charts cover the walls, and ancient texts about celestial alignments are scattered on tables. This place was used by the town's original founders to study the stars, but it also holds clues about the cult's timing and rituals. The view of the night sky is breathtaking, but there's something ominous about the way the stars seem to align.\n"
+      description: 'A secret observatory hidden in the hills above the town. The building
+        is small and unassuming from the outside, but inside it contains powerful
+        telescopes and astronomical instruments. Star charts cover the walls, and
+        ancient texts about celestial alignments are scattered on tables. This place
+        was used by the town''s original founders to study the stars, but it also
+        holds clues about the cult''s timing and rituals. The view of the night sky
+        is breathtaking, but there''s something ominous about the way the stars seem
+        to align.
+
+        '
     properties:
       exits:
         forest:
           id: forest
           name: Old Forest Path
           destination_room_id: old_forest_path
-          aliases: [forest, woods, path]
+          aliases:
+          - forest
+          - woods
+          - path
       objects:
         star_charts:
           id: star_charts
-          name: Star Charts
           object_type_id: star_charts
-          current_room_id: hidden_observatory
-          description: Detailed charts showing celestial alignments and their significance to the cult's rituals.
         ritual_timing:
           id: ritual_timing
           name: Ritual Timing
           object_type_id: ritual_timing
-          current_room_id: hidden_observatory
-          description: A calendar showing when the cult's most powerful rituals can be performed.
+          description: A calendar showing when the cult's most powerful rituals can
+            be performed.
         telescope:
           id: telescope
-          name: Telescope
           object_type_id: telescope
-          current_room_id: hidden_observatory
-          description: A powerful telescope that can be used to observe the stars and predict celestial events.
         ritual_candle:
           id: ritual_candle
           name: Ritual Candle
           object_type_id: ritual_candle
-          current_room_id: hidden_observatory
-          description: A black candle made from strange wax. When lit, it burns with an unnatural flame.
+          description: A black candle made from strange wax. When lit, it burns with
+            an unnatural flame.
         secret_map:
           id: secret_map
           name: Secret Map
           object_type_id: secret_map
-          current_room_id: hidden_observatory
-          description: A detailed map showing hidden passages and secret rooms throughout the town.
+          description: A detailed map showing hidden passages and secret rooms throughout
+            the town.
         celestial_calculator:
           id: celestial_calculator
           name: Celestial Calculator
           object_type_id: celestial_calculator
-          current_room_id: hidden_observatory
-          description: A complex device that calculates the optimal timing for dark rituals based on celestial alignments.
+          description: A complex device that calculates the optimal timing for dark
+            rituals based on celestial alignments.
         confrontation_planner:
           id: confrontation_planner
           name: Confrontation Planner
           object_type_id: confrontation_planner
-          current_room_id: hidden_observatory
-          description: A complex device that synthesizes all gathered knowledge to create a plan for the final confrontation with the cult.
+          description: A complex device that synthesizes all gathered knowledge to
+            create a plan for the final confrontation with the cult.
+  town_hall:
+    behaviors:
+    - room
+    attributes:
+      name: Blackwater Town Hall
+      description: 'The administrative heart of Blackwater, where the mayor once conducted
+        town business and kept official records. The building is grand but shows signs
+        of neglect - dust covers the furniture and many documents are scattered about.
+        The mayor''s office is empty, his chair pushed back as if he left in a hurry.
+        Filing cabinets line the walls, filled with town records, birth certificates,
+        and other official documents. This place holds the town''s official history,
+        including records of disappearances and suspicious activities that might be
+        connected to the cult.
+
+
+        The records mention that Father Marcus at Sacred Heart Church has been investigating
+        these disappearances and that there are rumors of cult activity in hidden
+        locations around town. One notice specifically mentions that the cult''s rituals
+        are timed to celestial events, and there are references to an observatory
+        in the hills where the town''s founders studied the stars.
+
+        '
+    properties:
+      exits:
+        square:
+          id: square
+          name: Town Square
+          destination_room_id: town_square
+          aliases:
+          - square
+          - town
+          - main
+        cemetery:
+          id: cemetery
+          name: Blackwater Cemetery
+          destination_room_id: cemetery
+          aliases:
+          - cemetery
+          - graveyard
+          - tombs
+      objects:
+        town_records:
+          id: town_records
+          object_type_id: town_records
+          interactions:
+            look:
+              effects:
+              - type: set_property
+                target: player
+                property: town_records_found
+                value: true
+              - type: generate_event
+                message: '{{player_name}} examines the town records and finds crucial
+                  evidence!'
+                observers:
+                - room_characters
+        missing_persons_log:
+          id: missing_persons_log
+          object_type_id: missing_persons_log
+          interactions:
+            look:
+              effects:
+              - type: set_property
+                target: player
+                property: missing_persons_log_found
+                value: true
+              - type: generate_event
+                message: '{{player_name}} examines the missing persons log and finds
+                  crucial evidence!'
+                observers:
+                - room_characters
+        mayors_desk:
+          id: mayors_desk
+          name: Mayor's Desk
+          object_type_id: mayors_desk
+          description: The mayor's desk, covered with documents and correspondence.
+            Some papers seem to have been recently disturbed.
+        official_seal:
+          id: official_seal
+          name: Official Seal
+          object_type_id: official_seal
+          description: The town's official seal, used to authenticate documents and
+            legal papers.
+  newspaper_office:
+    behaviors:
+    - room
+    attributes:
+      name: Blackwater Gazette Office
+      description: 'The office of the local newspaper, where journalists once worked
+        to keep the town informed. The building is small but well-organized, with
+        desks covered in papers, typewriters, and printing equipment. The editor''s
+        desk is cluttered with notes and drafts of articles about the recent disappearances.
+        This place holds the town''s recent history as recorded by its journalists,
+        including eyewitness accounts and investigative reports that might contain
+        clues about the cult''s activities.
+
+        '
+    properties:
+      exits:
+        square:
+          id: square
+          name: Town Square
+          destination_room_id: town_square
+          aliases:
+          - square
+          - town
+          - main
+        market:
+          id: market
+          name: Market District
+          destination_room_id: market_district
+          aliases:
+          - market
+          - bazaar
+          - shops
+      objects:
+        local_newspaper:
+          id: local_newspaper
+          object_type_id: local_newspaper
+          interactions:
+            look:
+              effects:
+              - type: set_property
+                target: player
+                property: local_newspaper_found
+                value: true
+              - type: generate_event
+                message: '{{player_name}} examines the local newspaper and finds crucial
+                  evidence!'
+                observers:
+                - room_characters
+        editor_notes:
+          id: editor_notes
+          object_type_id: editor_notes
+          interactions:
+            look:
+              effects:
+              - type: set_property
+                target: player
+                property: editor_notes_found
+                value: true
+              - type: generate_event
+                message: '{{player_name}} examines the editor''s notes and finds crucial
+                  evidence!'
+                observers:
+                - room_characters
+        printing_press:
+          id: printing_press
+          name: Printing Press
+          object_type_id: printing_press
+          description: An old printing press used to produce the newspaper. It's been
+            recently used to print something.
+        reporter_desk:
+          id: reporter_desk
+          name: Reporter's Desk
+          object_type_id: reporter_desk
+          description: A desk covered with notes, photographs, and drafts of articles
+            about the recent troubles.
+  astronomer_study:
+    behaviors:
+    - room
+    attributes:
+      name: Astronomer's Study
+      description: 'A small study in the home of the town''s former astronomer, filled
+        with star charts, astronomical instruments, and ancient texts about celestial
+        phenomena. The room is cluttered but organized, with books and papers covering
+        every surface. The astronomer was known for his accurate predictions of celestial
+        events, and his notes contain detailed information about the timing of various
+        astronomical phenomena. This place holds the knowledge needed to understand
+        when the cult''s rituals can be performed at their most powerful.
+
+        '
+    properties:
+      exits:
+        square:
+          id: square
+          name: Town Square
+          destination_room_id: town_square
+          aliases:
+          - square
+          - town
+          - main
+        forest:
+          id: forest
+          name: Old Forest Path
+          destination_room_id: old_forest_path
+          aliases:
+          - forest
+          - woods
+          - path
+      objects:
+        astronomers_notes:
+          id: astronomers_notes
+          name: Astronomer's Notes
+          object_type_id: astronomers_notes
+          description: Detailed notes from the town's astronomer about celestial alignments
+            and their significance to the cult's timing.
+          properties:
+            readable: true
+            pickupable: true
+            size: medium
+            pickup_action: use
+          interactions:
+            use:
+              effects:
+              - type: set_property
+                target: player
+                property: cult_timing_understood
+                value: true
+              - type: generate_event
+                message: '{{player_name}} understands the cult''s timing using the
+                  astronomer''s notes! They now know when the rituals will occur!'
+                observers:
+                - room_characters
+        ancient_calendar:
+          id: ancient_calendar
+          object_type_id: ancient_calendar
+          interactions:
+            use:
+              effects:
+              - type: set_property
+                target: player
+                property: cult_timing_understood
+                value: true
+              - type: generate_event
+                message: '{{player_name}} understands the cult''s timing using the
+                  ancient calendar! They now know when the rituals will occur!'
+                observers:
+                - room_characters
+        ritual_schedule:
+          id: ritual_schedule
+          object_type_id: ritual_schedule
+          interactions:
+            use:
+              effects:
+              - type: set_property
+                target: player
+                property: cult_timing_understood
+                value: true
+              - type: generate_event
+                message: '{{player_name}} understands the cult''s timing using the
+                  ritual schedule! They now know when the rituals will occur!'
+                observers:
+                - room_characters
+        celestial_instruments:
+          id: celestial_instruments
+          name: Celestial Instruments
+          object_type_id: celestial_instruments
+          description: Various instruments used to observe and calculate celestial
+            events.
+        star_atlas:
+          id: star_atlas
+          name: Star Atlas
+          object_type_id: star_atlas
+          description: A comprehensive atlas of the night sky with detailed information
+            about stars and constellations.
+  mausoleum:
+    behaviors:
+    - room
+    attributes:
+      name: Ancient Mausoleum
+      description: 'A large stone mausoleum with ornate carvings and heavy stone doors
+        that are slightly ajar. The interior is dimly lit by flickering candles, casting
+        dancing shadows across the stone walls. Ancient sarcophagi line the walls,
+        and the air is thick with the scent of old stone and incense. The mausoleum
+        serves as both a resting place for the town''s founders and a secret meeting
+        place for those who prefer to operate in shadows.
+
+
+        **EXITS:** You can see the way back to the **cemetery** (graveyard).
+
+
+        Ancient sarcophagi contain the remains of the town''s founders, each with
+        their own story. Flickering candles suggest recent activity - someone has
+        been here recently. Stone carvings on the walls tell the history of the town
+        and its founding families. The air feels charged with ancient magic, suggesting
+        this place has been used for rituals.
+
+        '
+    properties:
+      exits:
+        cemetery:
+          id: cemetery
+          name: Blackwater Cemetery
+          destination_room_id: cemetery
+          aliases:
+          - cemetery
+          - graveyard
+          - tombs
+      objects:
+        ancient_sarcophagi:
+          id: ancient_sarcophagi
+          object_type_id: ancient_sarcophagi
+        ritual_candles:
+          id: ritual_candles
+          object_type_id: ritual_candles

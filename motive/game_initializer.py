@@ -708,7 +708,7 @@ class GameInitializer:
                         final_interactions = {**obj_type_interactions, **obj_instance_cfg.get('interactions', {})}
 
                         game_obj = GameObject(
-                            obj_id=obj_instance_cfg['id'],
+                            obj_id=obj_instance_cfg.get('id', obj_id),
                             name=obj_instance_cfg.get('name') or obj_type_name,
                             description=obj_instance_cfg.get('description') or obj_type_description,
                             current_location_id=room.id,
@@ -1161,7 +1161,7 @@ class GameInitializer:
                         final_interactions = {**obj_type_interactions, **obj_instance_cfg.get('interactions', {})}
 
                         game_obj = GameObject(
-                            obj_id=obj_instance_cfg['id'],
+                            obj_id=obj_instance_cfg.get('id', obj_id),
                             name=obj_instance_cfg.get('name') or obj_type_name,
                             description=obj_instance_cfg.get('description') or obj_type_description,
                             current_location_id=room.id,
