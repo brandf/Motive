@@ -1522,35 +1522,57 @@ class GameMaster:
         player.logger.info(f"{player.name} ➡️ GM (Turn End Response):\n{player_input}")
         
         # Parse the response for turn end actions (STRICT: only accept actions with > prefix)
-        if "> quit" in response.content:
+        # First, check for any actions with > prefix
+        other_actions = []
+        has_continue = False
+        has_quit = False
+        
+        for line in response.content.strip().splitlines():
+            trimmed_line = line.strip()
+            if trimmed_line.startswith(">"):
+                if trimmed_line.startswith("> continue"):
+                    has_continue = True
+                elif trimmed_line.startswith("> quit"):
+                    has_quit = True
+                else:
+                    other_actions.append(trimmed_line)
+        
+        # Handle quit action
+        if has_quit:
             self.game_logger.info(f"🚪 Player {player.name} chose to quit the game.")
             player.logger.info(f"🚪 Player {player.name} chose to quit the game.")
             # Mark player as quit (we'll handle this in the main game loop)
             player_char.action_points = -1  # Special marker for quit
             return False  # Player quit
-        elif "> continue" in response.content:
+        
+        # Handle continue action
+        elif has_continue:
             self.game_logger.info(f"✅ Player {player.name} chose to continue.")
             player.logger.info(f"✅ Player {player.name} chose to continue.")
             
-            # Check for any other actions in the response and warn about them
-            other_actions = []
-            for line in response.content.strip().splitlines():
-                trimmed_line = line.strip()
-                if trimmed_line.startswith(">") and not trimmed_line.startswith("> continue") and not trimmed_line.startswith("> quit"):
-                    other_actions.append(trimmed_line)
-            
+            # Warn about any other actions in the response
             if other_actions:
-                # Format ignored actions with line breaks like AP exhaustion feedback
                 ignored_actions_text = "\n".join([f"- {action}" for action in other_actions])
-                warning_msg = f"Note: You submitted other actions during turn end confirmation. These were ignored. Actions can only be performed during your active turn.\n\n**Ignored actions:**\n{ignored_actions_text}"
+                warning_msg = f"Note: You submitted other actions during turn end confirmation. These actions are not available during the end of a turn. Try again next turn.\n\n**Ignored actions:**\n{ignored_actions_text}"
                 warning_message = HumanMessage(content=warning_msg)
                 player.add_message(warning_message)
                 player.logger.info(f"{player.name} ⬅️ GM (Warning):\n{warning_msg}")
                 self.game_logger.info(f"GM ➡️ {player.name} (Warning):\n{warning_msg}")
             
             return True  # Player continues
+        
+        # Handle case where player submitted other actions but no continue/quit
+        elif other_actions:
+            ignored_actions_text = "\n".join([f"- {action}" for action in other_actions])
+            warning_msg = f"Note: You submitted actions during turn end confirmation, but no '> continue' or '> quit' action. These actions are not available during the end of a turn. Try again next turn. Defaulting to continue.\n\n**Ignored actions:**\n{ignored_actions_text}"
+            warning_message = HumanMessage(content=warning_msg)
+            player.add_message(warning_message)
+            player.logger.info(f"{player.name} ⬅️ GM (Warning):\n{warning_msg}")
+            self.game_logger.info(f"GM ➡️ {player.name} (Warning):\n{warning_msg}")
+            return True  # Player continues
+        
+        # Handle case where no actions with > prefix were found
         else:
-            # Default to continue if unclear response (but log it as unclear)
             self.game_logger.info(f"Player {player.name} gave unclear response (no > prefix), defaulting to continue.")
             player.logger.info(f"Player {player.name} gave unclear response (no > prefix), defaulting to continue.")
             return True  # Player continues

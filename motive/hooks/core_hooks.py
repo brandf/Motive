@@ -1561,15 +1561,22 @@ def handle_investigate_action(game_master: Any, player_char: Character, action_c
         feedback_messages.append("You are not in a valid room.")
         return events_generated, feedback_messages
     
-    # Look for the object in the room
+    # Look for the object in the room first
     target_object = None
     for obj_id, obj in current_room.objects.items():
         if obj.name.lower() == target.lower():
             target_object = obj
             break
     
+    # If not found in room, check player's inventory
     if not target_object:
-        feedback_messages.append(f"You don't see '{target}' in the current room.")
+        for obj_id, obj in player_char.inventory.items():
+            if obj.name.lower() == target.lower():
+                target_object = obj
+                break
+    
+    if not target_object:
+        feedback_messages.append(f"You don't see '{target}' anywhere nearby.")
         return events_generated, feedback_messages
 
     # Check if the object has an investigate action alias that redirects to look

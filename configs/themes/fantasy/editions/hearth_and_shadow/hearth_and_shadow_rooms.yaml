@@ -848,7 +848,11 @@ entity_definitions:
           - observatory
           - telescope
           - stars
-          is_hidden: true
+          - "upward toward the hills"
+          - "narrow trail"
+          - upward
+          - hills
+          - trail
       objects:
         wooden_sign:
           object_type_id: wooden_sign
