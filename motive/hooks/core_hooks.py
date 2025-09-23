@@ -803,20 +803,34 @@ def handle_read_action(game_master: Any, player_char: Character, action_config: 
         ))
         return events_generated, feedback_messages
 
+    # DEBUG: Log read action attempt
+    room_name = current_room.name if current_room else "UNKNOWN_ROOM"
+    game_master.game_logger.debug(f"🔍 READ ACTION DEBUG: {player_char.name} in {room_name} (ID: {player_char.current_room_id}) attempting to read '{object_name}'")
+
     # First check player's inventory for the object
     obj_to_read = None
     if hasattr(player_char, 'inventory') and player_char.inventory:
+        inventory_objects = list(player_char.inventory.keys())
+        game_master.game_logger.debug(f"🔍 READ ACTION DEBUG: {player_char.name} inventory contains: {inventory_objects}")
+        
         # Look for object in inventory by name (case-insensitive)
         for obj_id, obj in player_char.inventory.items():
             if obj.name.lower() == object_name.lower():
                 obj_to_read = obj
+                game_master.game_logger.debug(f"🔍 READ ACTION DEBUG: Found '{object_name}' in {player_char.name}'s inventory")
                 break
     
     # If not found in inventory, check the current room
     if not obj_to_read:
+        room_objects = list(current_room.objects.keys()) if hasattr(current_room, 'objects') else []
+        game_master.game_logger.debug(f"🔍 READ ACTION DEBUG: Room '{room_name}' contains objects: {room_objects}")
+        
         obj_to_read = current_room.get_object(object_name)
+        if obj_to_read:
+            game_master.game_logger.debug(f"🔍 READ ACTION DEBUG: Found '{object_name}' in room '{room_name}'")
     
     if not obj_to_read:
+        game_master.game_logger.debug(f"🔍 READ ACTION DEBUG: '{object_name}' not found in inventory or room '{room_name}'")
         feedback_messages.append(f"You don't see any '{object_name}' here to read.")
         events_generated.append(Event(
             message=f"Player {player_char.name} attempted to read non-existent object '{object_name}'.",
@@ -1056,17 +1070,26 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
     if not current_room:
         return [], [f"Error: Character is in an unknown room: {player_char.current_room_id}."]
     
+    # DEBUG: Log pickup action attempt
+    room_name = current_room.name if current_room else "UNKNOWN_ROOM"
+    game_master.game_logger.debug(f"🔍 PICKUP ACTION DEBUG: {player_char.name} in {room_name} (ID: {player_char.current_room_id}) attempting to pickup '{object_name}'")
+    
     # Find the object in the room
     # Strip quotes from object_name for comparison
     clean_object_name = object_name.strip('"\'')
+    
+    room_objects = list(current_room.objects.keys()) if hasattr(current_room, 'objects') else []
+    game_master.game_logger.debug(f"🔍 PICKUP ACTION DEBUG: Room '{room_name}' contains objects: {room_objects}")
     
     target_object = None
     for obj_id, obj in current_room.objects.items():
         if obj.name.lower() == clean_object_name.lower():
             target_object = obj
+            game_master.game_logger.debug(f"🔍 PICKUP ACTION DEBUG: Found '{object_name}' in room '{room_name}'")
             break
     
     if not target_object:
+        game_master.game_logger.debug(f"🔍 PICKUP ACTION DEBUG: '{object_name}' not found in room '{room_name}'")
         return [], [f"Error: '{object_name}' not found in the room."]
     
     # Check inventory constraints using centralized system
@@ -1082,6 +1105,9 @@ def handle_pickup_action(game_master: Any, player_char: Character, action_config
     # Move object from room to player inventory
     current_room.remove_object(target_object.id)
     player_char.add_item_to_inventory(target_object)
+    
+    # DEBUG: Log successful pickup
+    game_master.game_logger.debug(f"🔍 PICKUP ACTION DEBUG: Successfully moved '{target_object.name}' from room '{room_name}' to {player_char.name}'s inventory")
     
     # Generate timestamp
     from datetime import datetime
@@ -1625,25 +1651,40 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
         feedback_messages.append("You need to specify an object to use.")
         return events_generated, feedback_messages
 
+    # DEBUG: Log use action attempt
+    current_room = game_master.rooms.get(player_char.current_room_id)
+    room_name = current_room.name if current_room else "UNKNOWN_ROOM"
+    game_master.game_logger.debug(f"🔍 USE ACTION DEBUG: {player_char.name} in {room_name} (ID: {player_char.current_room_id}) attempting to use '{object_name}' on '{target}'")
+
     # Check if player has the object in inventory first (prioritize inventory)
     inv_object = None
+    inventory_objects = list(player_char.inventory.keys()) if hasattr(player_char, 'inventory') else []
+    game_master.game_logger.debug(f"🔍 USE ACTION DEBUG: {player_char.name} inventory contains: {inventory_objects}")
+    
     for obj in player_char.inventory.values():
         if obj.name.lower() == object_name.lower():
             inv_object = obj
+            game_master.game_logger.debug(f"🔍 USE ACTION DEBUG: Found '{object_name}' in {player_char.name}'s inventory")
             break
     
     # If not found in inventory, check room objects
     room_object = None
     if not inv_object:
-        current_room = game_master.rooms.get(player_char.current_room_id)
         if current_room:
+            room_objects = list(current_room.objects.keys()) if hasattr(current_room, 'objects') else []
+            game_master.game_logger.debug(f"🔍 USE ACTION DEBUG: Room '{room_name}' contains objects: {room_objects}")
+            
             for obj in current_room.objects.values():
                 if obj.name.lower() == object_name.lower():
                     room_object = obj
+                    game_master.game_logger.debug(f"🔍 USE ACTION DEBUG: Found '{object_name}' in room '{room_name}'")
                     break
+        else:
+            game_master.game_logger.debug(f"🔍 USE ACTION DEBUG: No current room found for {player_char.name}")
     
     # If neither inventory nor room object found, return error
     if not inv_object and not room_object:
+        game_master.game_logger.debug(f"🔍 USE ACTION DEBUG: '{object_name}' not found in inventory or room '{room_name}'")
         feedback_messages.append(f"You don't see '{object_name}' anywhere nearby.")
         return events_generated, feedback_messages
     

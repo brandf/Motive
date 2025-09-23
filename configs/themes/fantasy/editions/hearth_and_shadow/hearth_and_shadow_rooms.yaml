@@ -318,7 +318,7 @@ entity_definitions:
         \ of unease. The church \nserves as both a place of worship and a refuge for\
         \ those seeking sanctuary from the town's \ntroubles.\n\n**EXITS:** You can\
         \ see paths leading to the **cemetery** (graveyard), **square** (town square),\
-        \ and **library** (old library).\n\nChurch records are scattered on a nearby\
+        \ **library** (old library), and **tunnels** (underground tunnels/crypt entrance).\n\nChurch records are scattered on a nearby\
         \ table, documenting recent disappearances and suspicious activities. Father\
         \ Marcus's personal diary lies open on the altar, containing his observations\
         \ about the cult's activities. An ancient sacred map hangs on the wall, showing\
@@ -356,7 +356,8 @@ entity_definitions:
           - tunnels
           - underground
           - passages
-          is_hidden: true
+          - crypt
+          - crypt entrance
         library:
           id: library
           name: Old Library
@@ -374,10 +375,6 @@ entity_definitions:
           object_type_id: confession_booth
           description: A wooden booth where the faithful come to confess their sins.
             The priest seems to be spending a lot of time here recently.
-        crypt_entrance:
-          object_type_id: crypt_entrance
-          description: A hidden entrance to the underground crypt. The door seems
-            to have been recently used.
         cult_members_confession:
           object_type_id: cult_members_confession
         holy_water:
