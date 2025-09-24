@@ -162,6 +162,41 @@ def check_inventory_constraints(
                 )
                 return False, error_msg, error_event
     
+    # Check inventory space constraints
+    object_size = object_to_add.properties.get('size', 'medium')
+    size_map = {
+        'tiny': 1,
+        'small': 2, 
+        'medium': 3,
+        'large': 4,
+        'huge': 6
+    }
+    object_space_needed = size_map.get(object_size, 3)  # Default to medium if unknown size
+    
+    # Calculate current inventory space used
+    current_space_used = 0
+    for item in target_player.inventory.values():
+        item_size = item.properties.get('size', 'medium')
+        current_space_used += size_map.get(item_size, 3)
+    
+    # Get maximum inventory space
+    max_inventory_space = target_player.properties.get('inventory_size', 12)  # Default to 12 spaces
+    
+    # Check if there's enough space
+    if current_space_used + object_space_needed > max_inventory_space:
+        available_space = max_inventory_space - current_space_used
+        error_msg = f"Cannot perform '{action_name}': Cannot add '{object_to_add.name}' to inventory - not enough space. Need {object_space_needed} space, but only {available_space} available."
+        error_event = Event(
+            message=f"{target_player.name} attempts to add the {object_to_add.name} to their inventory, but they don't have enough space ({available_space}/{max_inventory_space} available, need {object_space_needed}).",
+            event_type="player_action",
+            source_room_id=target_player.current_room_id,
+            timestamp=datetime.now().isoformat(),
+            related_object_id=object_to_add.id,
+            related_player_id=target_player.id,
+            observers=["room_characters"]
+        )
+        return False, error_msg, error_event
+    
     # All constraints passed
     return True, None, None
 

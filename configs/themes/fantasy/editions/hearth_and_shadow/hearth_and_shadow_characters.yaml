@@ -6,6 +6,8 @@ entity_definitions:
       name: Detective James Thorne
       description: A seasoned detective with a sharp mind and unwavering determination. Detective Thorne is driven by the need to avenge his murdered partner and bring the Shadowed Hand cult to justice. His investigative skills are unmatched, and he approaches each case with methodical precision and deep personal investment.
     properties:
+      # Inventory management
+      inventory_size: { type: number, default: 12 }
       # Phase 1: Initial Evidence Gathering
       evidence_found: { type: number, default: 0 }
       # Branch A: Cult Structure Investigation
@@ -157,6 +159,8 @@ entity_definitions:
       name: Father Marcus
       description: A devoted priest who has been secretly investigating the cult's activities. Father Marcus is torn between his faith and the growing darkness in Blackwater. He has been studying celestial alignments and developing confrontation strategies to combat the Shadowed Hand cult.
     properties:
+      # Inventory management
+      inventory_size: { type: number, default: 12 }
       # Phase 1: Spiritual Foundation
       spiritual_doubts_confronted: { type: boolean, default: false }
       divine_mysteries_uncovered: { type: number, default: 0 }

@@ -209,6 +209,13 @@ def look_at_target(game_master: Any, player_char: Character, action_config: Any,
                 
                 # Create the inventory display
                 inventory_text = "You are carrying:\n" + "\n".join(inventory_items)
+                
+                # Add inventory space information
+                max_space = player_char.properties.get('inventory_size', 12)
+                used_space = player_char.inventory_space_used
+                available_space = player_char.inventory_space_available
+                inventory_text += f"\n\n**Inventory Space:** {used_space}/{max_space} used ({available_space} available)"
+                
                 feedback_messages.append(inventory_text)
                 event_message = f"{player_char.name} looks at their inventory."
             
@@ -1644,8 +1651,8 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
     feedback_messages: List[str] = []
     events_generated: List[Event] = []
     
-    object_name = params.get("object_name", "").strip()
-    target = (params.get("target", "") or "").strip()
+    object_name = params.get("object_name", "").strip().strip('"\'')
+    target = (params.get("target", "") or "").strip().strip('"\'')
 
     if not object_name:
         feedback_messages.append("You need to specify an object to use.")
@@ -1691,16 +1698,35 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
     # Use inventory object if available, otherwise use room object
     use_object = inv_object if inv_object else room_object
 
+    # Check if the object is usable
+    if use_object:
+        try:
+            is_usable = use_object.get_property('usable', True)  # Default to True if not specified
+        except Exception:
+            is_usable = getattr(use_object, 'properties', {}).get('usable', True)
+        
+        if not is_usable:
+            feedback_messages.append(f"The {use_object.name} cannot be used.")
+            return events_generated, feedback_messages
+
     # Helper: get entity interactions dict
     def _get_interactions(entity: Any) -> Dict[str, Any]:
         if entity is None:
             return {}
+        
+        # Check direct interactions attribute first (most common case)
+        if hasattr(entity, 'interactions') and entity.interactions:
+            return entity.interactions
+        
+        # Fallback to get_property method
         try:
-            ih = entity.get_property('interactions', None)  # Prefer via accessor
+            ih = entity.get_property('interactions', None)
             if ih:
                 return ih
         except Exception:
             pass
+        
+        # Final fallback to properties dict
         return getattr(entity, 'properties', {}).get('interactions', {}) or {}
 
     # Helper: check simple when-conditions
@@ -1837,8 +1863,21 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
         if not spec:
             return False
         applied_any = False
-        # Normalize to list
-        entries = spec if isinstance(spec, list) else [spec]
+        
+        # Handle different interaction formats:
+        # 1. Direct list of effects: [{"type": "set_property", ...}]
+        # 2. Dict with effects key: {"effects": [{"type": "set_property", ...}]}
+        # 3. Single effect dict: {"type": "set_property", ...}
+        if isinstance(spec, dict):
+            if 'effects' in spec:
+                # Format: {"effects": [...]}
+                entries = spec['effects'] if isinstance(spec['effects'], list) else [spec['effects']]
+            else:
+                # Format: {"type": "set_property", ...} - single effect
+                entries = [spec]
+        else:
+            # Format: [...] - list of effects
+            entries = spec if isinstance(spec, list) else [spec]
         for entry in entries:
             if not isinstance(entry, dict):
                 continue

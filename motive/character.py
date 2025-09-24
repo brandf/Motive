@@ -356,5 +356,31 @@ class Character:
         
         return sum(1 for flag in evidence_flags if self.properties.get(flag, False))
 
+    @property
+    def inventory_space_used(self) -> int:
+        """Computed property that calculates the total inventory space used by all items."""
+        total_space = 0
+        for item in self.inventory.values():
+            # Get the size property from the item's properties dict, default to medium (3) if not specified
+            size_value = item.properties.get('size', 'medium')
+            
+            # Convert size string to numeric value
+            size_map = {
+                'tiny': 1,
+                'small': 2, 
+                'medium': 3,
+                'large': 4,
+                'huge': 6
+            }
+            total_space += size_map.get(size_value, 3)  # Default to medium if unknown size
+        
+        return total_space
+
+    @property
+    def inventory_space_available(self) -> int:
+        """Computed property that calculates remaining inventory space."""
+        max_space = self.properties.get('inventory_size', 12)  # Default to 12 spaces
+        return max_space - self.inventory_space_used
+
     def __repr__(self):
         return f"Character(id='{self.id}', name='{self.name}', room='{self.current_room_id}', ap={self.action_points})"
