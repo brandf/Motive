@@ -11,19 +11,18 @@ This file contains essential guidance for AI agents working on the Motive projec
 
 **Before starting any work, read these documents in order:**
 
-1. **[README.md](../README.md)** - Project overview, goals, and current status
-2. **[CONTRIBUTORS.md](CONTRIBUTORS.md)** - Architecture, setup, and development workflows (READ THIS FIRST - contains essential setup and architecture info)
-3. **[VIBECODER.md](VIBECODER.md)** - Human-LLM collaboration lessons
-4. **This file (AGENT.md)** - AI-specific workflows and guidelines (builds on CONTRIBUTORS.md)
+1. **[README.md](README.md)** - Project overview, goals, and current status
+2. **[CONTRIBUTORS.md](docs/CONTRIBUTORS.md)** - Architecture, setup, and development workflows (READ THIS FIRST - contains essential setup and architecture info)
+3. **[VIBECODER.md](docs/VIBECODER.md)** - Human-LLM collaboration lessons
+4. **This file (AGENTS.md)** - AI-specific workflows and guidelines (builds on CONTRIBUTORS.md)
 
 ## Quick Links
 
-- Project overview: [../README.md](../README.md)
-- Contributors guide: [CONTRIBUTORS.md](CONTRIBUTORS.md)
-- Human‑LLM collaboration: [VIBECODER.md](VIBECODER.md)
-- Player manual: [MANUAL.md](MANUAL.md)
-- Documentation map: [DOCS.md](DOCS.md)
-- Current priorities: [TODO.md](TODO.md)
+- Project overview: [README.md](README.md)
+- Contributors guide: [CONTRIBUTORS.md](docs/CONTRIBUTORS.md)
+- Human‑LLM collaboration: [VIBECODER.md](docs/VIBECODER.md)
+- Player manual: [MANUAL.md](docs/MANUAL.md)
+- Documentation map: [DOCS.md](docs/DOCS.md)
 
 ---
 

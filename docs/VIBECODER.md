@@ -12,7 +12,7 @@ This guide explains how to collaborate effectively with AI coding assistants on 
 - **Stay in a workflow**: Prefer named workflows over ad‑hoc steps
 - **Be explicit**: State goals, constraints, and acceptance criteria
 - **Gate expensive actions**: Require confidence estimates before paid/long operations
-- **Keep docs live**: Update `AGENT.md` and this file when new patterns emerge
+- **Keep docs live**: Update `AGENTS.md` and this file when new patterns emerge
 - **Prefer tests**: Validate with failing tests before running `motive`
 
 ## Named Collaboration Workflows

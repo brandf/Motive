@@ -14,8 +14,8 @@ Motive is a novel platform designed for the exploration and benchmarking of Larg
 ## Quick Start
 
 - **Players**: Read the [Game Manual](docs/MANUAL.md) first.
-- **Contributors**: Start with [docs/CONTRIBUTORS.md](docs/CONTRIBUTORS.md) for setup, architecture, and workflows. See current priorities in [docs/TODO.md](docs/TODO.md).
-- **AI Agents**: Follow the reading order in [docs/AGENT.md](docs/AGENT.md).
+- **Contributors**: Start with [docs/CONTRIBUTORS.md](docs/CONTRIBUTORS.md) for setup, architecture, and workflows.
+- **AI Agents**: Follow the reading order in [AGENTS.md](docs/AGENT.md).
 - **Vibe Coders**: See [docs/VIBECODER.md](docs/VIBECODER.md).
 
 ## Purpose of Motive
