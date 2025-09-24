@@ -19,7 +19,7 @@ entity_definitions:
         \ celestial events. Fresh evidence near the fountain suggests a recent struggle,\
         \ with bloodstains and strange markings that point to cult activity. The notice\
         \ board is covered with missing person posters, each one a potential lead\
-        \ in your investigation.\n"
+        \ in your investigation.\n\n**INVESTIGATION NOTE:** For detectives investigating cult activities, Father Marcus at the Sacred Heart Church has been gathering evidence and witness testimony. The church may contain crucial information about cult operations.\n"
     properties:
       exits:
         tavern:
@@ -137,7 +137,7 @@ entity_definitions:
         \ and rumors. \nThe air is thick with the smell of ale, pipe smoke, and something\
         \ else... something that makes \nyou uneasy. But the great hearth in the corner\
         \ burns bright, casting dancing shadows on the walls \nand providing a haven\
-        \ of warmth and light against the darkness that threatens to consume the town.\n"
+        \ of warmth and light against the darkness that threatens to consume the town.\n\n**RUMORS:** The locals whisper that Father Marcus has been interviewing witnesses and gathering evidence about the recent troubles. Some say he's been seen entering the church crypt late at night, claiming to be investigating strange sounds from below.\n"
     properties:
       exits:
         square:
@@ -205,7 +205,7 @@ entity_definitions:
         \ tables. A quest board dominates one wall, covered with \nvarious missions\
         \ and bounties. The guild master, a weathered veteran, sits behind a massive\
         \ \ndesk, reviewing reports and assigning quests. The air is filled with the\
-        \ excitement of new \nadventures and the weight of past battles.\n"
+        \ excitement of new \nadventures and the weight of past battles.\n\n**QUEST BOARD:** Among the various missions posted, there's a notice from Father Marcus seeking assistance with an investigation into the recent disappearances. The notice mentions that he's been gathering evidence and witness testimony, and that anyone with information about cult activities should contact him at the Sacred Heart Church.\n"
     properties:
       exits:
         square:
@@ -329,7 +329,7 @@ entity_definitions:
         \ synthesizing all gathered knowledge for the final confrontation. Witness\
         \ testimony is filed in the church archives, containing crucial evidence about\
         \ cult activities. Father Marcus has been studying celestial timing and developing\
-        \ confrontation strategies against the cult.\n"
+        \ confrontation strategies against the cult.\n\n**INVESTIGATION NOTE:** For detectives investigating cult activities, the church contains critical evidence including witness testimony, ritual knowledge, and a sacred map that reveals cult locations. The crypt entrance leads to underground passages that may connect to other areas of interest.\n"
     properties:
       exits:
         square:
@@ -529,7 +529,7 @@ entity_definitions:
         \ constantly worried. The vault door stands open more often than it should,\
         \ \nand there are whispers of missing funds and unexplained disappearances.\
         \ The bank serves as both \na financial institution and a repository of the\
-        \ town's secrets.\n"
+        \ town's secrets.\n\n**OFFICIAL RECORDS:** The bank manager mentions that Father Marcus has been reviewing financial records related to the disappearances, claiming that some transactions may be connected to the cult's activities. He's been particularly interested in accounts that show unusual patterns around the time of the mayor's disappearance.\n"
     properties:
       exits:
         square:
@@ -659,7 +659,7 @@ entity_definitions:
         \ that makes your skin crawl. Torches flicker along the walls, casting \n\
         dancing shadows, and the sound of dripping water echoes through the passages.\
         \ The tunnels \nserve as both a hidden transportation network and a place\
-        \ where secrets are kept and dark \ndeeds are done.\n"
+        \ where secrets are kept and dark \ndeeds are done.\n\n**INVESTIGATION NOTE:** For detectives investigating cult activities, these tunnels connect key locations including the church crypt and abandoned warehouse. They may contain evidence of cult movement and secret meetings.\n"
     properties:
       exits:
         cemetery:
@@ -886,6 +886,8 @@ entity_definitions:
         their contents. This place was once used for storing goods, but now it serves
         as a meeting place for those who prefer to operate in the shadows. The air
         is thick with dust and the smell of decay.
+
+        **INVESTIGATION NOTE:** For detectives investigating cult activities, this warehouse appears to be a key meeting place. Recent activity and hidden passages suggest it may contain crucial evidence about cult operations and organizational structure.
 
         '
     properties:
