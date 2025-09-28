@@ -39,6 +39,16 @@ This file contains essential guidance for AI agents working on the Motive projec
 4. **Verify the fix**: Ensure the test passes and the behavior is correct
 5. **Learn from the failure**: Understand what went wrong and how to prevent it
 
+## Post-Run Log Analysis (Required)
+
+After every `motive` run, perform a round-by-round summary of the latest game log covering:
+- What the player did each round
+- Why the player likely chose those actions
+- What would have been better for motive success
+- Which content changes could increase the chance of the better outcome
+
+Use this analysis to drive the next plan of changes before continuing work.
+
 **Deleting failing tests is grounds for termination** - it's that serious of a violation.
 
 ## Test-Driven Development (TDD) is Non-Negotiable

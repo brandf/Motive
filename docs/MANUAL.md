@@ -204,6 +204,7 @@ This system allows players to engage in complex social interactions, form allian
 - **Communication**: Always quote your messages
   - `> say "Hello there!"` ✅
   - `> say Hello there!` ❌ (missing quotes)
+- **Dark rooms**: Carry or light a `torch`, `lantern`, or similar tool when a room is marked as dark so you can explore safely.
 
 ### Strategic Considerations
 - **Information is power**: What you observe vs. what others observe creates strategic opportunities

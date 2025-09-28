@@ -1,0 +1,91 @@
+action_definitions:
+  move:
+    name: move
+    description: Move between rooms using exit aliases.
+    cost: 1
+    category: movement
+    parameters:
+      - name: direction
+        type: string
+        description: Exit alias or name
+        required: true
+        default_value: null
+    requirements:
+      - type: exit_exists
+        direction_param: direction
+    effects:
+      - type: code_binding
+        function_name: handle_move_action
+        observers:
+          - player
+  look:
+    name: look
+    description: Look around the current room or at a specific object.
+    cost: 1
+    category: observation
+    parameters:
+      - name: target
+        type: string
+        description: Optional thing to look at
+        required: false
+        default_value: null
+    requirements: []
+    effects:
+      - type: code_binding
+        function_name: look_at_target
+        observers:
+          - player
+  pickup:
+    name: pickup
+    description: Pick up an object from the room.
+    cost: 1
+    category: inventory
+    parameters:
+      - name: object_name
+        type: string
+        description: Name of the object
+        required: true
+        default_value: null
+    requirements:
+      - type: object_in_room
+        object_name_param: object_name
+    effects:
+      - type: code_binding
+        function_name: handle_pickup_action
+        observers:
+          - player
+  use:
+    name: use
+    description: Use an inventory object on a room object.
+    cost: 1
+    category: interaction
+    parameters:
+      - name: object_name
+        type: string
+        description: The name of the object from your inventory to use.
+        required: true
+        default_value: null
+      - name: target
+        type: string
+        description: The target object in the room.
+        required: true
+        default_value: null
+    requirements:
+      - type: object_in_inventory
+        object_name_param: object_name
+      - type: object_in_room
+        object_name_param: target
+    effects:
+      - type: code_binding
+        function_name: handle_use_action
+        observers:
+          - player
+          - room_characters
+  pass:
+    name: pass
+    description: End turn.
+    cost: -1
+    category: system
+    parameters: []
+    requirements: []
+    effects: []

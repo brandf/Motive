@@ -46,6 +46,7 @@ entity_definitions:
           - church
           - temple
           - sanctuary
+          - sacred heart church
         bank:
           id: bank
           name: Blackwater Bank
@@ -348,6 +349,7 @@ entity_definitions:
           - cemetery
           - graveyard
           - tombs
+          - blackwater cemetery
         tunnels:
           id: tunnels
           name: Underground Tunnels
@@ -405,6 +407,8 @@ entity_definitions:
           object_type_id: sacred_map
         ritual_texts:
           object_type_id: ritual_texts
+        lectern_notes:
+          object_type_id: lectern_notes
         celestial_almanac:
           object_type_id: celestial_almanac
           properties:

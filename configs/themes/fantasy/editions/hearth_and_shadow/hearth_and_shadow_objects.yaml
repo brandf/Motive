@@ -66,17 +66,18 @@ entity_definitions:
     - object
     attributes:
       name: Broken Fountain
-      description: A once-beautiful stone fountain, now cracked and dry.
+      description: A once-beautiful stone fountain, now cracked yet still whispering with a faint trickle beneath the stone. A rune-etched trough glimmers as if waiting for a sanctified vessel.
     properties:
       immovable: true
       size: large
+      sacred_water_source: true
     action_aliases:
       examine: look
     interactions:
       look:
         effects:
         - type: generate_event
-          message: '{{player_name}} examines the broken fountain.'
+          message: '{{player_name}} notices a hidden shimmer within the broken fountain, hinting it could refill a consecration vial before a journey up the Old Forest Path to the Forgotten Shrine.'
           observers:
           - room_characters
   bar:
@@ -234,6 +235,13 @@ entity_definitions:
     properties:
       immovable: true
       size: large
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "{{player_name}} studies the fresh graves. The Saint's Bone pulses, urging you to cleanse the desecrated gravestone before leaving."
+          observers:
+          - player
   suspicious_footprints:
     behaviors:
     - object
@@ -244,6 +252,13 @@ entity_definitions:
     properties:
       immovable: true
       size: small
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "{{player_name}} traces the footprints—they circle the desecrated gravestone, whispering that only the Saint's Bone can end the corruption."
+          observers:
+          - player
   vault:
     behaviors:
     - object
@@ -905,10 +920,18 @@ entity_definitions:
       name: Holy Water
       description: A small vial of blessed water from the church.
     properties:
-      pickupable: true
+      pickupable: false
+      usable: false
       size: small
       tool_type: spiritual
       blessed: true
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "{{player_name}} notes the church's holy water but remembers only the consecration vial filled at the shrine can cleanse distant altars."
+          observers:
+          - player
   eternal_flame:
     behaviors:
     - object
@@ -982,6 +1005,29 @@ entity_definitions:
       magical: true
       hearth_symbol: true
       responsive: true
+  lectern_notes:
+    behaviors:
+    - object
+    attributes:
+      name: Worn Liturgical Notes
+      description: Dog-eared pages tucked beneath the church lectern, edges smudged with incense ash.
+    properties:
+      immovable: true
+      size: small
+      readable: true
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "You thumb the liturgical notes—every line recounts rites already set in motion; unfinished verses mutter about unrest in the cemetery." 
+          observers:
+          - player
+      read:
+        effects:
+        - type: generate_event
+          message: "The notes remind you: altar, shrine, then gravestone. The cadence ends only when the angel stands serene." 
+          observers:
+          - player
   message_board:
     behaviors:
     - object
@@ -1057,6 +1103,13 @@ entity_definitions:
       time_sensitive: true
       text: The earth has been recently disturbed. It will settle and become less
         obvious over time.
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "You examine the disturbed earth. Footprints spiral toward the angelic watcher, as if whoever last held the reliquary stood there with a lantern before touching bone to stone."
+          observers:
+          - player
   ritual_preparations:
     behaviors:
     - object
@@ -1190,21 +1243,33 @@ entity_definitions:
     - object
     attributes:
       name: Altar
-      description: A beautiful stone altar adorned with fresh flowers and candles.
+      description: The marble altar is dusted with ash and feels unnaturally cold to the touch.
     properties:
       immovable: true
       size: large
       sacred: true
+      usable: true
+      tainted: true
     action_aliases:
       examine: look
       investigate: look
+      sermon: use
     interactions:
       look:
         effects:
+        - type: set_property
+          target: player
+          property: church_taint_identified
+          value: true
         - type: generate_event
-          message: '{{player_name}} examines the Altar.'
+          message: "{{player_name}} studies the altar, feels the chill of desecration, and recalls the blessed incense nearby could sanctify it."
           observers:
           - room_characters
+      use:
+        - type: generate_event
+          message: '{{player_name}} steadies themselves before the altar, sensing it longs to be sanctified.'
+          observers:
+          - player
   wooden_sign:
     behaviors:
     - object
@@ -1224,9 +1289,9 @@ entity_definitions:
       look:
         effects:
         - type: generate_event
-          message: '{{player_name}} examines the Wooden Sign.'
+          message: "You read the wooden sign. An added charcoal note urges: 'Shrine spring for holy water, then return with the Saint's Bone to cleanse the graves.'"
           observers:
-          - room_characters
+          - player
   partner_evidence:
     behaviors:
     - object
@@ -1411,6 +1476,12 @@ entity_definitions:
       size: small
       usable: true
     interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "The relic rests undisturbed; its inscriptions mention honoring the angel in the cemetery before invoking its power." 
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -1490,14 +1561,18 @@ entity_definitions:
       immovable: true
       size: large
       readable: true
-      text: '**THE SHADOWED HAND - ORIGINS:**
+      text: |-
+        **THE SHADOWED HAND - ORIGINS:**
 
-        "Founded three centuries ago by Malachi the First, the Shadowed Hand seeks
-        to bring about the return of the Dark Lord through blood sacrifice and ritual
-        magic. Their power grows with each victim, and they have infiltrated every
+        "Founded three centuries ago by Malachi the First, the Shadowed Hand seeks to bring about the return of the Dark
+        Lord through blood sacrifice and ritual magic. Their power grows with each victim, and they have infiltrated every
         level of society."
 
-        '
+        **PURIFICATION RITES:**
+
+        "When sacred places are defiled, three relics must be gathered: incense blessed for courage, a saint's relic for
+        sanctity, and water hallowed beneath the stars. Each relic must be used where the corruption took hold—altar,
+        grave, and forgotten shrine—before a sermon can restore the covenant."
     interactions:
       look:
         effects:
@@ -2143,14 +2218,7 @@ entity_definitions:
     - object
     attributes:
       name: Church Records
-      description: Detailed church records documenting recent disappearances and suspicious
-        activities. Contains crucial evidence about the cult's activities. The records
-        mention that Father Marcus has been studying celestial alignments and that
-        the cult's rituals are timed to specific astronomical events. There are also
-        references to a confrontation plan being developed in the church's hidden
-        chambers. The records contain notes about "the observatory in the hills" where
-        the town's founders studied the stars, and mention that this place holds the
-        key to understanding the cult's timing.
+      description: Detailed ledgers documenting parish activity, disappearances, and whispered reports of sacrilege. Recent entries describe desecrations at the cemetery and a shrine hidden off the Old Forest Path—each marked by a different celestial symbol.
     properties:
       pickupable: true
       size: medium
@@ -2163,8 +2231,7 @@ entity_definitions:
           property: church_records_found
           value: true
         - type: generate_event
-          message: '{{player_name}} examines the church records and finds crucial
-            evidence!'
+          message: '{{player_name}} examines the church records and finds detailed notes about other desecrated sites.'
           observers:
           - room_characters
   priest_diary:
@@ -2197,10 +2264,9 @@ entity_definitions:
           property: cult_hierarchy_discovered
           value: true
         - type: generate_event
-          message: '{{player_name}} discovers the cult hierarchy in the priest''s
-            diary! The Shadowed Hand''s structure is revealed!'
+          message: "You pore over Father Marcus's diary. He vows to burn the incense, retrieve a reliquary from the mausoleum, and guard the cemetery from further corruption."
           observers:
-          - room_characters
+          - player
   sacred_map:
     behaviors:
     - object
@@ -2224,10 +2290,9 @@ entity_definitions:
           property: cult_locations_mapped
           value: true
         - type: generate_event
-          message: '{{player_name}} maps all cult locations using the sacred map!
-            Their hideouts are now known!'
+          message: "You trace the sacred map. It notes the church altar, the mausoleum reliquary, and the old shrine as key sanctified sites."
           observers:
-          - room_characters
+          - player
   ritual_texts:
     behaviors:
     - object
@@ -2253,10 +2318,9 @@ entity_definitions:
           property: ritual_knowledge_mastered
           value: true
         - type: generate_event
-          message: '{{player_name}} masters the ritual knowledge from the ancient
-            texts! They now understand the cult''s dark methods!'
+          message: "You study the ritual texts. They warn that cemeteries tainted by cult rites require relics attuned to the dead."
           observers:
-          - room_characters
+          - player
   witness_testimony:
     behaviors:
     - object
@@ -2478,10 +2542,9 @@ entity_definitions:
           property: graveyard_epitaphs_found
           value: true
         - type: generate_event
-          message: '{{player_name}} examines the graveyard epitaphs and finds crucial
-            evidence!'
+          message: "You read the epitaphs. Several speak of a reliquary bone once raised before the angel statue to banish corruption from this cemetery."
           observers:
-          - room_characters
+          - player
   ancient_sarcophagi:
     behaviors:
     - object
@@ -2497,10 +2560,9 @@ entity_definitions:
       look:
         effects:
         - type: generate_event
-          message: '{{player_name}} examines the ancient sarcophagi and learns about
-            the town''s founding families.'
+          message: "You examine the sarcophagi. One niche is empty save for a note that the Saint's Bone reliquary must be borne to the cemetery gravestone whenever corruption stirs."
           observers:
-          - room_characters
+          - player
   ritual_candles:
     behaviors:
     - object

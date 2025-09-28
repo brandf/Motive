@@ -43,6 +43,10 @@ class ActionRequirementConfig(BaseModel):
     target_player_param: Optional[str] = None # For player_in_room, player_has_tag
     direction_param: Optional[str] = None # For exit_exists
     operator: Optional[str] = None # For numeric comparisons (==, >=, <=, >, <)
+    progress_message: Optional[str] = Field(
+        default=None,
+        description="Optional narrative update delivered when this requirement is first satisfied as part of a motive."
+    )
 
 class ActionEffectConfig(BaseModel):
     """Base model for action effects."""
@@ -247,4 +251,3 @@ class GameConfig(BaseModel):
     characters: Optional[Dict[str, Any]] = None
     id: Optional[str] = None
     name: Optional[str] = None
-

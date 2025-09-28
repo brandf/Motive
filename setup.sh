@@ -1,11 +1,11 @@
 #!/bin/bash
 
+set -o pipefail
+
 # --- Configuration ---
 VENV_NAME="venv"
-PYTHON_BIN="python3" # Use python3 for most Linux/macOS systems. On Windows, it might be 'python'.
-                     # The script will try both.
 CONFIG_FILE="configs/game.yaml"
-ENV_EXAMPLE="env.example"
+ENV_EXAMPLE="env.example.txt"
 DOT_ENV=".env"
 LOGS_DIR="logs"
 
@@ -34,18 +34,34 @@ check_command() {
 # --- Pre-requisite Checks ---
 echo_color blue "--- Checking system prerequisites ---"
 check_command "git"
-check_command "pip"
 
-# Determine Python command based on OS
-if [[ "$OSTYPE" == "darwin"* || "$OSTYPE" == "linux-gnu"* ]]; then
-    # macOS / Linux
-    PYTHON_BIN="python3"
-elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-    # Git Bash / Cygwin on Windows
-    PYTHON_BIN="python"
+PYTHON_BIN=""
+for candidate in python3 python; do
+    if command -v "$candidate" &> /dev/null; then
+        PYTHON_BIN="$candidate"
+        break
+    fi
+done
+
+if [ -z "$PYTHON_BIN" ]; then
+    echo_color red "Error: Python 3 is required but was not found in PATH."
+    echo_color red "Install Python 3 (e.g., 'sudo apt install python3 python3-pip python3-venv' on Ubuntu/WSL)."
+    exit 1
 fi
-check_command "$PYTHON_BIN"
-echo_color green "Prerequisites checked: Git, Pip, and Python are available."
+
+PY_MAJOR=$("$PYTHON_BIN" -c 'import sys; print(sys.version_info.major)')
+if [ "$PY_MAJOR" -ne 3 ]; then
+    echo_color red "Error: Python 3 is required. Detected '$("$PYTHON_BIN" -V)'."
+    exit 1
+fi
+
+if ! "$PYTHON_BIN" -m pip --version &> /dev/null; then
+    echo_color red "Error: pip is not available for $PYTHON_BIN."
+    echo_color red "Install pip with 'sudo apt install python3-pip' (Ubuntu/WSL) or the equivalent for your distro."
+    exit 1
+fi
+
+echo_color green "Prerequisites checked: Git, Python 3, and pip are available."
 
 # --- Virtual Environment Setup ---
 echo_color blue "\n--- Setting up virtual environment ---"
@@ -56,10 +72,33 @@ if [ -d "$VENV_NAME" ]; then
 fi
 
 echo_color blue "Creating virtual environment '$VENV_NAME'..."
-"$PYTHON_BIN" -m venv "$VENV_NAME"
-if [ $? -ne 0 ]; then
-    echo_color red "Failed to create virtual environment."
-    exit 1
+if ! "$PYTHON_BIN" -m venv "$VENV_NAME"; then
+    echo_color yellow "Virtual environment creation reported a failure. Attempting manual pip bootstrap..."
+    VENV_BOOTSTRAP_PY=""
+    for candidate in "$VENV_NAME/bin/python" "$VENV_NAME/Scripts/python" "$VENV_NAME/Scripts/python.exe"; do
+        if [ -x "$candidate" ]; then
+            VENV_BOOTSTRAP_PY="$candidate"
+            break
+        fi
+    done
+
+    if [ -n "$VENV_BOOTSTRAP_PY" ]; then
+        if "$VENV_BOOTSTRAP_PY" -m ensurepip --upgrade --default-pip; then
+            echo_color yellow "Manual pip bootstrap succeeded. Continuing with setup..."
+        else
+            echo_color red "Failed to bootstrap pip after virtual environment creation error."
+            if command -v apt-get &> /dev/null; then
+                echo_color red "Tip: On Ubuntu/WSL install the venv module: sudo apt update && sudo apt install python3-venv"
+            fi
+            exit 1
+        fi
+    else
+        echo_color red "Failed to locate python executable inside '$VENV_NAME'."
+        if command -v apt-get &> /dev/null; then
+            echo_color red "Tip: On Ubuntu/WSL install the venv module: sudo apt update && sudo apt install python3-venv"
+        fi
+        exit 1
+    fi
 fi
 echo_color green "Virtual environment created."
 
@@ -75,20 +114,34 @@ else
     VENV_ACTIVATE_SCRIPT="./$VENV_NAME/bin/activate"
 fi
 
-# Set path for pip and python within the venv for this script's execution
-VENV_PIP="$VENV_NAME/bin/pip"
-VENV_PYTHON="$VENV_NAME/bin/python"
+# Set path for python within the venv for this script's execution
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-    VENV_PIP="$VENV_NAME/Scripts/pip"
-    VENV_PYTHON="$VENV_NAME/Scripts/python"
+    VENV_BIN_DIR="$VENV_NAME/Scripts"
+else
+    VENV_BIN_DIR="$VENV_NAME/bin"
+fi
+
+VENV_PYTHON="$VENV_BIN_DIR/python"
+
+if [ ! -x "$VENV_PYTHON" ]; then
+    echo_color red "Virtual environment python executable not found at '$VENV_PYTHON'."
+    exit 1
 fi
 
 
 # --- Install Dependencies ---
 echo_color blue "\n--- Installing dependencies ---"
 
+echo_color blue "Upgrading pip..."
+"$VENV_PYTHON" -m pip install --upgrade pip
+if [ $? -ne 0 ]; then
+    echo_color red "Failed to upgrade pip inside the virtual environment."
+    exit 1
+fi
+echo_color green "pip upgraded."
+
 echo_color blue "Installing runtime dependencies from requirements.txt..."
-"$VENV_PIP" install -r requirements.txt
+"$VENV_PYTHON" -m pip install -r requirements.txt
 if [ $? -ne 0 ]; then
     echo_color red "Failed to install runtime dependencies."
     exit 1
@@ -96,15 +149,19 @@ fi
 echo_color green "Runtime dependencies installed."
 
 echo_color blue "Installing development dependencies from requirements-dev.txt..."
-"$VENV_PIP" install -r requirements-dev.txt
-if [ $? -ne 0 ]; then
-    echo_color red "Failed to install development dependencies."
-    exit 1
+if [ -f requirements-dev.txt ]; then
+    "$VENV_PYTHON" -m pip install -r requirements-dev.txt
+    if [ $? -ne 0 ]; then
+        echo_color red "Failed to install development dependencies."
+        exit 1
+    fi
+    echo_color green "Development dependencies installed."
+else
+    echo_color yellow "requirements-dev.txt not found; skipping development dependencies."
 fi
-echo_color green "Development dependencies installed."
 
 echo_color blue "Installing project in editable mode..."
-"$VENV_PIP" install -e .
+"$VENV_PYTHON" -m pip install -e .
 if [ $? -ne 0 ]; then
     echo_color red "Failed to install project in editable mode."
     exit 1

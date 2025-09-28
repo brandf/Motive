@@ -1,0 +1,248 @@
+entity_definitions:
+  altar:
+    behaviors:
+      - object
+    attributes:
+      name: Altar
+      description: The marble altar is unnaturally cold and streaked with a dark residue.
+    properties:
+      usable: true
+      tainted: true
+      size: large
+    interactions:
+      look:
+        effects:
+          - type: set_property
+            target: player
+            property: church_taint_identified
+            value: true
+          - type: generate_event
+            message: "{{player_name}} studies the altar and senses desecration."
+            observers:
+              - room_characters
+  blessed_incense:
+    behaviors:
+      - object
+    attributes:
+      name: Blessed Incense
+      description: Fragrant incense prepared for sacred purification rites.
+    properties:
+      pickupable: true
+      usable: true
+      size: small
+    interactions:
+      pickup:
+        effects:
+          - type: set_property
+            target: player
+            property: blessed_incense_collected
+            value: true
+      use:
+        - when:
+            target_has_property:
+              property: tainted
+              equals: true
+          effects:
+            - type: set_property
+              target: target
+              property: tainted
+              value: false
+            - type: set_property
+              target: target
+              property: purified
+              value: true
+            - type: set_property
+              target: target
+              property: sermon_ready
+              value: true
+            - type: set_property
+              target: player
+              property: church_cleansed
+              value: true
+            - type: generate_event
+              message: "{{player_name}} burns blessed incense, driving out the corruption!"
+              observers:
+                - room_characters
+        - when:
+            target_has_property:
+              property: sermon_ready
+              equals: true
+          effects:
+            - type: set_property
+              target: player
+              property: final_sermon_delivered
+              value: true
+            - type: generate_event
+              message: "{{player_name}} delivers a sermon of hope at the restored altar."
+              observers:
+                - room_characters
+  desecrated_gravestone:
+    behaviors:
+      - object
+    attributes:
+      name: Desecrated Gravestone
+      description: A grave marked by blackened residue and a cracked angel statue weeping dark ichor.
+    properties:
+      usable: true
+      tainted: true
+      size: medium
+    interactions:
+      look:
+        effects:
+          - type: set_property
+            target: player
+            property: cemetery_taint_identified
+            value: true
+          - type: generate_event
+            message: "{{player_name}} inspects the gravestone and notes signs of desecration."
+            observers:
+              - room_characters
+  consecration_vial:
+    behaviors:
+      - object
+    attributes:
+      name: Consecration Vial
+      description: A glass vial meant to carry water blessed for sacred rites.
+    properties:
+      pickupable: true
+      usable: true
+      size: small
+      is_hallowed: false
+    interactions:
+      pickup:
+        effects:
+          - type: set_property
+            target: player
+            property: consecration_vial_collected
+            value: true
+      use:
+        - when:
+            target_has_property:
+              property: sacred_water_source
+              equals: true
+          effects:
+            - type: set_property
+              target: player
+              property: hallowed_water_collected
+              value: true
+            - type: set_property
+              target: object
+              property: is_hallowed
+              value: true
+            - type: generate_event
+              message: "{{player_name}} fills the consecration vial with shimmering water."
+              observers:
+                - player
+        - when:
+            target_has_property:
+              property: requires_hallowed_water
+              equals: true
+          effects:
+            - type: set_property
+              target: target
+              property: tainted
+              value: false
+            - type: set_property
+              target: target
+              property: cleansed
+              value: true
+            - type: set_property
+              target: player
+              property: shrine_cleansed
+              value: true
+            - type: set_property
+              target: object
+              property: is_hallowed
+              value: false
+            - type: generate_event
+              message: "{{player_name}} anoints the altar with hallowed water."
+              observers:
+                - room_characters
+  saints_bone:
+    behaviors:
+      - object
+    attributes:
+      name: Saint's Bone
+      description: A revered relic retrieved from an ancient sarcophagus.
+    properties:
+      pickupable: true
+      usable: true
+      size: small
+    interactions:
+      pickup:
+        effects:
+          - type: set_property
+            target: player
+            property: saints_bone_collected
+            value: true
+      use:
+        - when:
+            target_has_property:
+              property: tainted
+              equals: true
+          effects:
+            - type: set_property
+              target: target
+              property: tainted
+              value: false
+            - type: set_property
+              target: target
+              property: sanctified
+              value: true
+            - type: set_property
+              target: player
+              property: cemetery_cleansed
+              value: true
+            - type: generate_event
+              message: "{{player_name}} places the Saint's Bone upon the gravestone, sanctifying it."
+              observers:
+                - room_characters
+  tainted_shrine_altar:
+    behaviors:
+      - object
+    attributes:
+      name: Tainted Shrine Altar
+      description: A cracked stone altar overrun with creeping shadow.
+    properties:
+      usable: true
+      tainted: true
+      requires_hallowed_water: true
+      size: medium
+    interactions:
+      look:
+        effects:
+          - type: set_property
+            target: player
+            property: shrine_taint_identified
+            value: true
+          - type: generate_event
+            message: "{{player_name}} observes the shrine altar and recognizes its corruption."
+            observers:
+              - room_characters
+  hallowed_water:
+    behaviors:
+      - object
+    attributes:
+      name: Hallowed Water
+      description: Water blessed for rites of cleansing. The consecration vial can be filled with it.
+    properties:
+      pickupable: false
+      usable: false
+      size: small
+  shrine_spring:
+    behaviors:
+      - object
+    attributes:
+      name: Shrine Spring
+      description: A basin collecting a faintly glowing spring. Perfect for filling sacred vials.
+    properties:
+      immovable: true
+      sacred_water_source: true
+      size: small
+    interactions:
+      look:
+        effects:
+          - type: generate_event
+            message: "{{player_name}} watches the spring shimmer, inviting a sacred rite."
+            observers:
+              - player

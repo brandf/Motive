@@ -1,0 +1,58 @@
+entity_definitions:
+  father_marcus:
+    behaviors:
+      - character
+    attributes:
+      name: Father Marcus
+      description: A troubled priest determined to restore the divine connection by cleansing corrupted holy sites.
+    properties:
+      inventory_size: { type: number, default: 12 }
+      church_taint_identified: { type: boolean, default: false }
+      cemetery_taint_identified: { type: boolean, default: false }
+      shrine_taint_identified: { type: boolean, default: false }
+      blessed_incense_collected: { type: boolean, default: false }
+      saints_bone_collected: { type: boolean, default: false }
+      hallowed_water_collected: { type: boolean, default: false }
+      church_cleansed: { type: boolean, default: false }
+      cemetery_cleansed: { type: boolean, default: false }
+      shrine_cleansed: { type: boolean, default: false }
+      final_sermon_delivered: { type: boolean, default: false }
+    motives:
+      - id: restore_divine_connection
+        description: Cleanse every desecrated site and deliver a final sermon of hope to restore your faith.
+        success_conditions:
+          - operator: AND
+          - type: character_has_property
+            property: church_taint_identified
+            value: true
+          - type: character_has_property
+            property: cemetery_taint_identified
+            value: true
+          - type: character_has_property
+            property: shrine_taint_identified
+            value: true
+          - type: character_has_property
+            property: blessed_incense_collected
+            value: true
+          - type: character_has_property
+            property: saints_bone_collected
+            value: true
+          - type: character_has_property
+            property: hallowed_water_collected
+            value: true
+          - type: character_has_property
+            property: church_cleansed
+            value: true
+          - type: character_has_property
+            property: cemetery_cleansed
+            value: true
+          - type: character_has_property
+            property: shrine_cleansed
+            value: true
+          - type: character_has_property
+            property: final_sermon_delivered
+            value: true
+    initial_rooms:
+      - room_id: church
+        chance: 100
+        reason: You kneel before the altar, wrestling with the chill that has settled upon it.

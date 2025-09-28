@@ -1,7 +1,8 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import random
+import json
 from motive.game_object import GameObject
-from motive.config import MotiveConfig
+from motive.config import MotiveConfig, MotiveConditionGroup
 
 
 class Character:
@@ -36,6 +37,9 @@ class Character:
         
         # Initialize evidence system properties
         self._initialize_evidence_properties()
+
+        # Track per-condition motive progress to emit narrative updates once
+        self._motive_condition_state: Dict[str, bool] = {}
         
         # Handle motive assignment - prioritize selected_motive, then motives, then legacy motive
         if selected_motive:
@@ -127,17 +131,11 @@ class Character:
 
     def _evaluate_condition_group(self, condition_group, game_master) -> bool:
         """Evaluate a single condition or condition group."""
-        from motive.config import MotiveConditionGroup
-        
         if isinstance(condition_group, MotiveConditionGroup):
             # Multiple conditions with explicit operator
             results = []
             for condition in condition_group.conditions:
-                condition_dict = {
-                    'type': condition.type,
-                    'requirements': [condition.model_dump()]
-                }
-                success, _, _ = game_master._check_requirements(self, condition_dict, {})
+                success = self._evaluate_single_condition(condition, game_master)
                 results.append(success)
             
             if condition_group.operator == "AND":
@@ -145,13 +143,17 @@ class Character:
             elif condition_group.operator == "OR":
                 return any(results)
         else:
-            # Single condition
-            condition_dict = {
-                'type': condition_group.type,
-                'requirements': [condition_group.model_dump()]
-            }
-            success, _, _ = game_master._check_requirements(self, condition_dict, {})
-            return success
+            return self._evaluate_single_condition(condition_group, game_master)
+
+    def _evaluate_single_condition(self, condition, game_master) -> bool:
+        """Evaluate a single condition requirement."""
+        requirement_payload = condition.model_dump(exclude={'progress_message'}, exclude_none=True)
+        condition_dict = {
+            'type': condition.type,
+            'requirements': [requirement_payload]
+        }
+        success, _, _ = game_master._check_requirements(self, condition_dict, {})
+        return success
 
     def check_motive_success(self, game_master) -> bool:
         """Check if the character's selected motive has been achieved."""
@@ -242,11 +244,7 @@ class Character:
             
             for i, condition in enumerate(condition_group.conditions):
                 # Check if this individual condition passes
-                condition_dict = {
-                    'type': condition.type,
-                    'requirements': [condition.model_dump()]
-                }
-                success, _, _ = game_master._check_requirements(self, condition_dict, {})
+                success = self._evaluate_single_condition(condition, game_master)
                 
                 # Get condition description
                 condition_desc = self._get_condition_description(condition)
@@ -256,11 +254,7 @@ class Character:
                 lines.append(f"{indent}  {status_checkbox} {condition_desc}")
         else:
             # Single condition
-            condition_dict = {
-                'type': condition_group.type,
-                'requirements': [condition_group.model_dump()]
-            }
-            success, _, _ = game_master._check_requirements(self, condition_dict, {})
+            success = self._evaluate_single_condition(condition_group, game_master)
             
             condition_desc = self._get_condition_description(condition_group)
             status_checkbox = "☑️" if success else "☐"
@@ -299,6 +293,51 @@ class Character:
             return f"✅ **MOTIVE STATUS**: Your motive '{self.selected_motive.id}' is currently SUCCEEDING and not failing. Keep it up!"
         
         return None  # Neither succeeding nor failing - no status update needed
+
+    def collect_motive_progress_updates(self, game_master) -> List[str]:
+        """Return newly satisfied success-condition messages for this motive."""
+        updates: List[str] = []
+
+        if not self.selected_motive or not self.selected_motive.success_conditions:
+            return updates
+
+        for identifier, passed, message in self._iter_success_conditions(self.selected_motive.success_conditions, game_master):
+            previous = self._motive_condition_state.get(identifier, False)
+            if passed and not previous and message:
+                updates.append(message)
+            self._motive_condition_state[identifier] = passed
+
+        return updates
+
+    def _iter_success_conditions(
+        self,
+        condition_group,
+        game_master,
+        path: Tuple[int, ...] = (),
+    ) -> List[Tuple[str, bool, Optional[str]]]:
+        """Yield (identifier, passed, message) for each leaf success condition."""
+        results: List[Tuple[str, bool, Optional[str]]] = []
+
+        if isinstance(condition_group, MotiveConditionGroup):
+            for idx, condition in enumerate(condition_group.conditions):
+                results.extend(self._iter_success_conditions(condition, game_master, path + (idx,)))
+        else:
+            success = self._evaluate_single_condition(condition_group, game_master)
+            condition_payload = condition_group.model_dump(exclude_none=True)
+            # Ensure progress_message does not influence requirement evaluation but does influence identifier uniqueness
+            message = condition_payload.get('progress_message')
+            condition_payload.pop('progress_message', None)
+            identifier = json.dumps(
+                {
+                    "motive": self.selected_motive.id if self.selected_motive else "unknown",
+                    "path": path,
+                    "condition": condition_payload,
+                },
+                sort_keys=True,
+            )
+            results.append((identifier, success, message))
+
+        return results
 
     def _initialize_evidence_properties(self):
         """Initialize evidence system properties with unique flags for each piece of evidence."""

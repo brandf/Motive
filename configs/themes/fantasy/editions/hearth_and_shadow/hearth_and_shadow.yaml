@@ -5,12 +5,14 @@ includes:
   - "../../fantasy.yaml"  # Inherit from fantasy theme (which includes core)
   - "hearth_and_shadow_actions.yaml"  # H&S specific actions
   - "hearth_and_shadow_rooms.yaml"
+  - "hearth_and_shadow_motive_rooms.yaml"
   - "hearth_and_shadow_characters.yaml"
   - "hearth_and_shadow_objects.yaml"
+  - "hearth_and_shadow_motive_objects.yaml"
 
 game_settings:
-  num_rounds: 2
-  initial_ap_per_turn: 30
+  num_rounds: 20
+  initial_ap_per_turn: 40
   manual: "../../../docs/MANUAL.md"
   log_path: "fantasy/hearth_and_shadow/{game_id}"
 

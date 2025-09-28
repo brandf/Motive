@@ -1,0 +1,78 @@
+entity_definitions:
+  church:
+    behaviors:
+      - room
+    attributes:
+      name: Sacred Heart Church
+      description: A quiet sanctuary dimmed by a lingering shadow. The altar feels cold and bears a dark residue.
+    properties:
+      exits:
+        cemetery:
+          id: cemetery
+          name: Cemetery
+          destination_room_id: cemetery
+          aliases:
+            - cemetery
+        shrine:
+          id: shrine
+          name: Forgotten Shrine
+          destination_room_id: forgotten_shrine
+          aliases:
+            - shrine
+      objects:
+        altar:
+          object_type_id: altar
+        blessed_incense:
+          object_type_id: blessed_incense
+        consecration_vial:
+          object_type_id: consecration_vial
+  cemetery:
+    behaviors:
+      - room
+    attributes:
+      name: Blackwater Cemetery
+      description: Weathered stones surround a single disturbed grave slick with dark ichor.
+    properties:
+      exits:
+        church:
+          id: church
+          name: Church
+          destination_room_id: church
+          aliases:
+            - church
+        shrine:
+          id: shrine
+          name: Forgotten Shrine
+          destination_room_id: forgotten_shrine
+          aliases:
+            - shrine
+      objects:
+        desecrated_gravestone:
+          object_type_id: desecrated_gravestone
+        saints_bone:
+          object_type_id: saints_bone
+  forgotten_shrine:
+    behaviors:
+      - room
+    attributes:
+      name: Forgotten Shrine
+      description: An overgrown shrine in the woods. A cracked altar seeps with shadow and a spring bubbles nearby.
+    properties:
+      exits:
+        church:
+          id: church
+          name: Church
+          destination_room_id: church
+          aliases:
+            - church
+        cemetery:
+          id: cemetery
+          name: Cemetery
+          destination_room_id: cemetery
+          aliases:
+            - cemetery
+      objects:
+        tainted_shrine_altar:
+          object_type_id: tainted_shrine_altar
+        shrine_spring:
+          object_type_id: shrine_spring

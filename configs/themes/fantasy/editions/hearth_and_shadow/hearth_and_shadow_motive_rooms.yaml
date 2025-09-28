@@ -1,0 +1,334 @@
+entity_definitions:
+  town_square:
+    behaviors:
+      - room
+    attributes:
+      name: Town Square
+      description: |-
+        The heart of Blackwater is usually busy, but tonight the square feels hollow. A cracked fountain wheezes in the
+        center while posters of missing citizens flutter on the notice boards. A silvered vial rests on the rim of the
+        fountain, waiting for someone faithful enough to fill it, and small chalk marks point toward the Old Forest Path
+        with notes about shrine offerings.
+    properties:
+      exits:
+        tavern:
+          id: tavern
+          name: Rusty Anchor Tavern
+          destination_room_id: tavern
+          aliases: [tavern, bar, inn]
+        guild:
+          id: guild
+          name: Adventurer's Guild Hall
+          destination_room_id: adventurer_guild
+          aliases: [guild, hall, adventurers]
+        church:
+          id: church
+          name: Sacred Heart Church
+          destination_room_id: church
+          aliases: [church, temple, sanctuary, "sacred heart church"]
+        bank:
+          id: bank
+          name: Blackwater Bank
+          destination_room_id: bank
+          aliases: [bank, vault, treasury]
+        market:
+          id: market
+          name: Market District
+          destination_room_id: market_district
+          aliases: [market, bazaar, shops]
+        forest:
+          id: forest
+          name: Old Forest Path
+          destination_room_id: old_forest_path
+          aliases: [forest, woods, path]
+        town_hall:
+          id: town_hall
+          name: Blackwater Town Hall
+          destination_room_id: town_hall
+          aliases: [town_hall, hall, government]
+        newspaper:
+          id: newspaper
+          name: Blackwater Gazette Office
+          destination_room_id: newspaper_office
+          aliases: [newspaper, gazette, office]
+        astronomer:
+          id: astronomer
+          name: Astronomer's Study
+          destination_room_id: astronomer_study
+          aliases: [astronomer, study, stars]
+      objects:
+        notice_board:
+          object_type_id: notice_board
+        broken_fountain:
+          object_type_id: broken_fountain
+        consecration_vial:
+          object_type_id: consecration_vial
+          description: A consecration vial gleams on the fountain, ready to be filled with hallowed water.
+        town_statue:
+          object_type_id: town_statue
+        cult_symbols:
+          name: Cult Symbols
+          object_type_id: cult_symbols
+          description: Dark symbols drip along the stonework, proof that the cult stalks the square at night.
+        fresh_evidence:
+          object_type_id: fresh_evidence
+          description: Boot prints and streaks of ichor mar the cobbles.
+        eternal_flame:
+          object_type_id: eternal_flame
+        flame_of_hope:
+          object_type_id: flame_of_hope
+        message_board:
+          object_type_id: message_board
+        partner_evidence:
+          object_type_id: partner_evidence
+          interactions:
+            look:
+              effects:
+                - type: set_property
+                  target: player
+                  property: partner_evidence_found
+                  value: true
+                - type: generate_event
+                  message: "{{player_name}} examines the notice board and notes their partner's last clue."
+                  observers: [room_characters]
+  church:
+    behaviors:
+      - room
+    attributes:
+      name: Sacred Heart Church
+      description: |-
+        Tall stained-glass windows wash the pews in muted color. The altar has gone cold and a faint ash circles its
+        base. Father Marcus keeps vigil here, fearful the desecration will spread, while the blessed incense he prepared
+        waits to be burned to cleanse the altar and deliver a final sermon. Worn notes rest on the lectern, their margins
+        scribbled with reminders of the rites still unfinished.
+    properties:
+      exits:
+        square:
+          id: square
+          name: Town Square
+          destination_room_id: town_square
+          aliases: [square, town, main]
+        cemetery:
+          id: cemetery
+          name: Blackwater Cemetery
+          destination_room_id: cemetery
+          aliases: [cemetery, graveyard, tombs, "blackwater cemetery"]
+        tunnels:
+          id: tunnels
+          name: Underground Tunnels
+          destination_room_id: underground_tunnels
+          aliases: [tunnels, underground, passages, crypt, crypt entrance]
+        library:
+          id: library
+          name: Old Library
+          destination_room_id: old_library
+          aliases: [library, books, archive]
+      objects:
+        altar:
+          object_type_id: altar
+        confession_booth:
+          object_type_id: confession_booth
+        blessed_incense:
+          object_type_id: blessed_incense
+          description: Coils of incense wait beside the confession booth, ready to burn at the altar and seal your
+            closing sermon.
+        church_records:
+          object_type_id: church_records
+        priest_diary:
+          object_type_id: priest_diary
+        sacred_map:
+          object_type_id: sacred_map
+        ritual_texts:
+          object_type_id: ritual_texts
+        lectern_notes:
+          object_type_id: lectern_notes
+        celestial_almanac:
+          object_type_id: celestial_almanac
+          properties:
+            readable: true
+            pickupable: true
+            size: medium
+            pickup_action: use
+        confrontation_manual:
+          object_type_id: confrontation_manual
+          properties:
+            readable: true
+            pickupable: true
+            size: medium
+            pickup_action: use
+        witness_testimony:
+          object_type_id: witness_testimony
+          interactions:
+            look:
+              effects:
+                - type: set_property
+                  target: player
+                  property: witness_testimony_found
+                  value: true
+                - type: generate_event
+                  message: '{{player_name}} studies witness testimony about cult sightings.'
+                  observers: [room_characters]
+  cemetery:
+    behaviors:
+      - room
+    attributes:
+      name: Blackwater Cemetery
+      description: |-
+        Rows of leaning stones ring an open grave where oily residue stains the earth. A cracked angel statue weeps a
+        tarry tear above a desecrated gravestone, and an abandoned lantern sways on a hook. The air tastes like burnt myrrh—
+        something sacred, perhaps the Saint's Bone reliquary tucked inside the mausoleum, must cleanse this ground.
+    properties:
+      exits:
+        forest:
+          id: forest
+          name: Old Forest Path
+          destination_room_id: old_forest_path
+          aliases: [forest, woods, path]
+        church:
+          id: church
+          name: Sacred Heart Church
+          destination_room_id: church
+          aliases: [church, temple, sanctuary]
+        tunnels:
+          id: tunnels
+          name: Underground Tunnels
+          destination_room_id: underground_tunnels
+          aliases: [tunnels, underground, passages]
+        mausoleum:
+          id: mausoleum
+          name: Mausoleum
+          destination_room_id: mausoleum
+          aliases: [mausoleum, tomb, crypt]
+        secret_passage:
+          id: secret_passage
+          name: Secret Passage
+          destination_room_id: thieves_den
+          aliases: [secret, passage, hidden]
+          is_hidden: true
+      objects:
+        fresh_graves:
+          object_type_id: fresh_graves
+        suspicious_footprints:
+          object_type_id: suspicious_footprints
+        fresh_footprints:
+          object_type_id: fresh_footprints
+        disturbed_earth:
+          object_type_id: disturbed_earth
+        desecrated_gravestone:
+          object_type_id: desecrated_gravestone
+        angel_watch_statue:
+          object_type_id: angel_watch_statue
+        gravekeepers_lantern:
+          object_type_id: gravekeepers_lantern
+        graveyard_epitaphs:
+          object_type_id: graveyard_epitaphs
+      dark: true
+      spooky: true
+  mausoleum:
+    behaviors:
+      - room
+    attributes:
+      name: Ancient Mausoleum
+      description: |-
+        Flickering candles paint long shadows across carved sarcophagi. Incense clings to the air while a reliquary bone
+        rests on velvet cloth, waiting for a faithful hand to carry it into battle with the corruption.
+    properties:
+      exits:
+        cemetery:
+          id: cemetery
+          name: Blackwater Cemetery
+          destination_room_id: cemetery
+          aliases: [cemetery, graveyard, tombs]
+      objects:
+        ancient_sarcophagi:
+          object_type_id: ancient_sarcophagi
+        saints_bone:
+          object_type_id: saints_bone
+          description: A saint's relic rests upon a carved marble slab, untouched by dust.
+        ritual_candles:
+          object_type_id: ritual_candles
+        ritual_preparations:
+          object_type_id: ritual_preparations
+        burning_candle:
+          object_type_id: burning_candle
+      hidden: true
+      underground: true
+      dark: true
+      evil: true
+  old_forest_path:
+    behaviors:
+      - room
+    attributes:
+      name: Old Forest Path
+      description: |-
+        Gnarled branches lock overhead and swallow the moonlight. A weathered sign points deeper into the woods, and a
+        narrow trail climbs toward an ancient shrine where the final cleansing ritual must be performed.
+    properties:
+      exits:
+        square:
+          id: square
+          name: Town Square
+          destination_room_id: town_square
+          aliases: [square, town, main]
+        cemetery:
+          id: cemetery
+          name: Blackwater Cemetery
+          destination_room_id: cemetery
+          aliases: [cemetery, graveyard, tombs]
+        observatory:
+          id: observatory
+          name: Hidden Observatory
+          destination_room_id: hidden_observatory
+          aliases: [observatory, telescope, stars]
+        shrine:
+          id: shrine
+          name: Forgotten Shrine
+          destination_room_id: forgotten_shrine
+          aliases: [shrine, forgotten shrine, hidden shrine]
+      objects:
+        wooden_sign:
+          object_type_id: wooden_sign
+          description: A faded sign points toward a shrine and warns of strange lights in the trees.
+      characters:
+        cult_leader_malachi:
+          id: cult_leader_malachi
+          name: Malachi the Shadow
+          character_type_id: cult_leader_malachi
+          current_room_id: old_forest_path
+          description: A robed cultist murmurs over the ancient altar, eyes burning with zeal.
+        cult_member_thorn:
+          id: cult_member_thorn
+          name: Thorn the Enforcer
+          character_type_id: cult_member_thorn
+          current_room_id: old_forest_path
+          description: A hulking guard watches the path, ready to warn the cult of intruders.
+      dark: true
+      forest: true
+  forgotten_shrine:
+    behaviors:
+      - room
+    attributes:
+      name: Forgotten Shrine
+      description: |-
+        Moss covers the stone arches and a cracked altar bleeds shadow. Beneath it, a spring glows with faint light as if
+        waiting for a sanctified vessel.
+    properties:
+      exits:
+        forest:
+          id: forest
+          name: Old Forest Path
+          destination_room_id: old_forest_path
+          aliases: [forest, path, woods]
+        tunnels:
+          id: tunnels
+          name: Underground Tunnels
+          destination_room_id: underground_tunnels
+          aliases: [tunnels, underground, catacombs]
+          is_hidden: true
+      objects:
+        tainted_shrine_altar:
+          object_type_id: tainted_shrine_altar
+          description: A cracked altar pulses with cold shadow.
+        shrine_spring:
+          object_type_id: shrine_spring
+          description: A shallow basin glows with soft starlight and murmurs for a consecration vial.

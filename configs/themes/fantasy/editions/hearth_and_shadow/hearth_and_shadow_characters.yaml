@@ -157,106 +157,80 @@ entity_definitions:
     - character
     attributes:
       name: Father Marcus
-      description: A devoted priest who has been secretly investigating the cult's activities. Father Marcus is torn between his faith and the growing darkness in Blackwater. He has been studying celestial alignments and developing confrontation strategies to combat the Shadowed Hand cult.
+      description: A devoted priest whose faith has been shaken by the cult's corruption. He now pursues a path of purification to restore the town's divine protections.
     properties:
-      # Inventory management
       inventory_size: { type: number, default: 12 }
-      # Phase 1: Spiritual Foundation
-      spiritual_doubts_confronted: { type: boolean, default: false }
-      divine_mysteries_uncovered: { type: number, default: 0 }
-      # Branch A: Courage and Protection Path
-      courage_found: { type: boolean, default: false }
-      congregation_protected: { type: boolean, default: false }
-      # Branch B: Divine Knowledge Path
-      ritual_knowledge_gained: { type: boolean, default: false }
-      divine_protection_gained: { type: boolean, default: false }
-      # Branch C: Sacred Power Path
-      binding_power_acquired: { type: boolean, default: false }
-      sacred_artifacts_blessed: { type: boolean, default: false }
-      # Final Synthesis
-      divine_connection_restored: { type: boolean, default: false }
-      # Failure conditions
+      church_taint_identified: { type: boolean, default: false }
+      cemetery_taint_identified: { type: boolean, default: false }
+      shrine_taint_identified: { type: boolean, default: false }
+      blessed_incense_collected: { type: boolean, default: false }
+      saints_bone_collected: { type: boolean, default: false }
+      hallowed_water_collected: { type: boolean, default: false }
+      consecration_vial_collected: { type: boolean, default: false }
+      church_cleansed: { type: boolean, default: false }
+      cemetery_cleansed: { type: boolean, default: false }
+      shrine_cleansed: { type: boolean, default: false }
+      final_sermon_delivered: { type: boolean, default: false }
       faith_lost: { type: boolean, default: false }
     name: Father Marcus
-    backstory: "The priest of Sacred Heart Church, Father Marcus has served the community\
-      \ for over \ntwenty years. Recently, he has become increasingly troubled and\
-      \ distracted, often \nfound in the confession booth or staring at the crypt\
-      \ entrance. His once-strong \nfaith has been shaken by the evil he has witnessed,\
-      \ and he carries a terrible \nsecret that weighs heavily on his soul. The cult\
-      \ forced him to perform a dark \nritual three months ago, threatening to kill\
-      \ his congregation if he refused. \nNow he knows their plans but revealing them\
-      \ would endanger everyone he loves. \nHis internal struggle between duty and\
-      \ fear, truth and protection, drives his \nevery action. He prays for divine\
-      \ guidance but fears he has already damned himself. \nHe was once a young idealistic\
-      \ priest who dreamed of bringing light to \nthe darkest corners of the world,\
-      \ but the cult's corruption has left him \nquestioning everything he once believed.\
-      \ His congregation looks to him for \nspiritual guidance, but he feels like\
-      \ a fraud, knowing the dark secret he \ncarries. The weight of his failure to\
-      \ protect his flock from the cult's \ninfluence haunts his every waking moment.\n"
+    backstory: "A long-serving priest whose faith fractured when the cult forced him into a ritual. Marcus now seeks redemption by cleansing every holy site before despair consumes him."
     motives:
     - id: restore_divine_connection
-      description: Rebuild your shattered faith through a spiritual journey that requires confronting your doubts, uncovering divine mysteries, and proving your worthiness through acts of courage and protection. This is a multi-faceted spiritual quest with branching paths that must be synthesized into divine restoration.
+      description: Cleanse every desecrated holy site, gather sacred relics, and deliver a final sermon of hope to restore your shattered faith.
       success_conditions:
       - operator: AND
-      # Phase 1: Spiritual Foundation (Confronting Doubts)
       - type: character_has_property
-        property: spiritual_doubts_confronted
+        property: church_taint_identified
         value: true
       - type: character_has_property
-        property: divine_mysteries_uncovered
-        value: 2
-      # Branch A: Courage and Protection Path
+        property: cemetery_taint_identified
+        value: true
+        progress_message: "You see the corruption etched into the gravestone—the Saint's Bone must be pressed here to sanctify it."
       - type: character_has_property
-        property: courage_found
+        property: shrine_taint_identified
         value: true
       - type: character_has_property
-        property: congregation_protected
+        property: blessed_incense_collected
         value: true
-      # Branch B: Divine Knowledge Path
+        progress_message: "The incense is prepared—return to the altar and drive out the chill that lingers there."
       - type: character_has_property
-        property: ritual_knowledge_gained
+        property: saints_bone_collected
         value: true
+        progress_message: "The reliquary bone thrums with purpose; in your mind's eye the angel atop the cemetery gravestone leans forward, and the abandoned gravekeeper's lantern rattles, begging to be carried into the dark."
       - type: character_has_property
-        property: divine_protection_gained
+        property: hallowed_water_collected
         value: true
-      # Branch C: Sacred Power Path
+        progress_message: "Your vial brims with hallowed water—anoint the Forgotten Shrine so its light can return."
       - type: character_has_property
-        property: binding_power_acquired
+        property: church_cleansed
         value: true
+        progress_message: "Sacred warmth returns to the church. Seek the mausoleum next to reclaim what the dead entrusted to you."
       - type: character_has_property
-        property: sacred_artifacts_blessed
+        property: cemetery_cleansed
         value: true
-      # Final Synthesis: Divine Restoration
+        progress_message: "The graves rest easy again. Offer a final sermon so the town hears hope instead of whispers."
       - type: character_has_property
-        property: divine_connection_restored
+        property: shrine_cleansed
+        value: true
+        progress_message: "The shrine glows with gentle starlight—the graves still murmur for the reliquary before your final sermon can ring true."
+      - type: character_has_property
+        property: final_sermon_delivered
         value: true
       failure_conditions:
       - operator: OR
       - type: character_has_property
         property: faith_lost
         value: true
-      - type: character_has_property
-        property: courage_failed
-        value: true
-      - type: character_has_property
-        property: congregation_harmed
-        value: true
     initial_rooms:
     - room_id: church
       chance: 60
-      reason: Your spiritual home. You've been spending more time here lately, seeking
-        divine guidance for the terrible secret you carry. The crypt entrance seems
-        to call to you, a reminder of the dark ritual you were forced to perform.
+      reason: You kneel at the altar, sensing the desecration that has seeped into your sanctuary.
     - room_id: town_square
       chance: 20
-      reason: Ministering to the troubled townspeople. Your heart aches to see the
-        growing darkness in their eyes, knowing that your silence about the cult's
-        plans may be contributing to their suffering.
+      reason: Offering comfort to townsfolk while quietly gathering clues about the spreading corruption.
     - room_id: tavern
       chance: 20
-      reason: Seeking to comfort the troubled souls who gather here. The barkeep knows
-        you're a regular, and you're here to offer spiritual guidance to those who
-        need it most.
+      reason: Seeking troubled souls to counsel while searching for whispers of the cult.
     aliases:
     - marcus
     - father
@@ -264,6 +238,7 @@ entity_definitions:
     - cleric
     - confessor
     - shepherd
+
   guild_master_elena:
     behaviors:
     - character
@@ -887,5 +862,3 @@ entity_definitions:
     - broker
     - spy
     - informant
-
-

@@ -1,0 +1,16 @@
+includes:
+  - "minimal_actions.yaml"
+  - "minimal_rooms.yaml"
+  - "minimal_objects.yaml"
+  - "minimal_characters.yaml"
+
+game_settings:
+  num_rounds: 20
+  initial_ap_per_turn: 40
+  manual: "../docs/MANUAL.md"
+
+players:
+  - name: "Player_1"
+    provider: "dummy"
+    model: "test"
+    character_id: father_marcus

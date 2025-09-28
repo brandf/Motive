@@ -1129,6 +1129,13 @@ class GameMaster:
                 for event in player_observations:
                     observation_messages.append(f"• {event.message}")
 
+            # Motive progress updates (per-condition narrative nudges)
+            motive_progress_updates = player_char.collect_motive_progress_updates(self)
+            if motive_progress_updates:
+                observation_messages.append("**🔔 Motive Progress:**")
+                for update in motive_progress_updates:
+                    observation_messages.append(f"• {update}")
+
             # Check motive status and add debug logging
             motive_status_message = player_char.get_motive_status_message(self)
             if motive_status_message:
@@ -1889,4 +1896,3 @@ class GameMaster:
         """Sets up the initial game world by merging configs and instantiating objects."""
         # This method is now handled by GameInitializer. This empty method can be removed after full refactor.
         pass
-
