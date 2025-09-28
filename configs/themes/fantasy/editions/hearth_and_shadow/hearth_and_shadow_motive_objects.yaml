@@ -114,9 +114,13 @@ entity_definitions:
       use:
         - when:
             target_has_property:
-              property: tainted
+              property: sanctify_with_bone
               equals: true
           effects:
+            - type: set_property
+              target: player
+              property: cemetery_taint_identified
+              value: true
             - type: set_property
               target: target
               property: tainted
@@ -125,6 +129,10 @@ entity_definitions:
               target: target
               property: sanctified
               value: true
+            - type: set_property
+              target: target
+              property: sanctify_with_bone
+              value: false
             - type: set_property
               target: player
               property: cemetery_cleansed
@@ -135,7 +143,7 @@ entity_definitions:
                 - room_characters
         - effects:
             - type: generate_event
-              message: "You grip the Saint's Bone. It demands to be pressed against the desecrated gravestone—use it there with > use \"Saint's Bone\" on \"Desecrated Gravestone\"."
+              message: "You grip the Saint's Bone. It refuses to bite anything but the desecrated gravestone--use it there with > use \"Saint's Bone\" on \"Desecrated Gravestone\"."
               observers:
                 - player
   consecration_vial:
@@ -182,10 +190,10 @@ entity_definitions:
               target: object
               property: is_hallowed
               value: true
-            - type: generate_event
-              message: "{{player_name}} fills the vial at the consecrated source, creating hallowed water. Return to the tainted shrine altar and anoint it with > use \"Consecration Vial\" on \"Tainted Shrine Altar\"."
-              observers:
-                - player
+        - type: generate_event
+          message: "{{player_name}} fills the vial at the consecrated source, creating hallowed water. Now, while the glow still dances, anoint the Tainted Shrine Altar with > use \"Consecration Vial\" on \"Tainted Shrine Altar\"."
+          observers:
+            - player
         - when:
             target_has_property:
               property: requires_hallowed_water
@@ -204,6 +212,10 @@ entity_definitions:
               property: shrine_cleansed
               value: true
             - type: set_property
+              target: player
+              property: shrine_taint_identified
+              value: true
+            - type: set_property
               target: object
               property: is_hallowed
               value: false
@@ -217,7 +229,7 @@ entity_definitions:
               equals: true
           effects:
             - type: generate_event
-              message: "{{player_name}} finds the vial has no effect. This corruption calls for a different relic—like the Saint's Bone for the cemetery graves."
+              message: "{{player_name}} finds the vial has no effect. This corruption calls for a different relic--like the Saint's Bone for the cemetery graves."
               observers:
                 - player
   hallowed_water:
@@ -241,6 +253,7 @@ entity_definitions:
     properties:
       usable: true
       tainted: true
+      sanctify_with_bone: true
       size: medium
     action_aliases:
       sanctify: use
@@ -291,21 +304,33 @@ entity_definitions:
       fuel: 100
       is_lit: false
     interactions:
+      pickup:
+        effects:
+          - type: generate_event
+            message: "The lantern is cold; take it to a holy flame--like the Eternal Flame in the Town Square or the church's votive candles--to light the wick before you face the forest darkness again."
+            observers:
+              - player
       look:
         effects:
           - type: generate_event
-            message: "Soot stains the lantern's glass; a spark would set its wick aglow and chase back the graveyard gloom."
+            message: "Soot stains the lantern's glass; a spark from the Eternal Flame or the church's votive candles would set its wick aglow so you can pierce the shrine's darkness."
             observers:
               - player
       use:
-        - type: set_property
-          target: object
-          property: is_lit
-          toggle: true
-        - type: generate_event
-          message: "{{player_name}} raises the Gravekeeper's Lantern, and warm light spills across the graves."
-          observers:
-            - room_characters
+        - when:
+            target_has_property:
+              property: is_lit
+              equals: true
+          effects:
+            - type: generate_event
+              message: "{{player_name}} raises the Gravekeeper's Lantern, and its holy glow cuts through the gloom."
+              observers:
+                - room_characters
+        - effects:
+            - type: generate_event
+              message: "{{player_name}} rattles the unlit lantern--faithful, but flameless. Hold it to a sacred fire with > use \"Eternal Flame\" on \"Gravekeeper's Lantern\" (a church candle works too)."
+              observers:
+                - player
   lectern_notes:
     behaviors:
       - object
@@ -365,6 +390,6 @@ entity_definitions:
       look:
         effects:
           - type: generate_event
-            message: "{{player_name}} watches the spring shimmer and senses it could refill a consecration vial for hallowed water."
+            message: "{{player_name}} watches the spring shimmer and senses it could refill a consecration vial for hallowed water—just > use \"Consecration Vial\" on \"Shrine Spring\"."
             observers:
               - player

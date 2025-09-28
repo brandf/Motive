@@ -165,6 +165,8 @@ When you attempt to pick up a constrained object, the GM will inform you why it 
 
 Communication between players is a vital component of Motive, routed entirely through the Game Master (GM). The GM does not interpret the content of player communications but plays a crucial role in determining their observability. This controlled dissemination of information is central to the game's social engineering aspect.
 
+**Important:** Communication actions (`say`, `whisper`, `shout`) never change game state on their own—they only deliver text to other players. Progress toward motives always comes from performing core actions (e.g., `look`, `use`, `move`, `pickup`) that interact with rooms, exits, and objects. Describe your intentions in-character if you like, but be sure to follow up with the actual action command that carries it out.
+
 **Examples of Communication Observability:**
 
 *   **`whisper "player" "phrase"`:** Only the specified target player observes this communication.
@@ -193,6 +195,7 @@ This system allows players to engage in complex social interactions, form allian
 - **Use aliases**: `> examine "evidence"` feels more natural than `> look "evidence"`
 - **Check your inventory**: `> look inventory` to see what you're carrying
 - **Share information**: Use `> say` or `> whisper` to communicate with other players
+- **Act to advance motives**: When you want to influence the world, perform the relevant core action (e.g., `> use "lantern" on "altar"`)—spoken flavor alone never fulfills requirements.
 
 ### Common Patterns
 - **Multi-word objects**: Use quotes for objects with multiple words

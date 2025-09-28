@@ -944,6 +944,32 @@ entity_definitions:
       size: small
       magical: true
       hearth_symbol: true
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "The Eternal Flame dances without dimming—share its light by holding the Gravekeeper's Lantern to it with > use \"Eternal Flame\" on \"Gravekeeper's Lantern\"."
+          observers:
+          - player
+      use:
+        - when:
+            target_has_property:
+              property: tool_type
+              equals: lighting
+          effects:
+          - type: set_property
+            target: target
+            property: is_lit
+            value: true
+          - type: generate_event
+            message: "{{player_name}} holds the Gravekeeper's Lantern to the Eternal Flame until it blazes with holy light."
+            observers:
+            - room_characters
+        - effects:
+          - type: generate_event
+            message: "{{player_name}} warms their hands at the Eternal Flame; it seems to expect a lantern or torch to share its light."
+            observers:
+            - player
   shadow_crystal:
     behaviors:
     - object
@@ -1078,6 +1104,32 @@ entity_definitions:
       size: small
       time_sensitive: true
       fuel: 100
+    interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "Wax puddles around the candle's base; touch the Gravekeeper's Lantern to it with > use \"Burning Candle\" on \"Gravekeeper's Lantern\" if you want to carry the flame."
+          observers:
+          - player
+      use:
+        - when:
+            target_has_property:
+              property: tool_type
+              equals: lighting
+          effects:
+          - type: set_property
+            target: target
+            property: is_lit
+            value: true
+          - type: generate_event
+            message: "{{player_name}} touches the Gravekeeper's Lantern to the church candle; the flame leaps across with a soft amen of sparks."
+            observers:
+            - room_characters
+        - effects:
+          - type: generate_event
+            message: "The candle's small flame flickers politely--bring it something like the Gravekeeper's Lantern if you want to carry the light."
+            observers:
+            - player
   fresh_footprints:
     behaviors:
     - object
@@ -1289,7 +1341,7 @@ entity_definitions:
       look:
         effects:
         - type: generate_event
-          message: "You read the wooden sign. An added charcoal note urges: 'Shrine spring for holy water, then return with the Saint's Bone to cleanse the graves.'"
+          message: "You read the wooden sign. An added charcoal note urges: 'Fill the vial at the shrine spring, light the gravekeeper's lantern from the Eternal Flame, then return with the Saint's Bone to cleanse the graves.'"
           observers:
           - player
   partner_evidence:
@@ -1484,15 +1536,10 @@ entity_definitions:
           - player
       use:
         effects:
-        - type: set_property
-          target: player
-          property: faith_restored
-          value: true
         - type: generate_event
-          message: '{{player_name}} uses the Sacred Relic and feels their faith restored!
-            Divine strength flows through them!'
+          message: "{{player_name}} reverently taps the Sacred Relic, but it stays reli-cant to budge--its duty is to stay put."
           observers:
-          - room_characters
+          - player
   hidden_safe:
     behaviors:
     - object
@@ -2620,6 +2667,12 @@ entity_definitions:
           message: '{{player_name}} examines the Ancient Altar.'
           observers:
           - room_characters
+      use:
+        effects:
+        - type: generate_event
+          message: "The ancient altar hums with old forest magic but shrugs off your rite—anoint the Tainted Shrine Altar instead if you seek to cleanse the corruption."
+          observers:
+          - player
   mayors_desk:
     behaviors:
     - object
