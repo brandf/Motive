@@ -152,7 +152,8 @@ class Player:
                 return AIMessage(content=response.content)
             except Exception as e:
                 error_msg = str(e)
-                if "timeout" in error_msg.lower() and attempt < max_retries:
+                lower_error = error_msg.lower()
+                if ("timeout" in lower_error or "timed out" in lower_error) and attempt < max_retries:
                     wait_time = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
                     self.logger.warning(f"⚠️  LLM call timeout on attempt {attempt + 1}, retrying in {wait_time}s...")
                     await asyncio.sleep(wait_time)

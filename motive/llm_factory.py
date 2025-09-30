@@ -1,6 +1,8 @@
 from typing import Type
 import time
 import asyncio
+import os
+import logging
 from langchain_core.language_models.chat_models import BaseChatModel
 
 # Dynamic imports for specific chat models
@@ -39,6 +41,9 @@ PROVIDER_API_KEYS = {
     # "cohere": "COHERE_API_KEY",
 }
 
+# Request timeout configuration (seconds)
+DEFAULT_LLM_REQUEST_TIMEOUT = float(os.getenv("MOTIVE_LLM_REQUEST_TIMEOUT", "45"))
+
 # Rate limiting configuration for different providers
 # Format: {"provider": {"requests_per_minute": int, "requests_per_hour": int, "max_retries": int, "retry_delay": float}}
 RATE_LIMIT_CONFIG = {
@@ -47,28 +52,32 @@ RATE_LIMIT_CONFIG = {
         "requests_per_hour": 3000,
         "max_retries": 3,
         "retry_delay": 1.0,
-        "backoff_multiplier": 2.0
+        "backoff_multiplier": 2.0,
+        "request_timeout": DEFAULT_LLM_REQUEST_TIMEOUT,
     },
     "google": {
         "requests_per_minute": 60,
         "requests_per_hour": 1500,
         "max_retries": 5,
         "retry_delay": 2.0,
-        "backoff_multiplier": 1.5
+        "backoff_multiplier": 1.5,
+        "request_timeout": DEFAULT_LLM_REQUEST_TIMEOUT,
     },
     "anthropic": {
         "requests_per_minute": 50,
         "requests_per_hour": 2000,
         "max_retries": 3,
         "retry_delay": 1.5,
-        "backoff_multiplier": 2.0
+        "backoff_multiplier": 2.0,
+        "request_timeout": DEFAULT_LLM_REQUEST_TIMEOUT,
     },
     "dummy": {
         "requests_per_minute": 1000,  # No real limits for dummy
         "requests_per_hour": 10000,
         "max_retries": 0,
         "retry_delay": 0.0,
-        "backoff_multiplier": 1.0
+        "backoff_multiplier": 1.0,
+        "request_timeout": DEFAULT_LLM_REQUEST_TIMEOUT,
     }
 }
 
@@ -147,30 +156,64 @@ def _increment_rate_limit(provider: str):
     state["minute"] += 1
     state["hour"] += 1
 
+logger = logging.getLogger(__name__)
 
-async def _rate_limited_request(provider: str, llm_client: BaseChatModel, messages, max_retries: int = None):
+
+def _log_llm_warning(message: str):
+    """Emit warnings both to module logger and the GameNarrative logger if available."""
+    logger.warning(message)
+    game_logger = logging.getLogger("GameNarrative")
+    try:
+        game_logger.warning(message)
+    except Exception:
+        # If GameNarrative logger isn't configured yet, fall back to module-level warning only.
+        logger.debug("GameNarrative logger not ready for message: %s", message)
+
+
+def _log_llm_error(message: str):
+    """Emit errors both to module logger and the GameNarrative logger if available."""
+    logger.error(message)
+    game_logger = logging.getLogger("GameNarrative")
+    try:
+        game_logger.error(message)
+    except Exception:
+        logger.debug("GameNarrative logger not ready for message: %s", message)
+
+
+async def _rate_limited_request(
+    provider: str,
+    llm_client: BaseChatModel,
+    messages,
+    max_retries: int = None,
+    timeout: float | None = None,
+    **kwargs,
+):
     """
     Make a rate-limited request to the LLM client.
     Handles retries with exponential backoff for rate limit errors.
     """
     if provider not in RATE_LIMIT_CONFIG:
         # No rate limiting for unknown providers
-        return await llm_client.ainvoke(messages)
+        return await llm_client.ainvoke(messages, **kwargs)
     
     config = RATE_LIMIT_CONFIG[provider]
     if max_retries is None:
         max_retries = config["max_retries"]
-    
+    if timeout is None:
+        timeout = config.get("request_timeout", DEFAULT_LLM_REQUEST_TIMEOUT)
+
     retry_count = 0
     retry_delay = config["retry_delay"]
-    
+
     while retry_count <= max_retries:
         # Check rate limit before making request
         if not _check_rate_limit(provider):
             if retry_count < max_retries:
-                print(f"Rate limit exceeded for {provider}, waiting {retry_delay}s before retry {retry_count + 1}/{max_retries}")
+                _log_llm_warning(
+                    f"Rate limit exceeded for {provider}, waiting {retry_delay}s before retry {retry_count + 1}/{max_retries}"
+                )
                 await asyncio.sleep(retry_delay)
-                retry_delay *= config["backoff_multiplier"]
+                retry_delay *= config.get("backoff_multiplier", 1.0)
                 retry_count += 1
                 continue
             else:
@@ -179,16 +222,37 @@ async def _rate_limited_request(provider: str, llm_client: BaseChatModel, messag
         try:
             # Make the request
             _increment_rate_limit(provider)
-            result = await llm_client.ainvoke(messages)
+            result = await asyncio.wait_for(
+                llm_client.ainvoke(messages, **kwargs),
+                timeout=timeout,
+            )
             return result
+        except asyncio.TimeoutError as e:
+            if retry_count < max_retries:
+                _log_llm_warning(
+                    "LLM request to %s timed out after %.2fs (attempt %s/%s); retrying in %.2fs"
+                    % (provider, timeout, retry_count + 1, max_retries, retry_delay)
+                )
+                await asyncio.sleep(retry_delay)
+                retry_delay *= config.get("backoff_multiplier", 1.0)
+                retry_count += 1
+                continue
+            _log_llm_error(
+                "LLM request to %s timed out after %.2fs on final attempt" % (provider, timeout)
+            )
+            raise TimeoutError(f"LLM request to {provider} timed out after {timeout}s") from e
         except Exception as e:
             error_str = str(e).lower()
             if "rate limit" in error_str or "quota" in error_str or "429" in error_str:
                 if retry_count < max_retries:
-                    print(f"Rate limit error for {provider}: {e}")
-                    print(f"Retrying in {retry_delay}s (attempt {retry_count + 1}/{max_retries})")
+                    _log_llm_warning(
+                        f"Rate limit error for {provider}: {e}"
+                    )
+                    _log_llm_warning(
+                        f"Retrying in {retry_delay}s (attempt {retry_count + 1}/{max_retries})"
+                    )
                     await asyncio.sleep(retry_delay)
-                    retry_delay *= config["backoff_multiplier"]
+                    retry_delay *= config.get("backoff_multiplier", 1.0)
                     retry_count += 1
                     continue
                 else:
@@ -244,9 +308,18 @@ def create_llm_client(provider: str, model: str) -> BaseChatModel:
                 for attr in dir(base_llm):
                     if not attr.startswith('_') and not callable(getattr(base_llm, attr)):
                         setattr(self, attr, getattr(base_llm, attr))
-            
+
             async def ainvoke(self, messages, **kwargs):
-                return await _rate_limited_request(self.provider, self.base_llm, messages)
+                timeout = kwargs.pop("timeout", None)
+                max_retries = kwargs.pop("max_retries", None)
+                return await _rate_limited_request(
+                    self.provider,
+                    self.base_llm,
+                    messages,
+                    max_retries=max_retries,
+                    timeout=timeout,
+                    **kwargs,
+                )
             
             def invoke(self, messages, **kwargs):
                 # For synchronous calls, we'll need to handle this differently

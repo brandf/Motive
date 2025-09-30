@@ -474,6 +474,7 @@ Before committing changes, verify all items are complete:
 - **Use PowerShell syntax for git commands**: On Windows, use `;` instead of `&&` for command chaining. Example: `git add .; git commit -m "message"; git push`
 - **Use `motive` with defaults for validation**: Simply run `motive` (no arguments needed) to validate changes, as it defaults to `configs/game.yaml` and auto-generates game IDs.
 - **Use test configs for specific validation**: Use `motive -c tests/configs/integration/game_test.yaml` to test with specific configurations, hints, and shorter game rounds. This is especially useful for debugging specific actions or behaviors.
+- **Set long timeouts for live runs**: When calling `motive` through the shell tool, set `timeout_ms` to at least `600000` so the Codex CLI doesn’t kill the process before the LLM finishes the opening turn.
 
 ## Decision Making
 - **Don't ask permission for high-confidence operations**: When confidence is 8+ and rationale is provided, just run the operation (like `motive`). The user will reject if they don't want it run.
