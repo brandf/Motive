@@ -812,14 +812,17 @@ class TestActionDisplay:
         mock_move = Mock()
         mock_move.category = "movement"
         mock_move.name = "move"
-        
+        mock_move.cost = 1
+
         mock_say = Mock()
         mock_say.category = "communication"
         mock_say.name = "say"
-        
+        mock_say.cost = 1
+
         mock_look = Mock()
         mock_look.category = "observation"
         mock_look.name = "look"
+        mock_look.cost = 1
         
         gm.game_actions = {
             'move': mock_move,
@@ -876,14 +879,17 @@ class TestActionDisplay:
         mock_move = Mock()
         mock_move.category = "movement"
         mock_move.name = "move"
-        
+        mock_move.cost = 1
+
         mock_say = Mock()
         mock_say.category = "communication"
         mock_say.name = "say"
-        
+        mock_say.cost = 1
+
         mock_look = Mock()
         mock_look.category = "observation"
         mock_look.name = "look"
+        mock_look.cost = 1
         
         gm.game_actions = {
             'move': mock_move,

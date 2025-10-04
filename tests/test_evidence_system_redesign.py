@@ -12,29 +12,27 @@ class TestEvidenceSystemRedesign:
     
     def setup_method(self):
         """Set up test environment with Detective Thorne and evidence objects."""
+        from motive.character import Character
+
         # Create a character with the new evidence system
-        self.character = type('Character', (), {
-            'id': 'detective_thorne',
-            'name': 'Detective Thorne',
-            'properties': {
+        self.character = Character(
+            char_id='detective_thorne',
+            name='Detective Thorne',
+            backstory='A determined investigator.',
+            current_room_id='town_square',
+            inventory={},
+            properties={
+                'inventory_size': 12,
                 # Individual evidence flags (can only be set once)
-                "town_records_found": False,
-                "local_newspaper_found": False,
-                "graveyard_epitaphs_found": False,
-                "church_records_found": False,
-                "witness_testimony_found": False,
-                "editor_notes_found": False,
-                # Computed property that counts unique evidence
-                "evidence_found": 0  # This will be computed from the flags above
+                'town_records_found': False,
+                'local_newspaper_found': False,
+                'graveyard_epitaphs_found': False,
+                'church_records_found': False,
+                'witness_testimony_found': False,
+                'editor_notes_found': False,
+                'evidence_found': 0,
             },
-            'set_property': lambda self, prop, value: self.properties.update({prop: value}),
-            'get_property': lambda self, prop, default=None: self.properties.get(prop, default),
-            'add_item_to_inventory': lambda self, item: None,
-            'get_item_in_inventory': lambda self, name: None,  # Mock method
-            'get_display_name': lambda self: self.name,
-            'current_room_id': 'town_square',
-            'inventory': {}  # Mock inventory
-        })()
+        )
         
         # Create evidence objects with unique flags
         self.town_records = type('Object', (), {

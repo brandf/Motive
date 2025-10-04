@@ -60,7 +60,7 @@ def test_redemption_removes_failure_before_end():
     gm._check_requirements.side_effect = side_effect_mid
     # DM status should indicate failing
     msg_mid = character.get_motive_status_message(gm)
-    assert msg_mid and "FAILING" in msg_mid
+    assert msg_mid and msg_mid.startswith("⚠️ **Case Outlook:**")
 
     # End-game: failure cleared, success true
     def side_effect_end(_character, condition_dict, _params):

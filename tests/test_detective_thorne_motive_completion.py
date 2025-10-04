@@ -12,25 +12,27 @@ class TestDetectiveThorneMotiveCompletion:
     
     def setup_method(self):
         """Set up test environment with Detective Thorne and his motive."""
-        # Create a simple character for testing
-        self.character = type('Character', (), {
-            'id': 'detective_thorne',
-            'name': 'Detective Thorne',
-            'properties': {
-                "evidence_found": 0,
-                "cult_hierarchy_discovered": False,
-                "cult_locations_mapped": False,
-                "ritual_knowledge_mastered": False,
-                "cult_timing_understood": False,
-                "justice_tools_acquired": False,
-                "evidence_chain_complete": False,
-                "final_confrontation_ready": False
+        from motive.character import Character
+
+        # Create a character with the real inventory helpers so inventory space math works
+        self.character = Character(
+            char_id='detective_thorne',
+            name='Detective Thorne',
+            backstory='A determined investigator.',
+            current_room_id='church',
+            inventory={},
+            properties={
+                'inventory_size': 12,
+                'evidence_found': 0,
+                'cult_hierarchy_discovered': False,
+                'cult_locations_mapped': False,
+                'ritual_knowledge_mastered': False,
+                'cult_timing_understood': False,
+                'justice_tools_acquired': False,
+                'evidence_chain_complete': False,
+                'final_confrontation_ready': False,
             },
-            'set_property': lambda self, prop, value: self.properties.update({prop: value}),
-            'add_item_to_inventory': lambda self, item: None,  # Mock method
-            'get_display_name': lambda self: self.name,  # Mock method
-            'current_room_id': 'church'
-        })()
+        )
         
         # Create a simple room for testing
         self.room = type('Room', (), {

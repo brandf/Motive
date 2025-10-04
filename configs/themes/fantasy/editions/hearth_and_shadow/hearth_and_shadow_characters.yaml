@@ -90,31 +90,39 @@ entity_definitions:
         property: evidence_found
         value: 2
         operator: ">="
+        progress_message: "You've assembled the initial case file—now identify who sits at the top of the cult."
       # Branch A: Cult Structure Investigation
       - type: character_has_property
         property: cult_hierarchy_discovered
         value: true
+        progress_message: "The hierarchy is clear. Track where each lieutenant gathers to map their safe houses."
       - type: character_has_property
         property: cult_locations_mapped
         value: true
+        progress_message: "You know their meeting points—study their rites to learn when they'll strike next."
       # Branch B: Ritual Knowledge Investigation  
       - type: character_has_property
         property: ritual_knowledge_mastered
         value: true
+        progress_message: "The ritual mechanics make sense. Pin down the timing so you can intercept the ceremony."
       - type: character_has_property
         property: cult_timing_understood
         value: true
+        progress_message: "You have their schedule. Secure whatever tools you'll need to shut them down."
       # Branch C: Justice Preparation
       - type: character_has_property
         property: justice_tools_acquired
         value: true
+        progress_message: "You're armed for the raid—compile your evidence so the case survives in daylight."
       - type: character_has_property
         property: evidence_chain_complete
         value: true
+        progress_message: "The case file is airtight. Synthesize your findings into one final takedown plan."
       # Final Synthesis: Combine all branches
       - type: character_has_property
         property: final_confrontation_ready
         value: true
+        progress_message: "The confrontation plan is in place. Move fast before the cult slips the net."
       failure_conditions:
       - operator: OR
       - type: character_has_property
@@ -126,6 +134,55 @@ entity_definitions:
       - type: character_has_property
         property: dark_power_channeled
         value: true
+      status_prompts:
+      - condition:
+          operator: OR
+          conditions:
+          - type: character_has_property
+            property: evidence_destroyed
+            value: true
+          - type: character_has_property
+            property: cult_escaped
+            value: true
+          - type: character_has_property
+            property: dark_power_channeled
+            value: true
+        message: "**🧭 Case Outlook:** The cult just shattered part of your case file. Recover fresh proof before dawn swallows the trail."
+      - condition:
+          type: character_has_property
+          property: final_confrontation_ready
+          value: true
+        message: "**🧭 Case Outlook:** Every thread is tied off. Assemble your allies and spring the trap before the Shadowed Hand relocates."
+      - condition:
+          operator: AND
+          conditions:
+          - type: character_has_property
+            property: justice_tools_acquired
+            value: true
+          - type: character_has_property
+            property: evidence_chain_complete
+            value: true
+          - type: character_has_property
+            property: cult_timing_understood
+            value: true
+        message: "**🧭 Case Outlook:** Your weapons are packed and the ritual schedule is pinned. Lock down the leadership's safe house to trigger the confrontation."
+      - condition:
+          operator: AND
+          conditions:
+          - type: character_has_property
+            property: cult_hierarchy_discovered
+            value: true
+          - type: character_has_property
+            property: cult_locations_mapped
+            value: true
+        message: "**🧭 Case Outlook:** You know who chairs the cult and where they gather. Study their rites to predict the exact moment to strike."
+      - condition:
+          type: character_has_property
+          property: evidence_found
+          value: 2
+          operator: ">="
+        message: "**🧭 Case Outlook:** The initial dossiers click into place. Follow the Gazette leads for hierarchy intel before the cult purges their insiders."
+      - message: "**🧭 Case Outlook:** The case is raw. Sweep the town square, tavern whispers, and guild ledgers for anything that ties the cult together."
     initial_rooms:
     - room_id: town_square
       chance: 40
@@ -221,6 +278,52 @@ entity_definitions:
       - type: character_has_property
         property: faith_lost
         value: true
+      status_prompts:
+      - condition:
+          type: character_has_property
+          property: faith_lost
+          value: true
+        message: "**🕯️ Sacred Pulse:** Doubt swallows your prayers. Find sanctuary or guidance before the cult crowns despair."
+      - condition:
+          type: character_has_property
+          property: final_sermon_delivered
+          value: true
+        message: "**🕯️ Sacred Pulse:** The town hums with renewed faith. Guard the sanctified sites and keep candles lit through the night."
+      - condition:
+          operator: AND
+          conditions:
+          - type: character_has_property
+            property: church_cleansed
+            value: true
+          - type: character_has_property
+            property: cemetery_cleansed
+            value: true
+          - type: character_has_property
+            property: shrine_cleansed
+            value: true
+          - type: character_has_property
+            property: final_sermon_delivered
+            value: false
+        message: "**🕯️ Sacred Pulse:** Every holy site now sings. Gather the faithful and deliver the final sermon before shadows regroup."
+      - condition:
+          operator: AND
+          conditions:
+          - type: character_has_property
+            property: church_cleansed
+            value: true
+          - type: character_has_property
+            property: saints_bone_collected
+            value: true
+          - type: character_has_property
+            property: hallowed_water_collected
+            value: false
+        message: "**🕯️ Sacred Pulse:** The cathedral breathes easy. Carry the saints bone to the graveyard, then hallow the shrine's spring before dusk."
+      - condition:
+          type: character_has_property
+          property: church_taint_identified
+          value: true
+        message: "**🕯️ Sacred Pulse:** You sense the rot coiled at the altar. Prepare incense, reliquary, and shrine water—each site must feel your hand."
+      - message: "**🕯️ Sacred Pulse:** Blackwater's rites lie in tatters. Trace the corruption through church, graveyard, and shrine before the cult cements its reign."
     initial_rooms:
     - room_id: church
       chance: 60

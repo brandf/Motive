@@ -207,7 +207,8 @@ class GameInitializer:
                                         id=motive_item['id'],
                                         description=motive_item['description'],
                                         success_conditions=success_conditions,
-                                        failure_conditions=failure_conditions
+                                        failure_conditions=failure_conditions,
+                                        status_prompts=motive_item.get('status_prompts', [])
                                     ))
                                 else:
                                     # Already a MotiveConfig object
@@ -239,7 +240,8 @@ class GameInitializer:
                                             id=motive_item['id'],
                                             description=motive_item['description'],
                                             success_conditions=success_conditions,
-                                            failure_conditions=failure_conditions
+                                            failure_conditions=failure_conditions,
+                                            status_prompts=motive_item.get('status_prompts', [])
                                         ))
                                     else:
                                         # Already a MotiveConfig object
@@ -332,8 +334,10 @@ class GameInitializer:
                 self.game_object_types.update(raw_config['object_types'])
         
             if 'character_types' in raw_config and raw_config['character_types']:
-                # Handle v1 character_types - legacy support
-                self.game_character_types.update(raw_config['character_types'])
+                # Handle v1 character_types - legacy support without overwriting v2 definitions
+                for char_id, char_def in raw_config['character_types'].items():
+                    if char_id not in self.game_character_types:
+                        self.game_character_types[char_id] = char_def
         
             # Extract characters from merged config
             if 'characters' in raw_config and raw_config['characters']:
@@ -524,7 +528,8 @@ class GameInitializer:
                                             id=motive_item['id'],
                                             description=motive_item['description'],
                                             success_conditions=success_conditions,
-                                            failure_conditions=failure_conditions
+                                            failure_conditions=failure_conditions,
+                                            status_prompts=motive_item.get('status_prompts', [])
                                         ))
                                     else:
                                         # Already a MotiveConfig object
@@ -871,6 +876,8 @@ class GameInitializer:
                 char_backstory = config_data.get('backstory', '')
                 char_motive = config_data.get('motive', None)  # Legacy single motive
                 char_motives = config_data.get('motives', None)  # New multiple motives
+                if not char_motives and 'motives' in char_cfg:
+                    char_motives = char_cfg.get('motives')
                 if not char_motives and properties and 'motives' in properties:
                     char_motives = properties.get('motives')
                 char_aliases = config_data.get('aliases', [])
@@ -897,7 +904,8 @@ class GameInitializer:
                             id=motive_item['id'],
                             description=motive_item['description'],
                             success_conditions=success_conditions,
-                            failure_conditions=failure_conditions
+                            failure_conditions=failure_conditions,
+                            status_prompts=motive_item.get('status_prompts', [])
                         ))
                     else:
                         # Already a MotiveConfig object
@@ -961,6 +969,20 @@ class GameInitializer:
                         initial_room_reason = room_config['reason']
                         break
             
+            # Extract character properties with defaults expanded
+            raw_properties = {}
+            if hasattr(char_cfg, 'properties') and getattr(char_cfg, 'properties'):
+                raw_properties = getattr(char_cfg, 'properties')
+            elif isinstance(char_cfg, dict):
+                raw_properties = char_cfg.get('properties', {})
+
+            char_properties = {}
+            for prop_name, prop_value in (raw_properties or {}).items():
+                if isinstance(prop_value, dict) and 'default' in prop_value:
+                    char_properties[prop_name] = prop_value['default']
+                else:
+                    char_properties[prop_name] = prop_value
+
             # Create character with new motives system support
             player_char = Character(
                 char_id=f"{char_id}_instance_{i}", # Make character instance ID unique                                                
@@ -973,6 +995,7 @@ class GameInitializer:
                 action_points=self.initial_ap_per_turn, # Use configurable initial AP
                 aliases=char_aliases,
                 deterministic=self.deterministic,  # Pass deterministic flag
+                properties=char_properties,
                 short_name=getattr(char_cfg, 'short_name', None) if hasattr(char_cfg, 'short_name') else char_cfg.get('short_name', None) if isinstance(char_cfg, dict) else None
             )
             
@@ -1092,10 +1115,14 @@ class GameInitializer:
         self.game_logger.info(f"Merged {len(self.game_actions)} actions.")
 
         # 3. Merge Character Types
-        self.game_character_types.update(self.theme_cfg.character_types)
+        for char_id, char_def in self.theme_cfg.character_types.items():
+            if char_id not in self.game_character_types:
+                self.game_character_types[char_id] = char_def
         # Edition characters config are CharacterConfig (types), not character instances.
         if self.edition_cfg.characters: # Use 'characters' from EditionConfig
-            self.game_character_types.update(self.edition_cfg.characters) # Edition characters can override or add
+            for char_id, char_def in self.edition_cfg.characters.items():
+                if char_id not in self.game_character_types:
+                    self.game_character_types[char_id] = char_def
         self.game_logger.info(f"Merged {len(self.game_character_types)} character types.")
 
     def _instantiate_rooms_and_objects(self):

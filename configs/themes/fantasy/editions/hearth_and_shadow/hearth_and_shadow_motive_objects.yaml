@@ -54,14 +54,18 @@ entity_definitions:
               target: target
               property: sermon_ready
               value: true
-            - type: set_property
-              target: player
-              property: church_cleansed
-              value: true
-            - type: generate_event
-              message: "You burn the blessed incense, bathing the altar in cleansing smoke."
-              observers:
-                - room_characters
+        - type: set_property
+          target: player
+          property: church_cleansed
+          value: true
+        - type: generate_event
+          message: "You burn the blessed incense, bathing the altar in cleansing smoke."
+          observers:
+            - room_characters
+        - type: generate_event
+          message: "The altar is cleansed. Next focus: sanctify the cemetery with the Saint's Bone, hallow the shrine spring, and gather the evidence compiler + justice weapon before the final sermon."
+          observers:
+            - player
         - when:
             target_has_property:
               property: sermon_ready
@@ -133,14 +137,18 @@ entity_definitions:
               target: target
               property: sanctify_with_bone
               value: false
-            - type: set_property
-              target: player
-              property: cemetery_cleansed
-              value: true
-            - type: generate_event
-              message: "{{player_name}} places the Saint's Bone against the gravestone, sanctifying the corrupted soil."
-              observers:
-                - room_characters
+        - type: set_property
+          target: player
+          property: cemetery_cleansed
+          value: true
+        - type: generate_event
+          message: "{{player_name}} places the Saint's Bone against the gravestone, sanctifying the corrupted soil."
+          observers:
+            - room_characters
+        - type: generate_event
+          message: "The graves settle. Carry the hallowed water to the forgotten shrine and make sure the evidence compiler and justice weapon travel with you back to the altar."
+          observers:
+            - player
         - effects:
             - type: generate_event
               message: "You grip the Saint's Bone. It refuses to bite anything but the desecrated gravestone--use it there with > use \"Saint's Bone\" on \"Desecrated Gravestone\"."
@@ -223,6 +231,10 @@ entity_definitions:
               message: "{{player_name}} anoints the altar with hallowed water, dissolving the lingering darkness."
               observers:
                 - room_characters
+            - type: generate_event
+              message: "Shrine cleansed! Gather the evidence compiler, justice weapon, and confrontation manual for the final sermon."
+              observers:
+                - player
         - when:
             target_has_property:
               property: tainted

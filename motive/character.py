@@ -283,15 +283,23 @@ class Character:
         """Get a status message for the player about their current motive state."""
         if not self.selected_motive:
             return None
-        
+
+        status_prompts = getattr(self.selected_motive, 'status_prompts', []) or []
+        for prompt in status_prompts:
+            condition = getattr(prompt, 'condition', None)
+            if condition and not self._evaluate_condition_group(condition, game_master):
+                continue
+            return prompt.message
+
+        # Fall back to generic narrative beats if no prompts match
         success_result = self.check_motive_success(game_master)
         failure_result = self.check_motive_failure(game_master)
-        
+
         if failure_result:
-            return f"⚠️ **MOTIVE STATUS**: Your motive '{self.selected_motive.id}' is currently FAILING. You must resolve this before the game ends to avoid failure."
-        elif success_result:
-            return f"✅ **MOTIVE STATUS**: Your motive '{self.selected_motive.id}' is currently SUCCEEDING and not failing. Keep it up!"
-        
+            return "⚠️ **Case Outlook:** Something vital slipped through your grasp—recover the missing thread quickly."
+        if success_result:
+            return "✅ **Case Outlook:** Your plan is converging; stay vigilant until the final move."
+
         return None  # Neither succeeding nor failing - no status update needed
 
     def collect_motive_progress_updates(self, game_master) -> List[str]:

@@ -158,8 +158,9 @@ def test_pickup_object_already_in_inventory():
     # Verify security: object should be picked up (this is actually valid behavior)
     # The object should be moved from room to inventory, even if player already has one
     assert len(events) == 3, f"Expected 3 events, got {len(events)}"
-    assert len(feedback) == 1, f"Expected 1 feedback message, got {len(feedback)}"
+    assert len(feedback) >= 2, f"Expected at least 2 feedback messages, got {len(feedback)}"
     assert "You pick up the Item." in feedback[0]
+    assert feedback[-1].startswith("Inventory space:")
     
     # Verify object is moved from room to inventory
     assert test_object.id not in test_room.objects, "Object should be removed from room"
@@ -274,8 +275,9 @@ def test_pickup_object_case_sensitivity_security():
         
         # Verify security: object should be picked up (case-insensitive matching is expected)
         assert len(events) == 3, f"Expected 3 events for case '{case_variation}', got {len(events)}"
-        assert len(feedback) == 1, f"Expected 1 feedback message for case '{case_variation}', got {len(feedback)}"
+        assert len(feedback) >= 2, f"Expected at least 2 feedback messages for case '{case_variation}', got {len(feedback)}"
         assert "You pick up the Sword." in feedback[0]
+        assert feedback[-1].startswith("Inventory space:")
         
         # Verify object is moved from room to inventory
         assert test_object.id not in test_room.objects, f"Object should be removed from room for case '{case_variation}'"
@@ -360,8 +362,9 @@ def test_pickup_object_duplicate_ids():
     
     # Verify Item2 can be picked up
     assert len(events) == 3, f"Expected 3 events for Item2, got {len(events)}"
-    assert len(feedback) == 1, f"Expected 1 feedback message for Item2, got {len(feedback)}"
+    assert len(feedback) >= 2, f"Expected at least 2 feedback messages for Item2, got {len(feedback)}"
     assert "You pick up the Item2." in feedback[0]
+    assert feedback[-1].startswith("Inventory space:")
     
     # Verify Item2 is in inventory
     assert len(player_char.inventory) == 1, "Player should have exactly one object in inventory"

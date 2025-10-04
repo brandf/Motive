@@ -150,15 +150,21 @@ def evaluate_requirement(player_char, game_master, req: Any, params: Dict[str, A
         if not current_room or not current_room.exits:
             return True, False, f"No exits available."
         # check name or aliases
+        available_exits = []
         for _, exit_info in current_room.exits.items():
             if exit_info.get('is_hidden', False):
                 continue
-            if exit_info.get('name', '').lower() == str(direction).lower():
+            exit_name = exit_info.get('name', '')
+            if exit_name:
+                available_exits.append(exit_name)
+            if exit_name.lower() == str(direction).lower():
                 return True, True, None
             aliases = exit_info.get('aliases', [])
             if any(a.lower() == str(direction).lower() for a in aliases):
                 return True, True, None
-        return True, False, f"No exit found for direction '{direction}'."
+        available_text = ", ".join(f'"{name}"' for name in available_exits) if available_exits else "none"
+        quoting_hint = " Remember to quote multi-word exits, e.g., > move \"Market District\"." if (isinstance(direction, str) and ' ' in direction) else ""
+        return True, False, f"No exit found for direction '{direction}'. Available exits: {available_text}.{quoting_hint}"
 
     return False, False, None
 

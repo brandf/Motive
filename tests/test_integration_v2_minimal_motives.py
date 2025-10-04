@@ -45,11 +45,13 @@ async def test_minimal_v2_motive_success(tmp_path):
         # Initially motive should not succeed
         assert not player.character.check_motive_success(gm)
 
+        initial_ap = merged['game_settings']['initial_ap_per_turn']
+        player.character.action_points = initial_ap
         await gm._execute_player_turn(player, round_num=1)
 
         # After solve action, motive success should be true
         assert player.character.check_motive_success(gm)
         msg = player.character.get_motive_status_message(gm)
-        assert msg and "SUCCEEDING" in msg
+        assert msg and msg.startswith("✅ **Case Outlook:**")
 
 

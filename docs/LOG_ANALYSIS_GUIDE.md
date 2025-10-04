@@ -56,3 +56,11 @@ A complete example for Father Marcus’ single-player test on 2025-09-28 is stor
 Use that file as a reference for the level of detail expected, especially the round-by-round structure and closing checklists.
 
 On future runs, always create or update the corresponding `RUN_ANALYSIS.md` beside that run’s logs and leave this guide untouched.
+
+## Recent Lessons
+- **Movement errors need context.** When you see repeated “No exit found” failures, log a fix that lists available exits and reminds players to quote multi-word destinations. This came up repeatedly in the 2025-10-04 playtests.
+- **Progress pings should be diegetic.** If players stall after completing one branch (altar, cemetery, shrine, etc.), capture the gap and plan narrative reminders rather than technical checklists. Each cleanse now emits an in-world hint pointing to the next ritual step.
+- **Evidence guidance must name sources.** Runs where Thorne ignored Sacred Map or Gazette records showed we need copy that explicitly references those assets. Record whether new text (diary, town records, evidence compiler) actually moved the player; if not, suggest stronger lore cues rather than harder gating.
+- **Inventory messaging matters.** The new “Inventory space: used/available” line helped players manage capacity. Flag any lingering inventory churn in logs and adjust hint copy or item weights instead of hiding the details.
+- **Keep engine content-agnostic.** If a fix requires story-specific copy, put it in YAML (progress messages, room/object text) rather than core Python files. Logs that show “engine knows about Detective Thorne” are a red flag—always keep narrative logic in content modules.
+- **Verify status prompts fire as intended.** Status summaries now come from YAML `status_prompts`; if the player never sees the narrative heartbeat, add or re-sequence prompts instead of hacking the engine.

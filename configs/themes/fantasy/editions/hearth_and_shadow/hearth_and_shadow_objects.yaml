@@ -983,6 +983,12 @@ entity_definitions:
       usable: true
       fragile: true
     interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "{{player_name}} flips through the manual—it insists you carry justice tools and compiled testimony before the final sermon."
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -1552,6 +1558,20 @@ entity_definitions:
       size: small
       locked: true
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: ancient_calendar_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} matches the calendar's markings to current dates—the observatory's forecast confirms the same night."
+          observers:
+          - player
       use:
         effects:
         - type: increment_property
@@ -1680,6 +1700,20 @@ entity_definitions:
       size: small
       usable: true
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: ritual_schedule_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} reviews the ritual schedule and nails the strike hour—feed these numbers into the Celestial Calculator to stay ahead."
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -1767,6 +1801,16 @@ entity_definitions:
       size: large
       usable: true
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} scans the almanac—the cult plans to act when the observatory's star charts align during the next new moon."
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -1791,6 +1835,20 @@ entity_definitions:
       usable: true
       key_for: secret_cult_chamber
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: astronomers_notes_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} traces the astronomer's calculations—the next convergence hits when the Hidden Observatory's lenses align."
+          observers:
+          - player
       use:
         effects:
         - type: generate_event
@@ -1810,6 +1868,20 @@ entity_definitions:
       usable: true
       consumable: true
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: ancient_calendar_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} reconciles the ancient calendar with modern dates—the same night the observatory predicts a full alignment."
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -1871,6 +1943,20 @@ entity_definitions:
       usable: true
       blessed: true
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: ritual_schedule_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} decrypts the ritual schedule and pins down the strike hour—feed these numbers into the Celestial Calculator to stay ahead."
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -1899,6 +1985,16 @@ entity_definitions:
       locked: true
       puzzle_complexity: high
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} scans the almanac—the cult plans to act when the observatory's star charts align during the next new moon."
+          observers:
+          - player
       use:
         effects:
         - type: generate_event
@@ -1917,6 +2013,7 @@ entity_definitions:
       pickupable: true
       size: medium
       usable: true
+      pickup_action: use
       consumable: true
     interactions:
       use:
@@ -2091,8 +2188,7 @@ entity_definitions:
           property: cult_timing_understood
           value: true
         - type: generate_event
-          message: '{{player_name}} understands the cult''s timing! Their ritual schedule
-            is revealed!'
+          message: "{{player_name}} runs the calculations—the cult will act at the next convergence unless you disrupt their gathered tools."
           observers:
           - room_characters
   celestial_almanac:
@@ -2108,10 +2204,28 @@ entity_definitions:
     properties:
       pickupable: true
       size: medium
-      readable: true
       usable: true
       pickup_action: use
+    action_aliases:
+      read: use
+      examine: use
+      investigate: use
+      almanac: use
+      celestial: use
+      timing: use
+      stars: use
+      astronomy: use
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} scans the almanac—the cult plans to act when the observatory's star charts align during the next new moon."
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -2119,16 +2233,19 @@ entity_definitions:
           property: cult_timing_understood
           value: true
         - type: generate_event
-          message: '{{player_name}} understands the cult''s timing using the celestial
-            almanac! They now know when the rituals will occur!'
+          message: "{{player_name}} decodes the almanac's tables—the cult plans to act when the observatory's star charts align during the next new moon."
           observers:
           - room_characters
-    action_aliases:
-      almanac: use
-      celestial: use
-      timing: use
-      stars: use
-      astronomy: use
+      read:
+        effects:
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} decodes the almanac's tables—the cult plans to act when the observatory's star charts align during the next new moon."
+          observers:
+          - room_characters
   confrontation_manual:
     behaviors:
     - object
@@ -2189,8 +2306,7 @@ entity_definitions:
           property: evidence_chain_complete
           value: true
         - type: generate_event
-          message: '{{player_name}} compiles the evidence chain! The case against
-            the cult is complete!'
+          message: "{{player_name}} feeds the Town Records, Missing Persons Log, and Gazette leads into the compiler—the case file locks tight." 
           observers:
           - room_characters
     action_aliases:
@@ -2217,6 +2333,12 @@ entity_definitions:
       usable: true
       pickup_action: pickup
     interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "{{player_name}} studies the justice weapon—it must be carried into the final sermon for the plan to work."
+          observers:
+          - player
       pickup:
         effects:
         - type: set_property
@@ -2256,8 +2378,7 @@ entity_definitions:
           property: final_confrontation_ready
           value: true
         - type: generate_event
-          message: '{{player_name}} synthesizes all knowledge! The final confrontation
-            plan is ready! Justice will be served!'
+          message: "{{player_name}} synthesizes every lead—the planner highlights any unfinished tasks: verify Sacred Map/Gazette hideouts, complete the evidence compiler dossier, and carry the justice weapon into the final sermon."
           observers:
           - room_characters
   church_records:
@@ -2270,6 +2391,9 @@ entity_definitions:
       pickupable: true
       size: medium
       readable: true
+    action_aliases:
+      read: look
+      examine: look
     interactions:
       look:
         effects:
@@ -2299,6 +2423,9 @@ entity_definitions:
       pickupable: true
       size: small
       readable: true
+    action_aliases:
+      read: look
+      examine: look
     interactions:
       look:
         effects:
@@ -2311,7 +2438,7 @@ entity_definitions:
           property: cult_hierarchy_discovered
           value: true
         - type: generate_event
-          message: "You pore over Father Marcus's diary. He vows to burn the incense, retrieve a reliquary from the mausoleum, and guard the cemetery from further corruption."
+          message: "You pore over Father Marcus's diary. He lists the Shadowed Hand lieutenants by role—banker, librarian, enforcer—marks their meeting points around town, and insists you study the Sacred Map and Gazette roster to pinpoint each hideout before heading for the observatory above the forest."
           observers:
           - player
   sacred_map:
@@ -2325,6 +2452,9 @@ entity_definitions:
       pickupable: true
       size: medium
       readable: true
+    action_aliases:
+      read: look
+      examine: look
     interactions:
       look:
         effects:
@@ -2353,6 +2483,9 @@ entity_definitions:
       size: large
       readable: true
       heavy: true
+    action_aliases:
+      read: look
+      examine: look
     interactions:
       look:
         effects:
@@ -2379,6 +2512,9 @@ entity_definitions:
       pickupable: true
       size: small
       readable: true
+    action_aliases:
+      read: look
+      examine: look
     interactions:
       look:
         effects:
@@ -2387,8 +2523,7 @@ entity_definitions:
           property: witness_testimony_found
           value: true
         - type: generate_event
-          message: '{{player_name}} reviews the witness testimony and finds crucial
-            evidence!'
+          message: "{{player_name}} compiles testimony naming a Gazette courier leaking intel and a guard captain hiding evidence in the town hall vault—bring it to the altar when you present the case."
           observers:
           - room_characters
   town_records:
@@ -2402,6 +2537,9 @@ entity_definitions:
       pickupable: true
       size: medium
       readable: true
+    action_aliases:
+      read: look
+      examine: look
     interactions:
       look:
         effects:
@@ -2410,7 +2548,7 @@ entity_definitions:
           property: town_records_found
           value: true
         - type: generate_event
-          message: '{{player_name}} examines the town records and finds crucial evidence!'
+          message: "{{player_name}} traces embezzled ledgers from the bank's lower vault into tunnel repairs—clear proof an insider is bankrolling the Shadowed Hand. Cross-reference the Sacred Map and the Gazette roster to mark every hideout." 
           observers:
           - room_characters
   missing_persons_log:
@@ -2424,6 +2562,9 @@ entity_definitions:
       pickupable: true
       size: small
       readable: true
+    action_aliases:
+      read: look
+      examine: look
     interactions:
       look:
         effects:
@@ -2432,8 +2573,7 @@ entity_definitions:
           property: missing_persons_log_found
           value: true
         - type: generate_event
-          message: '{{player_name}} examines the missing persons log and finds crucial
-            evidence!'
+          message: "{{player_name}} charts disappearances near the library and mausoleum—the pattern points straight at the cult's safe houses. Match these locations against the Sacred Map and Gazette roster so the hideouts can't stay hidden."
           observers:
           - room_characters
   local_newspaper:
@@ -2447,6 +2587,9 @@ entity_definitions:
       pickupable: true
       size: small
       readable: true
+    action_aliases:
+      read: look
+      examine: look
     interactions:
       look:
         effects:
@@ -2455,8 +2598,7 @@ entity_definitions:
           property: local_newspaper_found
           value: true
         - type: generate_event
-          message: '{{player_name}} examines the local newspaper and finds crucial
-            evidence!'
+          message: "{{player_name}} skims Gazette exposés noting a confiscated roster of collaborators locked in the press room's safe."
           observers:
           - room_characters
   editor_notes:
@@ -2470,6 +2612,9 @@ entity_definitions:
       pickupable: true
       size: small
       readable: true
+    action_aliases:
+      read: look
+      examine: look
     interactions:
       look:
         effects:
@@ -2478,8 +2623,7 @@ entity_definitions:
           property: editor_notes_found
           value: true
         - type: generate_event
-          message: '{{player_name}} examines the editor''s notes and finds crucial
-            evidence!'
+          message: "{{player_name}} deciphers the editor's shorthand: the roster hides with the press proofs, and matching maps were diverted to the bank archives."
           observers:
           - room_characters
   astronomers_notes:
@@ -2496,9 +2640,26 @@ entity_definitions:
     properties:
       pickupable: true
       size: medium
-      readable: true
       pickup_action: use
+    action_aliases:
+      read: use
+      examine: use
+      investigate: use
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: astronomers_notes_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} traces the astronomer's calculations—the next convergence hits when the Hidden Observatory's lenses align."
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -2510,8 +2671,21 @@ entity_definitions:
           property: cult_timing_understood
           value: true
         - type: generate_event
-          message: '{{player_name}} understands the cult''s timing using the astronomer''s
-            notes! They now know when the rituals will occur!'
+          message: "{{player_name}} translates the astronomer's shorthand—the next convergence hits when the Hidden Observatory's lenses align."
+          observers:
+          - room_characters
+      read:
+        effects:
+        - type: set_property
+          target: player
+          property: astronomers_notes_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} translates the astronomer's shorthand—the next convergence hits when the Hidden Observatory's lenses align."
           observers:
           - room_characters
   ancient_calendar:
@@ -2524,9 +2698,26 @@ entity_definitions:
     properties:
       pickupable: true
       size: medium
-      readable: true
       pickup_action: use
+    action_aliases:
+      read: use
+      examine: use
+      investigate: use
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: ancient_calendar_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} reconciles the ancient calendar with modern dates—the same night the observatory predicts a full alignment."
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -2538,8 +2729,21 @@ entity_definitions:
           property: cult_timing_understood
           value: true
         - type: generate_event
-          message: '{{player_name}} understands the cult''s timing using the ancient
-            calendar! They now know when the rituals will occur!'
+          message: "{{player_name}} reconciles the ancient calendar with modern dates—the same night the observatory predicts a full alignment."
+          observers:
+          - room_characters
+      read:
+        effects:
+        - type: set_property
+          target: player
+          property: ancient_calendar_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} reconciles the ancient calendar with modern dates—the same night the observatory predicts a full alignment."
           observers:
           - room_characters
   ritual_schedule:
@@ -2552,9 +2756,26 @@ entity_definitions:
     properties:
       pickupable: true
       size: small
-      readable: true
       pickup_action: use
+    action_aliases:
+      read: use
+      examine: use
+      investigate: use
     interactions:
+      look:
+        effects:
+        - type: set_property
+          target: player
+          property: ritual_schedule_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} decrypts the ritual schedule and pins down the strike hour—feed these numbers into the Celestial Calculator to stay ahead."
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -2566,8 +2787,21 @@ entity_definitions:
           property: cult_timing_understood
           value: true
         - type: generate_event
-          message: '{{player_name}} understands the cult''s timing using the ritual
-            schedule! They now know when the rituals will occur!'
+          message: "{{player_name}} decrypts the ritual schedule and pins down the strike hour—feed these numbers into the Celestial Calculator to stay ahead."
+          observers:
+          - room_characters
+      read:
+        effects:
+        - type: set_property
+          target: player
+          property: ritual_schedule_found
+          value: true
+        - type: set_property
+          target: player
+          property: cult_timing_understood
+          value: true
+        - type: generate_event
+          message: "{{player_name}} decrypts the ritual schedule and pins down the strike hour—feed these numbers into the Celestial Calculator to stay ahead."
           observers:
           - room_characters
   graveyard_epitaphs:

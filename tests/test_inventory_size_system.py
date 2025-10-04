@@ -399,9 +399,10 @@ class TestPickupActionWithSpaceConstraints:
             game_master, char, Mock(), {"object_name": "Small Item"}
         )
         
-        # Verify success
-        assert len(feedback) == 1
+        # Verify success and inventory messaging
+        assert len(feedback) == 2
         assert "You pick up the Small Item" in feedback[0]
+        assert "Inventory space:" in feedback[1]
         assert mock_validate.called
         room.remove_object.assert_called_once_with("small_item")
     
@@ -719,9 +720,10 @@ class TestInventorySizeIntegration:
         events, feedback = handle_pickup_action(
             game_master, char, Mock(), {"object_name": "Small Item"}
         )
-        
-        assert len(feedback) == 1
+
+        assert len(feedback) == 2
         assert "You pick up the Small Item" in feedback[0]
+        assert "Inventory space:" in feedback[1]
         assert "small_item" in char.inventory
         room.remove_object.assert_called_once_with("small_item")
         

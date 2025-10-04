@@ -139,12 +139,52 @@ class MotiveConditionGroup(BaseModel):
     operator: Literal["AND", "OR"] = Field(..., description="How to combine conditions: AND (all must pass) or OR (any must pass).")
     conditions: List[ActionRequirementConfig] = Field(..., description="List of conditions to evaluate.")
 
+
+class MotiveStatusPrompt(BaseModel):
+    """Configurable narrative status prompt for a motive."""
+
+    condition: Optional[Union[ActionRequirementConfig, MotiveConditionGroup]] = Field(
+        default=None,
+        description="Optional condition that must be satisfied for this prompt to appear. If omitted, the prompt always applies.",
+    )
+    message: str = Field(..., description="Narrative status message shown to the player when the condition matches.")
+
+    @field_validator('condition', mode='before')
+    @classmethod
+    def convert_condition(cls, v):
+        """Normalize YAML input into requirement or condition group objects."""
+        if not v:
+            return None
+        if isinstance(v, (ActionRequirementConfig, MotiveConditionGroup)):
+            return v
+        if isinstance(v, dict):
+            if 'type' in v:
+                return ActionRequirementConfig(**v)
+            if 'operator' in v:
+                operator = v['operator']
+                raw_conditions = v.get('conditions', [])
+                conditions = [ActionRequirementConfig(**cond) for cond in raw_conditions]
+                return MotiveConditionGroup(operator=operator, conditions=conditions)
+        if isinstance(v, list):
+            if len(v) == 1 and isinstance(v[0], dict) and 'type' in v[0]:
+                return ActionRequirementConfig(**v[0])
+            if len(v) > 1 and isinstance(v[0], dict) and 'operator' in v[0]:
+                operator = v[0]['operator']
+                conditions = [ActionRequirementConfig(**cond) for cond in v[1:]]
+                return MotiveConditionGroup(operator=operator, conditions=conditions)
+        raise ValueError("Invalid condition format for MotiveStatusPrompt")
+
+
 class MotiveConfig(BaseModel):
     """Configuration for a character motive with success/failure conditions."""
     id: str = Field(..., description="Unique identifier for the motive.")
     description: str = Field(..., description="Description shown to the player.")
     success_conditions: Union[ActionRequirementConfig, MotiveConditionGroup] = Field(default=[], description="Single condition or group with explicit operator.")
     failure_conditions: Union[ActionRequirementConfig, MotiveConditionGroup] = Field(default=[], description="Single condition or group with explicit operator.")
+    status_prompts: List[MotiveStatusPrompt] = Field(
+        default_factory=list,
+        description="Ordered list of narrative status prompts evaluated each turn. The first matching condition provides the player's status summary.",
+    )
     
     @field_validator('success_conditions', 'failure_conditions', mode='before')
     @classmethod

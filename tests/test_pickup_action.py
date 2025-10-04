@@ -61,8 +61,9 @@ def test_pickup_action_success():
     
     # Verify results
     assert len(events) == 3, f"Expected 3 events, got {len(events)}"
-    assert len(feedback) == 1, f"Expected 1 feedback message, got {len(feedback)}"
+    assert len(feedback) == 2, f"Expected 2 feedback messages, got {len(feedback)}"
     assert feedback[0] == "You pick up the Torch."
+    assert feedback[1] == "Inventory space: 3/12 used (9 available)."
     
     # Verify object was moved from room to inventory
     assert test_object.id not in test_room.objects, "Object should be removed from room"
@@ -217,8 +218,9 @@ def test_pickup_action_case_insensitive():
     
     # Verify results
     assert len(events) == 3, f"Expected 3 events, got {len(events)}"
-    assert len(feedback) == 1, f"Expected 1 feedback message, got {len(feedback)}"
+    assert len(feedback) == 2, f"Expected 2 feedback messages, got {len(feedback)}"
     assert feedback[0] == "You pick up the Torch."
+    assert feedback[1].startswith("Inventory space:")
     
     # Verify object was moved from room to inventory
     assert test_object.id not in test_room.objects, "Object should be removed from room"

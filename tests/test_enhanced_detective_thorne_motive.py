@@ -12,25 +12,27 @@ class TestEnhancedDetectiveThorneMotive:
     
     def setup_method(self):
         """Set up test environment with Detective Thorne and enhanced objects."""
-        # Create a simple character for testing
-        self.character = type('Character', (), {
-            'id': 'detective_thorne',
-            'name': 'Detective Thorne',
-            'properties': {
-                "evidence_found": 0,
-                "cult_hierarchy_discovered": False,
-                "cult_locations_mapped": False,
-                "ritual_knowledge_mastered": False,
-                "cult_timing_understood": False,
-                "justice_tools_acquired": False,
-                "evidence_chain_complete": False,
-                "final_confrontation_ready": False
+        from motive.character import Character
+
+        # Create a character with real inventory helpers so progress effects fire correctly
+        self.character = Character(
+            char_id='detective_thorne',
+            name='Detective Thorne',
+            backstory='A determined investigator.',
+            current_room_id='town_square',
+            inventory={},
+            properties={
+                'inventory_size': 12,
+                'evidence_found': 0,
+                'cult_hierarchy_discovered': False,
+                'cult_locations_mapped': False,
+                'ritual_knowledge_mastered': False,
+                'cult_timing_understood': False,
+                'justice_tools_acquired': False,
+                'evidence_chain_complete': False,
+                'final_confrontation_ready': False,
             },
-            'set_property': lambda self, prop, value: self.properties.update({prop: value}),
-            'add_item_to_inventory': lambda self, item: None,  # Mock method
-            'get_display_name': lambda self: self.name,  # Mock method
-            'current_room_id': 'town_square'
-        })()
+        )
         
         # Create mock game state
         self.game_state = type('GameState', (), {
@@ -395,177 +397,96 @@ class TestEnhancedDetectiveThorneMotive:
 
     def test_complete_motive_multiple_pathways(self):
         """Test that Detective Thorne can complete his motive using multiple pathways."""
-        # Evidence Found (3/3) - Multiple pathways
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'town_records'}
-        )
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'local_newspaper'}
-        )
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'graveyard_epitaphs'}
-        )
+        from unittest.mock import Mock
+        import pytest
+
+        gm = Mock()
+        room = Mock()
+        room.remove_object = Mock()
+        room.name = 'Town Square'
+        gm.rooms = {'town_square': room}
+
+        def pickup(display_name, obj):
+            room.objects = {display_name: obj}
+            with pytest.MonkeyPatch().context() as m:
+                m.setattr('motive.inventory_constraints.validate_inventory_transfer',
+                         lambda *args: (True, None, None))
+                handle_pickup_action(
+                    gm,
+                    self.character,
+                    type('ActionConfig', (), {})(),
+                    {'object_name': display_name}
+                )
+
+        for display_name, obj in (
+            ('Town Records', self.town_records),
+            ('Local Newspaper', self.local_newspaper),
+            ('Graveyard Epitaphs', self.graveyard_epitaphs),
+        ):
+            pickup(display_name, obj)
+
         assert self.character.properties["evidence_found"] == 3
-        
-        # Cult Hierarchy Discovered - Multiple pathways
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'priest_diary'}
-        )
-        assert self.character.properties["cult_hierarchy_discovered"] == True
-        
-        # Cult Locations Mapped - Multiple pathways
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'sacred_map'}
-        )
-        assert self.character.properties["cult_locations_mapped"] == True
-        
-        # Ritual Knowledge Mastered - Multiple pathways
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'ritual_texts'}
-        )
-        assert self.character.properties["ritual_knowledge_mastered"] == True
-        
-        # Cult Timing Understood - Multiple pathways
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'astronomers_notes'}
-        )
-        assert self.character.properties["cult_timing_understood"] == True
-        
-        # Justice Tools Acquired - Multiple pathways
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'justice_weapon'}
-        )
-        assert self.character.properties["justice_tools_acquired"] == True
-        
-        # Evidence Chain Complete - Multiple pathways
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'evidence_compiler'}
-        )
-        assert self.character.properties["evidence_chain_complete"] == True
-        
-        # Final Confrontation Ready - Multiple pathways
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'confrontation_manual'}
-        )
-        assert self.character.properties["final_confrontation_ready"] == True
-        
-        # Verify all 8 success conditions are met
-        assert self.character.properties["evidence_found"] == 3
-        assert self.character.properties["cult_hierarchy_discovered"] == True
-        assert self.character.properties["cult_locations_mapped"] == True
-        assert self.character.properties["ritual_knowledge_mastered"] == True
-        assert self.character.properties["cult_timing_understood"] == True
-        assert self.character.properties["justice_tools_acquired"] == True
-        assert self.character.properties["evidence_chain_complete"] == True
-        assert self.character.properties["final_confrontation_ready"] == True
+
+        pickup("Priest's Diary", self.priest_diary)
+        pickup('Sacred Map', self.sacred_map)
+        pickup('Ritual Texts', self.ritual_texts)
+        pickup("Astronomer's Notes", self.astronomers_notes)
+        pickup('Justice Weapon', self.justice_weapon)
+        pickup('Evidence Compiler', self.evidence_compiler)
+        pickup('Confrontation Manual', self.confrontation_manual)
+
+        assert self.character.properties["cult_hierarchy_discovered"] is True
+        assert self.character.properties["cult_locations_mapped"] is True
+        assert self.character.properties["ritual_knowledge_mastered"] is True
+        assert self.character.properties["cult_timing_understood"] is True
+        assert self.character.properties["justice_tools_acquired"] is True
+        assert self.character.properties["evidence_chain_complete"] is True
+        assert self.character.properties["final_confrontation_ready"] is True
 
     def test_robustness_against_player_interference(self):
         """Test that the motive can still be completed even if some objects are taken by other players."""
-        # Simulate other players taking some objects
-        # Evidence Found - Still have 3 pathways available
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'church_records'}
-        )
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'local_newspaper'}
-        )
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'graveyard_epitaphs'}
-        )
+        from unittest.mock import Mock
+        import pytest
+
+        gm = Mock()
+        room = Mock()
+        room.remove_object = Mock()
+        room.name = 'Town Square'
+        gm.rooms = {'town_square': room}
+
+        def pickup(display_name, obj):
+            room.objects = {display_name: obj}
+            with pytest.MonkeyPatch().context() as m:
+                m.setattr('motive.inventory_constraints.validate_inventory_transfer',
+                         lambda *args: (True, None, None))
+                handle_pickup_action(
+                    gm,
+                    self.character,
+                    type('ActionConfig', (), {})(),
+                    {'object_name': display_name}
+                )
+
+        for display_name, obj in (
+            ('Church Records', self.church_records),
+            ('Local Newspaper', self.local_newspaper),
+            ('Graveyard Epitaphs', self.graveyard_epitaphs),
+        ):
+            pickup(display_name, obj)
+
         assert self.character.properties["evidence_found"] == 3
-        
-        # Cult Timing - Still have 3 pathways available
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'ancient_calendar'}
-        )
-        assert self.character.properties["cult_timing_understood"] == True
-        
-        # Other properties - Still have multiple pathways
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'priest_diary'}
-        )
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'sacred_map'}
-        )
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'ritual_texts'}
-        )
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'justice_weapon'}
-        )
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'evidence_compiler'}
-        )
-        events, feedback = handle_pickup_action(
-            self.game_state,
-            self.character,
-            type('ActionConfig', (), {})(),
-            {'object_name': 'confrontation_manual'}
-        )
-        
-        # Verify all 8 success conditions are still met
-        assert self.character.properties["evidence_found"] == 3
-        assert self.character.properties["cult_hierarchy_discovered"] == True
-        assert self.character.properties["cult_locations_mapped"] == True
-        assert self.character.properties["ritual_knowledge_mastered"] == True
-        assert self.character.properties["cult_timing_understood"] == True
-        assert self.character.properties["justice_tools_acquired"] == True
-        assert self.character.properties["evidence_chain_complete"] == True
-        assert self.character.properties["final_confrontation_ready"] == True
+
+        pickup('Ancient Calendar', self.ancient_calendar)
+        pickup("Priest's Diary", self.priest_diary)
+        pickup('Sacred Map', self.sacred_map)
+        pickup('Ritual Texts', self.ritual_texts)
+        pickup('Justice Weapon', self.justice_weapon)
+        pickup('Evidence Compiler', self.evidence_compiler)
+        pickup('Confrontation Manual', self.confrontation_manual)
+
+        assert self.character.properties["cult_hierarchy_discovered"] is True
+        assert self.character.properties["cult_locations_mapped"] is True
+        assert self.character.properties["ritual_knowledge_mastered"] is True
+        assert self.character.properties["cult_timing_understood"] is True
+        assert self.character.properties["justice_tools_acquired"] is True
+        assert self.character.properties["evidence_chain_complete"] is True
+        assert self.character.properties["final_confrontation_ready"] is True

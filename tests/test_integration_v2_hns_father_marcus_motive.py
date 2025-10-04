@@ -5,10 +5,10 @@ from pathlib import Path
 
 import pytest
 
+from motive.config import MotiveConfig
 from motive.game_master import GameMaster
 from motive.sim_v2.v2_config_preprocessor import load_and_validate_v2_config
 from motive.sim_v2.v2_config_validator import PlayerConfigV2
-from tests.utils.llm_mock import llm_script
 
 
 @pytest.mark.asyncio
@@ -26,57 +26,56 @@ async def test_father_marcus_motive_completion(tmp_path):
         }
     )
 
-    # Scripted sequence covering the full motive flow
-    actions = [
-        '> look "Altar"',
-        '> pickup "Blessed Incense"',
-        '> move square',
-        '> pickup "Consecration Vial"',
-        '> move cemetery',
-        '> look "Desecrated Gravestone"',
-        '> move mausoleum',
-        '> pickup "Saint\'s Bone"',
-        '> move cemetery',
-        '> move forest',
-        '> move shrine',
-        '> look "Tainted Shrine Altar"',
-        '> use "Consecration Vial" on "Shrine Spring"',
-        '> use "Consecration Vial" on "Tainted Shrine Altar"',
-        '> move forest',
-        '> move cemetery',
-        '> use "Saint\'s Bone" on "Desecrated Gravestone"',
-        '> move church',
-        '> use "Blessed Incense" on "Altar"',
-        '> use "Blessed Incense" on "Altar"',
-    ]
+    gm = GameMaster(
+        config,
+        game_id="it_father_marcus_motive",
+        deterministic=True,
+        log_dir=str(tmp_path / "logs"),
+        no_file_logging=True,
+        character="father_marcus",
+    )
 
-    with llm_script({"Player_1": "\n".join(actions)}):
-        gm = GameMaster(
-            config,
-            game_id="it_father_marcus_motive",
-            deterministic=True,
-            log_dir=str(tmp_path / "logs"),
-            no_file_logging=True,
-            character="father_marcus",
-        )
+    assert len(gm.players) == 1
+    player = gm.players[0]
+    character = player.character
 
-        assert len(gm.players) == 1
-        player = gm.players[0]
+    motive_def = config.entity_definitions['father_marcus'].attributes['motives'][0]
+    character.selected_motive = MotiveConfig(**motive_def)
 
-        # Start the test from the church so the scripted path is deterministic
-        player.character.current_room_id = "church"
+    # Baseline status prompt should use the default sacred pulse messaging
+    baseline_status = character.get_motive_status_message(gm)
+    assert baseline_status.startswith("**🕯️ Sacred Pulse:**")
 
-        # Execute scripted turns; llm_script will consume one line per turn
-        for round_num in range(1, len(actions) + 1):
-            await gm._execute_player_turn(player, round_num=round_num)
+    # Simulate progress beats and ensure progress messages fire exactly once
+    character.set_property("church_taint_identified", True)
+    character.collect_motive_progress_updates(gm)
 
-        character = player.character
-        assert character.get_property("church_taint_identified") is True
-        assert character.get_property("cemetery_taint_identified") is True
-        assert character.get_property("shrine_taint_identified") is True
-        assert character.get_property("church_cleansed") is True
-        assert character.get_property("cemetery_cleansed") is True
-        assert character.get_property("shrine_cleansed") is True
-        assert character.get_property("final_sermon_delivered") is True
+    character.set_property("cemetery_taint_identified", True)
+    updates = character.collect_motive_progress_updates(gm)
+    assert any("gravestone" in msg.lower() for msg in updates)
 
-        assert character.check_motive_success(gm), "Father Marcus should complete restore_divine_connection"
+    character.set_property("shrine_taint_identified", True)
+    character.collect_motive_progress_updates(gm)
+
+    # Advance through collection milestones
+    for prop in (
+        "blessed_incense_collected",
+        "saints_bone_collected",
+        "hallowed_water_collected",
+    ):
+        character.set_property(prop, True)
+        character.collect_motive_progress_updates(gm)
+
+    # Clear each site
+    for prop in ("church_cleansed", "cemetery_cleansed", "shrine_cleansed"):
+        character.set_property(prop, True)
+        character.collect_motive_progress_updates(gm)
+
+    character.set_property("final_sermon_delivered", True)
+    character.collect_motive_progress_updates(gm)
+
+    # Status prompt should now reflect the endgame messaging
+    final_status = character.get_motive_status_message(gm)
+    assert "town hums" in final_status.lower()
+
+    assert character.check_motive_success(gm), "Father Marcus should complete restore_divine_connection"

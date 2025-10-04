@@ -48,8 +48,9 @@ class TestMotiveStatusDM:
 
         msg = character.get_motive_status_message(gm)
         assert msg is not None
-        assert "MOTIVE STATUS" in msg and "FAILING" in msg
-        assert "investigate_mayor" in msg
+        assert msg.startswith("⚠️ **Case Outlook:**")
+        assert "MOTIVE STATUS" not in msg
+        assert "investigate_mayor" not in msg
 
     def test_dm_motive_status_succeeding_without_failure(self):
         # Success true and failure false
@@ -61,8 +62,8 @@ class TestMotiveStatusDM:
 
         msg = character.get_motive_status_message(gm)
         assert msg is not None
-        assert "MOTIVE STATUS" in msg and "SUCCEEDING" in msg
-        assert "not failing" in msg
+        assert msg.startswith("✅ **Case Outlook:**")
+        assert "MOTIVE STATUS" not in msg
 
     def test_dm_motive_status_neutral_no_message(self):
         # Neither success nor failure true
