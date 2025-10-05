@@ -196,8 +196,10 @@ class GameInitializer:
                         if motives_data:
                             from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
                             converted_motives = []
+                            raw_prompt_map = {}
                             for motive_item in motives_data:
                                 if isinstance(motive_item, dict):
+                                    raw_prompt_map[motive_item['id']] = motive_item.get('status_prompts', [])
                                     # Convert success_conditions
                                     success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
                                     # Convert failure_conditions
@@ -208,11 +210,17 @@ class GameInitializer:
                                         description=motive_item['description'],
                                         success_conditions=success_conditions,
                                         failure_conditions=failure_conditions,
-                                        status_prompts=motive_item.get('status_prompts', [])
+                                        status_prompts=self._convert_status_prompts(motive_item.get('status_prompts', []))
                                     ))
                                 else:
                                     # Already a MotiveConfig object
                                     converted_motives.append(motive_item)
+
+                            if raw_prompt_map:
+                                for motive in converted_motives:
+                                    prompts = raw_prompt_map.get(getattr(motive, 'id', None))
+                                    if prompts and not getattr(motive, 'status_prompts', None):
+                                        motive.status_prompts = self._convert_status_prompts(prompts)
                             config_data['motives'] = converted_motives
                     elif 'motives' in entity_data:
                         # Handle string-encoded motives from v2 config
@@ -229,8 +237,10 @@ class GameInitializer:
                                 # Convert to MotiveConfig objects
                                 from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
                                 converted_motives = []
+                                raw_prompt_map = {}
                                 for motive_item in motives_list:
                                     if isinstance(motive_item, dict):
+                                        raw_prompt_map[motive_item['id']] = motive_item.get('status_prompts', [])
                                         # Convert success_conditions
                                         success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
                                         # Convert failure_conditions
@@ -241,11 +251,16 @@ class GameInitializer:
                                             description=motive_item['description'],
                                             success_conditions=success_conditions,
                                             failure_conditions=failure_conditions,
-                                            status_prompts=motive_item.get('status_prompts', [])
+                                            status_prompts=self._convert_status_prompts(motive_item.get('status_prompts', []))
                                         ))
                                     else:
                                         # Already a MotiveConfig object
                                         converted_motives.append(motive_item)
+                                if raw_prompt_map:
+                                    for motive in converted_motives:
+                                        prompts = raw_prompt_map.get(getattr(motive, 'id', None))
+                                        if prompts and not getattr(motive, 'status_prompts', None):
+                                            motive.status_prompts = self._convert_status_prompts(prompts)
                                 config_data['motives'] = converted_motives
                             except Exception as e:
                                 self.game_logger.error(f"Failed to parse motives for {entity_id}: {e}")
@@ -485,8 +500,10 @@ class GameInitializer:
                         if motives_data:
                             from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
                             converted_motives = []
+                            raw_prompt_map = {}
                             for motive_item in motives_data:
                                 if isinstance(motive_item, dict):
+                                    raw_prompt_map[motive_item['id']] = motive_item.get('status_prompts', [])
                                     # Convert success_conditions
                                     success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
                                     # Convert failure_conditions
@@ -496,11 +513,20 @@ class GameInitializer:
                                         id=motive_item['id'],
                                         description=motive_item['description'],
                                         success_conditions=success_conditions,
-                                        failure_conditions=failure_conditions
+                                        failure_conditions=failure_conditions,
+                                        status_prompts=self._convert_status_prompts(motive_item.get('status_prompts', []))
                                     ))
                                 else:
                                     # Already a MotiveConfig object
+                                    if not getattr(motive_item, 'status_prompts', None):
+                                        raw_prompt_map[motive_item.id] = motive_item.model_dump().get('status_prompts', [])
+                                        motive_item.status_prompts = self._convert_status_prompts(raw_prompt_map[motive_item.id])
                                     converted_motives.append(motive_item)
+                            if raw_prompt_map:
+                                for motive in converted_motives:
+                                    prompts = raw_prompt_map.get(getattr(motive, 'id', None))
+                                    if prompts and not getattr(motive, 'status_prompts', None):
+                                        motive.status_prompts = self._convert_status_prompts(prompts)
                             config_data['motives'] = converted_motives
                     elif 'motives' in entity_data:
                         # Handle string-encoded motives from v2 config
@@ -517,8 +543,10 @@ class GameInitializer:
                                 # Convert to MotiveConfig objects
                                 from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
                                 converted_motives = []
+                                raw_prompt_map = {}
                                 for motive_item in motives_list:
                                     if isinstance(motive_item, dict):
+                                        raw_prompt_map[motive_item['id']] = motive_item.get('status_prompts', [])
                                         # Convert success_conditions
                                         success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
                                         # Convert failure_conditions
@@ -529,11 +557,18 @@ class GameInitializer:
                                             description=motive_item['description'],
                                             success_conditions=success_conditions,
                                             failure_conditions=failure_conditions,
-                                            status_prompts=motive_item.get('status_prompts', [])
+                                            status_prompts=self._convert_status_prompts(motive_item.get('status_prompts', []))
                                         ))
                                     else:
-                                        # Already a MotiveConfig object
+                                        if not getattr(motive_item, 'status_prompts', None):
+                                            raw_prompt_map[motive_item.id] = motive_item.model_dump().get('status_prompts', [])
+                                            motive_item.status_prompts = self._convert_status_prompts(raw_prompt_map[motive_item.id])
                                         converted_motives.append(motive_item)
+                                if raw_prompt_map:
+                                    for motive in converted_motives:
+                                        prompts = raw_prompt_map.get(getattr(motive, 'id', None))
+                                        if prompts and not getattr(motive, 'status_prompts', None):
+                                            motive.status_prompts = self._convert_status_prompts(prompts)
                                 config_data['motives'] = converted_motives
                             except Exception as e:
                                 self.game_logger.error(f"Failed to parse motives for {entity_id}: {e}")
@@ -888,11 +923,16 @@ class GameInitializer:
             if char_motives and len(char_motives) > 0:
                 from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
                 converted_motives = []
+                raw_prompt_map = {}
                 for motive_item in char_motives:
                     if isinstance(motive_item, MotiveConfig):
                         # Already a MotiveConfig object (from v2→v1 conversion)
+                        if not getattr(motive_item, 'status_prompts', None):
+                            raw_prompt_map[motive_item.id] = motive_item.model_dump().get('status_prompts', [])
+                            motive_item.status_prompts = self._convert_status_prompts(raw_prompt_map[motive_item.id])
                         converted_motives.append(motive_item)
                     elif isinstance(motive_item, dict):
+                        raw_prompt_map[motive_item['id']] = motive_item.get('status_prompts', [])
                         # Convert success_conditions
                         success_conditions = self._convert_conditions(motive_item.get('success_conditions', []))
 
@@ -905,11 +945,17 @@ class GameInitializer:
                             description=motive_item['description'],
                             success_conditions=success_conditions,
                             failure_conditions=failure_conditions,
-                            status_prompts=motive_item.get('status_prompts', [])
+                            status_prompts=self._convert_status_prompts(motive_item.get('status_prompts', []))
                         ))
                     else:
                         # Already a MotiveConfig object
                         converted_motives.append(motive_item)
+
+                if raw_prompt_map:
+                    for motive in converted_motives or []:
+                        prompts = raw_prompt_map.get(getattr(motive, 'id', None))
+                        if prompts and not getattr(motive, 'status_prompts', None):
+                            motive.status_prompts = self._convert_status_prompts(prompts)
                 
                 # Handle motive override - check multiple override sources
                 motive_to_assign = None
@@ -998,6 +1044,9 @@ class GameInitializer:
                 properties=char_properties,
                 short_name=getattr(char_cfg, 'short_name', None) if hasattr(char_cfg, 'short_name') else char_cfg.get('short_name', None) if isinstance(char_cfg, dict) else None
             )
+
+            if raw_prompt_map:
+                player_char._raw_status_prompts = raw_prompt_map
             
             # Store the initial room reason for use in initial turn message
             player_char.initial_room_reason = initial_room_reason
@@ -1070,6 +1119,64 @@ class GameInitializer:
                 return ActionRequirementConfig(**conditions_data[0])
         
         return ActionRequirementConfig(type="character_has_property", property="dummy", value=True)  # Default fallback
+
+    def _convert_status_prompts(self, prompts_data):
+        """Convert raw status prompt definitions into MotiveStatusPrompt objects."""
+        from motive.config import ActionRequirementConfig, MotiveConditionGroup, MotiveStatusPrompt
+
+        if not prompts_data:
+            return []
+
+        converted_prompts = []
+        for prompt in prompts_data:
+            if isinstance(prompt, MotiveStatusPrompt):
+                converted_prompts.append(prompt)
+                continue
+
+            if not isinstance(prompt, dict):
+                self.game_logger.warning(f"Ignoring invalid status prompt definition: {prompt}")
+                continue
+
+            raw_condition = prompt.get('condition')
+            condition_obj = None
+
+            if raw_condition:
+                if isinstance(raw_condition, (ActionRequirementConfig, MotiveConditionGroup)):
+                    condition_obj = raw_condition
+                elif isinstance(raw_condition, dict):
+                    if 'type' in raw_condition:
+                        condition_obj = ActionRequirementConfig(**raw_condition)
+                    elif 'operator' in raw_condition:
+                        operator = raw_condition['operator']
+                        raw_conditions = raw_condition.get('conditions', []) or []
+                        condition_obj = MotiveConditionGroup(
+                            operator=operator,
+                            conditions=[
+                                cond if isinstance(cond, ActionRequirementConfig)
+                                else ActionRequirementConfig(**cond)
+                                for cond in raw_conditions
+                            ]
+                        )
+                elif isinstance(raw_condition, list):
+                    if raw_condition and isinstance(raw_condition[0], dict) and 'operator' in raw_condition[0]:
+                        operator = raw_condition[0]['operator']
+                        condition_obj = MotiveConditionGroup(
+                            operator=operator,
+                            conditions=[
+                                cond if isinstance(cond, ActionRequirementConfig)
+                                else ActionRequirementConfig(**cond)
+                                for cond in raw_condition[1:]
+                            ]
+                        )
+
+            message = prompt.get('message')
+            if not message:
+                self.game_logger.warning("Status prompt missing 'message' field – skipping entry.")
+                continue
+
+            converted_prompts.append(MotiveStatusPrompt(condition=condition_obj, message=message))
+
+        return converted_prompts
 
     def _load_yaml_config(self, file_path: str, config_model: BaseModel) -> BaseModel:
         """Loads and validates a YAML configuration file against a Pydantic model."""

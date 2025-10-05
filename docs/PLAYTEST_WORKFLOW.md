@@ -2,6 +2,8 @@
 
 This workflow captures how we run narrative playtests with live LLM players, synthesize findings, and feed them back into content iterations. It complements – but does not duplicate – the analysis details in [`LOG_ANALYSIS_GUIDE.md`](LOG_ANALYSIS_GUIDE.md).
 
+Playtesting uses real LLM players so we can see how they respond to content and plan/implement improvements.
+
 ## When to Use
 - You have authored new or revised content (rooms, objects, character motives) and want to evaluate the in-fiction experience end-to-end.
 - You need to confirm that story-driven hints, progress pings, or UX tweaks are landing with real players before committing to larger rollouts.

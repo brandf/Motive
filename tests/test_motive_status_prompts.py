@@ -5,6 +5,25 @@ from motive.config import MotiveConfig
 from motive.requirements_evaluator import evaluate_requirement
 
 
+def build_dummy_game_master():
+    from motive.cli import load_config
+    from motive.game_master import GameMaster
+
+    config = load_config('configs/game.yaml', validate=False)
+    config['players'] = config['players'][:1]
+    config['players'][0]['provider'] = 'dummy'
+    config['players'][0]['model'] = 'test'
+
+    return GameMaster(
+        config,
+        game_id='unit-status-prompts',
+        deterministic=True,
+        no_file_logging=True,
+        character='detective_thorne',
+        motive='avenge_partner',
+    )
+
+
 class DummyGameMaster:
     def __init__(self):
         self.rooms = {}
@@ -83,3 +102,14 @@ def test_status_prompt_selects_first_matching_condition():
     message = character.get_motive_status_message(gm)
 
     assert message == "**🧭 Case Outlook:** You connected the captain to the cult meetings—prepare the raid."
+
+
+def test_detective_thorne_status_prompts_survive_runtime():
+    gm = build_dummy_game_master()
+    char = gm.players[0].character
+
+    assert char.selected_motive.id == 'avenge_partner'
+    assert len(char.selected_motive.status_prompts) == 6
+
+    message = char.get_motive_status_message(gm)
+    assert message == "**🧭 Case Outlook:** The case is raw. Sweep the town square, tavern whispers, and guild ledgers for anything that ties the cult together."

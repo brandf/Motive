@@ -2,7 +2,7 @@ from typing import List, Dict, Any, Optional, Tuple
 import random
 import json
 from motive.game_object import GameObject
-from motive.config import MotiveConfig, MotiveConditionGroup
+from motive.config import MotiveConfig, MotiveConditionGroup, ActionRequirementConfig, MotiveStatusPrompt
 
 
 class Character:
@@ -279,12 +279,75 @@ class Character:
         else:
             return f"{condition.type}: {condition.model_dump()}"
 
+    def _ensure_status_prompts_initialized(self) -> List[MotiveStatusPrompt]:
+        """Lazily hydrate status prompts from raw config when missing."""
+        if not self.selected_motive:
+            return []
+
+        prompts = getattr(self.selected_motive, 'status_prompts', []) or []
+        if prompts:
+            return prompts
+
+        raw_map = getattr(self, '_raw_status_prompts', {}) or {}
+        raw_prompts = raw_map.get(self.selected_motive.id)
+        if not raw_prompts:
+            return []
+
+        converted: List[MotiveStatusPrompt] = []
+        for prompt in raw_prompts:
+            if isinstance(prompt, MotiveStatusPrompt):
+                converted.append(prompt)
+                continue
+
+            if not isinstance(prompt, dict):
+                continue
+
+            raw_condition = prompt.get('condition')
+            condition_obj = None
+
+            if isinstance(raw_condition, (ActionRequirementConfig, MotiveConditionGroup)):
+                condition_obj = raw_condition
+            elif isinstance(raw_condition, dict):
+                if 'type' in raw_condition:
+                    condition_obj = ActionRequirementConfig(**raw_condition)
+                elif 'operator' in raw_condition:
+                    operator = raw_condition['operator']
+                    raw_conditions = raw_condition.get('conditions', []) or []
+                    condition_obj = MotiveConditionGroup(
+                        operator=operator,
+                        conditions=[
+                            cond if isinstance(cond, ActionRequirementConfig)
+                            else ActionRequirementConfig(**cond)
+                            for cond in raw_conditions
+                        ]
+                    )
+            elif isinstance(raw_condition, list):
+                if raw_condition and isinstance(raw_condition[0], dict) and 'operator' in raw_condition[0]:
+                    operator = raw_condition[0]['operator']
+                    condition_obj = MotiveConditionGroup(
+                        operator=operator,
+                        conditions=[
+                            cond if isinstance(cond, ActionRequirementConfig)
+                            else ActionRequirementConfig(**cond)
+                            for cond in raw_condition[1:]
+                        ]
+                    )
+
+            message = prompt.get('message')
+            if not message:
+                continue
+
+            converted.append(MotiveStatusPrompt(condition=condition_obj, message=message))
+
+        self.selected_motive.status_prompts = converted
+        return converted
+
     def get_motive_status_message(self, game_master) -> Optional[str]:
         """Get a status message for the player about their current motive state."""
         if not self.selected_motive:
             return None
 
-        status_prompts = getattr(self.selected_motive, 'status_prompts', []) or []
+        status_prompts = self._ensure_status_prompts_initialized()
         for prompt in status_prompts:
             condition = getattr(prompt, 'condition', None)
             if condition and not self._evaluate_condition_group(condition, game_master):
