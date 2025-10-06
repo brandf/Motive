@@ -1,13 +1,14 @@
 import pytest
 import os
 import logging
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from motive.game_master import GameMaster
 from motive.config import (
     GameConfig, PlayerConfig, ThemeConfig, EditionConfig, ObjectTypeConfig, 
     ActionConfig, CharacterConfig, RoomConfig, ExitConfig, ObjectInstanceConfig, 
-    ActionRequirementConfig, ActionEffectConfig, ParameterConfig, GameSettings, CoreConfig
+    ActionRequirementConfig, ActionEffectConfig, MessageVariantConfig, ParameterConfig, GameSettings, CoreConfig
 ) # Added GameSettings and other config models
 from motive.player import Player
 from motive.character import Character
@@ -361,6 +362,34 @@ def test_execute_effects_generate_event(mock_game_master):
     assert "Hero lights the event_torch." in feedback
     # Also check that the event was actually generated and has the correct message
     assert any(e.message == "Hero lights the event_torch." for e in events_generated)
+
+
+def test_execute_effects_generate_event_variant(mock_game_master):
+    gm = mock_game_master
+    player = gm.players[0]
+    player_char = player.character
+
+    variant_effect = ActionEffectConfig(
+        type="generate_event",
+        message="{player_name} receives a generic cue.",
+        observers=["player"],
+        message_variants=[
+            MessageVariantConfig(
+                character_ids=[player_char.template_id],
+                message="{player_name} receives a guidance tailored to their path.",
+            )
+        ],
+    )
+
+    variant_action = SimpleNamespace(name="variant_event", effects=[variant_effect])
+
+    events_generated, feedback = gm._execute_effects(player_char, variant_action, params={})
+
+    expected_variant = "Hero receives a guidance tailored to their path."
+    expected_base = "Hero receives a generic cue."
+
+    assert expected_variant in feedback
+    assert any(event.message == expected_base for event in events_generated)
 
 def test_execute_effects_help_action(mock_game_master):
     gm = mock_game_master

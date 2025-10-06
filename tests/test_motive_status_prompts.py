@@ -109,7 +109,7 @@ def test_detective_thorne_status_prompts_survive_runtime():
     char = gm.players[0].character
 
     assert char.selected_motive.id == 'avenge_partner'
-    assert len(char.selected_motive.status_prompts) == 6
+    assert len(char.selected_motive.status_prompts) == 11
 
     message = char.get_motive_status_message(gm)
-    assert message == "**🧭 Case Outlook:** The case is raw. Sweep the town square, tavern whispers, and guild ledgers for anything that ties the cult together."
+    assert message == "**🧭 Case Outlook:** The case is raw. Fan out—crime scene, tavern whispers, guild ledgers, and the Gazette all hide threads you can still pull."

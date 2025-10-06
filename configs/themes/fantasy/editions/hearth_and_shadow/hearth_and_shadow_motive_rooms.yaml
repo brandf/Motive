@@ -8,7 +8,8 @@ entity_definitions:
         The heart of Blackwater is usually busy, but tonight the square feels hollow. A cracked fountain wheezes in the
         center while posters of missing citizens flutter on the notice boards. A silvered vial rests on the rim of the
         fountain, waiting for someone faithful enough to fill it, and small chalk marks point toward the Old Forest Path
-        with notes about shrine offerings.
+        with notes about shrine offerings. Faded arrows also nudge detectives toward the Gazette offices, guild ledgers,
+        and the astronomer's hilltop study—no single desk will solve Blackwater's mystery.
     properties:
       exits:
         tavern:
@@ -91,6 +92,9 @@ entity_definitions:
                 - type: generate_event
                   message: "{{player_name}} examines the notice board and notes their partner's last clue."
                   observers: [room_characters]
+                - type: generate_event
+                  message: "A scribbled reminder urges you to slot the notebook into the church's evidence compiler before the handwriting smudges."
+                  observers: [player]
   church:
     behaviors:
       - room

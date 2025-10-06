@@ -83,6 +83,10 @@ entity_definitions:
               message: "{{player_name}} delivers a sermon of hope, rekindling the faith of all who listen."
               observers:
                 - room_characters
+            - type: generate_event
+              message: "News spreads through Blackwater: Father Marcus's cleansing sermon restores the town's faith."
+              observers:
+                - all_players
   saints_bone:
     behaviors:
       - object

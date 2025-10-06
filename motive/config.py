@@ -48,6 +48,20 @@ class ActionRequirementConfig(BaseModel):
         description="Optional narrative update delivered when this requirement is first satisfied as part of a motive."
     )
 
+class MessageVariantConfig(BaseModel):
+    """Alternate message template scoped to specific characters or motives."""
+
+    message: str = Field(..., description="Message template to use when the variant applies.")
+    character_ids: Optional[List[str]] = Field(
+        default=None,
+        description="List of character template IDs (e.g., 'detective_thorne') that should see this variant.",
+    )
+    motive_ids: Optional[List[str]] = Field(
+        default=None,
+        description="List of motive IDs (e.g., 'avenge_partner') that should trigger this variant when currently selected.",
+    )
+
+
 class ActionEffectConfig(BaseModel):
     """Base model for action effects."""
     type: str = Field(..., description="Type of effect (e.g., 'add_tag', 'remove_tag', 'set_property', 'generate_event', 'code_binding').")
@@ -74,6 +88,10 @@ class ActionEffectConfig(BaseModel):
         "room_characters",
         "adjacent_rooms_characters",
     ]]] = None
+    message_variants: List[MessageVariantConfig] = Field(
+        default_factory=list,
+        description="Optional ordered variants that replace the base message when character/motive filters match.",
+    )
 
     # Fields for code_binding effect
     function_name: Optional[str] = None

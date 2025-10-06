@@ -632,7 +632,13 @@ def handle_move_action(game_master: Any, player_char: Character, action_config: 
             break
 
     if not exit_data:
-        feedback_messages.append(f"Cannot move '{player_char.name}': No visible exit in the '{direction}' direction.")
+        exit_names = [exit_info['name'] for exit_info in current_room.exits.values() if not exit_info.get('is_hidden', False)]
+        message = f"Cannot move '{player_char.name}': No visible exit in the '{direction}' direction."
+        if exit_names:
+            message += f" Available exits: {', '.join(exit_names)}."
+        if ' ' in direction and not (direction.startswith('"') and direction.endswith('"')):
+            message += " Remember to quote multi-word exits, e.g., > move \"Market District\"."
+        feedback_messages.append(message)
         events_generated.append(Event(
             message=f"Player {player_char.name} attempted to move '{direction}' but no exit was found.",
             event_type="player_action_failed",
@@ -1788,6 +1794,66 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
     # Use inventory object if available, otherwise use room object
     use_object = inv_object if inv_object else room_object
 
+    use_properties = {}
+    if hasattr(use_object, 'properties') and isinstance(use_object.properties, dict):
+        use_properties = use_object.properties
+
+    required_props = use_properties.get('requires_player_properties') if use_properties else None
+    if required_props:
+        missing_labels = []
+        for requirement in required_props:
+            if isinstance(requirement, dict):
+                prop_name = requirement.get('property')
+                label = requirement.get('label', prop_name)
+            else:
+                prop_name = requirement
+                label = requirement
+            if prop_name and not bool(player_char.get_property(prop_name, False)):
+                missing_labels.append(label or prop_name)
+        if missing_labels:
+            base_message = use_properties.get('requires_player_message')
+            if base_message:
+                message = base_message.format(missing=", ".join(missing_labels))
+            else:
+                message = (
+                    f"The {use_object.name} refuses to engage. You still need "
+                    + ", ".join(missing_labels)
+                    + " before it will operate."
+                )
+            feedback_messages.append(message)
+            return events_generated, feedback_messages
+
+    quest_flow = use_properties.get('quest_workflows') if use_properties else None
+    if isinstance(quest_flow, dict):
+        train_prop = quest_flow.get('train_property')
+        defend_prop = quest_flow.get('defend_property')
+        if train_prop and not bool(player_char.get_property(train_prop, False)):
+            player_char.set_property(train_prop, True)
+            feedback_messages.append(quest_flow.get('train_feedback', "You coordinate recruits in a quick defensive drill."))
+            events_generated.append(Event(
+                message=quest_flow.get('train_event', f"{player_char.name} drills guild recruits for the coming threat."),
+                event_type="player_action",
+                source_room_id=player_char.current_room_id,
+                timestamp=datetime.now().isoformat(),
+                related_player_id=player_char.id,
+                observers=["room_characters"],
+            ))
+            return events_generated, feedback_messages
+        if defend_prop and not bool(player_char.get_property(defend_prop, False)):
+            player_char.set_property(defend_prop, True)
+            feedback_messages.append(quest_flow.get('defend_feedback', "You redeploy patrols and coordinate town defenses."))
+            events_generated.append(Event(
+                message=quest_flow.get('defend_event', f"{player_char.name} positions guild patrols across Blackwater."),
+                event_type="player_action",
+                source_room_id=player_char.current_room_id,
+                timestamp=datetime.now().isoformat(),
+                related_player_id=player_char.id,
+                observers=["room_characters"],
+            ))
+            return events_generated, feedback_messages
+        feedback_messages.append(quest_flow.get('completed_feedback', "The board lists no new assignments."))
+        return events_generated, feedback_messages
+
     # Check if the object is usable
     if use_object:
         try:
@@ -1925,7 +1991,20 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
             if target_entity and hasattr(target_entity, 'remove_tag'):
                 target_entity.remove_tag(tag)
         elif eff_type == 'generate_event':
-            msg_tmpl = eff.get('message', '')
+            base_template = eff.get('message', '')
+            def _normalize(template: str) -> str:
+                if not isinstance(template, str):
+                    return template
+                return (
+                    template
+                    .replace('{{player_name}}', '{player_name}')
+                    .replace('{{object_name}}', '{object_name}')
+                    .replace('{{target_name}}', '{target_name}')
+                )
+            resolver = getattr(game_master, '_resolve_effect_message', None)
+            variant_template = resolver(eff, player_char) if callable(resolver) else None
+            if not isinstance(variant_template, str):
+                variant_template = None
             observers = eff.get('observers', [])
             inv_obj = context.get('inv_object')
             tgt = context.get('target_object')
@@ -1935,12 +2014,23 @@ def handle_use_action(game_master: Any, player_char: Character, action_config: A
                 'object_name': inv_obj.name if inv_obj else '',
                 'target_name': tgt.name if tgt else ''
             })
+
+            # Actor-facing feedback uses the variant when available
+            actor_template = _normalize(variant_template or base_template)
             try:
-                msg = msg_tmpl.format(**fmt_params)
+                actor_message = actor_template.format(**fmt_params)
             except Exception:
-                msg = msg_tmpl
+                actor_message = actor_template
+            if actor_message:
+                feedback_messages.append(actor_message)
+
+            # Broadcast event remains generic for other observers
+            try:
+                event_message = _normalize(base_template).format(**fmt_params)
+            except Exception:
+                event_message = _normalize(base_template)
             events_generated.append(Event(
-                message=msg,
+                message=event_message,
                 event_type="player_action",
                 source_room_id=player_char.current_room_id,
                 timestamp=datetime.now().isoformat(),

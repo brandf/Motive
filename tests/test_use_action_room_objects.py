@@ -49,7 +49,7 @@ def test_use_action_works_on_inventory_objects():
     
     # Should succeed
     assert len(feedback) > 0
-    assert "You use the Torch" in feedback[0] or "You light the Torch" in feedback[0]
+    assert any("You use the Torch" in msg or "You light the Torch" in msg for msg in feedback)
 
 
 def test_use_action_now_works_on_room_objects():
@@ -94,7 +94,7 @@ def test_use_action_now_works_on_room_objects():
     
     # Should succeed after fix
     assert len(feedback) > 0
-    assert "You use the Sacred Altar" in feedback[0]
+    assert any("You use the Sacred Altar" in msg for msg in feedback)
 
 
 def test_use_action_should_work_on_room_objects_after_fix():
@@ -140,7 +140,7 @@ def test_use_action_should_work_on_room_objects_after_fix():
     
     # Should succeed after fix
     assert len(feedback) > 0
-    assert "You use the Sacred Altar" in feedback[0]
+    assert any("You use the Sacred Altar" in msg for msg in feedback)
 
 
 def test_use_action_prioritizes_inventory_over_room():
@@ -197,3 +197,177 @@ def test_use_action_prioritizes_inventory_over_room():
     assert "You use the Torch" in feedback[0] or "You light the Torch" in feedback[0]
     # Should NOT use room object
     assert "wall torch" not in feedback[0]
+
+
+def test_evidence_compiler_requires_documents():
+    game_master = Mock()
+
+    test_room = Room("test_room", "Test Room", "", {})
+    compiler = GameObject(
+        "evidence_compiler",
+        "Evidence Compiler",
+        "",
+        "test_room",
+        properties={
+            'requires_player_properties': [
+                {'property': 'town_records_found', 'label': 'Town Records'},
+                {'property': 'witness_testimony_found', 'label': 'Witness Testimony'},
+                {'property': 'editor_notes_found', 'label': 'Gazette roster'},
+            ]
+        }
+    )
+    test_room.objects = {"compiler": compiler}
+    game_master.rooms = {"test_room": test_room}
+
+    player = Character("test_player", "TestPlayer", "", "", current_room_id="test_room")
+    player.inventory = {}
+
+    action_config = Mock()
+
+    events, feedback = handle_use_action(game_master, player, action_config, {"object_name": "Evidence Compiler"})
+
+    assert events == []
+    assert any("Town Records" in msg for msg in feedback)
+
+
+def test_evidence_compiler_allows_use_when_documents_present():
+    game_master = Mock()
+
+    test_room = Room("test_room", "Test Room", "", {})
+    compiler = GameObject(
+        "evidence_compiler",
+        "Evidence Compiler",
+        "",
+        "test_room",
+        properties={
+            'requires_player_properties': [
+                {'property': 'town_records_found', 'label': 'Town Records'},
+                {'property': 'witness_testimony_found', 'label': 'Witness Testimony'},
+                {'property': 'editor_notes_found', 'label': 'Gazette roster'},
+            ]
+        }
+    )
+    test_room.objects = {"compiler": compiler}
+    game_master.rooms = {"test_room": test_room}
+
+    player = Character("test_player", "TestPlayer", "", "", current_room_id="test_room")
+    player.inventory = {}
+    player.set_property('town_records_found', True)
+    player.set_property('witness_testimony_found', True)
+    player.set_property('editor_notes_found', True)
+
+    action_config = Mock()
+
+    events, feedback = handle_use_action(game_master, player, action_config, {"object_name": "Evidence Compiler"})
+
+    assert any("You use" in msg for msg in feedback)
+
+
+def test_quest_board_use_trains_recruits():
+    game_master = Mock()
+
+    room = Room("guild", "Guild Hall", "", {})
+    board = GameObject(
+        "quest_board",
+        "Quest Board",
+        "",
+        "guild",
+        properties={
+            'quest_workflows': {
+                'train_property': 'adventurers_trained',
+                'train_feedback': "You coordinate guild recruits in drills.",
+                'train_event': "{{player_name}} drills the guild recruits.",
+                'defend_property': 'town_defended',
+                'defend_feedback': "You redeploy patrols to defend Blackwater.",
+                'defend_event': "{{player_name}} posts guild patrols across the town.",
+                'completed_feedback': "The board lists no new assignments."
+            }
+        }
+    )
+    room.objects = {"board": board}
+    game_master.rooms = {"guild": room}
+
+    player = Character("guild_master", "Guild Master", "", "", current_room_id="guild")
+    player.inventory = {}
+
+    action_config = Mock()
+
+    events, feedback = handle_use_action(game_master, player, action_config, {"object_name": "Quest Board"})
+
+    assert player.get_property('adventurers_trained') is True
+    assert any("drill" in msg.lower() for msg in feedback)
+    assert events
+
+
+def test_quest_board_use_secures_town_after_training():
+    game_master = Mock()
+
+    room = Room("guild", "Guild Hall", "", {})
+    board = GameObject(
+        "quest_board",
+        "Quest Board",
+        "",
+        "guild",
+        properties={
+            'quest_workflows': {
+                'train_property': 'adventurers_trained',
+                'train_feedback': "You coordinate guild recruits in drills.",
+                'train_event': "{{player_name}} drills the guild recruits.",
+                'defend_property': 'town_defended',
+                'defend_feedback': "You redeploy patrols to defend Blackwater.",
+                'defend_event': "{{player_name}} posts guild patrols across the town.",
+                'completed_feedback': "The board lists no new assignments."
+            }
+        }
+    )
+    room.objects = {"board": board}
+    game_master.rooms = {"guild": room}
+
+    player = Character("guild_master", "Guild Master", "", "", current_room_id="guild")
+    player.inventory = {}
+    player.set_property('adventurers_trained', True)
+
+    action_config = Mock()
+
+    events, feedback = handle_use_action(game_master, player, action_config, {"object_name": "Quest Board"})
+
+    assert player.get_property('town_defended') is True
+    assert any("patrols" in msg.lower() for msg in feedback)
+    assert events
+
+
+def test_quest_board_use_after_completion():
+    game_master = Mock()
+
+    room = Room("guild", "Guild Hall", "", {})
+    board = GameObject(
+        "quest_board",
+        "Quest Board",
+        "",
+        "guild",
+        properties={
+            'quest_workflows': {
+                'train_property': 'adventurers_trained',
+                'train_feedback': "You coordinate guild recruits in drills.",
+                'train_event': "{{player_name}} drills the guild recruits.",
+                'defend_property': 'town_defended',
+                'defend_feedback': "You redeploy patrols to defend Blackwater.",
+                'defend_event': "{{player_name}} posts guild patrols across the town.",
+                'completed_feedback': "The board lists no new assignments."
+            }
+        }
+    )
+    room.objects = {"board": board}
+    game_master.rooms = {"guild": room}
+
+    player = Character("guild_master", "Guild Master", "", "", current_room_id="guild")
+    player.inventory = {}
+    player.set_property('adventurers_trained', True)
+    player.set_property('town_defended', True)
+
+    action_config = Mock()
+
+    events, feedback = handle_use_action(game_master, player, action_config, {"object_name": "Quest Board"})
+
+    assert events == []
+    assert any("no new assignments" in msg.lower() for msg in feedback)

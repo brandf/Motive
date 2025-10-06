@@ -920,10 +920,10 @@ class GameInitializer:
             # Convert motives dictionaries to MotiveConfig objects if needed
             converted_motives = None
             selected_motive = None
+            raw_prompt_map: Dict[str, Any] = {}
             if char_motives and len(char_motives) > 0:
                 from motive.config import MotiveConfig, ActionRequirementConfig, MotiveConditionGroup
                 converted_motives = []
-                raw_prompt_map = {}
                 for motive_item in char_motives:
                     if isinstance(motive_item, MotiveConfig):
                         # Already a MotiveConfig object (from v2→v1 conversion)
@@ -1042,7 +1042,8 @@ class GameInitializer:
                 aliases=char_aliases,
                 deterministic=self.deterministic,  # Pass deterministic flag
                 properties=char_properties,
-                short_name=getattr(char_cfg, 'short_name', None) if hasattr(char_cfg, 'short_name') else char_cfg.get('short_name', None) if isinstance(char_cfg, dict) else None
+                short_name=getattr(char_cfg, 'short_name', None) if hasattr(char_cfg, 'short_name') else char_cfg.get('short_name', None) if isinstance(char_cfg, dict) else None,
+                template_id=char_id,
             )
 
             if raw_prompt_map:

@@ -22,7 +22,8 @@ class Character:
         action_points: int = 3, # Default action points
         aliases: Optional[List[str]] = None,
         deterministic: bool = False,  # Use deterministic selection instead of random
-        short_name: Optional[str] = None  # Short display name for observations
+        short_name: Optional[str] = None,  # Short display name for observations
+        template_id: Optional[str] = None,  # Identifier of the character template (e.g., detective_thorne)
     ):
         self.id = char_id
         self.name = name
@@ -34,6 +35,7 @@ class Character:
         self.action_points = action_points
         self.aliases = aliases if aliases else []
         self.short_name = short_name
+        self.template_id = template_id or self._infer_template_id()
         
         # Initialize evidence system properties
         self._initialize_evidence_properties()
@@ -63,6 +65,12 @@ class Character:
     def add_item_to_inventory(self, item: GameObject):
         self.inventory[item.id] = item
         item.current_location_id = self.id
+
+    def _infer_template_id(self) -> Optional[str]:
+        """Best effort fallback to derive the character template id from the instance id."""
+        if self.id and '_instance_' in self.id:
+            return self.id.rsplit('_instance_', 1)[0]
+        return None
 
     def remove_item_from_inventory(self, item_id: str) -> Optional[GameObject]:
         # Try to remove by ID first

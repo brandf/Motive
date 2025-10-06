@@ -19,7 +19,9 @@ entity_definitions:
         \ celestial events. Fresh evidence near the fountain suggests a recent struggle,\
         \ with bloodstains and strange markings that point to cult activity. The notice\
         \ board is covered with missing person posters, each one a potential lead\
-        \ in your investigation.\n\n**INVESTIGATION NOTE:** For detectives investigating cult activities, Father Marcus at the Sacred Heart Church has been gathering evidence and witness testimony. The church may contain crucial information about cult operations.\n"
+        \ in your investigation. Faded chalk arrows point toward the Gazette's presses,
+        \ the guild ledgers, and the hilltop observatory—a reminder that solving
+        \ this case means chasing threads beyond the square.\n\n**INVESTIGATION NOTE:** For detectives investigating cult activities, Father Marcus at the Sacred Heart Church has been gathering evidence and witness testimony. The church may contain crucial information about cult operations.\n"
     properties:
       exits:
         tavern:

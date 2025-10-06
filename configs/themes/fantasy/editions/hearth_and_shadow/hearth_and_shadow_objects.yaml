@@ -61,6 +61,16 @@ entity_definitions:
             information!'
           observers:
           - room_characters
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: '{{player_name}} cross-references the missing posters with their partner''s notes—the disappearance pattern mirrors the cult''s ritual cadence.'
+          - character_ids:
+            - father_marcus
+            message: '{{player_name}} marks the families who still wait for comfort and blessings after the disappearances.'
+          - character_ids:
+            - guild_master_elena
+            message: '{{player_name}} flags which districts need extra patrols before the cult strikes again.'
   broken_fountain:
     behaviors:
     - object
@@ -99,6 +109,14 @@ entity_definitions:
       readable: true
       text: Various quests and bounties are posted here, including some related to
         recent disappearances.
+      quest_workflows:
+        train_property: adventurers_trained
+        train_feedback: "You assign guild recruits to drills and mark the training ledger complete."
+        train_event: "{{player_name}} drills the guild's recruits in formation exercises."
+        defend_property: town_defended
+        defend_feedback: "You redeploy patrols across Blackwater—defensive posts are now manned."
+        defend_event: "{{player_name}} posts guild patrols across vulnerable districts."
+        completed_feedback: "The quest board offers no new directives—you've already trained recruits and organized the town's defenses."
     action_aliases:
       read: look
       examine: look
@@ -1367,20 +1385,15 @@ entity_definitions:
       read: look
       examine: look
       investigate: look
-    text: '**PARTNER''S NOTEBOOK:**
+    text: |-
+      **PARTNER'S NOTEBOOK:**
 
-      "Following leads on the Shadowed Hand cult. They''re planning something big
-      - a ritual that will change everything. Mayor Thompson knows too much. They''re
-      coming for him next. If I don''t make it back, tell James... tell him I found
-      the truth."
+      "Following leads on the Shadowed Hand cult. They're planning something big - a ritual that will change everything. Mayor Thompson knows too much. They're coming for him next. If I don't make it back, tell James... tell him I found the truth."
 
 
       **BROKEN BADGE:**
 
-      The badge shows signs of struggle. Blood stains suggest the partner fought bravely
-      before being overwhelmed.
-
-      '
+      The badge shows signs of struggle. Blood stains suggest the partner fought bravely before being overwhelmed.
     interactions:
       look:
         effects:
@@ -1389,10 +1402,17 @@ entity_definitions:
           property: partner_evidence_found
           value: true
         - type: generate_event
-          message: '{{player_name}} examines the partner''s evidence and finds crucial
-            clues!'
+          message: '{{player_name}} studies the battered case file and vows to preserve the witness statements before the cult burns them.'
           observers:
           - room_characters
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: '{{player_name}} pores over their partner''s field notes -- each scribble tightens the net around the cult hierarchy.'
+        - type: generate_event
+          message: 'Marcus''s margin note: *"Slot the badge and notebook into the Compiler before the ink fades."*'
+          observers:
+          - player
       pickup:
         effects:
         - type: set_property
@@ -1400,9 +1420,13 @@ entity_definitions:
           property: partner_evidence_found
           value: true
         - type: generate_event
-          message: '{{player_name}} collects the partner''s evidence!'
+          message: '{{player_name}} collects the fallen detective''s dossier, promising to place it in trustworthy hands.'
           observers:
           - room_characters
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: '{{player_name}} reclaims their partner''s dossier—no cult bookkeeper slips past this time.'
       use:
         effects:
         - type: set_property
@@ -1410,8 +1434,7 @@ entity_definitions:
           property: mystery_solved
           value: true
         - type: generate_event
-          message: '{{player_name}} pieces together the evidence and solves the mystery
-            of their partner''s death! The truth is revealed!'
+          message: '{{player_name}} sorts the partner''s dossier into working order—the next step is to slot every notarized bundle into the Evidence Compiler so a magistrate will sign the warrant.'
           observers:
           - room_characters
   corruption_documents:
@@ -1652,6 +1675,10 @@ entity_definitions:
             Secrets uncovered: {{player_property:secrets_uncovered}}/2'
           observers:
           - room_characters
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: '{{player_name}} catalogs the cult lore, earmarking the purification rites for Father Marcus while you chase the implicating ledgers. Secrets uncovered: {{player_property:secrets_uncovered}}/2'
   cult_history:
     behaviors:
     - object
@@ -1688,6 +1715,14 @@ entity_definitions:
           message: '{{player_name}} studies the cult history and finds important evidence!'
           observers:
           - room_characters
+        - type: generate_event
+          message: "Charts in the margin warn that records vanish when they aren't catalogued in time."
+          observers:
+          - player
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "Charts in the margin suggest filing dates -- slide these records through the Compiler before you march into court."
   decoder_ring:
     behaviors:
     - object
@@ -1811,6 +1846,10 @@ entity_definitions:
           message: "{{player_name}} scans the almanac—the cult plans to act when the observatory's star charts align during the next new moon."
           observers:
           - player
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "{{player_name}} scans the almanac—the observatory's next convergence matches the roster drop noted in Town Hall files. Be on that hilltop before the leadership convenes."
       use:
         effects:
         - type: set_property
@@ -1851,11 +1890,23 @@ entity_definitions:
           - player
       use:
         effects:
+        - type: set_property
+          target: player
+          property: observatory_passage_unlocked
+          value: true
         - type: generate_event
           message: '{{player_name}} uses the Cult Key! The dark symbols glow briefly,
             and you feel a connection to hidden places.'
           observers:
           - room_characters
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: '{{player_name}} turns the Cult Key—the shelves grind aside to reveal a stair toward the hilltop observatory where the leadership keeps its roster.'
+        - type: generate_event
+          message: "A hidden stair creaks open, leading toward the astronomer's study above town."
+          observers:
+          - player
   ritual_candle:
     behaviors:
     - object
@@ -2173,14 +2224,20 @@ entity_definitions:
     - object
     attributes:
       name: Celestial Calculator
-      description: A complex device that calculates the optimal timing for dark rituals
-        based on celestial alignments. Using this device could reveal when the cult
-        plans to strike. You can use this device to understand the cult's timing.
+      description: A brass orrery studded with rune-etched gears. It was designed to travel—the base folds shut, but it
+        still eats up most of a satchel. With the right evidence in hand you can predict the next strike, but only if you
+        carry it to the confrontation.
     properties:
       pickupable: true
       size: medium
       usable: true
     interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "It weighs about the same as three ledgers—make room before you haul it out of the observatory." 
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -2286,19 +2343,35 @@ entity_definitions:
     - object
     attributes:
       name: Evidence Compiler
-      description: A complex mechanical device that can organize and compile evidence
-        into a coherent case against the cult. The device has multiple dials, levers,
-        and compartments for organizing different types of evidence. When activated,
-        it processes all gathered information and creates a comprehensive case file.
-        This device is essential for building an airtight case against the Shadowed
-        Hand - you must use it to compile your evidence chain and prepare for the
-        final confrontation.
+      description: |-
+        A brass-and-oak contraption bolted to the church lectern. Slots for witnesses, ledgers, and press clippings wait to be fed; a crank-powered printer murmurs beside a stamped seal of the Blackwater courts. Father Marcus left a note tucked under the lever: *"Bring me real documentation, not gossip. The Compiler only binds what you've truly uncovered."*
     properties:
-      pickupable: true
-      size: medium
+      pickupable: false
       usable: true
-      pickup_action: use
+      requires_player_properties:
+      - property: town_records_found
+        label: Town Records
+      - property: witness_testimony_found
+        label: Witness Testimony
+      - property: editor_notes_found
+        label: Gazette roster
     interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "The compiler's ledger lists empty slots for Town Records, Missing Persons testimony, and any Gazette exposes you've actually uncovered."
+          observers:
+          - player
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "The ledger shows 'Town Records', 'Witness Testimony', and 'Gazette Roster' stamped in red—feed each packet through before the magistrate will seal your case file."
+          - character_ids:
+            - father_marcus
+            message: "Marcus's note reminds you: once Thorne files the ledgers, your reliquary reports lock the cult out of court." 
+          - character_ids:
+            - guild_master_elena
+            message: "The ledger boxes labeled 'Town Records', 'Witness Testimony', and 'Gazette Roster' are still empty—urge the detectives to file them so you can mobilize the guard."
       use:
         effects:
         - type: set_property
@@ -2306,9 +2379,17 @@ entity_definitions:
           property: evidence_chain_complete
           value: true
         - type: generate_event
-          message: "{{player_name}} feeds the Town Records, Missing Persons Log, and Gazette leads into the compiler—the case file locks tight." 
+          message: "{{player_name}} feeds the dossiers into humming gears—the case file clacks shut with a magistrate's seal."
           observers:
           - room_characters
+        - type: generate_event
+          message: "A marginal note reminds you: the courts only credit evidence you've *personally* documented."
+          observers:
+          - player
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "The lever strains unless every notarized bundle—Town Records, Witness Testimony, Gazette Roster—is slotted. Track them down before you expect the seal to hold."
     action_aliases:
       compiler: use
       evidence: use
@@ -2367,10 +2448,15 @@ entity_definitions:
         to prepare for the final confrontation.
     properties:
       pickupable: true
-      size: large
+      size: medium
       usable: true
-      heavy: true
     interactions:
+      look:
+        effects:
+        - type: generate_event
+          message: "The planner folds into a leather folio—you can carry it, but it replaces the space where lesser clues lived."
+          observers:
+          - player
       use:
         effects:
         - type: set_property
@@ -2470,6 +2556,10 @@ entity_definitions:
           message: "You trace the sacred map. It notes the church altar, the mausoleum reliquary, and the old shrine as key sanctified sites."
           observers:
           - player
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "You trace the sacred map. Arrows highlight the bank archives, Gazette presses, and astronomer's hill—the hides where the leadership stores rosters and ledgers. Secure those records before the cult torches them."
   ritual_texts:
     behaviors:
     - object
@@ -2523,9 +2613,13 @@ entity_definitions:
           property: witness_testimony_found
           value: true
         - type: generate_event
-          message: "{{player_name}} compiles testimony naming a Gazette courier leaking intel and a guard captain hiding evidence in the town hall vault—bring it to the altar when you present the case."
+          message: "{{player_name}} compiles sworn accounts that outline who shields the cult from the shadows."
           observers:
           - room_characters
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "{{player_name}} compiles testimony naming a Gazette courier leaking intel and a guard captain hiding evidence in the town hall vault -- slot every signed statement into the Evidence Compiler before you confront them."
   town_records:
     behaviors:
     - object
@@ -2551,6 +2645,14 @@ entity_definitions:
           message: "{{player_name}} traces embezzled ledgers from the bank's lower vault into tunnel repairs—clear proof an insider is bankrolling the Shadowed Hand. Cross-reference the Sacred Map and the Gazette roster to mark every hideout." 
           observers:
           - room_characters
+        - type: generate_event
+          message: "The ledgers include notarized slips that will matter only if someone files them properly."
+          observers:
+          - player
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "The ledgers include notarized slips -- slot them into the Compiler so the evidence can't be dismissed as hearsay."
   missing_persons_log:
     behaviors:
     - object
@@ -2573,9 +2675,21 @@ entity_definitions:
           property: missing_persons_log_found
           value: true
         - type: generate_event
-          message: "{{player_name}} charts disappearances near the library and mausoleum—the pattern points straight at the cult's safe houses. Match these locations against the Sacred Map and Gazette roster so the hideouts can't stay hidden."
+          message: "{{player_name}} charts disappearances near the library and mausoleum, revealing how the cult stalks Blackwater."
           observers:
           - room_characters
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "{{player_name}} charts disappearances near the library and mausoleum -- match these against the Sacred Map and Gazette roster so the hideouts can't stay hidden."
+        - type: generate_event
+          message: "The logbook carries a court stamp that demands a proper filing before it fades."
+          observers:
+          - player
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "The logbook carries a court stamp -- drop it through the Compiler so the magistrate can't dismiss these names as rumor."
   local_newspaper:
     behaviors:
     - object
@@ -2601,6 +2715,14 @@ entity_definitions:
           message: "{{player_name}} skims Gazette exposés noting a confiscated roster of collaborators locked in the press room's safe."
           observers:
           - room_characters
+        - type: generate_event
+          message: "The editor's scribble warns: 'Compile everything before the mayor's office buries it again.'"
+          observers:
+          - player
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "The editor's scribble warns: 'Compile everything before the mayor's office buries it again.' -- the margin arrows point straight to the Compiler." 
   editor_notes:
     behaviors:
     - object
@@ -2626,6 +2748,10 @@ entity_definitions:
           message: "{{player_name}} deciphers the editor's shorthand: the roster hides with the press proofs, and matching maps were diverted to the bank archives."
           observers:
           - room_characters
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: "{{player_name}} deciphers the editor's shorthand -- the roster hides with the press proofs, and matching maps were diverted to the bank archives for safekeeping." 
   astronomers_notes:
     behaviors:
     - object
@@ -2929,6 +3055,14 @@ entity_definitions:
           message: '{{player_name}} examines the Mayor''s Desk.'
           observers:
           - room_characters
+        - type: generate_event
+          message: 'You comb through the mayor''s correspondence. Envelopes stamped "Town Records" and "Witness Testimony" sit unopened beside the official seal.'
+          observers:
+          - player
+          message_variants:
+          - character_ids:
+            - detective_thorne
+            message: 'You comb through the mayor''s correspondence—envelopes labeled "Town Records" and "Witness Testimony" are half-pulled. Grab them and file everything through the Evidence Compiler before the cult scraps the archive.'
   official_seal:
     behaviors:
     - object

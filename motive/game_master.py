@@ -873,7 +873,16 @@ class GameMaster:
                     effect_observers = effect.get('observers', [])
                     
                 if effect_message and effect_observers:
-                    event_message = effect_message.format(**params, player_name=player_char.name) # Add player_name to params for formatting
+                    # Determine character-specific variants for actor feedback
+                    variant_template = self._resolve_effect_message(effect, player_char)
+                    actor_template = variant_template or effect_message
+                    actor_template = self._normalize_event_template(actor_template)
+                    actor_message = actor_template.format(**params, player_name=player_char.name)
+                    feedback_messages.append(actor_message)
+
+                    # Keep event broadcast generic for other observers
+                    base_template = self._normalize_event_template(effect_message)
+                    event_message = base_template.format(**params, player_name=player_char.name)
                     events_generated.append(Event(
                         message=event_message,
                         event_type="action_event", # A generic type for now
@@ -882,7 +891,6 @@ class GameMaster:
                         related_player_id=player_char.id,
                         observers=effect_observers
                     ))
-                    feedback_messages.append(event_message) # Player sees their own immediate events
 
             elif effect_type == "code_binding":
                 # Handle both Pydantic objects and dictionaries from merged config
@@ -979,8 +987,77 @@ class GameMaster:
         # Special case: -1 means consume all remaining AP (for pass action)
         if cost_value == -1:
             return player_char.action_points
-        
+
         return cost_value
+
+    def _resolve_effect_message(self, effect: Any, player_char: Character) -> Optional[str]:
+        """Return a character/motive-specific message template if one applies."""
+        variants = self._extract_message_variants(effect)
+        if not variants:
+            return None
+
+        for variant in variants:
+            variant_message = self._get_variant_field(variant, 'message')
+            character_ids = self._get_variant_field(variant, 'character_ids')
+            motive_ids = self._get_variant_field(variant, 'motive_ids')
+
+            if variant_message and self._variant_applies(player_char, character_ids, motive_ids):
+                return variant_message
+
+        return None
+
+    def _extract_message_variants(self, effect: Any) -> List[Any]:
+        if hasattr(effect, 'message_variants') and effect.message_variants:
+            return effect.message_variants
+        if isinstance(effect, dict):
+            return effect.get('message_variants', []) or []
+        return []
+
+    @staticmethod
+    def _get_variant_field(variant: Any, field_name: str) -> Any:
+        if hasattr(variant, field_name):
+            return getattr(variant, field_name)
+        if isinstance(variant, dict):
+            return variant.get(field_name)
+        return None
+
+    def _variant_applies(
+        self,
+        player_char: Character,
+        character_ids: Optional[List[str]],
+        motive_ids: Optional[List[str]],
+    ) -> bool:
+        # If no filters provided, treat as wildcard.
+        if not character_ids and not motive_ids:
+            return True
+
+        matches_character = True
+        if character_ids:
+            normalized_lookup = {
+                (player_char.template_id or "").lower(),
+                player_char.id.lower(),
+                player_char.name.lower(),
+            }
+            matches_character = any((cid or "").lower() in normalized_lookup for cid in character_ids)
+
+        matches_motive = True
+        if motive_ids:
+            selected_motive_id = player_char.selected_motive.id if player_char.selected_motive else None
+            matches_motive = selected_motive_id in motive_ids if selected_motive_id else False
+
+        return matches_character and matches_motive
+
+    @staticmethod
+    def _normalize_event_template(template: str) -> str:
+        """Convert legacy double-brace placeholders to str.format-compatible tokens."""
+        if not template or not isinstance(template, str):
+            return template
+        return (
+            template
+            .replace('{{player_name}}', '{player_name}')
+            .replace('{{object_name}}', '{object_name}')
+            .replace('{{target_name}}', '{target_name}')
+        )
 
     def _distribute_events(self):
         """Distributes generated events to relevant players based on observer scopes."""
