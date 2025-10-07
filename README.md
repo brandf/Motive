@@ -4,20 +4,14 @@
 
 Motive is a novel platform designed for the exploration and benchmarking of Large Language Models (LLMs) through interactive, turn-based games. It provides a unique environment where AI (or human) players can engage in complex scenarios, fostering the generation of valuable training data and facilitating research into advanced AI capabilities like long-context reasoning, planning, and social engineering.
 
-## Who is this for?
-
-- **Players** who want to play the game (read the Manual)
-- **Human contributors** building features and fixing bugs (read the Contributors guide)
-- **AI coding agents** implementing code and tests (read AGENT.md)
-- **Researchers** exploring LLM benchmarking and training data
-
 ## Quick Start
 
 - **Players**: Read the [Game Manual](docs/MANUAL.md) first.
 - **Contributors**: Start with [docs/CONTRIBUTORS.md](docs/CONTRIBUTORS.md) for setup, architecture, and workflows.
-- **AI Agents**: Follow the reading order in [AGENTS.md](docs/AGENT.md).
+- **AI Agents**: Follow the reading order in [AGENTS.md](AGENTS.md).
 - **Vibe Coders**: See [docs/VIBECODER.md](docs/VIBECODER.md).
-
+- **About Motive Deck**: [This deck](https://docs.google.com/presentation/d/1SNpa3uqgWdXpw9g4eg0WISZiYC6k5T1SjKA-KqrtaXo/edit?usp=sharing) gives an overview of the project.
+- 
 ## Purpose of Motive
 
 *   **Turn-Based Game with Chat Interface:** Motive enables the creation and execution of turn-based games with a chat-based interface. These games can be played by AI agents or human participants, with the potential for environments, characters, and objects to be dynamically balanced via AI simulation.
@@ -240,3 +234,4 @@ This project is open source. See the repository for license details.
 ## Contact
 
 For questions, suggestions, or collaboration opportunities, please open an issue or contact the maintainers.
+
