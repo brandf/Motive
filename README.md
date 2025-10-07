@@ -217,13 +217,13 @@ Current development priorities are tracked in [docs/TODO.md](docs/TODO.md).
 
 ## Documentation
 
+- **[docs/DOCS.md](docs/DOCS.md)** - Documentation structure and relationships
 - **[docs/MANUAL.md](docs/MANUAL.md)** - Complete game manual for players
 - **[docs/CONTRIBUTORS.md](docs/CONTRIBUTORS.md)** - Development guide for contributors
-- **[docs/AGENT.md](docs/AGENT.md)** - AI agent development guidelines
-- **[docs/VIBECODER.md](docs/VIBECODER.md)** - Human-LLM collaboration lessons
-- **[docs/TODO.md](docs/TODO.md)** - Current development priorities
-- **[docs/DOCS.md](docs/DOCS.md)** - Documentation structure and relationships
+- **[docs/LOG_ANALYSIS_GUIDE.md](docs/LOG_ANALYSIS_GUIDE.md)** - Instructions for Agents on how to report the results of game runs
+- **[docs/PLAYTEST_WORKFLOW.md](docs/PLAYTEST_WORKFLOW.md)** - Instructions for Agents on how to perform playtesting workflows
 - **[docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md)** - Comparison with similar platforms and research environments
+
 
 For active development planning, always check [docs/TODO.md](docs/TODO.md) after reading the contributors guide.
 
@@ -234,4 +234,5 @@ This project is open source. See the repository for license details.
 ## Contact
 
 For questions, suggestions, or collaboration opportunities, please open an issue or contact the maintainers.
+
 
